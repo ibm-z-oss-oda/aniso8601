@@ -412,6 +412,20 @@ class TestRelativeDurationParserFunctions(unittest.TestCase):
         with self.assertRaises(ValueError):
             _parse_duration_prescribed('P1.5M', True)
 
+    def test_parse_duration_prescribed_relative_nodateutil(self):
+        import sys
+        import dateutil
+
+        dateutil_import = dateutil
+
+        sys.modules['dateutil'] = None
+
+        with self.assertRaises(RuntimeError):
+            _parse_duration_prescribed('P1Y', True)
+
+        #Reinstall dateutil
+        sys.modules['dateutil'] = dateutil
+
     def test_parse_duration_combined_relative(self):
         resultduration = _parse_duration_combined('P0003-06-04T12:30:05', True)
         self.assertEqual(resultduration.years, 3)
@@ -435,3 +449,17 @@ class TestRelativeDurationParserFunctions(unittest.TestCase):
         #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
         with self.assertRaises(ValueError):
             parse_duration('P0003-06-04T12:30:05.5asdfasdf', True)
+
+    def test_parse_duration_combined_relative_nodateutil(self):
+        import sys
+        import dateutil
+
+        dateutil_import = dateutil
+
+        sys.modules['dateutil'] = None
+
+        with self.assertRaises(RuntimeError):
+            _parse_duration_combined('P0003-06-04T12:30:05', True)
+
+        #Reinstall dateutil
+        sys.modules['dateutil'] = dateutil

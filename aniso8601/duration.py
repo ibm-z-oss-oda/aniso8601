@@ -7,7 +7,6 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import datetime
-import dateutil.relativedelta
 
 from aniso8601.date import parse_date
 from aniso8601.time import parse_time
@@ -144,12 +143,17 @@ def _parse_duration_prescribed(durationstr, relative):
         #Weeks can't be included
         weeks = 0
 
-    if relative == True:
-        if int(years) != years or int(months) != months:
-            #https://github.com/dateutil/dateutil/issues/40
-            raise ValueError('Fractional months and years are not defined for relative intervals.')
+    if relative is True:
+        try:
+            import dateutil.relativedelta
 
-        return dateutil.relativedelta.relativedelta(years=int(years), months=int(months), weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
+            if int(years) != years or int(months) != months:
+                #https://github.com/dateutil/dateutil/issues/40
+                raise ValueError('Fractional months and years are not defined for relative intervals.')
+
+            return dateutil.relativedelta.relativedelta(years=int(years), months=int(months), weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
+        except ImportError:
+            raise RuntimeError('dateutil must be installed for relative duration support.')
     else:
         #Note that weeks can be handled without conversion to days
         totaldays = years * 365 + months * 30 + days
@@ -166,7 +170,12 @@ def _parse_duration_combined(durationstr, relative):
     timevalue = parse_time(timepart)
 
     if relative is True:
-        return dateutil.relativedelta.relativedelta(years=datevalue.year, months=datevalue.month, days=datevalue.day, hours=timevalue.hour, minutes=timevalue.minute, seconds=timevalue.second, microseconds=timevalue.microsecond)
+        try:
+            import dateutil.relativedelta
+
+            return dateutil.relativedelta.relativedelta(years=datevalue.year, months=datevalue.month, days=datevalue.day, hours=timevalue.hour, minutes=timevalue.minute, seconds=timevalue.second, microseconds=timevalue.microsecond)
+        except ImportError:
+            raise RuntimeError('dateutil must be installed for relative duration support.')
     else:
         totaldays = datevalue.year * 365 + datevalue.month * 30 + datevalue.day
 
