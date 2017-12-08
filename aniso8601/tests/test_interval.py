@@ -276,6 +276,23 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
         with self.assertRaises(ValueError):
             parse_interval('R3/1981-04-05/P0003-06-04T12:30:05.5asdfasdf')
 
+    def test_parse_repeating_interval_relative_nodateutil(self):
+        import sys
+        import dateutil
+
+        dateutil_import = dateutil
+
+        sys.modules['dateutil'] = None
+
+        with self.assertRaises(RuntimeError):
+            parse_repeating_interval('R3/1981-04-05/P1D', relative=True)
+
+        with self.assertRaises(RuntimeError):
+            parse_repeating_interval('R4/2017-04-30T00:00:00/P1M', relative=True)
+
+        #Reinstall dateutil
+        sys.modules['dateutil'] = dateutil
+
 class TestIntervalPartParserFunctions(unittest.TestCase):
     def test_parse_interval_parts(self):
         resultinterval = _parse_interval_parts('P1M/1981-04-05T01:01:00')
@@ -435,3 +452,17 @@ class TestIntervalPartParserFunctions(unittest.TestCase):
         self.assertEqual(resultinterval[0], datetime.date(year=2001, month=3, day=1))
         self.assertEqual(resultinterval[1], datetime.date(year=2000, month=3, day=1))
         self.assertEqual(resultinterval[2], -dateutil.relativedelta.relativedelta(years=1))
+
+    def test_parse_interval_parts_relative_nodateutil(self):
+        import sys
+        import dateutil
+
+        dateutil_import = dateutil
+
+        sys.modules['dateutil'] = None
+
+        with self.assertRaises(RuntimeError):
+            _parse_interval_parts('P1M/1981-04-05T01:01:00', relative=True)
+
+        #Reinstall dateutil
+        sys.modules['dateutil'] = dateutil
