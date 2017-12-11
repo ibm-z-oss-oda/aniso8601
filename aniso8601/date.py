@@ -237,13 +237,13 @@ def _parse_ordinal_date(datestr):
     return parseddatetime.date()
 
 def _iso_year_start(isoyear):
-    #Given an ISO year, returns the equivalent of the start of the year on the
-    #Gregorian calendar (which is used by Python)
+    #Given an ISO year, returns the equivalent of the start of the year
+    #on the Gregorian calendar (which is used by Python)
     #Stolen from:
     #http://stackoverflow.com/questions/304256/whats-the-best-way-to-find-the-inverse-of-datetime-isocalendar
 
-    #Determine the location of the 4th of January, the first week of the ISO
-    #year in the week containing the 4th of January
+    #Determine the location of the 4th of January, the first week of
+    #the ISO year is the week containing the 4th of January
     #http://en.wikipedia.org/wiki/ISO_week_date
     fourth_jan = datetime.date(isoyear, 1, 4)
 
