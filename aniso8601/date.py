@@ -229,12 +229,12 @@ def _parse_ordinal_date(datestr):
 
         #Since no 'time' is given, cast to a date
         return parseddatetime.date()
-    else:
-        #YYYYDDD
-        parseddatetime = datetime.datetime.strptime(datestr, '%Y%j')
 
-        #Since no 'time' is given, cast to a date
-        return parseddatetime.date()
+    #YYYYDDD
+    parseddatetime = datetime.datetime.strptime(datestr, '%Y%j')
+
+    #Since no 'time' is given, cast to a date
+    return parseddatetime.date()
 
 def _iso_year_start(isoyear):
     #Given an ISO year, returns the equivalent of the start of the year on the
