@@ -99,7 +99,7 @@ def parse_date(isodatestr):
     #YYYYDDD
     #
     #Note that the ISO 8601 date format of ±YYYYY is expressly not supported
-    return _resolution_map[get_date_resolution(isodatestr)](isodatestr)
+    return _RESOLUTION_MAP[get_date_resolution(isodatestr)](isodatestr)
 
 def _parse_year(yearstr):
     #yearstr is of the format Y[YYY]
@@ -253,7 +253,7 @@ def _iso_year_start(isoyear):
     #Return the start of the year
     return fourth_jan - delta
 
-_resolution_map = {
+_RESOLUTION_MAP = {
     DateResolution.Day: _parse_calendar_day,
     DateResolution.Ordinal: _parse_ordinal_date,
     DateResolution.Month: _parse_calendar_month,
