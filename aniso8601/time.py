@@ -67,8 +67,8 @@ def get_time_resolution(isotimestr):
     elif timestrlen == 2:
         #hh
         return TimeResolution.Hours
-    else:
-        raise ValueError('String is not a valid ISO 8601 time.')
+
+    raise ValueError('String is not a valid ISO 8601 time.')
 
 def parse_time(isotimestr):
     #Given a string in any ISO 8601 time format, return a datetime.time object
@@ -107,8 +107,8 @@ def parse_time(isotimestr):
         return _parse_time_naive(timestr)
     elif tzstr == 'Z':
         return _parse_time_naive(timestr).replace(tzinfo=build_utcoffset('UTC', datetime.timedelta(hours=0)))
-    else:
-        return _parse_time_naive(timestr).replace(tzinfo=parse_timezone(tzstr))
+
+    return _parse_time_naive(timestr).replace(tzinfo=parse_timezone(tzstr))
 
 def parse_datetime(isodatetimestr, delimiter='T'):
     #Given a string in ISO 8601 date time format, return a datetime.datetime
@@ -133,7 +133,7 @@ def _parse_time_naive(timestr):
     #mm is between 0 and 60, with 60 used to denote a leap second
     #
     #No tzinfo will be included
-    return _resolution_map[get_time_resolution(timestr)](timestr)
+    return _RESOLUTION_MAP[get_time_resolution(timestr)](timestr)
 
 def _parse_hour(timestr):
     #Format must be hh or hh.
@@ -169,7 +169,7 @@ def _parse_minute_time(timestr):
 
     #Since the time constructor doesn't handle fractional minutes, we put
     #the minutes in to a timedelta, and add it to the time before returning
-    minutesdelta = datetime.timedelta(minutes = isominute)
+    minutesdelta = datetime.timedelta(minutes=isominute)
 
     return _build_time(datetime.time(hour=isohour), minutesdelta)
 
@@ -184,7 +184,7 @@ def _parse_second_time(timestr):
 
         #Since the time constructor doesn't handle fractional seconds, we put
         #the seconds in to a timedelta, and add it to the time before returning
-        secondsdelta = datetime.timedelta(seconds = float(timestrarray[2]))
+        secondsdelta = datetime.timedelta(seconds=float(timestrarray[2]))
     else:
         #hhmmss or hhmmss.
         isohour = int(timestr[0:2])
@@ -192,7 +192,7 @@ def _parse_second_time(timestr):
 
         #Since the time constructor doesn't handle fractional seconds, we put
         #the seconds in to a timedelta, and add it to the time before returning
-        secondsdelta = datetime.timedelta(seconds = float(timestr[4:]))
+        secondsdelta = datetime.timedelta(seconds=float(timestr[4:]))
 
     if secondsdelta.seconds >= 60:
         #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
@@ -206,7 +206,7 @@ def _parse_second_time(timestr):
         return datetime.time(hour=0, minute=0)
 
     return _build_time(datetime.time(hour=isohour, minute=isominute),
-                      secondsdelta)
+                       secondsdelta)
 
 def _build_time(time, delta):
     #Combine today's date (just so we have a date object), the time, the
@@ -229,7 +229,7 @@ def _split_tz(isotimestr):
         tzstr = None
     return (timestr, tzstr)
 
-_resolution_map = {
+_RESOLUTION_MAP = {
     TimeResolution.Hours: _parse_hour,
     TimeResolution.Minutes: _parse_minute_time,
     TimeResolution.Seconds: _parse_second_time
