@@ -221,7 +221,7 @@ def _parse_week(datestr):
 
 def _parse_ordinal_date(datestr):
     #datestr is of the format YYYY-DDD or YYYYDDD
-    #DDD can be from 1 - 365, this matches Python's definition
+    #DDD can be from 1 - 36[5,6], this matches Python's definition
 
     if datestr.find('-') != -1:
         #YYYY-DDD
