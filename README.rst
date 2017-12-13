@@ -20,7 +20,7 @@ Features
   - Parse a repeating interval, get a date or datetime `generator <http://www.python.org/dev/peps/pep-0255/>`_
 
 * UTC offset represented as fixed-offset tzinfo
-* `dateutil.relativedelta <http://dateutil.readthedocs.io/en/latest/relativedelta.html>`_ available for calendar accuracy
+* Optional `dateutil.relativedelta <http://dateutil.readthedocs.io/en/latest/relativedelta.html>`_ support for calendar accuracy
 * No regular expressions
 
 Installation
@@ -326,8 +326,20 @@ Similarly, for an ISO 8601 date string::
   >>> aniso8601.get_date_resolution('1981') == aniso8601.resolution.DateResolution.Year
   True
 
+Development
+===========
+
+Setup
+-----
+
+It is recommended to develop using a `virtualenv <https://virtualenv.pypa.io/en/stable/>`_.
+
+The tests require the `relative` feature to be enabled, install the necessary dependencies using pip::
+
+  $ pip install .[relative]
+
 Tests
-=====
+-----
 
 To run the unit tests, navigate to the source directory and run the tests for the python version being worked on (python2, python3)::
 
