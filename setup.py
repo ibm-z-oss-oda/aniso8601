@@ -15,7 +15,7 @@ setup(
     author='Brandon Nielsen',
     author_email='nielsenb@jetfuse.net',
     url='https://bitbucket.org/nielsenb/aniso8601',
-    extras_require={'dev': {['python-dateutil']}},
+    extras_require={'dev': ['python-dateutil']},
     packages=['aniso8601'],
     classifiers=[
         'Intended Audience :: Developers',
