@@ -255,3 +255,8 @@ class TestDateParserFunctions(unittest.TestCase):
         #Day 366 is only valid on a leap year
         with self.assertRaises(ValueError):
             _parse_ordinal_date('1981366')
+
+    def test_parse_ordinal_date_overflow(self):
+        #Day must me 365, or 366, not larger
+        with self.assertRaises(ValueError):
+            _parse_ordinal_date('1981367')
