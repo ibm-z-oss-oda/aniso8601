@@ -128,17 +128,22 @@ def _parse_calendar_day(datestr):
     #datestr is of the format YYYY-MM-DD or YYYYMMDD
     if len(datestr) == 10:
         #YYYY-MM-DD
+        isoyear = int(datestr[0:4])
+        isomonth = int(datestr[5:7])
+        isoday = int(datestr[8:])
+
         strformat = '%Y-%m-%d'
     elif len(datestr) == 8:
         #YYYYMMDD
+        isoyear = int(datestr[0:4])
+        isomonth = int(datestr[4:6])
+        isoday = int(datestr[7:])
+
         strformat = '%Y%m%d'
     else:
         raise ISOFormatError('"{0}" is not a valid ISO 8601 calendar day.'.format(datestr))
 
-    parseddatetime = datetime.datetime.strptime(datestr, strformat)
-
-    #Since no 'time' is given, cast to a date
-    return parseddatetime.date()
+    return datetime.date(isoyear, isomonth, isoday)
 
 def _parse_calendar_month(datestr):
     #datestr is of the format YYYY-MM
