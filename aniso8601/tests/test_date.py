@@ -116,7 +116,7 @@ class TestDateParserFunctions(unittest.TestCase):
         self.assertEqual(date.month, 1)
         self.assertEqual(date.day, 1)
 
-    def test_parse_year_nonzero(self):
+    def test_parse_year_zero(self):
         #0 isn't a valid year
         with self.assertRaises(ValueError):
             _parse_year('0')
@@ -246,8 +246,12 @@ class TestDateParserFunctions(unittest.TestCase):
         self.assertEqual(date.month, 12)
         self.assertEqual(date.day, 31)
 
+    def test_parse_ordinal_date_zero(self):
+        #0 isn't a valid day of year
         with self.assertRaises(ValueError):
             _parse_ordinal_date('1981000')
 
+    def test_parse_ordinal_date_nonleap(self):
+        #Day 366 is only valid on a leap year
         with self.assertRaises(ValueError):
             _parse_ordinal_date('1981366')
