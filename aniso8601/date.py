@@ -223,7 +223,7 @@ def _parse_ordinal_date(datestr):
     #datestr is of the format YYYY-DDD or YYYYDDD
     #DDD can be from 1 - 36[5,6], this matches Python's definition
 
-    year = int(datestr[0:4])
+    isoyear = int(datestr[0:4])
 
     if datestr.find('-') != -1:
         #YYYY-DDD
@@ -234,7 +234,7 @@ def _parse_ordinal_date(datestr):
 
     #Enforce ordinal day limitation
     #https://bitbucket.org/nielsenb/aniso8601/issues/14/parsing-ordinal-dates-should-only-allow
-    if parseddatetime.year != year:
+    if parseddatetime.year != isoyear:
         raise ValueError('Day of year must be from 1..365, 1..366 for leap year.')
 
     #Since no 'time' is given, cast to a date
