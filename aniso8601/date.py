@@ -150,10 +150,10 @@ def _parse_calendar_month(datestr):
     if len(datestr) != 7:
         raise ISOFormatError('"{0}" is not a valid ISO 8601 calendar month.'.format(datestr))
 
-    parseddatetime = datetime.datetime.strptime(datestr, '%Y-%m')
+    isoyear = int(datestr[0:4])
+    isomonth = int(datestr[5:])
 
-    #Since no 'time' is given, cast to a date
-    return parseddatetime.date()
+    return datetime.date(isoyear, isomonth, 1)
 
 def _parse_week_day(datestr):
     #datestr is of the format YYYY-Www-D, YYYYWwwD
