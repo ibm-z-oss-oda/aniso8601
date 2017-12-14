@@ -235,3 +235,19 @@ class TestDateParserFunctions(unittest.TestCase):
         self.assertEqual(date.year, 1981)
         self.assertEqual(date.month, 4)
         self.assertEqual(date.day, 5)
+
+        date = _parse_ordinal_date('1981365')
+        self.assertEqual(date.year, 1981)
+        self.assertEqual(date.month, 12)
+        self.assertEqual(date.day, 31)
+
+        date = _parse_ordinal_date('1980366')
+        self.assertEqual(date.year, 1980)
+        self.assertEqual(date.month, 12)
+        self.assertEqual(date.day, 31)
+
+        with self.assertRaises(ValueError):
+            _parse_ordinal_date('1981000')
+
+        with self.assertRaises(ValueError):
+            _parse_ordinal_date('1981366')
