@@ -206,7 +206,7 @@ class TestTimeParserFunctions(unittest.TestCase):
         with self.assertRaises(LeapSecondError):
             parse_time('23:59:60+00:00')
 
-        #Leap seconds not supported, but exception type should be changed
+    def test_parse_time_overflow(self):
         with self.assertRaises(SecondsOutOfBoundsError):
             parse_time('00:00:60')
 
@@ -278,7 +278,7 @@ class TestTimeParserFunctions(unittest.TestCase):
         with self.assertRaises(LeapSecondError):
             parse_datetime('2016-12-31T23:59:60Z')
 
-        #Seconds can't be greater than 60
+    def test_parse_datetime_overflow(self):
         with self.assertRaises(SecondsOutOfBoundsError):
             parse_datetime('1981-04-05T00:00:60')
 
@@ -312,6 +312,14 @@ class TestTimeParserFunctions(unittest.TestCase):
 
         with self.assertRaises(MinutesOutOfBoundsError):
             parse_datetime('1981-04-05T00:61+00:00')
+
+    def test_parse_datetime_leapsecond(self):
+        #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
+        with self.assertRaises(ValueError):
+            parse_datetime('2016-12-31T23:59:60+00:00')
+
+        with self.assertRaises(ValueError):
+            parse_datetime('2016-12-31T23:59:60')
 
     def test_parse_datetime_spaceseperated(self):
         resultdatetime = parse_datetime('2004-W53-6 23:21:28.512400-12:34', ' ')
@@ -371,10 +379,11 @@ class TestTimeParserFunctions(unittest.TestCase):
             _parse_time_naive('00:61')
 
     def test_parse_time_naive_bounds(self):
-        #Leap seconds not supporter
+        #Leap seconds not supported
         with self.assertRaises(LeapSecondError):
             _parse_time_naive('23:59:60')
 
+    def test_parse_time_naive_overflow(self):
         #Seconds must not be greater than or equal to 60
         with self.assertRaises(SecondsOutOfBoundsError):
             _parse_time_naive('00:00:60')
@@ -431,8 +440,7 @@ class TestTimeParserFunctions(unittest.TestCase):
         time = _parse_minute_time('0123.4567')
         self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
 
-    def test_parse_minute_time_bounds(self):
-        #Minutes cannot be greater than 60
+    def test_parse_minute_time_overflow(self):
         with self.assertRaises(MinutesOutOfBoundsError):
             _parse_minute_time('0060')
 
@@ -491,6 +499,7 @@ class TestTimeParserFunctions(unittest.TestCase):
         with self.assertRaises(LeapSecondError):
             _parse_second_time('23:59:60')
 
+    def test_parse_second_time_overflow(self):
         #Seconds must be less than 60
         #Leap seconds not supported
         with self.assertRaises(SecondsOutOfBoundsError):
