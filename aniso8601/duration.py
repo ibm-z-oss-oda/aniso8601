@@ -50,8 +50,8 @@ def _parse_duration_prescribed(durationstr, relative):
             if character.isalpha() is True:
                 lettercount += 1
 
-            if lettercount > 1:
-                raise ISOFormatError('ISO 8601 duration must end with a single valid character.')
+                if lettercount > 1:
+                    raise ISOFormatError('ISO 8601 duration must end with a single valid character.')
 
     #Do not allow W in combination with other designators
     #https://bitbucket.org/nielsenb/aniso8601/issues/2/week-designators-should-not-be-combinable
