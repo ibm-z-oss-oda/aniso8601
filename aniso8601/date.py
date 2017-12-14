@@ -6,6 +6,7 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
+import calendar
 import datetime
 
 from aniso8601.exceptions import DayOutOfBoundsError, ISOFormatError, \
@@ -219,6 +220,8 @@ def _parse_ordinal_date(datestr):
         #YYYYDDD
         isoday = int(datestr[4:])
 
+    #Day of year to a date
+    #https://stackoverflow.com/questions/2427555/python-question-year-and-day-of-year-to-date
     parseddate = datetime.date(isoyear, 1, 1) + datetime.timedelta(days=isoday - 1)
 
     #Enforce ordinal day limitation
