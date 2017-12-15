@@ -248,6 +248,7 @@ def _split_tz(isotimestr):
     else:
         timestr = isotimestr
         tzstr = None
+
     return (timestr, tzstr)
 
 _RESOLUTION_MAP = {
