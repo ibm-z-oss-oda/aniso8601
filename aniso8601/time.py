@@ -8,6 +8,7 @@
 
 import datetime
 
+from aniso8601.builder import PythonTimeBuilder
 from aniso8601.date import parse_date
 from aniso8601.exceptions import HoursOutOfBoundsError, ISOFormatError, \
         LeapSecondError, MidnightBoundsError, MinutesOutOfBoundsError, \
@@ -148,11 +149,7 @@ def _parse_hour(timestr):
     elif isohour > 24:
         raise HoursOutOfBoundsError('Hour must be between 0..24 with 24 representing midnight.')
 
-    #Since the time constructor doesn't handle fractional hours, we put
-    #the hours in to a timedelta, and add it to the time before returning
-    hoursdelta = datetime.timedelta(hours=isohour)
-
-    return _build_time(datetime.time(hour=0), hoursdelta)
+    return PythonTimeBuilder.build_time(hours=isohour)
 
 def _parse_minute_time(timestr):
     #Format must be hhmm, hhmm., hh:mm or hh:mm.
@@ -178,9 +175,9 @@ def _parse_minute_time(timestr):
 
     #Since the time constructor doesn't handle fractional minutes, we put
     #the minutes in to a timedelta, and add it to the time before returning
-    minutesdelta = datetime.timedelta(minutes=isominute)
+    minutesdelta = PythonTimeBuilder.build_timedelta(minutes=isominute)
 
-    return _build_time(datetime.time(hour=isohour), minutesdelta)
+    return PythonTimeBuilder.build_time(hours=isohour, minutes=isominute)
 
 def _parse_second_time(timestr):
     #Format must be hhmmss, hhmmss., hh:mm:ss or hh:mm:ss.
@@ -190,29 +187,18 @@ def _parse_second_time(timestr):
 
         isohour = int(timestrarray[0])
         isominute = int(timestrarray[1])
-
-        #Since the time constructor doesn't handle fractional seconds, we put
-        #the seconds in to a timedelta, and add it to the time before returning
-        #The seconds value is truncated to microsecond resolution before
-        #conversion:
-        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
-        secondsdelta = datetime.timedelta(seconds=float(timestrarray[2][:9]))
+        isoseconds = float(timestrarray[2])
     else:
         #hhmmss or hhmmss.
         isohour = int(timestr[0:2])
         isominute = int(timestr[2:4])
+        isoseconds = float(timestr[4:])
 
-        #Since the time constructor doesn't handle fractional seconds, we put
-        #the seconds in to a timedelta, and add it to the time before returning
-        #The seconds value is truncated to microsecond resolution before
-        #conversion:
-        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
-        secondsdelta = datetime.timedelta(seconds=float(timestr[4:13]))
-
-    if isohour == 23 and isominute == 59 and secondsdelta.seconds == 60:
+    if isohour == 23 and isominute == 59 and isoseconds == 60:
         #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
         raise LeapSecondError('Leap seconds are not supported.')
-    elif secondsdelta.seconds >= 60:
+
+    if isoseconds >= 60:
         #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
         raise SecondsOutOfBoundsError('Seconds must be less than 60.')
 
@@ -221,19 +207,12 @@ def _parse_second_time(timestr):
 
     if isohour == 24:
         #Midnight, see 4.2.1, 4.2.3
-        if isominute != 0 or secondsdelta.total_seconds() != 0:
+        if isominute != 0 or isoseconds != 0:
             raise MidnightBoundsError('Hour 24 may only represent midnight.')
 
-        return datetime.time(hour=0, minute=0)
+        return PythonTimeBuilder.build_time(hours=0, minutes=0)
 
-    return _build_time(datetime.time(hour=isohour, minute=isominute),
-                       secondsdelta)
-
-def _build_time(time, delta):
-    #Combine today's date (just so we have a date object), the time, the
-    #delta, and return the time component
-    base_datetime = datetime.datetime.combine(datetime.date.today(), time)
-    return (base_datetime + delta).time()
+    return PythonTimeBuilder.build_time(hours=isohour, minutes=isominute, seconds=isoseconds)
 
 def _split_tz(isotimestr):
     if isotimestr.find('+') != -1:

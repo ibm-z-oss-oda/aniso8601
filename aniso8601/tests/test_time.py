@@ -534,12 +534,6 @@ class TestTimeParserFunctions(unittest.TestCase):
         with self.assertRaises(MidnightBoundsError):
             _parse_second_time('24:01:00')
 
-    def test_build_time(self):
-        self.assertEqual(_build_time(datetime.time(hour=1), datetime.timedelta(hours=1.1, minutes=2.2, seconds=3.3)), datetime.time(hour=2, minute=8, second=15, microsecond=300000))
-
-        #Make sure it overflows correctly
-        self.assertEqual(_build_time(datetime.time.max, datetime.timedelta(microseconds=1)), datetime.time.min)
-
     def test_split_tz(self):
         self.assertEqual(_split_tz('01:23:45'), ('01:23:45', None))
 
