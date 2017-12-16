@@ -173,10 +173,6 @@ def _parse_minute_time(timestr):
 
         return datetime.time(hour=0, minute=0)
 
-    #Since the time constructor doesn't handle fractional minutes, we put
-    #the minutes in to a timedelta, and add it to the time before returning
-    minutesdelta = PythonTimeBuilder.build_timedelta(minutes=isominute)
-
     return PythonTimeBuilder.build_time(hours=isohour, minutes=isominute)
 
 def _parse_second_time(timestr):
