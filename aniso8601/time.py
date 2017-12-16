@@ -141,6 +141,8 @@ def _parse_hour(timestr):
 
     if isohour == 24:
         return datetime.time(hour=0, minute=0)
+    elif isohour > 24:
+        raise ValueError('Hour 24 may only represent midnight.')
 
     #Since the time constructor doesn't handle fractional hours, we put
     #the hours in to a timedelta, and add it to the time before returning
@@ -165,6 +167,9 @@ def _parse_minute_time(timestr):
         raise ValueError('ISO 8601 minute element cannot be greater than 60.')
 
     if isohour == 24:
+        if isominute != 0:
+            raise ValueError('Hour 24 may only represent midnight.')
+
         return datetime.time(hour=0, minute=0)
 
     #Since the time constructor doesn't handle fractional minutes, we put
@@ -203,6 +208,9 @@ def _parse_second_time(timestr):
 
     if isohour == 24:
         #Midnight, see 4.2.1, 4.2.3
+        if isominute != 0 or secondsdelta.total_seconds() != 0:
+            raise ValueError('Hour 24 may only represent midnight.')
+
         return datetime.time(hour=0, minute=0)
 
     return _build_time(datetime.time(hour=isohour, minute=isominute),
