@@ -164,7 +164,7 @@ def _parse_minute_time(timestr):
         isominute = float(timestr[2:])
 
     if isominute >= 60:
-        raise ValueError('Seconds must be less than 60.')
+        raise ValueError('Minutes must be less than 60.')
 
     if isohour == 24:
         if isominute != 0:
