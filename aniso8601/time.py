@@ -145,7 +145,7 @@ def _parse_hour(timestr):
     isohour = float(timestr)
 
     if isohour == 24:
-        return datetime.time(hour=0, minute=0)
+        return PythonTimeBuilder.build_time(hours=0, minutes=0)
     elif isohour > 24:
         raise HoursOutOfBoundsError('Hour must be between 0..24 with 24 representing midnight.')
 
@@ -171,7 +171,7 @@ def _parse_minute_time(timestr):
         if isominute != 0:
             raise MidnightBoundsError('Hour 24 may only represent midnight.')
 
-        return datetime.time(hour=0, minute=0)
+        return PythonTimeBuilder.build_time(hours=0, minutes=0)
 
     return PythonTimeBuilder.build_time(hours=isohour, minutes=isominute)
 
