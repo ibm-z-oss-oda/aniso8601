@@ -163,8 +163,8 @@ def _parse_minute_time(timestr):
         isohour = int(timestr[0:2])
         isominute = float(timestr[2:])
 
-    if isominute > 60:
-        raise ValueError('ISO 8601 minute element cannot be greater than 60.')
+    if isominute >= 60:
+        raise ValueError('Seconds must be less than 60.')
 
     if isohour == 24:
         if isominute != 0:
@@ -202,9 +202,6 @@ def _parse_second_time(timestr):
     if secondsdelta.seconds >= 60:
         #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
         raise ValueError('Seconds must be less than 60.')
-
-    if isominute > 60:
-        raise ValueError('ISO 8601 minute element cannot be greater than 60.')
 
     if isohour == 24:
         #Midnight, see 4.2.1, 4.2.3
