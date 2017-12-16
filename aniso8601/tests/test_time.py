@@ -473,6 +473,18 @@ class TestTimeParserFunctions(unittest.TestCase):
         with self.assertRaises(ValueError):
             _parse_minute_time('00:60.1')
 
+        with self.assertRaises(ValueError):
+            _parse_minute_time('2401')
+
+        with self.assertRaises(ValueError):
+            _parse_minute_time('2400.1')
+
+        with self.assertRaises(ValueError):
+            _parse_minute_time('24:01')
+
+        with self.assertRaises(ValueError):
+            _parse_minute_time('24:00.1')
+
     def test_parse_second_time(self):
         time = _parse_second_time('01:23:45')
         self.assertEqual(time.hour, 1)
