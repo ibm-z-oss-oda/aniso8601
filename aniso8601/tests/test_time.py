@@ -462,13 +462,13 @@ class TestTimeParserFunctions(unittest.TestCase):
         self.assertEqual(time.microsecond, 402000)
 
         with self.assertRaises(ValueError):
-            _parse_minute_time('0061')
+            _parse_minute_time('0060')
 
         with self.assertRaises(ValueError):
             _parse_minute_time('0060.1')
 
         with self.assertRaises(ValueError):
-            _parse_minute_time('00:61')
+            _parse_minute_time('00:60')
 
         with self.assertRaises(ValueError):
             _parse_minute_time('00:60.1')
@@ -525,10 +525,10 @@ class TestTimeParserFunctions(unittest.TestCase):
             _parse_second_time('00:00:60')
 
         with self.assertRaises(ValueError):
-            _parse_second_time('006100')
+            _parse_second_time('006000')
 
         with self.assertRaises(ValueError):
-            _parse_second_time('00:61:00')
+            _parse_second_time('00:60:00')
 
         with self.assertRaises(ValueError):
             _parse_second_time('240001')
