@@ -58,19 +58,21 @@ class PythonTimeBuilder(BaseTimeBuilder):
         else:
             microseconds = int(microseconds)
 
-        if fractional_hours != 0 or fractional_minutes != 0 or fractional_seconds != 0 or fractional_microseconds != 0:
-            #Datetimes don't handle fractional components, so we use a timedelta
-            return (datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, microsecond=microseconds, tzinfo=tzinfo) + PythonTimeBuilder.build_timedelta(seconds=fractional_seconds, microseconds=fractional_microseconds, minutes=fractional_minutes, hours=fractional_hours)).time()
+        #Datetimes don't handle fractional components, so we use a timedelta
+        result_datetime = datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, microsecond=microseconds, tzinfo=tzinfo) + PythonTimeBuilder.build_timedelta(seconds=fractional_seconds, microseconds=fractional_microseconds, minutes=fractional_minutes, hours=fractional_hours)
 
-        return datetime.time(hour=hours, minute=minutes, second=seconds, microsecond=microseconds, tzinfo=None)
+        if tzinfo is None:
+            return result_datetime.time()
+        else:
+            return result_datetime.timetz()
 
     @staticmethod
     def build_datetime(year, month, day, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
         #Builds a datetime from the given parts, handling fractional arguments where necessary
         date = datetime.date(year, month, day)
-        time = PythonTimeBuilder.build_time(hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None)
+        time = PythonTimeBuilder.build_time(hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=tzinfo)
 
-        return datetime.datetime.combine(date, time)
+        return PythonTimeBuilder.combine(date, time)
 
     @staticmethod
     def build_timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0):
