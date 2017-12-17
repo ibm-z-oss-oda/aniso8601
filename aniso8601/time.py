@@ -127,7 +127,7 @@ def parse_datetime(isodatetimestr, delimiter='T'):
 
     timepart = parse_time(isotimestr)
 
-    return datetime.datetime.combine(datepart, timepart)
+    return PythonTimeBuilder.combine(datepart, timepart)
 
 def _parse_time_naive(timestr):
     #timestr is of the format hh:mm:ss, hh:mm, hhmmss, hhmm, hh

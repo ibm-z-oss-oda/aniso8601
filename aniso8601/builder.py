@@ -21,6 +21,10 @@ class BaseTimeBuilder(object):
     def build_timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0):
         raise NotImplementedError
 
+    @staticmethod
+    def combine(date, time):
+        raise NotImplementedError
+
 class PythonTimeBuilder(BaseTimeBuilder):
     @staticmethod
     def build_time(hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
@@ -71,3 +75,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
     @staticmethod
     def build_timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0):
         return datetime.timedelta(days=days, seconds=seconds, microseconds=microseconds, milliseconds=milliseconds, minutes=minutes, hours=hours)
+
+    @staticmethod
+    def combine(date, time):
+        return datetime.datetime.combine(date, time)
