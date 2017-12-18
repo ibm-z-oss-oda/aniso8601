@@ -20,11 +20,10 @@ def parse_timezone(tzstr):
 
         if tzstr[0] == '+':
             return UTCOffset(name=tzstr, utcdelta=datetime.timedelta(hours=tzhour, minutes=tzminute))
-        else:
-            if tzhour == 0 and tzminute == 0:
-                raise ValueError('Negative ISO 8601 time offset cannot be 0.')
-            else:
-                return UTCOffset(name=tzstr, utcdelta=-datetime.timedelta(hours=tzhour, minutes=tzminute))
+        elif tzhour == 0 and tzminute == 0:
+            raise ValueError('Negative ISO 8601 time offset cannot be 0.')
+
+        return UTCOffset(name=tzstr, utcdelta=-datetime.timedelta(hours=tzhour, minutes=tzminute))
     elif tzstrlen == 5:
         #±hhmm
         tzhour = int(tzstr[1:3])
@@ -32,24 +31,22 @@ def parse_timezone(tzstr):
 
         if tzstr[0] == '+':
             return UTCOffset(name=tzstr, utcdelta=datetime.timedelta(hours=tzhour, minutes=tzminute))
-        else:
-            if tzhour == 0 and tzminute == 0:
-                raise ValueError('Negative ISO 8601 time offset cannot be 0.')
-            else:
-                return UTCOffset(name=tzstr, utcdelta=-datetime.timedelta(hours=tzhour, minutes=tzminute))
+        elif tzhour == 0 and tzminute == 0:
+            raise ValueError('Negative ISO 8601 time offset cannot be 0.')
+
+        return UTCOffset(name=tzstr, utcdelta=-datetime.timedelta(hours=tzhour, minutes=tzminute))
     elif tzstrlen == 3:
         #±hh
         tzhour = int(tzstr[1:3])
 
         if tzstr[0] == '+':
             return UTCOffset(name=tzstr, utcdelta=datetime.timedelta(hours=tzhour))
-        else:
-            if tzhour == 0:
-                raise ValueError('Negative ISO 8601 time offset cannot be 0.')
-            else:
-                return UTCOffset(name=tzstr, utcdelta=-datetime.timedelta(hours=tzhour))
-    else:
-        raise ValueError('String is not a valid ISO 8601 time offset.')
+        elif tzhour == 0:
+            raise ValueError('Negative ISO 8601 time offset cannot be 0.')
+
+        return UTCOffset(name=tzstr, utcdelta=-datetime.timedelta(hours=tzhour))
+
+    raise ValueError('String is not a valid ISO 8601 time offset.')
 
 class UTCOffset(datetime.tzinfo):
     def __init__(self, name=None, utcdelta=None):
@@ -62,31 +59,30 @@ class UTCOffset(datetime.tzinfo):
     def __repr__(self):
         if self._utcdelta >= datetime.timedelta(hours=0):
             return '+{0} UTC'.format(self._utcdelta)
-        else:
-            #From the docs:
-            #String representations of timedelta objects are normalized
-            #similarly to their internal representation. This leads to
-            #somewhat unusual results for negative timedeltas.
-            #
-            #Clean this up for printing purposes
-            correctedDays = abs(self._utcdelta.days + 1) #Negative deltas start at -1 day
 
-            deltaSeconds = (24 * 60 * 60) - self._utcdelta.seconds #Negative deltas have a positive seconds
+        #From the docs:
+        #String representations of timedelta objects are normalized
+        #similarly to their internal representation. This leads to
+        #somewhat unusual results for negative timedeltas.
 
-            days, remainder = divmod(deltaSeconds, 24 * 60 * 60) #(24 hours / day) * (60 minutes / hour) * (60 seconds / hour)
-            hours, remainder = divmod(remainder, 1 * 60 * 60) #(1 hour) * (60 minutes / hour) * (60 seconds / hour)
-            minutes, seconds = divmod(remainder, 1 * 60) #(1 minute) * (60 seconds / minute)
+        #Clean this up for printing purposes
+        correcteddays = abs(self._utcdelta.days + 1) #Negative deltas start at -1 day
 
-            #Add any remaining days to the correctedDays count
-            correctedDays += days
+        deltaseconds = (24 * 60 * 60) - self._utcdelta.seconds #Negative deltas have a positive seconds
 
-            if correctedDays == 0:
-                return '-{0}:{1:02}:{2:02} UTC'.format(hours, minutes, seconds)
-            else:
-                if correctedDays == 1:
-                    return '-1 day, {0}:{1:02}:{2:02} UTC'.format(hours, minutes, seconds)
-                else:
-                    return '-{0} days, {1}:{2:02}:{3:02} UTC'.format(correctedDays, hours, minutes, seconds)
+        days, remainder = divmod(deltaseconds, 24 * 60 * 60) #(24 hours / day) * (60 minutes / hour) * (60 seconds / hour)
+        hours, remainder = divmod(remainder, 1 * 60 * 60) #(1 hour) * (60 minutes / hour) * (60 seconds / hour)
+        minutes, seconds = divmod(remainder, 1 * 60) #(1 minute) * (60 seconds / minute)
+
+        #Add any remaining days to the correctedDays count
+        correcteddays += days
+
+        if correcteddays == 0:
+            return '-{0}:{1:02}:{2:02} UTC'.format(hours, minutes, seconds)
+        elif correcteddays == 1:
+            return '-1 day, {0}:{1:02}:{2:02} UTC'.format(hours, minutes, seconds)
+
+        return '-{0} days, {1}:{2:02}:{3:02} UTC'.format(correcteddays, hours, minutes, seconds)
 
     def utcoffset(self, dt):
         return self._utcdelta
