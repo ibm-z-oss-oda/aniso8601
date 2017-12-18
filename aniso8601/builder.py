@@ -10,6 +10,10 @@ import datetime
 
 class BaseTimeBuilder(object):
     @staticmethod
+    def build_date(year, month, day):
+        raise NotImplementedError
+
+    @staticmethod
     def build_time(hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
         raise NotImplementedError
 
@@ -26,6 +30,10 @@ class BaseTimeBuilder(object):
         raise NotImplementedError
 
 class PythonTimeBuilder(BaseTimeBuilder):
+    @staticmethod
+    def build_date(year, month, day):
+        return datetime.date(year, month, day)
+
     @staticmethod
     def build_time(hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
         #Builds a time from the given parts, handling fractional arguments where necessary
