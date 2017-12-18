@@ -132,15 +132,11 @@ def _parse_calendar_day(datestr):
         isoyear = int(datestr[0:4])
         isomonth = int(datestr[5:7])
         isoday = int(datestr[8:])
-
-        strformat = '%Y-%m-%d'
     elif len(datestr) == 8:
         #YYYYMMDD
         isoyear = int(datestr[0:4])
         isomonth = int(datestr[4:6])
         isoday = int(datestr[7:])
-
-        strformat = '%Y%m%d'
     else:
         raise ISOFormatError('"{0}" is not a valid ISO 8601 calendar day.'.format(datestr))
 
