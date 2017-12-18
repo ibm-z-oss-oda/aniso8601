@@ -10,7 +10,7 @@ import unittest
 import datetime
 import pickle
 
-from aniso8601.timezone import parse_timezone, build_utcoffset
+from aniso8601.timezone import parse_timezone, UTCOffset
 
 class TestTimezoneParserFunctions(unittest.TestCase):
     def test_parse_timezone(self):
@@ -95,7 +95,7 @@ class TestTimezoneParserFunctions(unittest.TestCase):
 
     def test_pickle(self):
         #Make sure timezone objects are pickleable
-        testutcoffset = build_utcoffset('UTC', datetime.timedelta(0))
+        testutcoffset = UTCOffset(name='UTC', utcdelta=datetime.timedelta(0))
 
         utcoffsetpickle = pickle.dumps(testutcoffset)
 

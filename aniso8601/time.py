@@ -8,9 +8,9 @@
 
 import datetime
 
-from aniso8601.timezone import parse_timezone, build_utcoffset
 from aniso8601.date import parse_date
 from aniso8601.resolution import TimeResolution
+from aniso8601.timezone import parse_timezone, UTCOffset
 
 def get_time_resolution(isotimestr):
     #Valid time formats are:
@@ -106,9 +106,11 @@ def parse_time(isotimestr):
     if tzstr is None:
         return _parse_time_naive(timestr)
     elif tzstr == 'Z':
-        return _parse_time_naive(timestr).replace(tzinfo=build_utcoffset('UTC', datetime.timedelta(hours=0)))
+        tzinfo = UTCOffset(name='UTC', utcdelta=datetime.timedelta(hours=0))
+    else:
+        tzinfo = parse_timezone(tzstr)
 
-    return _parse_time_naive(timestr).replace(tzinfo=parse_timezone(tzstr))
+    return _parse_time_naive(timestr).replace(tzinfo=tzinfo)
 
 def parse_datetime(isodatetimestr, delimiter='T'):
     #Given a string in ISO 8601 date time format, return a datetime.datetime

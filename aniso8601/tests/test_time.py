@@ -9,10 +9,10 @@
 import unittest
 import datetime
 
+from aniso8601.resolution import TimeResolution
 from aniso8601.time import get_time_resolution, parse_time, parse_datetime, \
      _parse_time_naive, _parse_hour, _parse_minute_time, _parse_second_time, \
      _build_time, _split_tz
-from aniso8601.resolution import TimeResolution
 
 class TestTimeParserFunctions(unittest.TestCase):
     def test_get_time_resolution(self):
