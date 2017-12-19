@@ -6,11 +6,11 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-from datetime import datetime
+from aniso8601.builder import PythonTimeBuilder
+from aniso8601.date import parse_date
 from aniso8601.duration import parse_duration
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.time import parse_datetime
-from aniso8601.date import parse_date
 
 def parse_interval(isointervalstr, intervaldelimiter='/', datetimedelimiter='T', relative=False):
     #Given a string representing an ISO 8601 interval, return a
@@ -91,7 +91,7 @@ def _parse_interval_parts(isointervalstr, intervaldelimiter='/', datetimedelimit
 
         #See if we need to upconvert to datetime to preserve resolution
         if firstpart.find(datetimedelimiter) != -1:
-            return (enddate, datetime.combine(enddate, datetime.min.time()) - duration, -duration)
+            return (enddate, PythonTimeBuilder.combine(enddate, PythonTimeBuilder.build_time()) - duration, -duration)
 
         return (enddate, enddate - duration, -duration)
     elif secondpart[0] == 'P':
@@ -110,7 +110,7 @@ def _parse_interval_parts(isointervalstr, intervaldelimiter='/', datetimedelimit
 
         #See if we need to upconvert to datetime to preserve resolution
         if secondpart.find(datetimedelimiter) != -1:
-            return (startdate, datetime.combine(startdate, datetime.min.time()) + duration, duration)
+            return (startdate, PythonTimeBuilder.combine(startdate, PythonTimeBuilder.build_time()) + duration, duration)
 
         return (startdate, startdate + duration, duration)
 
@@ -126,13 +126,13 @@ def _parse_interval_parts(isointervalstr, intervaldelimiter='/', datetimedelimit
         start_datetime = parse_datetime(firstpart, delimiter=datetimedelimiter)
         end_date = parse_date(secondpart)
 
-        return (start_datetime, end_date, datetime.combine(end_date, datetime.min.time()) - start_datetime)
+        return (start_datetime, end_date, PythonTimeBuilder.combine(end_date, PythonTimeBuilder.build_time()) - start_datetime)
     elif firstpart.find(datetimedelimiter) == -1 and secondpart.find(datetimedelimiter) != -1:
         #First part is a date, second part is a datetime
         start_date = parse_date(firstpart)
         end_datetime = parse_datetime(secondpart, delimiter=datetimedelimiter)
 
-        return (start_date, end_datetime, end_datetime - datetime.combine(start_date, datetime.min.time()))
+        return (start_date, end_datetime, end_datetime - PythonTimeBuilder.combine(start_date, PythonTimeBuilder.build_time()))
 
     #Both parts are dates
     start_date = parse_date(firstpart)
