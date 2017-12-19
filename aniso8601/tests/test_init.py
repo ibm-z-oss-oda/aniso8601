@@ -15,30 +15,20 @@ class TestInitFunctions(unittest.TestCase):
         #Just some tests repeated from other places to make sure the
         #imports work
         time = aniso8601.parse_time('01:23:45')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
-        self.assertEqual(time.second, 45)
+        self.assertEqual(time, datetime.time(hour=1, minute=23, second=45))
 
         resultdatetime = aniso8601.parse_datetime('1981-04-05T23:21:28.512400Z')
-        self.assertEqual(resultdatetime.year, 1981)
-        self.assertEqual(resultdatetime.month, 4)
-        self.assertEqual(resultdatetime.day, 5)
-        self.assertEqual(resultdatetime.hour, 23)
-        self.assertEqual(resultdatetime.minute, 21)
-        self.assertEqual(resultdatetime.second, 28)
-        self.assertEqual(resultdatetime.microsecond, 512400)
+        self.assertEqual(resultdatetime.replace(tzinfo=None), datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400))
+
         tzinfoobject = resultdatetime.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), 'UTC')
 
         date = aniso8601.parse_date('19810405')
-        self.assertEqual(date.year, 1981)
-        self.assertEqual(date.month, 4)
-        self.assertEqual(date.day, 5)
+        self.assertEqual(date, datetime.date(1981, 4, 5))
 
         resultduration = aniso8601.parse_duration('P1Y2M3DT4H54M6S')
-        self.assertEqual(resultduration.days, 428)
-        self.assertEqual(resultduration.seconds, 17646)
+        self.assertEqual(resultduration, datetime.timedelta(days=428, seconds=17646))
 
         resultinterval = aniso8601.parse_interval('1980-03-05T01:01:00/1981-04-05T01:01:00')
         self.assertEqual(resultinterval[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
