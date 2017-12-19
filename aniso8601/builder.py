@@ -89,3 +89,17 @@ class PythonTimeBuilder(BaseTimeBuilder):
     @staticmethod
     def combine(date, time):
         return datetime.datetime.combine(date, time)
+
+class RelativeTimeBuilder(PythonTimeBuilder):
+    @staticmethod
+    def build_timedelta(years=0, months=0, weeks=0, days=0, hours=0, minutes=0, seconds=0, microseconds=0):
+        try:
+            import dateutil.relativedelta
+
+            if int(years) != years or int(months) != months:
+                #https://github.com/dateutil/dateutil/issues/40
+                raise ValueError('Fractional months and years are not defined for relative intervals.')
+
+            return dateutil.relativedelta.relativedelta(years=int(years), months=int(months), weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds, microseconds=microseconds)
+        except ImportError:
+            raise RuntimeError('dateutil must be installed for relativedelta support.')

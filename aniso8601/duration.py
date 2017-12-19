@@ -6,12 +6,11 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-import datetime
-
+from aniso8601 import compat
+from aniso8601.builder import PythonTimeBuilder, RelativeTimeBuilder
 from aniso8601.date import parse_date
 from aniso8601.exceptions import ISOFormatError, RelativeValueError
 from aniso8601.time import parse_time
-from aniso8601 import compat
 
 def parse_duration(isodurationstr, relative=False):
     #Given a string representing an ISO 8601 duration, return a
@@ -65,21 +64,12 @@ def _parse_duration_prescribed(durationstr, relative):
         years, months, weeks, days, hours, minutes, seconds = _parse_duration_prescribed_time(durationstr)
 
     if relative is True:
-        try:
-            import dateutil.relativedelta
-
-            if int(years) != years or int(months) != months:
-                #https://github.com/dateutil/dateutil/issues/40
-                raise RelativeValueError('Fractional months and years are not defined for relative intervals.')
-
-            return dateutil.relativedelta.relativedelta(years=int(years), months=int(months), weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
-        except ImportError:
-            raise RuntimeError('dateutil must be installed for relative duration support.')
+        return RelativeTimeBuilder.build_timedelta(years=years, months=months, weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
 
     #Note that weeks can be handled without conversion to days
     totaldays = years * 365 + months * 30 + days
 
-    return datetime.timedelta(weeks=weeks, days=totaldays, hours=hours, minutes=minutes, seconds=seconds)
+    return PythonTimeBuilder.build_timedelta(weeks=weeks, days=totaldays, hours=hours, minutes=minutes, seconds=seconds)
 
 def _parse_duration_prescribed_notime(durationstr):
     #durationstr can be of the form PnYnMnD or PnW
@@ -185,16 +175,11 @@ def _parse_duration_combined(durationstr, relative):
     timevalue = parse_time(timepart)
 
     if relative is True:
-        try:
-            import dateutil.relativedelta
+        return RelativeTimeBuilder.build_timedelta(years=datevalue.year, months=datevalue.month, days=datevalue.day, hours=timevalue.hour, minutes=timevalue.minute, seconds=timevalue.second, microseconds=timevalue.microsecond)
 
-            return dateutil.relativedelta.relativedelta(years=datevalue.year, months=datevalue.month, days=datevalue.day, hours=timevalue.hour, minutes=timevalue.minute, seconds=timevalue.second, microseconds=timevalue.microsecond)
-        except ImportError:
-            raise RuntimeError('dateutil must be installed for relative duration support.')
-    else:
-        totaldays = datevalue.year * 365 + datevalue.month * 30 + datevalue.day
+    totaldays = datevalue.year * 365 + datevalue.month * 30 + datevalue.day
 
-        return datetime.timedelta(days=totaldays, hours=timevalue.hour, minutes=timevalue.minute, seconds=timevalue.second, microseconds=timevalue.microsecond)
+    return PythonTimeBuilder.build_timedelta(days=totaldays, hours=timevalue.hour, minutes=timevalue.minute, seconds=timevalue.second, microseconds=timevalue.microsecond)
 
 def _parse_duration_element(durationstr, elementstr):
     #Extracts the specified portion of a duration, for instance, given:
