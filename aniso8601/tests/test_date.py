@@ -6,6 +6,7 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
+import datetime
 import unittest
 
 from aniso8601.date import parse_date, _parse_year, _parse_calendar_day, _parse_calendar_month, _parse_week_day, _parse_week, _parse_ordinal_date, get_date_resolution
@@ -36,85 +37,58 @@ class TestDateResolutionFunctions(unittest.TestCase):
 class TestDateParserFunctions(unittest.TestCase):
     def test_parse_date(self):
         date = parse_date('2013')
-        self.assertEqual(date.year, 2013)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 1)
+        self.assertEqual(date, datetime.date(2013, 1, 1))
 
         date = parse_date('0001')
-        self.assertEqual(date.year, 1)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 1)
+        self.assertEqual(date, datetime.date(1, 1, 1))
 
         date = parse_date('19')
-        self.assertEqual(date.year, 1900)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 1)
+        self.assertEqual(date, datetime.date(1900, 1, 1))
 
         date = parse_date('1981-04-05')
-        self.assertEqual(date.year, 1981)
-        self.assertEqual(date.month, 4)
-        self.assertEqual(date.day, 5)
+        self.assertEqual(date, datetime.date(1981, 4, 5))
 
         date = parse_date('19810405')
-        self.assertEqual(date.year, 1981)
-        self.assertEqual(date.month, 4)
-        self.assertEqual(date.day, 5)
+        self.assertEqual(date, datetime.date(1981, 4, 5))
 
         date = parse_date('1981-04')
-        self.assertEqual(date.year, 1981)
-        self.assertEqual(date.month, 4)
-        self.assertEqual(date.day, 1)
+        self.assertEqual(date, datetime.date(1981, 4, 1))
 
         date = parse_date('2004-W53')
-        self.assertEqual(date.year, 2004)
-        self.assertEqual(date.month, 12)
+        self.assertEqual(date, datetime.date(2004, 12, 27))
         self.assertEqual(date.weekday(), 0)
 
         date = parse_date('2009-W01')
-        self.assertEqual(date.year, 2008)
-        self.assertEqual(date.month, 12)
+        self.assertEqual(date, datetime.date(2008, 12, 29))
         self.assertEqual(date.weekday(), 0)
 
         date = parse_date('2004-W53-6')
-        self.assertEqual(date.year, 2005)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 1)
+        self.assertEqual(date, datetime.date(2005, 1, 1))
+        self.assertEqual(date.weekday(), 5)
 
         date = parse_date('2004W53')
-        self.assertEqual(date.year, 2004)
-        self.assertEqual(date.month, 12)
+        self.assertEqual(date, datetime.date(2004, 12, 27))
         self.assertEqual(date.weekday(), 0)
 
         date = parse_date('2004W536')
-        self.assertEqual(date.year, 2005)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 1)
+        self.assertEqual(date, datetime.date(2005, 1, 1))
+        self.assertEqual(date.weekday(), 5)
 
         date = parse_date('1981-095')
-        self.assertEqual(date.year, 1981)
-        self.assertEqual(date.month, 4)
-        self.assertEqual(date.day, 5)
+        self.assertEqual(date, datetime.date(1981, 4, 5))
 
         date = parse_date('1981095')
-        self.assertEqual(date.year, 1981)
-        self.assertEqual(date.month, 4)
-        self.assertEqual(date.day, 5)
+        self.assertEqual(date, datetime.date(1981, 4, 5))
 
     def test_parse_year(self):
         date = _parse_year('2013')
-        self.assertEqual(date.year, 2013)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 1)
+        self.assertEqual(date, datetime.date(2013, 1, 1))
 
         date = _parse_year('0001')
-        self.assertEqual(date.year, 1)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 1)
+        self.assertEqual(date, datetime.date(1, 1, 1))
 
         date = _parse_year('19')
-        self.assertEqual(date.year, 1900)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 1)
+        self.assertEqual(date, datetime.date(1900, 1, 1))
 
     def test_parse_year_zero(self):
         #0 isn't a valid year
@@ -123,20 +97,14 @@ class TestDateParserFunctions(unittest.TestCase):
 
     def test_parse_calendar_day(self):
         date = _parse_calendar_day('1981-04-05')
-        self.assertEqual(date.year, 1981)
-        self.assertEqual(date.month, 4)
-        self.assertEqual(date.day, 5)
+        self.assertEqual(date, datetime.date(1981, 4, 5))
 
         date = _parse_calendar_day('19810405')
-        self.assertEqual(date.year, 1981)
-        self.assertEqual(date.month, 4)
-        self.assertEqual(date.day, 5)
+        self.assertEqual(date, datetime.date(1981, 4, 5))
 
     def test_parse_calendar_month(self):
         date = _parse_calendar_month('1981-04')
-        self.assertEqual(date.year, 1981)
-        self.assertEqual(date.month, 4)
-        self.assertEqual(date.day, 1)
+        self.assertEqual(date, datetime.date(1981, 4, 1))
 
     def test_parse_calendar_month_nohyphen(self):
         #Hyphen is required
@@ -145,106 +113,82 @@ class TestDateParserFunctions(unittest.TestCase):
 
     def test_parse_week_day(self):
         date = _parse_week_day('2004-W53-6')
-        self.assertEqual(date.year, 2005)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 1)
+        self.assertEqual(date, datetime.date(2005, 1, 1))
+        self.assertEqual(date.weekday(), 5)
 
         date = _parse_week_day('2009-W01-1')
-        self.assertEqual(date.year, 2008)
-        self.assertEqual(date.month, 12)
-        self.assertEqual(date.day, 29)
+        self.assertEqual(date, datetime.date(2008, 12, 29))
+        self.assertEqual(date.weekday(), 0)
 
         date = _parse_week_day('2009-W53-7')
-        self.assertEqual(date.year, 2010)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 3)
+        self.assertEqual(date, datetime.date(2010, 1, 3))
+        self.assertEqual(date.weekday(), 6)
 
         date = _parse_week_day('2010-W01-1')
-        self.assertEqual(date.year, 2010)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 4)
+        self.assertEqual(date, datetime.date(2010, 1, 4))
+        self.assertEqual(date.weekday(), 0)
 
         date = _parse_week_day('2004W536')
-        self.assertEqual(date.year, 2005)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 1)
+        self.assertEqual(date, datetime.date(2005, 1, 1))
+        self.assertEqual(date.weekday(), 5)
 
         date = _parse_week_day('2009W011')
-        self.assertEqual(date.year, 2008)
-        self.assertEqual(date.month, 12)
-        self.assertEqual(date.day, 29)
+        self.assertEqual(date, datetime.date(2008, 12, 29))
+        self.assertEqual(date.weekday(), 0)
 
         date = _parse_week_day('2009W537')
-        self.assertEqual(date.year, 2010)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 3)
+        self.assertEqual(date, datetime.date(2010, 1, 3))
+        self.assertEqual(date.weekday(), 6)
 
         date = _parse_week_day('2010W011')
-        self.assertEqual(date.year, 2010)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 4)
+        self.assertEqual(date, datetime.date(2010, 1, 4))
+        self.assertEqual(date.weekday(), 0)
 
     def test_parse_week(self):
         date = _parse_week('2004-W53')
-        self.assertEqual(date.year, 2004)
-        self.assertEqual(date.month, 12)
+        self.assertEqual(date, datetime.date(2004, 12, 27))
         self.assertEqual(date.weekday(), 0)
 
         date = _parse_week('2009-W01')
-        self.assertEqual(date.year, 2008)
-        self.assertEqual(date.month, 12)
+        self.assertEqual(date, datetime.date(2008, 12, 29))
         self.assertEqual(date.weekday(), 0)
 
         date = _parse_week('2009-W53')
-        self.assertEqual(date.year, 2009)
-        self.assertEqual(date.month, 12)
+        self.assertEqual(date, datetime.date(2009, 12, 28))
         self.assertEqual(date.weekday(), 0)
 
         date = _parse_week('2010-W01')
-        self.assertEqual(date.year, 2010)
-        self.assertEqual(date.month, 1)
+        self.assertEqual(date, datetime.date(2010, 1, 4))
         self.assertEqual(date.weekday(), 0)
 
         date = _parse_week('2004W53')
-        self.assertEqual(date.year, 2004)
-        self.assertEqual(date.month, 12)
+        self.assertEqual(date, datetime.date(2004, 12, 27))
         self.assertEqual(date.weekday(), 0)
 
         date = _parse_week('2009W01')
-        self.assertEqual(date.year, 2008)
-        self.assertEqual(date.month, 12)
+        self.assertEqual(date, datetime.date(2008, 12, 29))
         self.assertEqual(date.weekday(), 0)
 
         date = _parse_week('2009W53')
-        self.assertEqual(date.year, 2009)
-        self.assertEqual(date.month, 12)
+        self.assertEqual(date, datetime.date(2009, 12, 28))
         self.assertEqual(date.weekday(), 0)
 
         date = _parse_week('2010W01')
-        self.assertEqual(date.year, 2010)
-        self.assertEqual(date.month, 1)
+        self.assertEqual(date, datetime.date(2010, 1, 4))
         self.assertEqual(date.weekday(), 0)
 
     def test_parse_ordinal_date(self):
         date = _parse_ordinal_date('1981-095')
-        self.assertEqual(date.year, 1981)
-        self.assertEqual(date.month, 4)
-        self.assertEqual(date.day, 5)
+        self.assertEqual(date, datetime.date(1981, 4, 5))
 
         date = _parse_ordinal_date('1981095')
-        self.assertEqual(date.year, 1981)
-        self.assertEqual(date.month, 4)
-        self.assertEqual(date.day, 5)
+        self.assertEqual(date, datetime.date(1981, 4, 5))
 
         date = _parse_ordinal_date('1981365')
-        self.assertEqual(date.year, 1981)
-        self.assertEqual(date.month, 12)
-        self.assertEqual(date.day, 31)
+        self.assertEqual(date, datetime.date(1981, 12, 31))
 
         date = _parse_ordinal_date('1980366')
-        self.assertEqual(date.year, 1980)
-        self.assertEqual(date.month, 12)
-        self.assertEqual(date.day, 31)
+        self.assertEqual(date, datetime.date(1980, 12, 31))
 
     def test_parse_ordinal_date_zero(self):
         #0 isn't a valid day of year
