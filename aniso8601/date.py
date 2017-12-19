@@ -168,24 +168,16 @@ def _parse_week_day(datestr):
     if isoweeknumber == 0:
         raise ValueError('00 is not a valid ISO 8601 weeknumber.')
 
-    datestrlen = len(datestr)
-
-    if datestr.find('-') != -1:
-        if datestrlen == 10:
-            #YYYY-Www-D
-            isoday = int(datestr[9:10])
-
-            return gregorianyearstart + datetime.timedelta(weeks=isoweeknumber - 1, days=isoday - 1)
-        else:
-            raise ValueError('String is not a valid ISO 8601 week date.')
+    if datestr.find('-') != -1 and len(datestr) == 10:
+        #YYYY-Www-D
+        isoday = int(datestr[9:10])
+    elif len(datestr) == 8:
+         #YYYYWwwD
+        isoday = int(datestr[7:8])
     else:
-        if datestrlen == 8:
-            #YYYYWwwD
-            isoday = int(datestr[7:8])
+        raise ValueError('String is not a valid ISO 8601 week date.')
 
-            return gregorianyearstart + datetime.timedelta(weeks=isoweeknumber - 1, days=isoday - 1)
-        else:
-            raise ValueError('String is not a valid ISO 8601 week date.')
+    return gregorianyearstart + datetime.timedelta(weeks=isoweeknumber - 1, days=isoday - 1)
 
 def _parse_week(datestr):
     #datestr is of the format YYYY-Www, YYYYWww
