@@ -121,12 +121,10 @@ def _parse_year(yearstr):
 
 def _parse_calendar_day(datestr):
     #datestr is of the format YYYY-MM-DD or YYYYMMDD
-    datestrlen = len(datestr)
-
-    if datestrlen == 10:
+    if len(datestr) == 10:
         #YYYY-MM-DD
         strformat = '%Y-%m-%d'
-    elif datestrlen == 8:
+    elif len(datestr) == 8:
         #YYYYMMDD
         strformat = '%Y%m%d'
     else:
@@ -139,9 +137,7 @@ def _parse_calendar_day(datestr):
 
 def _parse_calendar_month(datestr):
     #datestr is of the format YYYY-MM
-    datestrlen = len(datestr)
-
-    if datestrlen != 7:
+    if len(datestr) != 7:
         raise ValueError('String is not a valid ISO 8601 calendar month.')
 
     parseddatetime = datetime.datetime.strptime(datestr, '%Y-%m')
