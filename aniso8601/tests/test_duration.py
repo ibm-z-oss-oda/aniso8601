@@ -6,98 +6,79 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
+import datetime
 import unittest
+import dateutil
 
 from aniso8601.duration import parse_duration, _parse_duration_prescribed, _parse_duration_combined, _parse_duration_element, _has_any_component, _component_order_correct
 
 class TestDurationParserFunctions(unittest.TestCase):
     def test_parse_duration(self):
         resultduration = parse_duration('P1Y2M3DT4H54M6S')
-        self.assertEqual(resultduration.days, 428)
-        self.assertEqual(resultduration.seconds, 17646)
+        self.assertEqual(resultduration, datetime.timedelta(days=428, seconds=17646))
 
         resultduration = parse_duration('P1Y2M3DT4H54M6.5S')
-        self.assertEqual(resultduration.days, 428)
-        self.assertEqual(resultduration.seconds, 17646)
-        self.assertEqual(resultduration.microseconds, 500000)
+        self.assertEqual(resultduration, datetime.timedelta(days=428, seconds=17646.5))
 
         resultduration = parse_duration('P1Y2M3DT4H54M6,5S')
-        self.assertEqual(resultduration.days, 428)
-        self.assertEqual(resultduration.seconds, 17646)
-        self.assertEqual(resultduration.microseconds, 500000)
+        self.assertEqual(resultduration, datetime.timedelta(days=428, seconds=17646.5))
 
         resultduration = parse_duration('P1Y2M3D')
-        self.assertEqual(resultduration.days, 428)
+        self.assertEqual(resultduration, datetime.timedelta(days=428))
 
         resultduration = parse_duration('P1Y2M3.5D')
-        self.assertEqual(resultduration.days, 428)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=428.5))
 
         resultduration = parse_duration('P1Y2M3,5D')
-        self.assertEqual(resultduration.days, 428)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=428.5))
 
         resultduration = parse_duration('PT4H54M6.5S')
-        self.assertEqual(resultduration.days, 0)
-        self.assertEqual(resultduration.seconds, 17646)
-        self.assertEqual(resultduration.microseconds, 500000)
+        self.assertEqual(resultduration, datetime.timedelta(hours=4, minutes=54, seconds=6.5))
 
         resultduration = parse_duration('PT4H54M6,5S')
-        self.assertEqual(resultduration.days, 0)
-        self.assertEqual(resultduration.seconds, 17646)
-        self.assertEqual(resultduration.microseconds, 500000)
+        self.assertEqual(resultduration, datetime.timedelta(hours=4, minutes=54, seconds=6.5))
 
         resultduration = parse_duration('P1Y')
-        self.assertEqual(resultduration.days, 365)
+        self.assertEqual(resultduration, datetime.timedelta(days=365))
 
         resultduration = parse_duration('P1.5Y')
-        self.assertEqual(resultduration.days, 547)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=547.5))
 
         resultduration = parse_duration('P1,5Y')
-        self.assertEqual(resultduration.days, 547)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=547.5))
 
         resultduration = parse_duration('P1M')
-        self.assertEqual(resultduration.days, 30)
+        self.assertEqual(resultduration, datetime.timedelta(days=30))
 
         resultduration = parse_duration('P1.5M')
-        self.assertEqual(resultduration.days, 45)
+        self.assertEqual(resultduration, datetime.timedelta(days=45))
 
         resultduration = parse_duration('P1,5M')
-        self.assertEqual(resultduration.days, 45)
+        self.assertEqual(resultduration, datetime.timedelta(days=45))
 
         resultduration = parse_duration('P1W')
-        self.assertEqual(resultduration.days, 7)
+        self.assertEqual(resultduration, datetime.timedelta(days=7))
 
         resultduration = parse_duration('P1.5W')
-        self.assertEqual(resultduration.days, 10)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=10.5))
 
         resultduration = parse_duration('P1,5W')
-        self.assertEqual(resultduration.days, 10)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=10.5))
 
         resultduration = parse_duration('P1D')
-        self.assertEqual(resultduration.days, 1)
+        self.assertEqual(resultduration, datetime.timedelta(days=1))
 
         resultduration = parse_duration('P1.5D')
-        self.assertEqual(resultduration.days, 1)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=1.5))
 
         resultduration = parse_duration('P1,5D')
-        self.assertEqual(resultduration.days, 1)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=1.5))
 
         resultduration = parse_duration('P0003-06-04T12:30:05')
-        self.assertEqual(resultduration.days, 1279)
-        self.assertEqual(resultduration.seconds, 45005)
-        self.assertEqual(resultduration.microseconds, 0)
+        self.assertEqual(resultduration, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5))
 
         resultduration = parse_duration('P0003-06-04T12:30:05.5')
-        self.assertEqual(resultduration.days, 1279)
-        self.assertEqual(resultduration.seconds, 45005)
-        self.assertEqual(resultduration.microseconds, 500000)
+        self.assertEqual(resultduration, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5.5))
 
         #Verify overflows
         self.assertEqual(parse_duration('PT36H'), parse_duration('P1DT12H'))
@@ -155,81 +136,64 @@ class TestDurationParserFunctions(unittest.TestCase):
 
     def test_parse_duration_prescribed(self):
         resultduration = _parse_duration_prescribed('P1Y2M3DT4H54M6S', False)
-        self.assertEqual(resultduration.days, 428)
-        self.assertEqual(resultduration.seconds, 17646)
+        self.assertEqual(resultduration, datetime.timedelta(days=428, hours=4, minutes=54, seconds=6))
 
         resultduration = _parse_duration_prescribed('P1Y2M3DT4H54M6.5S', False)
-        self.assertEqual(resultduration.days, 428)
-        self.assertEqual(resultduration.seconds, 17646)
-        self.assertEqual(resultduration.microseconds, 500000)
+        self.assertEqual(resultduration, datetime.timedelta(days=428, hours=4, minutes=54, seconds=6.5))
 
         resultduration = _parse_duration_prescribed('P1Y2M3DT4H54M6,5S', False)
-        self.assertEqual(resultduration.days, 428)
-        self.assertEqual(resultduration.seconds, 17646)
-        self.assertEqual(resultduration.microseconds, 500000)
+        self.assertEqual(resultduration, datetime.timedelta(days=428, hours=4, minutes=54, seconds=6.5))
 
         resultduration = _parse_duration_prescribed('P1Y2M3D', False)
-        self.assertEqual(resultduration.days, 428)
+        self.assertEqual(resultduration, datetime.timedelta(days=428))
 
         resultduration = _parse_duration_prescribed('P1Y2M3.5D', False)
-        self.assertEqual(resultduration.days, 428)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=428.5))
 
         resultduration = _parse_duration_prescribed('P1Y2M3,5D', False)
-        self.assertEqual(resultduration.days, 428)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=428.5))
 
         resultduration = _parse_duration_prescribed('PT4H54M6.5S', False)
-        self.assertEqual(resultduration.days, 0)
-        self.assertEqual(resultduration.seconds, 17646)
-        self.assertEqual(resultduration.microseconds, 500000)
+        self.assertEqual(resultduration, datetime.timedelta(hours=4, minutes=54, seconds=6.5))
 
         resultduration = _parse_duration_prescribed('PT4H54M6,5S', False)
-        self.assertEqual(resultduration.days, 0)
-        self.assertEqual(resultduration.seconds, 17646)
-        self.assertEqual(resultduration.microseconds, 500000)
+        self.assertEqual(resultduration, datetime.timedelta(hours=4, minutes=54, seconds=6.5))
 
         resultduration = _parse_duration_prescribed('P1Y', False)
-        self.assertEqual(resultduration.days, 365)
+        self.assertEqual(resultduration, datetime.timedelta(days=365))
 
         resultduration = _parse_duration_prescribed('P1.5Y', False)
-        self.assertEqual(resultduration.days, 547)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=547.5))
 
         resultduration = _parse_duration_prescribed('P1,5Y', False)
-        self.assertEqual(resultduration.days, 547)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=547.5))
 
         resultduration = _parse_duration_prescribed('P1M', False)
-        self.assertEqual(resultduration.days, 30)
+        self.assertEqual(resultduration, datetime.timedelta(days=30))
 
         resultduration = _parse_duration_prescribed('P1.5M', False)
-        self.assertEqual(resultduration.days, 45)
+        self.assertEqual(resultduration, datetime.timedelta(days=45))
 
         resultduration = _parse_duration_prescribed('P1,5M', False)
-        self.assertEqual(resultduration.days, 45)
+        self.assertEqual(resultduration, datetime.timedelta(days=45))
 
         resultduration = _parse_duration_prescribed('P1W', False)
-        self.assertEqual(resultduration.days, 7)
+        self.assertEqual(resultduration, datetime.timedelta(days=7))
 
         resultduration = _parse_duration_prescribed('P1.5W', False)
-        self.assertEqual(resultduration.days, 10)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=10.5))
 
         resultduration = _parse_duration_prescribed('P1,5W', False)
-        self.assertEqual(resultduration.days, 10)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=10.5))
 
         resultduration = _parse_duration_prescribed('P1D', False)
-        self.assertEqual(resultduration.days, 1)
+        self.assertEqual(resultduration, datetime.timedelta(days=1))
 
         resultduration = _parse_duration_prescribed('P1.5D', False)
-        self.assertEqual(resultduration.days, 1)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=1.5))
 
         resultduration = _parse_duration_prescribed('P1,5D', False)
-        self.assertEqual(resultduration.days, 1)
-        self.assertEqual(resultduration.seconds, 43200)
+        self.assertEqual(resultduration, datetime.timedelta(days=1.5))
 
         #Verify overflows
         self.assertEqual(parse_duration('PT36H'), parse_duration('P1DT12H'))
@@ -283,14 +247,10 @@ class TestDurationParserFunctions(unittest.TestCase):
 
     def test_parse_duration_combined(self):
         resultduration = _parse_duration_combined('P0003-06-04T12:30:05', False)
-        self.assertEqual(resultduration.days, 1279)
-        self.assertEqual(resultduration.seconds, 45005)
-        self.assertEqual(resultduration.microseconds, 0)
+        self.assertEqual(resultduration, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5))
 
         resultduration = _parse_duration_combined('P0003-06-04T12:30:05.5', False)
-        self.assertEqual(resultduration.days, 1279)
-        self.assertEqual(resultduration.seconds, 45005)
-        self.assertEqual(resultduration.microseconds, 500000)
+        self.assertEqual(resultduration, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5.5))
 
     def test_parse_duration_combined_suffixgarbage(self):
         #Don't allow garbage after the duration
@@ -322,36 +282,25 @@ class TestDurationParserFunctions(unittest.TestCase):
 class TestRelativeDurationParserFunctions(unittest.TestCase):
     def test_parse_duration_relative(self):
         resultduration = parse_duration('P1Y2M3DT4H54M6.5S', relative=True)
-        self.assertEqual(resultduration.years, 1)
-        self.assertEqual(resultduration.months, 2)
-        self.assertEqual(resultduration.days, 3)
-        self.assertEqual(resultduration.hours, 4)
-        self.assertEqual(resultduration.minutes, 54)
-        self.assertEqual(resultduration.seconds, 6.5)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6.5))
 
         resultduration = parse_duration('P0003-06-04T12:30:05.5', relative=True)
-        self.assertEqual(resultduration.years, 3)
-        self.assertEqual(resultduration.months, 6)
-        self.assertEqual(resultduration.days, 4)
-        self.assertEqual(resultduration.hours, 12)
-        self.assertEqual(resultduration.minutes, 30)
-        self.assertEqual(resultduration.seconds, 5)
-        self.assertEqual(resultduration.microseconds, 500000)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=3, months=6, days=4, hours=12, minutes=30, seconds=5, microseconds=500000))
 
     def test_parse_duration_prescribed_relative(self):
         resultduration = _parse_duration_prescribed('P1Y', True)
-        self.assertEqual(resultduration.years, 1)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1))
 
         resultduration = _parse_duration_prescribed('P1M', True)
-        self.assertEqual(resultduration.months, 1)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(months=1))
 
         #Add the relative ‘days’ argument to the absolute day. Notice that the ‘weeks’ argument is multiplied by 7 and added to ‘days’.
         #http://dateutil.readthedocs.org/en/latest/relativedelta.html
         resultduration = _parse_duration_prescribed('P1W', True)
-        self.assertEqual(resultduration.days, 7)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=7))
 
         resultduration = _parse_duration_prescribed('P1.5W', True)
-        self.assertEqual(resultduration.days, 10.5) #Fractional weeks are allowed
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=10.5))
 
     def test_parse_duration_prescribed_relative_multiplefractions(self):
         with self.assertRaises(ValueError):
@@ -428,21 +377,10 @@ class TestRelativeDurationParserFunctions(unittest.TestCase):
 
     def test_parse_duration_combined_relative(self):
         resultduration = _parse_duration_combined('P0003-06-04T12:30:05', True)
-        self.assertEqual(resultduration.years, 3)
-        self.assertEqual(resultduration.months, 6)
-        self.assertEqual(resultduration.days, 4)
-        self.assertEqual(resultduration.hours, 12)
-        self.assertEqual(resultduration.minutes, 30)
-        self.assertEqual(resultduration.seconds, 5)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=3, months=6, days=4, hours=12, minutes=30, seconds=5))
 
         resultduration = _parse_duration_combined('P0003-06-04T12:30:05.5', True)
-        self.assertEqual(resultduration.years, 3)
-        self.assertEqual(resultduration.months, 6)
-        self.assertEqual(resultduration.days, 4)
-        self.assertEqual(resultduration.hours, 12)
-        self.assertEqual(resultduration.minutes, 30)
-        self.assertEqual(resultduration.seconds, 5)
-        self.assertEqual(resultduration.microseconds, 500000)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=3, months=6, days=4, hours=12, minutes=30, seconds=5, microseconds=500000))
 
     def test_parse_duration_combined_relative_suffixgarbage(self):
         #Don't allow garbage after the duration
