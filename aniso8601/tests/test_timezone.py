@@ -95,7 +95,7 @@ class TestTimezoneParserFunctions(unittest.TestCase):
 
     def test_pickle(self):
         #Make sure timezone objects are pickleable
-        testutcoffset = UTCOffset(name='UTC', utcdelta=datetime.timedelta(0))
+        testutcoffset = UTCOffset(name='UTC', minutes=0)
 
         utcoffsetpickle = pickle.dumps(testutcoffset)
 

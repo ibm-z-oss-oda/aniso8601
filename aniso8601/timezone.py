@@ -10,51 +10,39 @@ import datetime
 
 def parse_timezone(tzstr):
     #tzstr can be ±hh:mm, ±hhmm, ±hh, the Z case is handled elsewhere
-
-    tzstrlen = len(tzstr)
-
-    if tzstrlen == 6:
+    if len(tzstr) == 6:
         #±hh:mm
         tzhour = int(tzstr[1:3])
         tzminute = int(tzstr[4:6])
-
-        if tzstr[0] == '+':
-            return UTCOffset(name=tzstr, utcdelta=datetime.timedelta(hours=tzhour, minutes=tzminute))
-        elif tzhour == 0 and tzminute == 0:
-            raise ValueError('Negative ISO 8601 time offset cannot be 0.')
-
-        return UTCOffset(name=tzstr, utcdelta=-datetime.timedelta(hours=tzhour, minutes=tzminute))
-    elif tzstrlen == 5:
+    elif len(tzstr) == 5:
         #±hhmm
         tzhour = int(tzstr[1:3])
         tzminute = int(tzstr[3:5])
-
-        if tzstr[0] == '+':
-            return UTCOffset(name=tzstr, utcdelta=datetime.timedelta(hours=tzhour, minutes=tzminute))
-        elif tzhour == 0 and tzminute == 0:
-            raise ValueError('Negative ISO 8601 time offset cannot be 0.')
-
-        return UTCOffset(name=tzstr, utcdelta=-datetime.timedelta(hours=tzhour, minutes=tzminute))
-    elif tzstrlen == 3:
+    elif len(tzstr) == 3:
         #±hh
         tzhour = int(tzstr[1:3])
+        tzminute = 0
+    else:
+        raise ValueError('String is not a valid ISO 8601 time offset.')
 
-        if tzstr[0] == '+':
-            return UTCOffset(name=tzstr, utcdelta=datetime.timedelta(hours=tzhour))
-        elif tzhour == 0:
-            raise ValueError('Negative ISO 8601 time offset cannot be 0.')
+    if tzstr[0] == '+':
+        return UTCOffset(name=tzstr, minutes=(tzhour * 60 + tzminute))
+    elif tzhour == 0 and tzminute == 0:
+        raise ValueError('Negative ISO 8601 time offset cannot be 0.')
 
-        return UTCOffset(name=tzstr, utcdelta=-datetime.timedelta(hours=tzhour))
-
-    raise ValueError('String is not a valid ISO 8601 time offset.')
+    return UTCOffset(name=tzstr, minutes=-(tzhour * 60 + tzminute))
 
 class UTCOffset(datetime.tzinfo):
-    def __init__(self, name=None, utcdelta=None):
+    def __init__(self, name=None, minutes=None):
         #We build an offset in this manner since the
         #tzinfo class must have an init that can
         #"method that can be called with no arguments"
         self._name = name
-        self._utcdelta = utcdelta
+
+        if minutes is not None:
+            self._utcdelta = datetime.timedelta(minutes=minutes)
+        else:
+            self._utcdelta = None
 
     def __repr__(self):
         if self._utcdelta >= datetime.timedelta(hours=0):
