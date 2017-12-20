@@ -14,6 +14,10 @@ from aniso8601.timezone import parse_timezone, UTCOffset
 
 class TestTimezoneParserFunctions(unittest.TestCase):
     def test_parse_timezone(self):
+        tzinfoobject = parse_timezone('Z')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
+        self.assertEqual(tzinfoobject.tzname(None), 'UTC')
+
         tzinfoobject = parse_timezone('+00:00')
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), '+00:00')
@@ -81,6 +85,19 @@ class TestTimezoneParserFunctions(unittest.TestCase):
         tzinfoobject = parse_timezone('-12')
         self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=12))
         self.assertEqual(tzinfoobject.tzname(None), '-12')
+
+    def test_parse_timezone_tzstr(self):
+        with self.assertRaises(ValueError):
+            parse_timezone('Y')
+
+        with self.assertRaises(ValueError):
+            parse_timezone(' Z')
+
+        with self.assertRaises(ValueError):
+            parse_timezone('Z ')
+
+        with self.assertRaises(ValueError):
+            parse_timezone(' Z ')
 
     def test_parse_timezone_negativezero(self):
         #A 0 offset cannot be negative
