@@ -404,135 +404,135 @@ class TestTimeParserFunctions(unittest.TestCase):
             _parse_time_naive('00:61+00:00')
 
     def test_parse_hour(self):
-        time = _parse_hour('01')
+        time = _parse_hour('01', None)
         self.assertEqual(time, datetime.time(hour=1))
 
-        time = _parse_hour('24')
+        time = _parse_hour('24', None)
         self.assertEqual(time, datetime.time(hour=0))
 
-        time = _parse_hour('01.4567')
+        time = _parse_hour('01.4567', None)
         self.assertEqual(time, datetime.time(hour=1, minute=27, second=24, microsecond=120000))
 
-        time = _parse_hour('12.5')
+        time = _parse_hour('12.5', None)
         self.assertEqual(time, datetime.time(hour=12, minute=30))
 
     def test_parse_hour_bounds(self):
         #Hour cannot be larger than 24
         with self.assertRaises(HoursOutOfBoundsError):
-            _parse_hour('24.1')
+            _parse_hour('24.1', None)
 
     def test_parse_minute_time(self):
-        time = _parse_minute_time('01:23')
+        time = _parse_minute_time('01:23', None)
         self.assertEqual(time, datetime.time(hour=1, minute=23))
 
-        time = _parse_minute_time('24:00')
+        time = _parse_minute_time('24:00', None)
         self.assertEqual(time, datetime.time(hour=0))
 
-        time = _parse_minute_time('01:23.4567')
+        time = _parse_minute_time('01:23.4567', None)
         self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
 
-        time = _parse_minute_time('0123')
+        time = _parse_minute_time('0123', None)
         self.assertEqual(time, datetime.time(hour=1, minute=23))
 
-        time = _parse_minute_time('2400')
+        time = _parse_minute_time('2400', None)
         self.assertEqual(time, datetime.time(hour=0))
 
-        time = _parse_minute_time('0123.4567')
+        time = _parse_minute_time('0123.4567', None)
         self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
 
     def test_parse_minute_time_overflow(self):
         with self.assertRaises(MinutesOutOfBoundsError):
-            _parse_minute_time('0060')
+            _parse_minute_time('0060', None)
 
         with self.assertRaises(MinutesOutOfBoundsError):
-            _parse_minute_time('0060.1')
+            _parse_minute_time('0060.1', None)
 
         with self.assertRaises(MinutesOutOfBoundsError):
-            _parse_minute_time('00:60')
+            _parse_minute_time('00:60', None)
 
         with self.assertRaises(MinutesOutOfBoundsError):
-            _parse_minute_time('00:60.1')
+            _parse_minute_time('00:60.1', None)
 
         #Hour 24 can only represent midnight
         with self.assertRaises(MidnightBoundsError):
-            _parse_minute_time('2401')
+            _parse_minute_time('2401', None)
 
         with self.assertRaises(MidnightBoundsError):
-            _parse_minute_time('2400.1')
+            _parse_minute_time('2400.1', None)
 
         with self.assertRaises(MidnightBoundsError):
-            _parse_minute_time('24:01')
+            _parse_minute_time('24:01', None)
 
         with self.assertRaises(MidnightBoundsError):
-            _parse_minute_time('24:00.1')
+            _parse_minute_time('24:00.1', None)
 
     def test_parse_second_time(self):
-        time = _parse_second_time('01:23:45')
+        time = _parse_second_time('01:23:45', None)
         self.assertEqual(time, datetime.time(hour=1, minute=23, second=45))
 
-        time = _parse_second_time('24:00:00')
+        time = _parse_second_time('24:00:00', None)
         self.assertEqual(time, datetime.time(hour=0))
 
-        time = _parse_second_time('23:21:28.512400')
+        time = _parse_second_time('23:21:28.512400', None)
         self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
 
-        time = _parse_second_time('14:43:59.9999997')
+        time = _parse_second_time('14:43:59.9999997', None)
         self.assertEqual(time, datetime.time(hour=14, minute=43, second=59, microsecond=999999))
 
-        time = _parse_second_time('012345')
+        time = _parse_second_time('012345', None)
         self.assertEqual(time, datetime.time(hour=1, minute=23, second=45))
 
-        time = _parse_second_time('240000')
+        time = _parse_second_time('240000', None)
         self.assertEqual(time, datetime.time(hour=0))
 
-        time = _parse_second_time('232128.512400')
+        time = _parse_second_time('232128.512400', None)
         self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
 
-        time = _parse_second_time('144359.9999997')
+        time = _parse_second_time('144359.9999997', None)
         self.assertEqual(time, datetime.time(hour=14, minute=43, second=59, microsecond=999999))
 
     def test_parse_second_time_bounds(self):
         #Leap seconds not supported
         with self.assertRaises(LeapSecondError):
-            _parse_second_time('235960')
+            _parse_second_time('235960', None)
 
         with self.assertRaises(LeapSecondError):
-            _parse_second_time('23:59:60')
+            _parse_second_time('23:59:60', None)
 
     def test_parse_second_time_overflow(self):
         #Seconds must be less than 60
         #Leap seconds not supported
         with self.assertRaises(SecondsOutOfBoundsError):
-            _parse_second_time('000060')
+            _parse_second_time('000060', None)
 
         with self.assertRaises(SecondsOutOfBoundsError):
-            _parse_second_time('00:00:60')
+            _parse_second_time('00:00:60', None)
 
         with self.assertRaises(SecondsOutOfBoundsError):
-            _parse_second_time('000061')
+            _parse_second_time('000061', None)
 
         with self.assertRaises(SecondsOutOfBoundsError):
-            _parse_second_time('00:00:61')
+            _parse_second_time('00:00:61', None)
 
         #Minutes must be less than 60
         with self.assertRaises(MinutesOutOfBoundsError):
-            _parse_second_time('006000')
+            _parse_second_time('006000', None)
 
         with self.assertRaises(MinutesOutOfBoundsError):
-            _parse_second_time('00:60:00')
+            _parse_second_time('00:60:00', None)
 
         #Hour 24 can only represent midnight
         with self.assertRaises(MidnightBoundsError):
-            _parse_second_time('240001')
+            _parse_second_time('240001', None)
 
         with self.assertRaises(MidnightBoundsError):
-            _parse_second_time('24:00:01')
+            _parse_second_time('24:00:01', None)
 
         with self.assertRaises(MidnightBoundsError):
-            _parse_second_time('240100')
+            _parse_second_time('240100', None)
 
         with self.assertRaises(MidnightBoundsError):
-            _parse_second_time('24:01:00')
+            _parse_second_time('24:01:00', None)
 
     def test_split_tz(self):
         self.assertEqual(_split_tz('01:23:45'), ('01:23:45', None))
