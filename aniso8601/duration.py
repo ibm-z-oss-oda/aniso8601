@@ -31,6 +31,10 @@ def parse_duration(isodurationstr, relative=False):
 
 def _parse_duration_prescribed(durationstr, relative):
     #durationstr can be of the form PnYnMnDTnHnMnS or PnW
+    builder = PythonTimeBuilder
+
+    if relative is True:
+        builder = RelativeTimeBuilder
 
     #Make sure the end character is valid
     #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
@@ -63,10 +67,7 @@ def _parse_duration_prescribed(durationstr, relative):
     else:
         years, months, weeks, days, hours, minutes, seconds = _parse_duration_prescribed_time(durationstr)
 
-    if relative is True:
-        return RelativeTimeBuilder.build_timedelta(years=years, months=months, weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
-
-    return PythonTimeBuilder.build_timedelta(years=years, months=months, weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
+    return builder.build_timedelta(years=years, months=months, weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
 
 def _parse_duration_prescribed_notime(durationstr):
     #durationstr can be of the form PnYnMnD or PnW
@@ -164,6 +165,10 @@ def _parse_duration_prescribed_time(durationstr):
 
 def _parse_duration_combined(durationstr, relative):
     #Period of the form P<date>T<time>
+    builder = PythonTimeBuilder
+
+    if relative is True:
+        builder = RelativeTimeBuilder
 
     #Split the string in to its component parts
     datepart, timepart = durationstr[1:].split('T') #We skip the 'P'
@@ -171,10 +176,7 @@ def _parse_duration_combined(durationstr, relative):
     datevalue = parse_date(datepart)
     timevalue = parse_time(timepart)
 
-    if relative is True:
-        return RelativeTimeBuilder.build_timedelta(years=datevalue.year, months=datevalue.month, days=datevalue.day, hours=timevalue.hour, minutes=timevalue.minute, seconds=timevalue.second, microseconds=timevalue.microsecond)
-
-    return PythonTimeBuilder.build_timedelta(years=datevalue.year, months=datevalue.month, days=datevalue.day, hours=timevalue.hour, minutes=timevalue.minute, seconds=timevalue.second, microseconds=timevalue.microsecond)
+    return builder.build_timedelta(years=datevalue.year, months=datevalue.month, days=datevalue.day, hours=timevalue.hour, minutes=timevalue.minute, seconds=timevalue.second, microseconds=timevalue.microsecond)
 
 def _parse_duration_element(durationstr, elementstr):
     #Extracts the specified portion of a duration, for instance, given:
