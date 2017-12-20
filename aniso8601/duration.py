@@ -31,6 +31,7 @@ def parse_duration(isodurationstr, relative=False):
 
 def _parse_duration_prescribed(durationstr, relative):
     #durationstr can be of the form PnYnMnDTnHnMnS or PnW
+
     builder = PythonTimeBuilder
 
     if relative is True:
@@ -164,6 +165,7 @@ def _parse_duration_prescribed_time(durationstr):
     return (years, months, weeks, days, hours, minutes, seconds)
 
 def _parse_duration_combined(durationstr, relative):
+
     #Period of the form P<date>T<time>
     builder = PythonTimeBuilder
 
