@@ -9,8 +9,13 @@
 import datetime
 
 def parse_timezone(tzstr):
-    #tzstr can be ±hh:mm, ±hhmm, ±hh, the Z case is handled elsewhere
-    if len(tzstr) == 6:
+    #tzstr can be Z, ±hh:mm, ±hhmm, ±hh
+    if len(tzstr) == 1 and tzstr == 'Z':
+        #Z -> UTC
+        tzstr = 'UTC'
+        tzhour = 0
+        tzminute = 0
+    elif len(tzstr) == 6:
         #±hh:mm
         tzhour = int(tzstr[1:3])
         tzminute = int(tzstr[4:6])
@@ -25,7 +30,7 @@ def parse_timezone(tzstr):
     else:
         raise ValueError('String is not a valid ISO 8601 time offset.')
 
-    if tzstr[0] == '+':
+    if tzstr[0] == '+' or tzstr == 'UTC':
         return UTCOffset(name=tzstr, minutes=(tzhour * 60 + tzminute))
     elif tzhour == 0 and tzminute == 0:
         raise ValueError('Negative ISO 8601 time offset cannot be 0.')

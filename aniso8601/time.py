@@ -105,8 +105,6 @@ def parse_time(isotimestr):
 
     if tzstr is None:
         return _parse_time_naive(timestr)
-    elif tzstr == 'Z':
-        tzinfo = UTCOffset(name='UTC', minutes=0)
     else:
         tzinfo = parse_timezone(tzstr)
 
