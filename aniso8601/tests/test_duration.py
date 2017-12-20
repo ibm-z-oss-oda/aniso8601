@@ -10,7 +10,10 @@ import datetime
 import unittest
 import dateutil
 
-from aniso8601.duration import parse_duration, _parse_duration_prescribed, _parse_duration_combined, _parse_duration_element, _has_any_component, _component_order_correct
+from aniso8601.duration import parse_duration, _parse_duration_prescribed, \
+        _parse_duration_combined, _parse_duration_prescribed_notime, \
+        _parse_duration_prescribed_time, _parse_duration_element, \
+        _has_any_component, _component_order_correct
 
 class TestDurationParserFunctions(unittest.TestCase):
     def test_parse_duration(self):
@@ -144,6 +147,12 @@ class TestDurationParserFunctions(unittest.TestCase):
         resultduration = _parse_duration_prescribed('P1Y2M3DT4H54M6,5S', False)
         self.assertEqual(resultduration, datetime.timedelta(days=428, hours=4, minutes=54, seconds=6.5))
 
+        resultduration = _parse_duration_prescribed('PT4H54M6.5S', False)
+        self.assertEqual(resultduration, datetime.timedelta(hours=4, minutes=54, seconds=6.5))
+
+        resultduration = _parse_duration_prescribed('PT4H54M6,5S', False)
+        self.assertEqual(resultduration, datetime.timedelta(hours=4, minutes=54, seconds=6.5))
+
         resultduration = _parse_duration_prescribed('P1Y2M3D', False)
         self.assertEqual(resultduration, datetime.timedelta(days=428))
 
@@ -152,12 +161,6 @@ class TestDurationParserFunctions(unittest.TestCase):
 
         resultduration = _parse_duration_prescribed('P1Y2M3,5D', False)
         self.assertEqual(resultduration, datetime.timedelta(days=428.5))
-
-        resultduration = _parse_duration_prescribed('PT4H54M6.5S', False)
-        self.assertEqual(resultduration, datetime.timedelta(hours=4, minutes=54, seconds=6.5))
-
-        resultduration = _parse_duration_prescribed('PT4H54M6,5S', False)
-        self.assertEqual(resultduration, datetime.timedelta(hours=4, minutes=54, seconds=6.5))
 
         resultduration = _parse_duration_prescribed('P1Y', False)
         self.assertEqual(resultduration, datetime.timedelta(days=365))
@@ -208,42 +211,130 @@ class TestDurationParserFunctions(unittest.TestCase):
             #Fraction only allowed on final component
             _parse_duration_prescribed('P1Y2M3DT4H5.1234M6S', False)
 
-    def test_parse_duration_prescribed_outoforder(self):
-        #Ensure durations are required to be in the correct order
-        #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
-        #https://bitbucket.org/nielsenb/aniso8601/issues/8/durations-with-components-in-wrong-order
-        with self.assertRaises(ValueError):
-            parse_duration('P1S')
-
-        with self.assertRaises(ValueError):
-            parse_duration('P1D1S')
-
-        with self.assertRaises(ValueError):
-            parse_duration('P1H1M')
-
-        with self.assertRaises(ValueError):
-            parse_duration('1Y2M3D1SPT1M')
-
-        with self.assertRaises(ValueError):
-            parse_duration('P1Y2M3D2MT1S')
-
-        with self.assertRaises(ValueError):
-            parse_duration('P2M3D1ST1Y1M')
-
-        with self.assertRaises(ValueError):
-            parse_duration('P1Y2M2MT3D1S')
-
-        with self.assertRaises(ValueError):
-            parse_duration('P1D1Y1M')
-
-        with self.assertRaises(ValueError):
-            parse_duration('PT1S1H')
-
     def test_parse_duration_prescribed_suffixgarbage(self):
         #Don't allow garbage after the duration
         #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
         with self.assertRaises(ValueError):
-            parse_duration('P1Dasdfasdf')
+            _parse_duration_prescribed('P1Dasdfasdf', False)
+
+    def test_parse_duration_prescribed_notime(self):
+        resultduration = _parse_duration_prescribed_notime('P1Y2M3D')
+        self.assertEqual(resultduration, (1, 2, 0, 3, 0, 0, 0))
+
+        resultduration = _parse_duration_prescribed_notime('P1Y2M3.5D')
+        self.assertEqual(resultduration, (1, 2, 0, 3.5, 0, 0, 0))
+
+        resultduration = _parse_duration_prescribed_notime('P1Y2M3,5D')
+        self.assertEqual(resultduration, (1, 2, 0, 3.5, 0, 0, 0))
+
+        resultduration = _parse_duration_prescribed_notime('P1Y')
+        self.assertEqual(resultduration, (1, 0, 0, 0, 0, 0, 0))
+
+        resultduration = _parse_duration_prescribed_notime('P1.5Y')
+        self.assertEqual(resultduration, (1.5, 0, 0, 0, 0, 0, 0))
+
+        resultduration = _parse_duration_prescribed_notime('P1,5Y')
+        self.assertEqual(resultduration, (1.5, 0, 0, 0, 0, 0, 0))
+
+        resultduration = _parse_duration_prescribed_notime('P1M')
+        self.assertEqual(resultduration, (0, 1, 0, 0, 0, 0, 0))
+
+        resultduration = _parse_duration_prescribed_notime('P1.5M')
+        self.assertEqual(resultduration, (0, 1.5, 0, 0, 0, 0, 0))
+
+        resultduration = _parse_duration_prescribed_notime('P1,5M')
+        self.assertEqual(resultduration, (0, 1.5, 0, 0, 0, 0, 0))
+
+        resultduration = _parse_duration_prescribed_notime('P1W')
+        self.assertEqual(resultduration, (0, 0, 1, 0, 0, 0, 0))
+
+        resultduration = _parse_duration_prescribed_notime('P1.5W')
+        self.assertEqual(resultduration, (0, 0, 1.5, 0, 0, 0, 0))
+
+        resultduration = _parse_duration_prescribed_notime('P1,5W')
+        self.assertEqual(resultduration, (0, 0, 1.5, 0, 0, 0, 0))
+
+        resultduration = _parse_duration_prescribed_notime('P1D')
+        self.assertEqual(resultduration, (0, 0, 0, 1, 0, 0, 0))
+
+        resultduration = _parse_duration_prescribed_notime('P1.5D')
+        self.assertEqual(resultduration, (0, 0, 0, 1.5, 0, 0, 0))
+
+        resultduration = _parse_duration_prescribed_notime('P1,5D')
+        self.assertEqual(resultduration, (0, 0, 0, 1.5, 0, 0, 0))
+
+    def test_parse_duration_prescribed_notime_timepart(self):
+        #Ensure no time part is allowed
+        with self.assertRaises(ValueError):
+            _parse_duration_prescribed_notime('P1S')
+
+        with self.assertRaises(ValueError):
+            _parse_duration_prescribed_notime('P1D1S')
+
+        with self.assertRaises(ValueError):
+            _parse_duration_prescribed_notime('P1H1M')
+
+        with self.assertRaises(ValueError):
+            _parse_duration_prescribed_notime('P1Y2M3D4H')
+
+        with self.assertRaises(ValueError):
+            _parse_duration_prescribed_notime('P1Y2M3D4H5S')
+
+    def test_parse_duration_prescribed_notime_outoforder(self):
+        #Ensure durations are required to be in the correct order
+        #https://bitbucket.org/nielsenb/aniso8601/issues/8/durations-with-components-in-wrong-order
+        with self.assertRaises(ValueError):
+            _parse_duration_prescribed_notime('P1H1M')
+
+        with self.assertRaises(ValueError):
+            _parse_duration_prescribed_notime('P1D1Y1M')
+
+    def test_parse_duration_prescribed_time(self):
+        resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6S')
+        self.assertEqual(resultduration, (1, 2, 0, 3, 4, 54, 6))
+
+        resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6.5S')
+        self.assertEqual(resultduration, (1, 2, 0, 3, 4, 54, 6.5))
+
+        resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6,5S')
+        self.assertEqual(resultduration, (1, 2, 0, 3, 4, 54, 6.5))
+
+        resultduration = _parse_duration_prescribed_time('PT4H54M6.5S')
+        self.assertEqual(resultduration, (0, 0, 0, 0, 4, 54, 6.5))
+
+        resultduration = _parse_duration_prescribed_time('PT4H54M6,5S')
+        self.assertEqual(resultduration, (0, 0, 0, 0, 4, 54, 6.5))
+
+    def test_parse_duration_prescribed_time_timeindate(self):
+        #Don't allow time components in date half
+        with self.assertRaises(ValueError):
+            _parse_duration_prescribed_time('P1Y2M3D4HT54M6S')
+
+        with self.assertRaises(ValueError):
+            _parse_duration_prescribed_time('P1Y2M3D6ST4H54M')
+
+    def test_parse_duration_prescribed_time_dateintime(self):
+        #Don't allow date components in time half
+        with self.assertRaises(ValueError):
+            _parse_duration_prescribed_time('P2M3DT1Y4H54M6S')
+
+        with self.assertRaises(ValueError):
+            _parse_duration_prescribed_time('P1Y2MT3D4H54M6S')
+
+    def test_parse_duration_prescribed_time_outoforder(self):
+        #Ensure durations are required to be in the correct order
+        #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
+        with self.assertRaises(ValueError):
+            _parse_duration_prescribed_time('1Y2M3D1SPT1M')
+
+        with self.assertRaises(ValueError):
+            _parse_duration_prescribed_time('P1Y2M3D2MT1S')
+
+        with self.assertRaises(ValueError):
+            _parse_duration_prescribed_time('P2M3D1ST1Y1M')
+
+        with self.assertRaises(ValueError):
+            _parse_duration_prescribed_time('P1Y2M2MT3D1S')
 
     def test_parse_duration_combined(self):
         resultduration = _parse_duration_combined('P0003-06-04T12:30:05', False)

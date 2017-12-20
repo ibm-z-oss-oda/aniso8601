@@ -59,89 +59,9 @@ def _parse_duration_prescribed(durationstr, relative):
 
     #Parse the elements of the duration
     if durationstr.find('T') == -1:
-        #Make sure no time portion is included
-        #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
-        if _has_any_component(durationstr, ['H', 'S']):
-            raise ValueError('ISO 8601 time components not allowed in duration without prescribed time.')
-
-        if _component_order_correct(durationstr, ['P', 'Y', 'M', 'D', 'W']) is False:
-            raise ValueError('ISO 8601 duration components must be in the correct order.')
-
-        if durationstr.find('Y') != -1:
-            years = _parse_duration_element(durationstr, 'Y')
-        else:
-            years = 0
-
-        if durationstr.find('M') != -1:
-            months = _parse_duration_element(durationstr, 'M')
-        else:
-            months = 0
-
-        if durationstr.find('W') != -1:
-            weeks = _parse_duration_element(durationstr, 'W')
-        else:
-            weeks = 0
-
-        if durationstr.find('D') != -1:
-            days = _parse_duration_element(durationstr, 'D')
-        else:
-            days = 0
-
-        #No hours, minutes or seconds
-        hours = 0
-        minutes = 0
-        seconds = 0
+        years, months, weeks, days, hours, minutes, seconds = _parse_duration_prescribed_notime(durationstr)
     else:
-        firsthalf = durationstr[:durationstr.find('T')]
-        secondhalf = durationstr[durationstr.find('T'):]
-
-        #Make sure no time portion is included in the date half
-        #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
-        if _has_any_component(firsthalf, ['H', 'S']):
-            raise ValueError('ISO 8601 time components not allowed in date portion of duration.')
-
-        if _component_order_correct(firsthalf, ['P', 'Y', 'M', 'D', 'W']) is False:
-            raise ValueError('ISO 8601 duration components must be in the correct order.')
-
-        #Make sure no date component is included in the time half
-        if _has_any_component(secondhalf, ['Y', 'D']):
-            raise ValueError('ISO 8601 time components not allowed in date portion of duration.')
-
-        if _component_order_correct(secondhalf, ['T', 'H', 'M', 'S']) is False:
-            raise ValueError('ISO 8601 time components in duration must be in the correct order.')
-
-        if firsthalf.find('Y') != -1:
-            years = _parse_duration_element(firsthalf, 'Y')
-        else:
-            years = 0
-
-        if firsthalf.find('M') != -1:
-            months = _parse_duration_element(firsthalf, 'M')
-        else:
-            months = 0
-
-        if firsthalf.find('D') != -1:
-            days = _parse_duration_element(firsthalf, 'D')
-        else:
-            days = 0
-
-        if secondhalf.find('H') != -1:
-            hours = _parse_duration_element(secondhalf, 'H')
-        else:
-            hours = 0
-
-        if secondhalf.find('M') != -1:
-            minutes = _parse_duration_element(secondhalf, 'M')
-        else:
-            minutes = 0
-
-        if secondhalf.find('S') != -1:
-            seconds = _parse_duration_element(secondhalf, 'S')
-        else:
-            seconds = 0
-
-        #Weeks can't be included
-        weeks = 0
+        years, months, weeks, days, hours, minutes, seconds = _parse_duration_prescribed_time(durationstr)
 
     if relative is True:
         try:
@@ -154,11 +74,105 @@ def _parse_duration_prescribed(durationstr, relative):
             return dateutil.relativedelta.relativedelta(years=int(years), months=int(months), weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
         except ImportError:
             raise RuntimeError('dateutil must be installed for relative duration support.')
-    else:
-        #Note that weeks can be handled without conversion to days
-        totaldays = years * 365 + months * 30 + days
 
-        return datetime.timedelta(weeks=weeks, days=totaldays, hours=hours, minutes=minutes, seconds=seconds)
+    #Note that weeks can be handled without conversion to days
+    totaldays = years * 365 + months * 30 + days
+
+    return datetime.timedelta(weeks=weeks, days=totaldays, hours=hours, minutes=minutes, seconds=seconds)
+
+def _parse_duration_prescribed_notime(durationstr):
+    #durationstr can be of the form PnYnMnD or PnW
+
+    #Make sure no time portion is included
+    #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
+    if _has_any_component(durationstr, ['H', 'S']):
+        raise ValueError('ISO 8601 time components not allowed in duration without prescribed time.')
+
+    if _component_order_correct(durationstr, ['P', 'Y', 'M', 'D', 'W']) is False:
+        raise ValueError('ISO 8601 duration components must be in the correct order.')
+
+    if durationstr.find('Y') != -1:
+        years = _parse_duration_element(durationstr, 'Y')
+    else:
+        years = 0
+
+    if durationstr.find('M') != -1:
+        months = _parse_duration_element(durationstr, 'M')
+    else:
+        months = 0
+
+    if durationstr.find('W') != -1:
+        weeks = _parse_duration_element(durationstr, 'W')
+    else:
+        weeks = 0
+
+    if durationstr.find('D') != -1:
+        days = _parse_duration_element(durationstr, 'D')
+    else:
+        days = 0
+
+    #No hours, minutes or seconds
+    hours = 0
+    minutes = 0
+    seconds = 0
+
+    return (years, months, weeks, days, hours, minutes, seconds)
+
+def _parse_duration_prescribed_time(durationstr):
+    #durationstr can be of the form PnYnMnDTnHnMnS
+
+    firsthalf = durationstr[:durationstr.find('T')]
+    secondhalf = durationstr[durationstr.find('T'):]
+
+    #Make sure no time portion is included in the date half
+    #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
+    if _has_any_component(firsthalf, ['H', 'S']):
+        raise ValueError('ISO 8601 time components not allowed in date portion of duration.')
+
+    if _component_order_correct(firsthalf, ['P', 'Y', 'M', 'D', 'W']) is False:
+        raise ValueError('ISO 8601 duration components must be in the correct order.')
+
+    #Make sure no date component is included in the time half
+    if _has_any_component(secondhalf, ['Y', 'D']):
+        raise ValueError('ISO 8601 time components not allowed in date portion of duration.')
+
+    if _component_order_correct(secondhalf, ['T', 'H', 'M', 'S']) is False:
+        raise ValueError('ISO 8601 time components in duration must be in the correct order.')
+
+    if firsthalf.find('Y') != -1:
+        years = _parse_duration_element(firsthalf, 'Y')
+    else:
+        years = 0
+
+    if firsthalf.find('M') != -1:
+        months = _parse_duration_element(firsthalf, 'M')
+    else:
+        months = 0
+
+    if firsthalf.find('D') != -1:
+        days = _parse_duration_element(firsthalf, 'D')
+    else:
+        days = 0
+
+    if secondhalf.find('H') != -1:
+        hours = _parse_duration_element(secondhalf, 'H')
+    else:
+        hours = 0
+
+    if secondhalf.find('M') != -1:
+        minutes = _parse_duration_element(secondhalf, 'M')
+    else:
+        minutes = 0
+
+    if secondhalf.find('S') != -1:
+        seconds = _parse_duration_element(secondhalf, 'S')
+    else:
+        seconds = 0
+
+    #Weeks can't be included
+    weeks = 0
+
+    return (years, months, weeks, days, hours, minutes, seconds)
 
 def _parse_duration_combined(durationstr, relative):
     #Period of the form P<date>T<time>
