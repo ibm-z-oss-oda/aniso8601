@@ -56,170 +56,131 @@ class TestTimeParserFunctions(unittest.TestCase):
 
     def test_parse_time(self):
         time = parse_time('01:23:45')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
-        self.assertEqual(time.second, 45)
+        self.assertEqual(time, datetime.time(hour=1, minute=23, second=45))
 
         time = parse_time('24:00:00')
-        self.assertEqual(time.hour, 0)
-        self.assertEqual(time.minute, 0)
-        self.assertEqual(time.second, 0)
+        self.assertEqual(time, datetime.time(hour=0))
 
         time = parse_time('23:21:28.512400')
-        self.assertEqual(time.hour, 23)
-        self.assertEqual(time.minute, 21)
-        self.assertEqual(time.second, 28)
-        self.assertEqual(time.microsecond, 512400)
+        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
 
         time = parse_time('01:23')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
+        self.assertEqual(time, datetime.time(hour=1, minute=23))
 
         time = parse_time('24:00')
-        self.assertEqual(time.hour, 0)
-        self.assertEqual(time.minute, 0)
+        self.assertEqual(time, datetime.time(hour=0))
 
         time = parse_time('01:23.4567')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
-        self.assertEqual(time.second, 27)
-        self.assertEqual(time.microsecond, 402000)
+        self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
 
         time = parse_time('012345')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
-        self.assertEqual(time.second, 45)
+        self.assertEqual(time, datetime.time(hour=1, minute=23, second=45))
 
         time = parse_time('240000')
-        self.assertEqual(time.hour, 0)
-        self.assertEqual(time.minute, 0)
-        self.assertEqual(time.second, 0)
+        self.assertEqual(time, datetime.time(hour=0))
 
         time = parse_time('0123')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
+        self.assertEqual(time, datetime.time(hour=1, minute=23))
 
         time = parse_time('2400')
-        self.assertEqual(time.hour, 0)
-        self.assertEqual(time.minute, 0)
+        self.assertEqual(time, datetime.time(hour=0))
 
         time = parse_time('01')
-        self.assertEqual(time.hour, 1)
+        self.assertEqual(time, datetime.time(hour=1))
 
         time = parse_time('24')
-        self.assertEqual(time.hour, 0)
+        self.assertEqual(time, datetime.time(hour=0))
 
         time = parse_time('12.5')
-        self.assertEqual(time.hour, 12)
-        self.assertEqual(time.minute, 30)
+        self.assertEqual(time, datetime.time(hour=12, minute=30))
 
         time = parse_time('232128.512400+00:00')
-        self.assertEqual(time.hour, 23)
-        self.assertEqual(time.minute, 21)
-        self.assertEqual(time.second, 28)
-        self.assertEqual(time.microsecond, 512400)
+        self.assertEqual(time.replace(tzinfo=None), datetime.time(hour=23, minute=21, second=28, microsecond=512400))
+
         tzinfoobject = time.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), '+00:00')
 
         time = parse_time('0123.4567+00:00')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
-        self.assertEqual(time.second, 27)
-        self.assertEqual(time.microsecond, 402000)
+        self.assertEqual(time.replace(tzinfo=None), datetime.time(hour=1, minute=23, second=27, microsecond=402000))
+
         tzinfoobject = time.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), '+00:00')
 
         time = parse_time('01.4567+00:00')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 27)
-        self.assertEqual(time.second, 24)
-        self.assertEqual(time.microsecond, 120000)
+        self.assertEqual(time.replace(tzinfo=None), datetime.time(hour=1, minute=27, second=24, microsecond=120000))
+
         tzinfoobject = time.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), '+00:00')
 
         time = parse_time('01:23:45+00:00')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
-        self.assertEqual(time.second, 45)
+        self.assertEqual(time.replace(tzinfo=None), datetime.time(hour=1, minute=23, second=45))
+
         tzinfoobject = time.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), '+00:00')
 
         time = parse_time('24:00:00+00:00')
-        self.assertEqual(time.hour, 0)
-        self.assertEqual(time.minute, 0)
-        self.assertEqual(time.second, 0)
+        self.assertEqual(time.replace(tzinfo=None), datetime.time(hour=0))
+
         tzinfoobject = time.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), '+00:00')
 
         time = parse_time('23:21:28.512400+00:00')
-        self.assertEqual(time.hour, 23)
-        self.assertEqual(time.minute, 21)
-        self.assertEqual(time.second, 28)
-        self.assertEqual(time.microsecond, 512400)
+        self.assertEqual(time.replace(tzinfo=None), datetime.time(hour=23, minute=21, second=28, microsecond=512400))
+
         tzinfoobject = time.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), '+00:00')
 
         time = parse_time('01:23+00:00')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
+        self.assertEqual(time.replace(tzinfo=None), datetime.time(hour=1, minute=23))
+
         tzinfoobject = time.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), '+00:00')
 
         time = parse_time('24:00+00:00')
-        self.assertEqual(time.hour, 0)
-        self.assertEqual(time.minute, 0)
+        self.assertEqual(time.replace(tzinfo=None), datetime.time(hour=0))
+
         tzinfoobject = time.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), '+00:00')
 
         time = parse_time('01:23.4567+00:00')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
-        self.assertEqual(time.second, 27)
-        self.assertEqual(time.microsecond, 402000)
+        self.assertEqual(time.replace(tzinfo=None), datetime.time(hour=1, minute=23, second=27, microsecond=402000))
+
         tzinfoobject = time.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), '+00:00')
 
         time = parse_time('23:21:28.512400+11:15')
-        self.assertEqual(time.hour, 23)
-        self.assertEqual(time.minute, 21)
-        self.assertEqual(time.second, 28)
-        self.assertEqual(time.microsecond, 512400)
+        self.assertEqual(time.replace(tzinfo=None), datetime.time(hour=23, minute=21, second=28, microsecond=512400))
+
         tzinfoobject = time.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=11, minutes=15))
         self.assertEqual(tzinfoobject.tzname(None), '+11:15')
 
         time = parse_time('23:21:28.512400-12:34')
-        self.assertEqual(time.hour, 23)
-        self.assertEqual(time.minute, 21)
-        self.assertEqual(time.second, 28)
-        self.assertEqual(time.microsecond, 512400)
+        self.assertEqual(time.replace(tzinfo=None), datetime.time(hour=23, minute=21, second=28, microsecond=512400))
+
         tzinfoobject = time.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=12, minutes=34))
         self.assertEqual(tzinfoobject.tzname(None), '-12:34')
 
         time = parse_time('23:21:28.512400Z')
-        self.assertEqual(time.hour, 23)
-        self.assertEqual(time.minute, 21)
-        self.assertEqual(time.second, 28)
-        self.assertEqual(time.microsecond, 512400)
+        self.assertEqual(time.replace(tzinfo=None), datetime.time(hour=23, minute=21, second=28, microsecond=512400))
+
         tzinfoobject = time.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), 'UTC')
 
         time = parse_time('06:14:00.000123Z')
-        self.assertEqual(time.hour, 6)
-        self.assertEqual(time.minute, 14)
-        self.assertEqual(time.second, 00)
-        self.assertEqual(time.microsecond, 123)
+        self.assertEqual(time.replace(tzinfo=None), datetime.time(hour=6, minute=14, microsecond=123))
+
         tzinfoobject = time.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), 'UTC')
@@ -244,47 +205,29 @@ class TestTimeParserFunctions(unittest.TestCase):
 
     def test_parse_datetime(self):
         resultdatetime = parse_datetime('1981-04-05T23:21:28.512400Z')
-        self.assertEqual(resultdatetime.year, 1981)
-        self.assertEqual(resultdatetime.month, 4)
-        self.assertEqual(resultdatetime.day, 5)
-        self.assertEqual(resultdatetime.hour, 23)
-        self.assertEqual(resultdatetime.minute, 21)
-        self.assertEqual(resultdatetime.second, 28)
-        self.assertEqual(resultdatetime.microsecond, 512400)
+        self.assertEqual(resultdatetime.replace(tzinfo=None), datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400))
+
         tzinfoobject = resultdatetime.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), 'UTC')
 
         resultdatetime = parse_datetime('1981095T23:21:28.512400-12:34')
-        self.assertEqual(resultdatetime.year, 1981)
-        self.assertEqual(resultdatetime.month, 4)
-        self.assertEqual(resultdatetime.day, 5)
-        self.assertEqual(resultdatetime.hour, 23)
-        self.assertEqual(resultdatetime.minute, 21)
-        self.assertEqual(resultdatetime.second, 28)
-        self.assertEqual(resultdatetime.microsecond, 512400)
+        self.assertEqual(resultdatetime.replace(tzinfo=None), datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400))
+
         tzinfoobject = resultdatetime.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=12, minutes=34))
         self.assertEqual(tzinfoobject.tzname(None), '-12:34')
 
         resultdatetime = parse_datetime('19810405T23:21:28+00')
-        self.assertEqual(resultdatetime.year, 1981)
-        self.assertEqual(resultdatetime.month, 4)
-        self.assertEqual(resultdatetime.day, 5)
-        self.assertEqual(resultdatetime.hour, 23)
-        self.assertEqual(resultdatetime.minute, 21)
-        self.assertEqual(resultdatetime.second, 28)
+        self.assertEqual(resultdatetime.replace(tzinfo=None), datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28))
+
         tzinfoobject = resultdatetime.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), '+00')
 
         resultdatetime = parse_datetime('19810405T23:21:28+00:00')
-        self.assertEqual(resultdatetime.year, 1981)
-        self.assertEqual(resultdatetime.month, 4)
-        self.assertEqual(resultdatetime.day, 5)
-        self.assertEqual(resultdatetime.hour, 23)
-        self.assertEqual(resultdatetime.minute, 21)
-        self.assertEqual(resultdatetime.second, 28)
+        self.assertEqual(resultdatetime.replace(tzinfo=None), datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28))
+
         tzinfoobject = resultdatetime.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), '+00:00')
@@ -316,89 +259,57 @@ class TestTimeParserFunctions(unittest.TestCase):
 
     def test_parse_datetime_spaceseperated(self):
         resultdatetime = parse_datetime('2004-W53-6 23:21:28.512400-12:34', ' ')
-        self.assertEqual(resultdatetime.year, 2005)
-        self.assertEqual(resultdatetime.month, 1)
-        self.assertEqual(resultdatetime.day, 1)
-        self.assertEqual(resultdatetime.hour, 23)
-        self.assertEqual(resultdatetime.minute, 21)
-        self.assertEqual(resultdatetime.second, 28)
-        self.assertEqual(resultdatetime.microsecond, 512400)
+        self.assertEqual(resultdatetime.replace(tzinfo=None), datetime.datetime(2005, 1, 1, hour=23, minute=21, second=28, microsecond=512400))
+
         tzinfoobject = resultdatetime.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=12, minutes=34))
         self.assertEqual(tzinfoobject.tzname(None), '-12:34')
 
     def test_parse_time_naive(self):
         time = _parse_time_naive('01:23:45')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
-        self.assertEqual(time.second, 45)
+        self.assertEqual(time, datetime.time(hour=1, minute=23, second=45))
 
         time = _parse_time_naive('24:00:00')
-        self.assertEqual(time.hour, 0)
-        self.assertEqual(time.minute, 0)
-        self.assertEqual(time.second, 0)
+        self.assertEqual(time, datetime.time(hour=0))
 
         time = _parse_time_naive('23:21:28.512400')
-        self.assertEqual(time.hour, 23)
-        self.assertEqual(time.minute, 21)
-        self.assertEqual(time.second, 28)
-        self.assertEqual(time.microsecond, 512400)
+        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
 
         time = _parse_time_naive('01:23')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
+        self.assertEqual(time, datetime.time(hour=1, minute=23))
 
         time = _parse_time_naive('24:00')
-        self.assertEqual(time.hour, 0)
-        self.assertEqual(time.minute, 0)
+        self.assertEqual(time, datetime.time(hour=0))
 
         time = _parse_time_naive('01:23.4567')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
-        self.assertEqual(time.second, 27)
-        self.assertEqual(time.microsecond, 402000)
+        self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
 
         time = _parse_time_naive('012345')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
-        self.assertEqual(time.second, 45)
+        self.assertEqual(time, datetime.time(hour=1, minute=23, second=45))
 
         time = _parse_time_naive('240000')
-        self.assertEqual(time.hour, 0)
-        self.assertEqual(time.minute, 0)
-        self.assertEqual(time.second, 0)
+        self.assertEqual(time, datetime.time(hour=0))
 
         time = _parse_time_naive('0123')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
+        self.assertEqual(time, datetime.time(hour=1, minute=23))
 
         time = _parse_time_naive('2400')
-        self.assertEqual(time.hour, 0)
-        self.assertEqual(time.minute, 0)
+        self.assertEqual(time, datetime.time(hour=0))
 
         time = _parse_time_naive('01')
-        self.assertEqual(time.hour, 1)
+        self.assertEqual(time, datetime.time(hour=1))
 
         time = _parse_time_naive('24')
-        self.assertEqual(time.hour, 0)
+        self.assertEqual(time, datetime.time(hour=0))
 
         time = _parse_time_naive('232128.512400')
-        self.assertEqual(time.hour, 23)
-        self.assertEqual(time.minute, 21)
-        self.assertEqual(time.second, 28)
-        self.assertEqual(time.microsecond, 512400)
+        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
 
         time = _parse_time_naive('0123.4567')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
-        self.assertEqual(time.second, 27)
-        self.assertEqual(time.microsecond, 402000)
+        self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
 
         time = _parse_time_naive('01.4567')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 27)
-        self.assertEqual(time.second, 24)
-        self.assertEqual(time.microsecond, 120000)
+        self.assertEqual(time, datetime.time(hour=1, minute=27, second=24, microsecond=120000))
 
         with self.assertRaises(ValueError):
             _parse_time_naive('00:00:60')
@@ -414,52 +325,38 @@ class TestTimeParserFunctions(unittest.TestCase):
 
     def test_parse_hour(self):
         time = _parse_hour('01')
-        self.assertEqual(time.hour, 1)
+        self.assertEqual(time, datetime.time(hour=1))
 
         time = _parse_hour('24')
-        self.assertEqual(time.hour, 0)
+        self.assertEqual(time, datetime.time(hour=0))
 
         time = _parse_hour('01.4567')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 27)
-        self.assertEqual(time.second, 24)
-        self.assertEqual(time.microsecond, 120000)
+        self.assertEqual(time, datetime.time(hour=1, minute=27, second=24, microsecond=120000))
 
         time = _parse_hour('12.5')
-        self.assertEqual(time.hour, 12)
-        self.assertEqual(time.minute, 30)
+        self.assertEqual(time, datetime.time(hour=12, minute=30))
 
         with self.assertRaises(ValueError):
             _parse_hour('24.1')
 
     def test_parse_minute_time(self):
         time = _parse_minute_time('01:23')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
+        self.assertEqual(time, datetime.time(hour=1, minute=23))
 
         time = _parse_minute_time('24:00')
-        self.assertEqual(time.hour, 0)
-        self.assertEqual(time.minute, 0)
+        self.assertEqual(time, datetime.time(hour=0))
 
         time = _parse_minute_time('01:23.4567')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
-        self.assertEqual(time.second, 27)
-        self.assertEqual(time.microsecond, 402000)
+        self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
 
         time = _parse_minute_time('0123')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
+        self.assertEqual(time, datetime.time(hour=1, minute=23))
 
         time = _parse_minute_time('2400')
-        self.assertEqual(time.hour, 0)
-        self.assertEqual(time.minute, 0)
+        self.assertEqual(time, datetime.time(hour=0))
 
         time = _parse_minute_time('0123.4567')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
-        self.assertEqual(time.second, 27)
-        self.assertEqual(time.microsecond, 402000)
+        self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
 
         with self.assertRaises(ValueError):
             _parse_minute_time('0060')
@@ -487,36 +384,22 @@ class TestTimeParserFunctions(unittest.TestCase):
 
     def test_parse_second_time(self):
         time = _parse_second_time('01:23:45')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
-        self.assertEqual(time.second, 45)
+        self.assertEqual(time, datetime.time(hour=1, minute=23, second=45))
 
         time = _parse_second_time('24:00:00')
-        self.assertEqual(time.hour, 0)
-        self.assertEqual(time.minute, 0)
-        self.assertEqual(time.second, 0)
+        self.assertEqual(time, datetime.time(hour=0))
 
         time = _parse_second_time('23:21:28.512400')
-        self.assertEqual(time.hour, 23)
-        self.assertEqual(time.minute, 21)
-        self.assertEqual(time.second, 28)
-        self.assertEqual(time.microsecond, 512400)
+        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
 
         time = _parse_second_time('012345')
-        self.assertEqual(time.hour, 1)
-        self.assertEqual(time.minute, 23)
-        self.assertEqual(time.second, 45)
+        self.assertEqual(time, datetime.time(hour=1, minute=23, second=45))
 
         time = _parse_second_time('240000')
-        self.assertEqual(time.hour, 0)
-        self.assertEqual(time.minute, 0)
-        self.assertEqual(time.second, 0)
+        self.assertEqual(time, datetime.time(hour=0))
 
         time = _parse_second_time('232128.512400')
-        self.assertEqual(time.hour, 23)
-        self.assertEqual(time.minute, 21)
-        self.assertEqual(time.second, 28)
-        self.assertEqual(time.microsecond, 512400)
+        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
 
         with self.assertRaises(ValueError):
             _parse_second_time('000060')
