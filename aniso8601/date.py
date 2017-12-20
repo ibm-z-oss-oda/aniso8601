@@ -239,7 +239,7 @@ def _iso_year_start(isoyear):
     fourth_jan = PythonTimeBuilder.build_date(isoyear, 1, 4)
 
     #Note the conversion from ISO day (1 - 7) and Python day (0 - 6)
-    delta = PythonTimeBuilder.build_timedelta(fourth_jan.isoweekday() - 1)
+    delta = PythonTimeBuilder.build_timedelta(days=fourth_jan.isoweekday() - 1)
 
     #Return the start of the year
     return fourth_jan - delta

@@ -22,7 +22,7 @@ class BaseTimeBuilder(object):
         raise NotImplementedError
 
     @staticmethod
-    def build_timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0):
+    def build_timedelta(years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
         raise NotImplementedError
 
     @staticmethod
@@ -83,8 +83,11 @@ class PythonTimeBuilder(BaseTimeBuilder):
         return PythonTimeBuilder.combine(date, time)
 
     @staticmethod
-    def build_timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0):
-        return datetime.timedelta(days=days, seconds=seconds, microseconds=microseconds, milliseconds=milliseconds, minutes=minutes, hours=hours, weeks=weeks)
+    def build_timedelta(years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
+        #Note that weeks can be handled without conversion to days
+        totaldays = years * 365 + months * 30 + days
+
+        return datetime.timedelta(days=totaldays, seconds=seconds, microseconds=microseconds, milliseconds=milliseconds, minutes=minutes, hours=hours, weeks=weeks)
 
     @staticmethod
     def combine(date, time):
@@ -92,7 +95,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
 class RelativeTimeBuilder(PythonTimeBuilder):
     @staticmethod
-    def build_timedelta(years=0, months=0, weeks=0, days=0, hours=0, minutes=0, seconds=0, microseconds=0):
+    def build_timedelta(years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
         try:
             import dateutil.relativedelta
 

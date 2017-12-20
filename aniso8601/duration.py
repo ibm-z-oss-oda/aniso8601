@@ -66,10 +66,7 @@ def _parse_duration_prescribed(durationstr, relative):
     if relative is True:
         return RelativeTimeBuilder.build_timedelta(years=years, months=months, weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
 
-    #Note that weeks can be handled without conversion to days
-    totaldays = years * 365 + months * 30 + days
-
-    return PythonTimeBuilder.build_timedelta(weeks=weeks, days=totaldays, hours=hours, minutes=minutes, seconds=seconds)
+    return PythonTimeBuilder.build_timedelta(years=years, months=months, weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
 
 def _parse_duration_prescribed_notime(durationstr):
     #durationstr can be of the form PnYnMnD or PnW
@@ -177,9 +174,7 @@ def _parse_duration_combined(durationstr, relative):
     if relative is True:
         return RelativeTimeBuilder.build_timedelta(years=datevalue.year, months=datevalue.month, days=datevalue.day, hours=timevalue.hour, minutes=timevalue.minute, seconds=timevalue.second, microseconds=timevalue.microsecond)
 
-    totaldays = datevalue.year * 365 + datevalue.month * 30 + datevalue.day
-
-    return PythonTimeBuilder.build_timedelta(days=totaldays, hours=timevalue.hour, minutes=timevalue.minute, seconds=timevalue.second, microseconds=timevalue.microsecond)
+    return PythonTimeBuilder.build_timedelta(years=datevalue.year, months=datevalue.month, days=datevalue.day, hours=timevalue.hour, minutes=timevalue.minute, seconds=timevalue.second, microseconds=timevalue.microsecond)
 
 def _parse_duration_element(durationstr, elementstr):
     #Extracts the specified portion of a duration, for instance, given:
