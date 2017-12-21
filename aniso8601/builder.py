@@ -78,7 +78,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
     def build_datetime(cls, year, month, day, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
         #Builds a datetime from the given parts, handling fractional arguments where necessary
         date = datetime.date(year, month, day)
-        time = cls.build_time(hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=tzinfo)
+        time = cls.build_time(hours=hours, minutes=minutes, seconds=seconds, microseconds=microseconds, tzinfo=tzinfo)
 
         return cls.combine(date, time)
 
@@ -103,6 +103,11 @@ class RelativeTimeBuilder(PythonTimeBuilder):
                 #https://github.com/dateutil/dateutil/issues/40
                 raise ValueError('Fractional months and years are not defined for relative intervals.')
 
-            return dateutil.relativedelta.relativedelta(years=int(years), months=int(months), weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds, microseconds=microseconds)
+            if milliseconds != 0:
+                fractional_seconds = seconds + (milliseconds / 1000.0)
+            else:
+                fractional_seconds = seconds
+
+            return dateutil.relativedelta.relativedelta(years=int(years), months=int(months), weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=fractional_seconds, microseconds=microseconds)
         except ImportError:
             raise RuntimeError('dateutil must be installed for relativedelta support.')
