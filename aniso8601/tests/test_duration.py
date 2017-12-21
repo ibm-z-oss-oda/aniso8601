@@ -11,6 +11,7 @@ import unittest
 import dateutil
 
 from aniso8601.exceptions import ISOFormatError, RelativeValueError
+from aniso8601.builder import BaseTimeBuilder, PythonTimeBuilder, RelativeTimeBuilder
 from aniso8601.duration import parse_duration, _parse_duration_prescribed, \
         _parse_duration_combined, _parse_duration_prescribed_notime, \
         _parse_duration_prescribed_time, _parse_duration_element, \
@@ -231,124 +232,124 @@ class TestDurationParserFunctions(unittest.TestCase):
         with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed('P1Dasdfasdf', False)
 
-    def test_parse_duration_prescribed_notime(self):
-        resultduration = _parse_duration_prescribed_notime('P1Y2M3D')
-        self.assertEqual(resultduration, (1, 2, 0, 3, 0, 0, 0))
+    def test_parse_duration_prescribed_notime_PythonTimeBuilder(self):
+        resultduration = _parse_duration_prescribed_notime('P1Y2M3D', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=428))
 
-        resultduration = _parse_duration_prescribed_notime('P1Y2M3.5D')
-        self.assertEqual(resultduration, (1, 2, 0, 3.5, 0, 0, 0))
+        resultduration = _parse_duration_prescribed_notime('P1Y2M3.5D', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=428.5))
 
-        resultduration = _parse_duration_prescribed_notime('P1Y2M3,5D')
-        self.assertEqual(resultduration, (1, 2, 0, 3.5, 0, 0, 0))
+        resultduration = _parse_duration_prescribed_notime('P1Y2M3,5D', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=428.5))
 
-        resultduration = _parse_duration_prescribed_notime('P1Y')
-        self.assertEqual(resultduration, (1, 0, 0, 0, 0, 0, 0))
+        resultduration = _parse_duration_prescribed_notime('P1Y', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=365))
 
-        resultduration = _parse_duration_prescribed_notime('P1.5Y')
-        self.assertEqual(resultduration, (1.5, 0, 0, 0, 0, 0, 0))
+        resultduration = _parse_duration_prescribed_notime('P1.5Y', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=547.5))
 
-        resultduration = _parse_duration_prescribed_notime('P1,5Y')
-        self.assertEqual(resultduration, (1.5, 0, 0, 0, 0, 0, 0))
+        resultduration = _parse_duration_prescribed_notime('P1,5Y', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=547.5))
 
-        resultduration = _parse_duration_prescribed_notime('P1M')
-        self.assertEqual(resultduration, (0, 1, 0, 0, 0, 0, 0))
+        resultduration = _parse_duration_prescribed_notime('P1M', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=30))
 
-        resultduration = _parse_duration_prescribed_notime('P1.5M')
-        self.assertEqual(resultduration, (0, 1.5, 0, 0, 0, 0, 0))
+        resultduration = _parse_duration_prescribed_notime('P1.5M', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=45))
 
-        resultduration = _parse_duration_prescribed_notime('P1,5M')
-        self.assertEqual(resultduration, (0, 1.5, 0, 0, 0, 0, 0))
+        resultduration = _parse_duration_prescribed_notime('P1,5M', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=45))
 
-        resultduration = _parse_duration_prescribed_notime('P1W')
-        self.assertEqual(resultduration, (0, 0, 1, 0, 0, 0, 0))
+        resultduration = _parse_duration_prescribed_notime('P1W', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=7))
 
-        resultduration = _parse_duration_prescribed_notime('P1.5W')
-        self.assertEqual(resultduration, (0, 0, 1.5, 0, 0, 0, 0))
+        resultduration = _parse_duration_prescribed_notime('P1.5W', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=10.5))
 
-        resultduration = _parse_duration_prescribed_notime('P1,5W')
-        self.assertEqual(resultduration, (0, 0, 1.5, 0, 0, 0, 0))
+        resultduration = _parse_duration_prescribed_notime('P1,5W', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=10.5))
 
-        resultduration = _parse_duration_prescribed_notime('P1D')
-        self.assertEqual(resultduration, (0, 0, 0, 1, 0, 0, 0))
+        resultduration = _parse_duration_prescribed_notime('P1D', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=1))
 
-        resultduration = _parse_duration_prescribed_notime('P1.5D')
-        self.assertEqual(resultduration, (0, 0, 0, 1.5, 0, 0, 0))
+        resultduration = _parse_duration_prescribed_notime('P1.5D', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=1.5))
 
-        resultduration = _parse_duration_prescribed_notime('P1,5D')
-        self.assertEqual(resultduration, (0, 0, 0, 1.5, 0, 0, 0))
+        resultduration = _parse_duration_prescribed_notime('P1,5D', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=1.5))
 
     def test_parse_duration_prescribed_notime_timepart(self):
         #Ensure no time part is allowed
         with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed_notime('P1S')
+            _parse_duration_prescribed_notime('P1S', BaseTimeBuilder)
 
         with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed_notime('P1D1S')
+            _parse_duration_prescribed_notime('P1D1S', BaseTimeBuilder)
 
         with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed_notime('P1H1M')
+            _parse_duration_prescribed_notime('P1H1M', BaseTimeBuilder)
 
         with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed_notime('P1Y2M3D4H')
+            _parse_duration_prescribed_notime('P1Y2M3D4H', BaseTimeBuilder)
 
         with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed_notime('P1Y2M3D4H5S')
+            _parse_duration_prescribed_notime('P1Y2M3D4H5S', BaseTimeBuilder)
 
     def test_parse_duration_prescribed_notime_outoforder(self):
         #Ensure durations are required to be in the correct order
         #https://bitbucket.org/nielsenb/aniso8601/issues/8/durations-with-components-in-wrong-order
         with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed_notime('P1H1M')
+            _parse_duration_prescribed_notime('P1H1M', BaseTimeBuilder)
 
         with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed_notime('P1D1Y1M')
+            _parse_duration_prescribed_notime('P1D1Y1M', BaseTimeBuilder)
 
-    def test_parse_duration_prescribed_time(self):
-        resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6S')
-        self.assertEqual(resultduration, (1, 2, 0, 3, 4, 54, 6))
+    def test_parse_duration_prescribed_time_PythonTimeBuilder(self):
+        resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6S', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=428, hours=4, minutes=54, seconds=6))
 
-        resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6.5S')
-        self.assertEqual(resultduration, (1, 2, 0, 3, 4, 54, 6.5))
+        resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6.5S', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=428, hours=4, minutes=54, seconds=6.5))
 
-        resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6,5S')
-        self.assertEqual(resultduration, (1, 2, 0, 3, 4, 54, 6.5))
+        resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6,5S', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(days=428, hours=4, minutes=54, seconds=6.5))
 
-        resultduration = _parse_duration_prescribed_time('PT4H54M6.5S')
-        self.assertEqual(resultduration, (0, 0, 0, 0, 4, 54, 6.5))
+        resultduration = _parse_duration_prescribed_time('PT4H54M6.5S', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(hours=4, minutes=54, seconds=6.5))
 
-        resultduration = _parse_duration_prescribed_time('PT4H54M6,5S')
-        self.assertEqual(resultduration, (0, 0, 0, 0, 4, 54, 6.5))
+        resultduration = _parse_duration_prescribed_time('PT4H54M6,5S', PythonTimeBuilder)
+        self.assertEqual(resultduration, datetime.timedelta(hours=4, minutes=54, seconds=6.5))
 
     def test_parse_duration_prescribed_time_timeindate(self):
         #Don't allow time components in date half
         with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed_time('P1Y2M3D4HT54M6S')
+            _parse_duration_prescribed_time('P1Y2M3D4HT54M6S', BaseTimeBuilder)
 
         with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed_time('P1Y2M3D6ST4H54M')
+            _parse_duration_prescribed_time('P1Y2M3D6ST4H54M', BaseTimeBuilder)
 
     def test_parse_duration_prescribed_time_dateintime(self):
         #Don't allow date components in time half
         with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed_time('P2M3DT1Y4H54M6S')
+            _parse_duration_prescribed_time('P2M3DT1Y4H54M6S', BaseTimeBuilder)
 
         with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed_time('P1Y2MT3D4H54M6S')
+            _parse_duration_prescribed_time('P1Y2MT3D4H54M6S', BaseTimeBuilder)
 
     def test_parse_duration_prescribed_time_outoforder(self):
         #Ensure durations are required to be in the correct order
         #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
         with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed_time('1Y2M3D1SPT1M')
+            _parse_duration_prescribed_time('1Y2M3D1SPT1M', BaseTimeBuilder)
 
         with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed_time('P1Y2M3D2MT1S')
+            _parse_duration_prescribed_time('P1Y2M3D2MT1S', BaseTimeBuilder)
 
         with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed_time('P2M3D1ST1Y1M')
+            _parse_duration_prescribed_time('P2M3D1ST1Y1M', BaseTimeBuilder)
 
         with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed_time('P1Y2M2MT3D1S')
+            _parse_duration_prescribed_time('P1Y2M2MT3D1S', BaseTimeBuilder)
 
     def test_parse_duration_combined(self):
         resultduration = _parse_duration_combined('P0003-06-04T12:30:05', False)

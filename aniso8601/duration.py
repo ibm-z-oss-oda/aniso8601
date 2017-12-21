@@ -64,13 +64,11 @@ def _parse_duration_prescribed(durationstr, relative):
 
     #Parse the elements of the duration
     if durationstr.find('T') == -1:
-        years, months, weeks, days, hours, minutes, seconds = _parse_duration_prescribed_notime(durationstr)
-    else:
-        years, months, weeks, days, hours, minutes, seconds = _parse_duration_prescribed_time(durationstr)
+        return _parse_duration_prescribed_notime(durationstr, builder)
 
-    return builder.build_timedelta(years=years, months=months, weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
+    return _parse_duration_prescribed_time(durationstr, builder)
 
-def _parse_duration_prescribed_notime(durationstr):
+def _parse_duration_prescribed_notime(durationstr, builder):
     #durationstr can be of the form PnYnMnD or PnW
 
     #Make sure no time portion is included
@@ -106,9 +104,9 @@ def _parse_duration_prescribed_notime(durationstr):
     minutes = 0
     seconds = 0
 
-    return (years, months, weeks, days, hours, minutes, seconds)
+    return builder.build_timedelta(years=years, months=months, weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
 
-def _parse_duration_prescribed_time(durationstr):
+def _parse_duration_prescribed_time(durationstr, builder):
     #durationstr can be of the form PnYnMnDTnHnMnS
 
     firsthalf = durationstr[:durationstr.find('T')]
@@ -162,7 +160,7 @@ def _parse_duration_prescribed_time(durationstr):
     #Weeks can't be included
     weeks = 0
 
-    return (years, months, weeks, days, hours, minutes, seconds)
+    return builder.build_timedelta(years=years, months=months, weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
 
 def _parse_duration_combined(durationstr, relative):
 
