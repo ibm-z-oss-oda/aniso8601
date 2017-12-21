@@ -174,6 +174,20 @@ class TestRelativeTimeBuilder(unittest.TestCase):
         timedelta = RelativeTimeBuilder.build_timedelta(years=1, months=-2, days=3, weeks=-4, hours=5, minutes=-6, seconds=7, milliseconds=-8, microseconds=9.1011)
         self.assertEqual(timedelta, dateutil.relativedelta.relativedelta(years=1, months=-2, days=-25, hours=5, minutes=-6, seconds=6.992, microseconds=9.1011))
 
+    def test_build_timedelta_nodateutil(self):
+        import sys
+        import dateutil
+
+        dateutil_import = dateutil
+
+        sys.modules['dateutil'] = None
+
+        with self.assertRaises(RuntimeError):
+            RelativeTimeBuilder.build_timedelta(years=1, months=2, days=3, weeks=4, hours=5, minutes=6, seconds=7, milliseconds=8, microseconds=9.1011)
+
+        #Reinstall dateutil
+        sys.modules['dateutil'] = dateutil
+
     def test_build_combine(self):
         date = RelativeTimeBuilder.build_date(1, 2, 3)
         time = RelativeTimeBuilder.build_time(hours=23, minutes=21, seconds=28, microseconds=512400)
