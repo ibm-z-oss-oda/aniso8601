@@ -71,8 +71,8 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
         if tzinfo is None:
             return result_datetime.time()
-        else:
-            return result_datetime.timetz()
+
+        return result_datetime.timetz()
 
     @classmethod
     def build_datetime(cls, year, month, day, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
