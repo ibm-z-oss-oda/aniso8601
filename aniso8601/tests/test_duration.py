@@ -403,37 +403,6 @@ class TestRelativeDurationParserFunctions(unittest.TestCase):
             #Fraction only allowed on final component
             _parse_duration_prescribed('P1Y2M3DT4H5.1234M6S', True)
 
-    def test_parse_duration_prescribed_relative_outoforder(self):
-        #Ensure durations are required to be in the correct order
-        #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
-        #https://bitbucket.org/nielsenb/aniso8601/issues/8/durations-with-components-in-wrong-order
-        with self.assertRaises(ValueError):
-            parse_duration('P1S', True)
-
-        with self.assertRaises(ValueError):
-            parse_duration('P1D1S', True)
-
-        with self.assertRaises(ValueError):
-            parse_duration('P1H1M', True)
-
-        with self.assertRaises(ValueError):
-            parse_duration('1Y2M3D1SPT1M', True)
-
-        with self.assertRaises(ValueError):
-            parse_duration('P1Y2M3D2MT1S', True)
-
-        with self.assertRaises(ValueError):
-            parse_duration('P2M3D1ST1Y1M', True)
-
-        with self.assertRaises(ValueError):
-            parse_duration('P1Y2M2MT3D1S', True)
-
-        with self.assertRaises(ValueError):
-            parse_duration('P1D1Y1M', True)
-
-        with self.assertRaises(ValueError):
-            parse_duration('PT1S1H', True)
-
     def test_parse_duration_prescribed_relative_suffixgarbage(self):
         #Don't allow garbage after the duration
         #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
@@ -465,6 +434,37 @@ class TestRelativeDurationParserFunctions(unittest.TestCase):
 
         #Reinstall dateutil
         sys.modules['dateutil'] = dateutil
+
+    def test_parse_duration_prescribed_relative_outoforder(self):
+        #Ensure durations are required to be in the correct order
+        #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
+        #https://bitbucket.org/nielsenb/aniso8601/issues/8/durations-with-components-in-wrong-order
+        with self.assertRaises(ValueError):
+            parse_duration('P1S', True)
+
+        with self.assertRaises(ValueError):
+            parse_duration('P1D1S', True)
+
+        with self.assertRaises(ValueError):
+            parse_duration('P1H1M', True)
+
+        with self.assertRaises(ValueError):
+            parse_duration('1Y2M3D1SPT1M', True)
+
+        with self.assertRaises(ValueError):
+            parse_duration('P1Y2M3D2MT1S', True)
+
+        with self.assertRaises(ValueError):
+            parse_duration('P2M3D1ST1Y1M', True)
+
+        with self.assertRaises(ValueError):
+            parse_duration('P1Y2M2MT3D1S', True)
+
+        with self.assertRaises(ValueError):
+            parse_duration('P1D1Y1M', True)
+
+        with self.assertRaises(ValueError):
+            parse_duration('PT1S1H', True)
 
     def test_parse_duration_combined_relative(self):
         resultduration = _parse_duration_combined('P0003-06-04T12:30:05', True)
