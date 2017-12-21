@@ -9,33 +9,33 @@
 import datetime
 
 class BaseTimeBuilder(object):
-    @staticmethod
-    def build_date(year, month, day):
+    @classmethod
+    def build_date(cls, year, month, day):
         raise NotImplementedError
 
-    @staticmethod
-    def build_time(hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
+    @classmethod
+    def build_time(cls, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
         raise NotImplementedError
 
-    @staticmethod
-    def build_datetime(year, month, day, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
+    @classmethod
+    def build_datetime(cls, year, month, day, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
         raise NotImplementedError
 
-    @staticmethod
-    def build_timedelta(years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
+    @classmethod
+    def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
         raise NotImplementedError
 
-    @staticmethod
-    def combine(date, time):
+    @classmethod
+    def combine(cls, date, time):
         raise NotImplementedError
 
 class PythonTimeBuilder(BaseTimeBuilder):
-    @staticmethod
-    def build_date(year, month, day):
+    @classmethod
+    def build_date(cls, year, month, day):
         return datetime.date(year, month, day)
 
-    @staticmethod
-    def build_time(hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
+    @classmethod
+    def build_time(cls, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
         #Builds a time from the given parts, handling fractional arguments where necessary
         fractional_hours = 0
         fractional_minutes = 0
@@ -67,35 +67,35 @@ class PythonTimeBuilder(BaseTimeBuilder):
             microseconds = int(microseconds)
 
         #Datetimes don't handle fractional components, so we use a timedelta
-        result_datetime = datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, microsecond=microseconds, tzinfo=tzinfo) + PythonTimeBuilder.build_timedelta(seconds=fractional_seconds, microseconds=fractional_microseconds, minutes=fractional_minutes, hours=fractional_hours)
+        result_datetime = datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, microsecond=microseconds, tzinfo=tzinfo) + cls.build_timedelta(seconds=fractional_seconds, microseconds=fractional_microseconds, minutes=fractional_minutes, hours=fractional_hours)
 
         if tzinfo is None:
             return result_datetime.time()
         else:
             return result_datetime.timetz()
 
-    @staticmethod
-    def build_datetime(year, month, day, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
+    @classmethod
+    def build_datetime(cls, year, month, day, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
         #Builds a datetime from the given parts, handling fractional arguments where necessary
         date = datetime.date(year, month, day)
-        time = PythonTimeBuilder.build_time(hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=tzinfo)
+        time = cls.build_time(hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=tzinfo)
 
-        return PythonTimeBuilder.combine(date, time)
+        return cls.combine(date, time)
 
-    @staticmethod
-    def build_timedelta(years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
+    @classmethod
+    def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
         #Note that weeks can be handled without conversion to days
         totaldays = years * 365 + months * 30 + days
 
         return datetime.timedelta(days=totaldays, seconds=seconds, microseconds=microseconds, milliseconds=milliseconds, minutes=minutes, hours=hours, weeks=weeks)
 
-    @staticmethod
-    def combine(date, time):
+    @classmethod
+    def combine(cls, date, time):
         return datetime.datetime.combine(date, time)
 
 class RelativeTimeBuilder(PythonTimeBuilder):
-    @staticmethod
-    def build_timedelta(years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
+    @classmethod
+    def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
         try:
             import dateutil.relativedelta
 
