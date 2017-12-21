@@ -449,20 +449,6 @@ class TestRelativeDurationParserFunctions(unittest.TestCase):
         with self.assertRaises(RelativeValueError):
             _parse_duration_prescribed('P1.5M', True)
 
-    def test_parse_duration_prescribed_relative_nodateutil(self):
-        import sys
-        import dateutil
-
-        dateutil_import = dateutil
-
-        sys.modules['dateutil'] = None
-
-        with self.assertRaises(RuntimeError):
-            _parse_duration_prescribed('P1Y', True)
-
-        #Reinstall dateutil
-        sys.modules['dateutil'] = dateutil
-
     def test_parse_duration_prescribed_relative_outoforder(self):
         #Ensure durations are required to be in the correct order
         #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
@@ -493,6 +479,70 @@ class TestRelativeDurationParserFunctions(unittest.TestCase):
 
         with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed('PT1S1H', True)
+
+    def test_parse_duration_prescribed_relative_nodateutil(self):
+        import sys
+        import dateutil
+
+        dateutil_import = dateutil
+
+        sys.modules['dateutil'] = None
+
+        with self.assertRaises(RuntimeError):
+            _parse_duration_prescribed('P1Y', True)
+
+        #Reinstall dateutil
+        sys.modules['dateutil'] = dateutil
+
+    def test_parse_duration_prescribed_notime_RelativeTimeBuilder(self):
+        resultduration = _parse_duration_prescribed_notime('P1Y2M3D', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3))
+
+        resultduration = _parse_duration_prescribed_notime('P1Y2M3.5D', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3.5))
+
+        resultduration = _parse_duration_prescribed_notime('P1Y2M3,5D', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3.5))
+
+        resultduration = _parse_duration_prescribed_notime('P1Y', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1))
+
+        resultduration = _parse_duration_prescribed_notime('P1M', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(months=1))
+
+        resultduration = _parse_duration_prescribed_notime('P1W', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=7))
+
+        resultduration = _parse_duration_prescribed_notime('P1.5W', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=10.5))
+
+        resultduration = _parse_duration_prescribed_notime('P1,5W', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=10.5))
+
+        resultduration = _parse_duration_prescribed_notime('P1D', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=1))
+
+        resultduration = _parse_duration_prescribed_notime('P1.5D', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=1.5))
+
+        resultduration = _parse_duration_prescribed_notime('P1,5D', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=1.5))
+
+    def test_parse_duration_prescribed_time_RelativeTimeBuilder(self):
+        resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6S', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6))
+
+        resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6.5S', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6.5))
+
+        resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6,5S', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6.5))
+
+        resultduration = _parse_duration_prescribed_time('PT4H54M6.5S', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(hours=4, minutes=54, seconds=6.5))
+
+        resultduration = _parse_duration_prescribed_time('PT4H54M6,5S', RelativeTimeBuilder)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(hours=4, minutes=54, seconds=6.5))
 
     def test_parse_duration_combined_relative(self):
         resultduration = _parse_duration_combined('P0003-06-04T12:30:05', True)
