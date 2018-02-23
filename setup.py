@@ -18,6 +18,7 @@ setup(
     extras_require={'relative': ['python-dateutil']},
     packages=['aniso8601'],
     classifiers=[
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
@@ -25,5 +26,11 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Libraries :: Python Modules'
-    ]
+    ],
+    keywords='iso8601 parser',
+    project_urls={
+        'Documentation': 'http://aniso8601.readthedocs.io/en/latest/',
+        'Source': 'https://bitbucket.org/nielsenb/aniso8601',
+        'Tracker': 'https://bitbucket.org/nielsenb/aniso8601/issues'
+    }
 )
