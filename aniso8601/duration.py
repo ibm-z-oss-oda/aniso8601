@@ -26,8 +26,8 @@ def parse_duration(isodurationstr, relative=False):
     #If Y, M, D, H, S, or W are in the string, assume it is a specified duration
     if _has_any_component(isodurationstr, ['Y', 'M', 'D', 'H', 'S', 'W']) is True:
         return _parse_duration_prescribed(isodurationstr, relative)
-    else:
-        return _parse_duration_combined(isodurationstr, relative)
+
+    return _parse_duration_combined(isodurationstr, relative)
 
 def _parse_duration_prescribed(durationstr, relative):
     #durationstr can be of the form PnYnMnDTnHnMnS or PnW
