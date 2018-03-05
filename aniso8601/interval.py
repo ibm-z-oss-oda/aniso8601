@@ -56,10 +56,10 @@ def parse_repeating_interval(isointervalstr, intervaldelimiter='/', datetimedeli
     interval_parts = _parse_interval_parts(intervalpart, intervaldelimiter, datetimedelimiter, relative=relative)
 
     #Now, build and return the generator
-    if iterations != None:
+    if iterations is not None:
         return _date_generator(interval_parts[0], interval_parts[2], iterations)
-    else:
-        return _date_generator_unbounded(interval_parts[0], interval_parts[2])
+
+    return _date_generator_unbounded(interval_parts[0], interval_parts[2])
 
 def _parse_interval_parts(isointervalstr, intervaldelimiter='/', datetimedelimiter='T', relative=False):
     #Returns a tuple containing the start of the interval, the end of the interval, and the interval timedelta
