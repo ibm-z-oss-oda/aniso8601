@@ -82,6 +82,9 @@ class TestTimeParserFunctions(unittest.TestCase):
         time = parse_time('240000')
         self.assertEqual(time, datetime.time(hour=0))
 
+        time = parse_time('144359.9999997')
+        self.assertEqual(time, datetime.time(hour=14, minute=43, second=59, microsecond=999999))
+
         time = parse_time('0123')
         self.assertEqual(time, datetime.time(hour=1, minute=23))
 
@@ -406,6 +409,9 @@ class TestTimeParserFunctions(unittest.TestCase):
 
         time = _parse_second_time('232128.512400')
         self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
+
+        time = _parse_second_time('144359.9999997')
+        self.assertEqual(time, datetime.time(hour=14, minute=43, second=59, microsecond=999999))
 
         with self.assertRaises(ValueError):
             _parse_second_time('000060')
