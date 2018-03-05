@@ -10,7 +10,7 @@ import datetime
 
 from aniso8601.date import parse_date
 from aniso8601.resolution import TimeResolution
-from aniso8601.timezone import parse_timezone, UTCOffset
+from aniso8601.timezone import parse_timezone
 
 def get_time_resolution(isotimestr):
     #Valid time formats are:
