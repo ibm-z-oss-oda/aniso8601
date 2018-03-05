@@ -189,7 +189,10 @@ def _parse_second_time(timestr):
 
         #Since the time constructor doesn't handle fractional seconds, we put
         #the seconds in to a timedelta, and add it to the time before returning
-        secondsdelta = datetime.timedelta(seconds=float(timestrarray[2]))
+        #The seconds value is truncated to microsecond resolution before
+        #conversion:
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        secondsdelta = datetime.timedelta(seconds=float(timestrarray[2][:9]))
     else:
         #hhmmss or hhmmss.
         isohour = int(timestr[0:2])
@@ -197,7 +200,10 @@ def _parse_second_time(timestr):
 
         #Since the time constructor doesn't handle fractional seconds, we put
         #the seconds in to a timedelta, and add it to the time before returning
-        secondsdelta = datetime.timedelta(seconds=float(timestr[4:]))
+        #The seconds value is truncated to microsecond resolution before
+        #conversion:
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        secondsdelta = datetime.timedelta(seconds=float(timestr[4:13]))
 
     if secondsdelta.seconds >= 60:
         #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
