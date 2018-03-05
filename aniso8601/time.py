@@ -9,6 +9,8 @@
 import datetime
 
 from aniso8601.date import parse_date
+from aniso8601.exceptions import HoursOutOfBoundsError, MidnightBoundsError, \
+        MinutesOutOfBoundsError, SecondsOutOfBoundsError
 from aniso8601.resolution import TimeResolution
 from aniso8601.timezone import parse_timezone
 
@@ -68,7 +70,7 @@ def get_time_resolution(isotimestr):
         #hh
         return TimeResolution.Hours
 
-    raise ValueError('String is not a valid ISO 8601 time.')
+    raise ValueError('"{0}" is not a valid ISO 8601 time.'.format(isotimestr))
 
 def parse_time(isotimestr):
     #Given a string in any ISO 8601 time format, return a datetime.time object
@@ -142,7 +144,7 @@ def _parse_hour(timestr):
     if isohour == 24:
         return datetime.time(hour=0, minute=0)
     elif isohour > 24:
-        raise ValueError('Hour 24 may only represent midnight.')
+        raise HoursOutOfBoundsError('Hour must be between 0..24 with 24 representing midnight.')
 
     #Since the time constructor doesn't handle fractional hours, we put
     #the hours in to a timedelta, and add it to the time before returning
@@ -164,11 +166,11 @@ def _parse_minute_time(timestr):
         isominute = float(timestr[2:])
 
     if isominute >= 60:
-        raise ValueError('Minutes must be less than 60.')
+        raise MinutesOutOfBoundsError('Minutes must be less than 60.')
 
     if isohour == 24:
         if isominute != 0:
-            raise ValueError('Hour 24 may only represent midnight.')
+            raise MidnightBoundsError('Hour 24 may only represent midnight.')
 
         return datetime.time(hour=0, minute=0)
 
@@ -207,12 +209,15 @@ def _parse_second_time(timestr):
 
     if secondsdelta.seconds >= 60:
         #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
-        raise ValueError('Seconds must be less than 60.')
+        raise SecondsOutOfBoundsError('Seconds must be less than 60.')
+
+    if isominute >= 60:
+        raise MinutesOutOfBoundsError('Minutes must be less than 60.')
 
     if isohour == 24:
         #Midnight, see 4.2.1, 4.2.3
         if isominute != 0 or secondsdelta.total_seconds() != 0:
-            raise ValueError('Hour 24 may only represent midnight.')
+            raise MidnightBoundsError('Hour 24 may only represent midnight.')
 
         return datetime.time(hour=0, minute=0)
 

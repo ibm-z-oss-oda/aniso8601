@@ -9,7 +9,11 @@
 import datetime
 import unittest
 
-from aniso8601.date import parse_date, _parse_year, _parse_calendar_day, _parse_calendar_month, _parse_week_day, _parse_week, _parse_ordinal_date, get_date_resolution
+from aniso8601.exceptions import DayOutOfBoundsError, WeekOutOfBoundsError, \
+        YearOutOfBoundsError
+from aniso8601.date import parse_date, _parse_year, _parse_calendar_day, \
+        _parse_calendar_month, _parse_week_day, _parse_week, \
+        _parse_ordinal_date, get_date_resolution
 from aniso8601.resolution import DateResolution
 
 class TestDateResolutionFunctions(unittest.TestCase):
@@ -80,6 +84,35 @@ class TestDateParserFunctions(unittest.TestCase):
         date = parse_date('1981095')
         self.assertEqual(date, datetime.date(1981, 4, 5))
 
+    def test_parse_date_bounds(self):
+        #0 isn't a valid week number
+        with self.assertRaises(WeekOutOfBoundsError):
+            parse_date('2003-W00')
+
+        with self.assertRaises(WeekOutOfBoundsError):
+            parse_date('2003W00')
+
+        #Week must not be larger than 53
+        with self.assertRaises(WeekOutOfBoundsError):
+            parse_date('2004-W54')
+
+        with self.assertRaises(WeekOutOfBoundsError):
+            parse_date('2004W54')
+
+        #0 isn't a valid day number
+        with self.assertRaises(DayOutOfBoundsError):
+            parse_date('2001-W02-0')
+
+        with self.assertRaises(DayOutOfBoundsError):
+            parse_date('2001W020')
+
+        #Day must not be larger than 7
+        with self.assertRaises(DayOutOfBoundsError):
+            parse_date('2001-W02-8')
+
+        with self.assertRaises(DayOutOfBoundsError):
+            parse_date('2001W028')
+
     def test_parse_year(self):
         date = _parse_year('2013')
         self.assertEqual(date, datetime.date(2013, 1, 1))
@@ -92,7 +125,7 @@ class TestDateParserFunctions(unittest.TestCase):
 
     def test_parse_year_zero(self):
         #0 isn't a valid year
-        with self.assertRaises(ValueError):
+        with self.assertRaises(YearOutOfBoundsError):
             _parse_year('0')
 
     def test_parse_calendar_day(self):
@@ -192,15 +225,15 @@ class TestDateParserFunctions(unittest.TestCase):
 
     def test_parse_ordinal_date_zero(self):
         #0 isn't a valid day of year
-        with self.assertRaises(ValueError):
+        with self.assertRaises(DayOutOfBoundsError):
             _parse_ordinal_date('1981000')
 
     def test_parse_ordinal_date_nonleap(self):
         #Day 366 is only valid on a leap year
-        with self.assertRaises(ValueError):
+        with self.assertRaises(DayOutOfBoundsError):
             _parse_ordinal_date('1981366')
 
     def test_parse_ordinal_date_overflow(self):
         #Day must me 365, or 366, not larger
-        with self.assertRaises(ValueError):
+        with self.assertRaises(DayOutOfBoundsError):
             _parse_ordinal_date('1981367')

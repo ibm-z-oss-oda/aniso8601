@@ -9,6 +9,8 @@
 import unittest
 import datetime
 
+from aniso8601.exceptions import HoursOutOfBoundsError, MidnightBoundsError, \
+        MinutesOutOfBoundsError, SecondsOutOfBoundsError
 from aniso8601.resolution import TimeResolution
 from aniso8601.time import get_time_resolution, parse_time, parse_datetime, \
      _parse_time_naive, _parse_hour, _parse_minute_time, _parse_second_time, \
@@ -191,22 +193,25 @@ class TestTimeParserFunctions(unittest.TestCase):
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), 'UTC')
 
-        with self.assertRaises(ValueError):
+    def test_parse_time_bounds(self):
+        #Seconds must not be greater than or equal to 60
+        with self.assertRaises(SecondsOutOfBoundsError):
             parse_time('00:00:60')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(SecondsOutOfBoundsError):
             parse_time('00:00:60Z')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(SecondsOutOfBoundsError):
             parse_time('00:00:60+00:00')
 
-        with self.assertRaises(ValueError):
+        #Minutes must not be greater than 60
+        with self.assertRaises(MinutesOutOfBoundsError):
             parse_time('00:61')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MinutesOutOfBoundsError):
             parse_time('00:61Z')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MinutesOutOfBoundsError):
             parse_time('00:61+00:00')
 
     def test_parse_datetime(self):
@@ -238,29 +243,32 @@ class TestTimeParserFunctions(unittest.TestCase):
         self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
         self.assertEqual(tzinfoobject.tzname(None), '+00:00')
 
+    def test_parse_datetime_bounds(self):
+        #Seconds can't be greater than or equal to 60
         #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
-        with self.assertRaises(ValueError):
+        with self.assertRaises(SecondsOutOfBoundsError):
             parse_datetime('2016-12-31T23:59:60+00:00')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(SecondsOutOfBoundsError):
             parse_datetime('2016-12-31T23:59:60')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(SecondsOutOfBoundsError):
             parse_datetime('1981-04-05T00:00:60')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(SecondsOutOfBoundsError):
             parse_datetime('1981-04-05T00:00:60Z')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(SecondsOutOfBoundsError):
             parse_datetime('1981-04-05T00:00:60+00:00')
 
-        with self.assertRaises(ValueError):
+        #Minutes can't be greater than 60
+        with self.assertRaises(MinutesOutOfBoundsError):
             parse_datetime('1981-04-05T00:61')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MinutesOutOfBoundsError):
             parse_datetime('1981-04-05T00:61Z')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MinutesOutOfBoundsError):
             parse_datetime('1981-04-05T00:61+00:00')
 
     def test_parse_datetime_spaceseperated(self):
@@ -318,13 +326,21 @@ class TestTimeParserFunctions(unittest.TestCase):
         self.assertEqual(time, datetime.time(hour=1, minute=27, second=24, microsecond=120000))
 
         with self.assertRaises(ValueError):
+            _parse_time_naive('00:61')
+
+    def test_parse_time_naive_bounds(self):
+        #Seconds must not be greater than or equal to 60
+        with self.assertRaises(SecondsOutOfBoundsError):
             _parse_time_naive('00:00:60')
 
+        #Minutes must not be greater than 60
+        with self.assertRaises(MinutesOutOfBoundsError):
+            _parse_time_naive('00:61')
+
+    def test_parse_time_naive_tz(self):
+        #These fail because of the timezone being parsed by the naive parser
         with self.assertRaises(ValueError):
             _parse_time_naive('00:00:60+00:00')
-
-        with self.assertRaises(ValueError):
-            _parse_time_naive('00:61')
 
         with self.assertRaises(ValueError):
             _parse_time_naive('00:61+00:00')
@@ -342,7 +358,9 @@ class TestTimeParserFunctions(unittest.TestCase):
         time = _parse_hour('12.5')
         self.assertEqual(time, datetime.time(hour=12, minute=30))
 
-        with self.assertRaises(ValueError):
+    def test_parse_hour_bounds(self):
+        #Hour cannot be larger than 24
+        with self.assertRaises(HoursOutOfBoundsError):
             _parse_hour('24.1')
 
     def test_parse_minute_time(self):
@@ -364,28 +382,31 @@ class TestTimeParserFunctions(unittest.TestCase):
         time = _parse_minute_time('0123.4567')
         self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
 
-        with self.assertRaises(ValueError):
+    def test_parse_minute_time_bounds(self):
+        #Minutes cannot be greater than 60
+        with self.assertRaises(MinutesOutOfBoundsError):
             _parse_minute_time('0060')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MinutesOutOfBoundsError):
             _parse_minute_time('0060.1')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MinutesOutOfBoundsError):
             _parse_minute_time('00:60')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MinutesOutOfBoundsError):
             _parse_minute_time('00:60.1')
 
-        with self.assertRaises(ValueError):
+        #Hour 24 can only represent midnight
+        with self.assertRaises(MidnightBoundsError):
             _parse_minute_time('2401')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MidnightBoundsError):
             _parse_minute_time('2400.1')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MidnightBoundsError):
             _parse_minute_time('24:01')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MidnightBoundsError):
             _parse_minute_time('24:00.1')
 
     def test_parse_second_time(self):
@@ -413,28 +434,32 @@ class TestTimeParserFunctions(unittest.TestCase):
         time = _parse_second_time('144359.9999997')
         self.assertEqual(time, datetime.time(hour=14, minute=43, second=59, microsecond=999999))
 
-        with self.assertRaises(ValueError):
+    def test_parse_second_time_bounds(self):
+        #Seconds must be less than 60
+        with self.assertRaises(SecondsOutOfBoundsError):
             _parse_second_time('000060')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(SecondsOutOfBoundsError):
             _parse_second_time('00:00:60')
 
-        with self.assertRaises(ValueError):
+        #Minutes must be less than 60
+        with self.assertRaises(MinutesOutOfBoundsError):
             _parse_second_time('006000')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MinutesOutOfBoundsError):
             _parse_second_time('00:60:00')
 
-        with self.assertRaises(ValueError):
+        #Hour 24 can only represent midnight
+        with self.assertRaises(MidnightBoundsError):
             _parse_second_time('240001')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MidnightBoundsError):
             _parse_second_time('24:00:01')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MidnightBoundsError):
             _parse_second_time('240100')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MidnightBoundsError):
             _parse_second_time('24:01:00')
 
     def test_build_time(self):

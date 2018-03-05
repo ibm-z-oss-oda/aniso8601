@@ -8,6 +8,8 @@
 
 import datetime
 
+from aniso8601.exceptions import DayOutOfBoundsError, WeekOutOfBoundsError, \
+        YearOutOfBoundsError
 from aniso8601.resolution import DateResolution
 
 def get_date_resolution(isodatestr):
@@ -41,7 +43,7 @@ def get_date_resolution(isodatestr):
             #YYYYWwwD
             return DateResolution.Weekday
         else:
-            raise ValueError('String is not a valid ISO 8601 week date.')
+            raise ValueError('"{0}" is not a valid ISO 8601 week date.'.format(isodatestr))
 
     #If the size of the string of 4 or less, assume its a truncated year representation
     if len(isodatestr) <= 4:
@@ -79,7 +81,7 @@ def get_date_resolution(isodatestr):
         return DateResolution.Ordinal
 
     #None of the date representations match
-    raise ValueError('String is not an ISO 8601 date, perhaps it represents a time or datetime.')
+    raise ValueError('"{0}" is not an ISO 8601 date, perhaps it represents a time or datetime.'.format(isodatestr))
 
 def parse_date(isodatestr):
     #Given a string in any ISO 8601 date format, return a datetime.date
@@ -112,10 +114,15 @@ def _parse_year(yearstr):
     #day is set to 1
 
     if len(yearstr) == 4:
-        return datetime.date(int(yearstr), 1, 1)
+        isoyear = int(yearstr)
     else:
         #Shift 0s in from the left to form complete year
-        return datetime.date(int(yearstr.ljust(4, '0')), 1, 1)
+        isoyear = int(yearstr.ljust(4, '0'))
+
+    if isoyear == 0:
+        raise YearOutOfBoundsError('Year must be between 1..9999.')
+
+    return datetime.date(isoyear, 1, 1)
 
 def _parse_calendar_day(datestr):
     #datestr is of the format YYYY-MM-DD or YYYYMMDD
@@ -126,7 +133,7 @@ def _parse_calendar_day(datestr):
         #YYYYMMDD
         strformat = '%Y%m%d'
     else:
-        raise ValueError('String is not a valid ISO 8601 calendar day.')
+        raise ValueError('"{0}" is not a valid ISO 8601 calendar day.'.format(datestr))
 
     parseddatetime = datetime.datetime.strptime(datestr, strformat)
 
@@ -136,7 +143,7 @@ def _parse_calendar_day(datestr):
 def _parse_calendar_month(datestr):
     #datestr is of the format YYYY-MM
     if len(datestr) != 7:
-        raise ValueError('String is not a valid ISO 8601 calendar month.')
+        raise ValueError('"{0}" is not a valid ISO 8601 calendar month.'.format(datestr))
 
     parseddatetime = datetime.datetime.strptime(datestr, '%Y-%m')
 
@@ -159,8 +166,8 @@ def _parse_week_day(datestr):
     windex = datestr.find('W')
     isoweeknumber = int(datestr[windex + 1:windex + 3])
 
-    if isoweeknumber == 0:
-        raise ValueError('00 is not a valid ISO 8601 weeknumber.')
+    if isoweeknumber == 0 or isoweeknumber > 53:
+        raise WeekOutOfBoundsError('Week number must be between 1..53.')
 
     if datestr.find('-') != -1 and len(datestr) == 10:
         #YYYY-Www-D
@@ -169,7 +176,10 @@ def _parse_week_day(datestr):
          #YYYYWwwD
         isoday = int(datestr[7:8])
     else:
-        raise ValueError('String is not a valid ISO 8601 week date.')
+        raise ValueError('"{0}" is not a valid ISO 8601 week date.'.format(datestr))
+
+    if isoday == 0 or isoday > 7:
+        raise DayOutOfBoundsError('Weekday number must be between 1..7.')
 
     return gregorianyearstart + datetime.timedelta(weeks=isoweeknumber - 1, days=isoday - 1)
 
@@ -186,8 +196,8 @@ def _parse_week(datestr):
     windex = datestr.find('W')
     isoweeknumber = int(datestr[windex + 1:windex + 3])
 
-    if isoweeknumber == 0:
-        raise ValueError('00 is not a valid ISO 8601 weeknumber.')
+    if isoweeknumber == 0 or isoweeknumber > 53:
+        raise WeekOutOfBoundsError('Week number must be between 1..53.')
 
     return gregorianyearstart + datetime.timedelta(weeks=isoweeknumber - 1, days=0)
 
@@ -199,18 +209,19 @@ def _parse_ordinal_date(datestr):
 
     if datestr.find('-') != -1:
         #YYYY-DDD
-        parseddatetime = datetime.datetime.strptime(datestr, '%Y-%j')
+        isoday = int(datestr[(datestr.find('-') + 1):])
     else:
         #YYYYDDD
-        parseddatetime = datetime.datetime.strptime(datestr, '%Y%j')
+        isoday = int(datestr[4:])
+
+    parseddate = datetime.date(isoyear, 1, 1) + datetime.timedelta(days=isoday - 1)
 
     #Enforce ordinal day limitation
     #https://bitbucket.org/nielsenb/aniso8601/issues/14/parsing-ordinal-dates-should-only-allow
-    if parseddatetime.year != isoyear:
-        raise ValueError('Day of year must be from 1..365, 1..366 for leap year.')
+    if isoday == 0 or parseddate.year != isoyear:
+        raise DayOutOfBoundsError('Day of year must be from 1..365, 1..366 for leap year.')
 
-    #Since no 'time' is given, cast to a date
-    return parseddatetime.date()
+    return parseddate
 
 def _iso_year_start(isoyear):
     #Given an ISO year, returns the equivalent of the start of the year
