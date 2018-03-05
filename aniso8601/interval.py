@@ -79,16 +79,16 @@ def _parse_interval_parts(isointervalstr, intervaldelimiter='/', datetimedelimit
             enddatetime = parse_datetime(secondpart, delimiter=datetimedelimiter)
 
             return (enddatetime, enddatetime - duration, -duration)
-        else:
-            #<end> must just be a date
-            duration = parse_duration(firstpart, relative=relative)
-            enddate = parse_date(secondpart)
 
-            #See if we need to upconvert to datetime to preserve resolution
-            if firstpart.find(datetimedelimiter) != -1:
-                return (enddate, datetime.combine(enddate, datetime.min.time()) - duration, -duration)
-            else:
-                return (enddate, enddate - duration, -duration)
+        #<end> must just be a date
+        duration = parse_duration(firstpart, relative=relative)
+        enddate = parse_date(secondpart)
+
+        #See if we need to upconvert to datetime to preserve resolution
+        if firstpart.find(datetimedelimiter) != -1:
+            return (enddate, datetime.combine(enddate, datetime.min.time()) - duration, -duration)
+
+        return (enddate, enddate - duration, -duration)
     elif secondpart[0] == 'P':
         #<start>/<duration>
         #We need to figure out if <start> is a date, or a datetime
@@ -98,42 +98,42 @@ def _parse_interval_parts(isointervalstr, intervaldelimiter='/', datetimedelimit
             startdatetime = parse_datetime(firstpart, delimiter=datetimedelimiter)
 
             return (startdatetime, startdatetime + duration, duration)
-        else:
-            #<start> must just be a date
-            duration = parse_duration(secondpart, relative=relative)
-            startdate = parse_date(firstpart)
 
-            #See if we need to upconvert to datetime to preserve resolution
-            if secondpart.find(datetimedelimiter) != -1:
-                return (startdate, datetime.combine(startdate, datetime.min.time()) + duration, duration)
-            else:
-                return (startdate, startdate + duration, duration)
-    else:
-        #<start>/<end>
-        if firstpart.find(datetimedelimiter) != -1 and secondpart.find(datetimedelimiter) != -1:
-            #Both parts are datetimes
-            start_datetime = parse_datetime(firstpart, delimiter=datetimedelimiter)
-            end_datetime = parse_datetime(secondpart, delimiter=datetimedelimiter)
+        #<start> must just be a date
+        duration = parse_duration(secondpart, relative=relative)
+        startdate = parse_date(firstpart)
 
-            return (start_datetime, end_datetime, end_datetime - start_datetime)
-        elif firstpart.find(datetimedelimiter) != -1 and secondpart.find(datetimedelimiter) == -1:
-            #First part is a datetime, second part is a date
-            start_datetime = parse_datetime(firstpart, delimiter=datetimedelimiter)
-            end_date = parse_date(secondpart)
+        #See if we need to upconvert to datetime to preserve resolution
+        if secondpart.find(datetimedelimiter) != -1:
+            return (startdate, datetime.combine(startdate, datetime.min.time()) + duration, duration)
 
-            return (start_datetime, end_date, datetime.combine(end_date, datetime.min.time()) - start_datetime)
-        elif firstpart.find(datetimedelimiter) == -1 and secondpart.find(datetimedelimiter) != -1:
-            #First part is a date, second part is a datetime
-            start_date = parse_date(firstpart)
-            end_datetime = parse_datetime(secondpart, delimiter=datetimedelimiter)
+        return (startdate, startdate + duration, duration)
 
-            return (start_date, end_datetime, end_datetime - datetime.combine(start_date, datetime.min.time()))
-        else:
-            #Both parts are dates
-            start_date = parse_date(firstpart)
-            end_date = parse_date(secondpart)
+    #<start>/<end>
+    if firstpart.find(datetimedelimiter) != -1 and secondpart.find(datetimedelimiter) != -1:
+        #Both parts are datetimes
+        start_datetime = parse_datetime(firstpart, delimiter=datetimedelimiter)
+        end_datetime = parse_datetime(secondpart, delimiter=datetimedelimiter)
 
-            return (start_date, end_date, end_date - start_date)
+        return (start_datetime, end_datetime, end_datetime - start_datetime)
+    elif firstpart.find(datetimedelimiter) != -1 and secondpart.find(datetimedelimiter) == -1:
+        #First part is a datetime, second part is a date
+        start_datetime = parse_datetime(firstpart, delimiter=datetimedelimiter)
+        end_date = parse_date(secondpart)
+
+        return (start_datetime, end_date, datetime.combine(end_date, datetime.min.time()) - start_datetime)
+    elif firstpart.find(datetimedelimiter) == -1 and secondpart.find(datetimedelimiter) != -1:
+        #First part is a date, second part is a datetime
+        start_date = parse_date(firstpart)
+        end_datetime = parse_datetime(secondpart, delimiter=datetimedelimiter)
+
+        return (start_date, end_datetime, end_datetime - datetime.combine(start_date, datetime.min.time()))
+
+    #Both parts are dates
+    start_date = parse_date(firstpart)
+    end_date = parse_date(secondpart)
+
+    return (start_date, end_date, end_date - start_date)
 
 def _date_generator(startdate, timedelta, iterations):
     currentdate = startdate
