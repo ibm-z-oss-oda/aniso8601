@@ -43,7 +43,7 @@ def _parse_duration_prescribed(durationstr, relative):
     elif durationstr.count('.') == 1:
         #There should only ever be 1 letter after a decimal if there is more
         #then one, the string is invalid
-        lettercount = 0;
+        lettercount = 0
 
         for character in durationstr.split('.')[1]:
             if character.isalpha() is True:
