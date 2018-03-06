@@ -9,8 +9,8 @@
 import datetime
 import unittest
 
-from aniso8601.exceptions import DayOutOfBoundsError, WeekOutOfBoundsError, \
-        YearOutOfBoundsError
+from aniso8601.exceptions import DayOutOfBoundsError, ISOFormatError, \
+        WeekOutOfBoundsError, YearOutOfBoundsError
 from aniso8601.date import parse_date, _parse_year, _parse_calendar_day, \
         _parse_calendar_month, _parse_week_day, _parse_week, \
         _parse_ordinal_date, get_date_resolution
@@ -141,7 +141,7 @@ class TestDateParserFunctions(unittest.TestCase):
 
     def test_parse_calendar_month_nohyphen(self):
         #Hyphen is required
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             _parse_calendar_month('198104')
 
     def test_parse_week_day(self):
