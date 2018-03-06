@@ -8,6 +8,7 @@
 
 from datetime import datetime
 from aniso8601.duration import parse_duration
+from aniso8601.exceptions import ISOFormatError
 from aniso8601.time import parse_datetime
 from aniso8601.date import parse_date
 
@@ -30,6 +31,9 @@ def parse_interval(isointervalstr, intervaldelimiter='/', datetimedelimiter='T',
     #Is expressly not supported as there is no way to provide the addtional
     #required context.
 
+    if isointervalstr[0] == 'R':
+        raise ISOFormatError('ISO 8601 repeating intervals must be parsed with parse_repeating_interval.')
+
     interval_parts = _parse_interval_parts(isointervalstr, intervaldelimiter, datetimedelimiter, relative)
 
     return (interval_parts[0], interval_parts[1])
@@ -43,7 +47,7 @@ def parse_repeating_interval(isointervalstr, intervaldelimiter='/', datetimedeli
     #R/<interval>
 
     if isointervalstr[0] != 'R':
-        raise ValueError('ISO 8601 repeating interval must start with an R.')
+        raise ISOFormatError('ISO 8601 repeating interval must start with an R.')
 
     #Parse the number of iterations
     iterationpart, intervalpart = isointervalstr.split(intervaldelimiter, 1)
@@ -63,6 +67,7 @@ def parse_repeating_interval(isointervalstr, intervaldelimiter='/', datetimedeli
 
 def _parse_interval_parts(isointervalstr, intervaldelimiter='/', datetimedelimiter='T', relative=False):
     #Returns a tuple containing the start of the interval, the end of the interval, and the interval timedelta
+
     firstpart, secondpart = isointervalstr.split(intervaldelimiter)
 
     if firstpart[0] == 'P':

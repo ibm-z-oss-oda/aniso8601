@@ -11,6 +11,7 @@ import datetime
 import dateutil.relativedelta
 
 from aniso8601 import compat
+from aniso8601.exceptions import ISOFormatError
 from aniso8601.interval import parse_interval, parse_repeating_interval, _parse_interval_parts
 
 class TestIntervalParserFunctions(unittest.TestCase):
@@ -74,6 +75,17 @@ class TestIntervalParserFunctions(unittest.TestCase):
         resultinterval = parse_interval('1980-03-05 01:01:00/1981-04-05 01:01:00', datetimedelimiter=' ')
         self.assertEqual(resultinterval[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
         self.assertEqual(resultinterval[1], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
+
+    def test_parse_interval_repeating(self):
+        #Parse interval can't parse repeating intervals
+        with self.assertRaises(ISOFormatError):
+            parse_interval('R3/1981-04-05/P1D')
+
+        with self.assertRaises(ISOFormatError):
+            parse_interval('R3/1981-04-05/P0003-06-04T12:30:05.5')
+
+        with self.assertRaises(ISOFormatError):
+            parse_interval('R/PT1H2M/1980-03-05T01:01:00')
 
     def test_parse_interval_suffixgarbage(self):
         #Don't allow garbage after the duration
@@ -230,10 +242,10 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
         #Don't allow garbage after the duration
         #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
         with self.assertRaises(ValueError):
-            parse_interval('R3/1981-04-05/P1Dasdf')
+            parse_repeating_interval('R3/1981-04-05/P1Dasdf')
 
         with self.assertRaises(ValueError):
-            parse_interval('R3/1981-04-05/P0003-06-04T12:30:05.5asdfasdf')
+            parse_repeating_interval('R3/1981-04-05/P0003-06-04T12:30:05.5asdfasdf')
 
     def test_parse_repeating_interval_relative(self):
         results = list(parse_repeating_interval('R3/1981-04-05/P1D', relative=True))
@@ -270,10 +282,10 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
     def test_parse_repeating_interval_relative_suffixgarbage(self):
         #Don't allow garbage after the duration
         #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             parse_interval('R3/1981-04-05/P1Dasdf', relative=True)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             parse_interval('R3/1981-04-05/P0003-06-04T12:30:05.5asdfasdf')
 
     def test_parse_repeating_interval_relative_nodateutil(self):

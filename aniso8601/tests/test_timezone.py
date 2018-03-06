@@ -10,6 +10,7 @@ import unittest
 import datetime
 import pickle
 
+from aniso8601.exceptions import ISOFormatError
 from aniso8601.timezone import parse_timezone, UTCOffset
 
 class TestTimezoneParserFunctions(unittest.TestCase):
@@ -87,27 +88,27 @@ class TestTimezoneParserFunctions(unittest.TestCase):
         self.assertEqual(tzinfoobject.tzname(None), '-12')
 
     def test_parse_timezone_tzstr(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             parse_timezone('Y')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             parse_timezone(' Z')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             parse_timezone('Z ')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             parse_timezone(' Z ')
 
     def test_parse_timezone_negativezero(self):
         #A 0 offset cannot be negative
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             parse_timezone('-00:00')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             parse_timezone('-0000')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             parse_timezone('-00')
 
     def test_pickle(self):
@@ -158,7 +159,7 @@ class TestTimezoneParserFunctions(unittest.TestCase):
 
     def test_datetime_tzinfo_dst(self):
         tzinfoobject = parse_timezone('+04:00')
-        #This would raise ValueError or a TypeError if dst info is invalid
+        #This would raise ISOFormatError or a TypeError if dst info is invalid
         result = datetime.datetime.now(tzinfoobject)
         #Hacky way to make sure the tzinfo is what we'd expect
         self.assertEqual(result.tzinfo.utcoffset(None), datetime.timedelta(hours=4))

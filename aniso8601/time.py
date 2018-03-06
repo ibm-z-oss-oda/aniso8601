@@ -9,8 +9,9 @@
 import datetime
 
 from aniso8601.date import parse_date
-from aniso8601.exceptions import HoursOutOfBoundsError, LeapSecondError, \
-        MidnightBoundsError, MinutesOutOfBoundsError, SecondsOutOfBoundsError
+from aniso8601.exceptions import HoursOutOfBoundsError, ISOFormatError, \
+        LeapSecondError, MidnightBoundsError, MinutesOutOfBoundsError, \
+        SecondsOutOfBoundsError
 from aniso8601.resolution import TimeResolution
 from aniso8601.timezone import parse_timezone
 
@@ -70,7 +71,7 @@ def get_time_resolution(isotimestr):
         #hh
         return TimeResolution.Hours
 
-    raise ValueError('"{0}" is not a valid ISO 8601 time.'.format(isotimestr))
+    raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'.format(isotimestr))
 
 def parse_time(isotimestr):
     #Given a string in any ISO 8601 time format, return a datetime.time object

@@ -8,9 +8,14 @@
 
 import datetime
 
+from aniso8601.exceptions import ISOFormatError
+
 def parse_timezone(tzstr):
     #tzstr can be Z, ±hh:mm, ±hhmm, ±hh
-    if len(tzstr) == 1 and tzstr == 'Z':
+    if 'Z' in tzstr:
+        if len(tzstr) != 1:
+            raise ISOFormatError('"{0}" is not a valid ISO 8601 time offset.'.format(tzstr))
+
         #Z -> UTC
         return UTCOffset(name='UTC', minutes=0)
     elif len(tzstr) == 6:
@@ -26,12 +31,12 @@ def parse_timezone(tzstr):
         tzhour = int(tzstr[1:3])
         tzminute = 0
     else:
-        raise ValueError('String is not a valid ISO 8601 time offset.')
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 time offset.'.format(tzstr))
 
     if tzstr[0] == '+':
         return UTCOffset(name=tzstr, minutes=(tzhour * 60 + tzminute))
     elif tzhour == 0 and tzminute == 0:
-        raise ValueError('Negative ISO 8601 time offset cannot be 0.')
+        raise ISOFormatError('Negative ISO 8601 time offset must not be 0.')
 
     return UTCOffset(name=tzstr, minutes=-(tzhour * 60 + tzminute))
 

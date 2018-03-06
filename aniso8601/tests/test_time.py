@@ -8,7 +8,6 @@
 
 import aniso8601
 import datetime
-import mock
 import unittest
 
 from aniso8601.exceptions import HoursOutOfBoundsError, LeapSecondError, \
@@ -372,7 +371,7 @@ class TestTimeParserFunctions(unittest.TestCase):
         time = _parse_time_naive('01.4567')
         self.assertEqual(time, datetime.time(hour=1, minute=27, second=24, microsecond=120000))
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MinutesOutOfBoundsError):
             _parse_time_naive('00:61')
 
     def test_parse_time_naive_bounds(self):

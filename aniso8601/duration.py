@@ -9,6 +9,7 @@
 import datetime
 
 from aniso8601.date import parse_date
+from aniso8601.exceptions import ISOFormatError
 from aniso8601.time import parse_time
 from aniso8601 import compat
 
@@ -21,7 +22,7 @@ def parse_duration(isodurationstr, relative=False):
     #P<date>T<time>
 
     if isodurationstr[0] != 'P':
-        raise ValueError('ISO 8601 duration must start with a P.')
+        raise ISOFormatError('ISO 8601 duration must start with a P.')
 
     #If Y, M, D, H, S, or W are in the string, assume it is a specified duration
     if _has_any_component(isodurationstr, ['Y', 'M', 'D', 'H', 'S', 'W']) is True:
@@ -35,11 +36,11 @@ def _parse_duration_prescribed(durationstr, relative):
     #Make sure the end character is valid
     #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
     if durationstr[-1] not in ['Y', 'M', 'D', 'H', 'S', 'W']:
-        raise ValueError('ISO 8601 duration must end with a valid character.')
+        raise ISOFormatError('ISO 8601 duration must end with a valid character.')
 
     #Make sure only the lowest order element has decimal precision
     if durationstr.count('.') > 1:
-        raise ValueError('ISO 8601 allows only lowest order element to have a decimal fraction.')
+        raise ISOFormatError('ISO 8601 allows only lowest order element to have a decimal fraction.')
     elif durationstr.count('.') == 1:
         #There should only ever be 1 letter after a decimal if there is more
         #then one, the string is invalid
@@ -50,12 +51,12 @@ def _parse_duration_prescribed(durationstr, relative):
                 lettercount += 1
 
             if lettercount > 1:
-                raise ValueError('ISO 8601 duration must end with a single valid character.')
+                raise ISOFormatError('ISO 8601 duration must end with a single valid character.')
 
     #Do not allow W in combination with other designators
     #https://bitbucket.org/nielsenb/aniso8601/issues/2/week-designators-should-not-be-combinable
     if durationstr.find('W') != -1 and _has_any_component(durationstr, ['Y', 'M', 'D', 'H', 'S']) is True:
-        raise ValueError('ISO 8601 week designators may not be combined with other time designators.')
+        raise ISOFormatError('ISO 8601 week designators may not be combined with other time designators.')
 
     #Parse the elements of the duration
     if durationstr.find('T') == -1:
@@ -69,7 +70,7 @@ def _parse_duration_prescribed(durationstr, relative):
 
             if int(years) != years or int(months) != months:
                 #https://github.com/dateutil/dateutil/issues/40
-                raise ValueError('Fractional months and years are not defined for relative intervals.')
+                raise ISOFormatError('Fractional months and years are not defined for relative intervals.')
 
             return dateutil.relativedelta.relativedelta(years=int(years), months=int(months), weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
         except ImportError:
@@ -86,10 +87,10 @@ def _parse_duration_prescribed_notime(durationstr):
     #Make sure no time portion is included
     #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
     if _has_any_component(durationstr, ['H', 'S']):
-        raise ValueError('ISO 8601 time components not allowed in duration without prescribed time.')
+        raise ISOFormatError('ISO 8601 time components not allowed in duration without prescribed time.')
 
     if _component_order_correct(durationstr, ['P', 'Y', 'M', 'D', 'W']) is False:
-        raise ValueError('ISO 8601 duration components must be in the correct order.')
+        raise ISOFormatError('ISO 8601 duration components must be in the correct order.')
 
     if durationstr.find('Y') != -1:
         years = _parse_duration_element(durationstr, 'Y')
@@ -127,17 +128,17 @@ def _parse_duration_prescribed_time(durationstr):
     #Make sure no time portion is included in the date half
     #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
     if _has_any_component(firsthalf, ['H', 'S']):
-        raise ValueError('ISO 8601 time components not allowed in date portion of duration.')
+        raise ISOFormatError('ISO 8601 time components not allowed in date portion of duration.')
 
     if _component_order_correct(firsthalf, ['P', 'Y', 'M', 'D', 'W']) is False:
-        raise ValueError('ISO 8601 duration components must be in the correct order.')
+        raise ISOFormatError('ISO 8601 duration components must be in the correct order.')
 
     #Make sure no date component is included in the time half
     if _has_any_component(secondhalf, ['Y', 'D']):
-        raise ValueError('ISO 8601 time components not allowed in date portion of duration.')
+        raise ISOFormatError('ISO 8601 time components not allowed in date portion of duration.')
 
     if _component_order_correct(secondhalf, ['T', 'H', 'M', 'S']) is False:
-        raise ValueError('ISO 8601 time components in duration must be in the correct order.')
+        raise ISOFormatError('ISO 8601 time components in duration must be in the correct order.')
 
     if firsthalf.find('Y') != -1:
         years = _parse_duration_element(firsthalf, 'Y')
