@@ -18,3 +18,6 @@ class SecondsOutOfBoundsError(ValueError):
 
 class MidnightBoundsError(ValueError):
     """Raise when parsed time has an hour of 24 but is not midnight."""
+
+class LeapSecondError(NotImplementedError):
+    """Raised when attempting to parse a leap second"""

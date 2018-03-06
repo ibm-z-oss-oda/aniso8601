@@ -9,8 +9,8 @@
 import datetime
 
 from aniso8601.date import parse_date
-from aniso8601.exceptions import HoursOutOfBoundsError, MidnightBoundsError, \
-        MinutesOutOfBoundsError, SecondsOutOfBoundsError
+from aniso8601.exceptions import HoursOutOfBoundsError, LeapSecondError, \
+        MidnightBoundsError, MinutesOutOfBoundsError, SecondsOutOfBoundsError
 from aniso8601.resolution import TimeResolution
 from aniso8601.timezone import parse_timezone
 
@@ -103,14 +103,19 @@ def parse_time(isotimestr):
     #hhmm±hh
     #hh±hh
 
-    (timestr, tzstr) = _split_tz(isotimestr)
+    #State variable, required since LeapSecondErrors only apply when parsing
+    #a datetimetime, and python2 does not support exception chaining
+    leapexception = False
 
-    if tzstr is None:
-        return _parse_time_naive(timestr)
-    else:
-        tzinfo = parse_timezone(tzstr)
+    try:
+        return _parse_time(isotimestr)
+    except LeapSecondError:
+        #Leap second errors only apply when parsing a datetime
+        leapexception = True
 
-    return _parse_time_naive(timestr).replace(tzinfo=tzinfo)
+    if leapexception is True:
+        #Required since python2 does not support exception chaining
+        raise SecondsOutOfBoundsError('Seconds must be less than 60.')
 
 def parse_datetime(isodatetimestr, delimiter='T'):
     #Given a string in ISO 8601 date time format, return a datetime.datetime
@@ -122,9 +127,22 @@ def parse_datetime(isodatetimestr, delimiter='T'):
     isodatestr, isotimestr = isodatetimestr.split(delimiter)
 
     datepart = parse_date(isodatestr)
-    timepart = parse_time(isotimestr)
+
+    timepart = _parse_time(isotimestr)
 
     return datetime.datetime.combine(datepart, timepart)
+
+def _parse_time(isotimestr):
+    #Shim function used to allow parse_time to catch a LeapSecondError and
+    #recast it to a SecondsOutOfBoundsError
+    (timestr, tzstr) = _split_tz(isotimestr)
+
+    if tzstr is None:
+        return _parse_time_naive(timestr)
+    else:
+        tzinfo = parse_timezone(tzstr)
+
+    return _parse_time_naive(timestr).replace(tzinfo=tzinfo)
 
 def _parse_time_naive(timestr):
     #timestr is of the format hh:mm:ss, hh:mm, hhmmss, hhmm, hh
@@ -207,7 +225,10 @@ def _parse_second_time(timestr):
         #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
         secondsdelta = datetime.timedelta(seconds=float(timestr[4:13]))
 
-    if secondsdelta.seconds >= 60:
+    if isohour == 23 and isominute == 59 and secondsdelta.seconds == 60:
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        raise LeapSecondError('Leap seconds are not supported.')
+    elif secondsdelta.seconds >= 60:
         #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
         raise SecondsOutOfBoundsError('Seconds must be less than 60.')
 
