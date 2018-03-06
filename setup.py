@@ -15,7 +15,10 @@ setup(
     author='Brandon Nielsen',
     author_email='nielsenb@jetfuse.net',
     url='https://bitbucket.org/nielsenb/aniso8601',
-    extras_require={'relative': ['python-dateutil']},
+    extras_require={
+        'dev': ['mock', 'python-dateutil'],
+        'relative': ['python-dateutil']
+    },
     packages=['aniso8601'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
