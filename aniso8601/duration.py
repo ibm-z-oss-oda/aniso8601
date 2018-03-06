@@ -9,7 +9,7 @@
 import datetime
 
 from aniso8601.date import parse_date
-from aniso8601.exceptions import ISOFormatError
+from aniso8601.exceptions import ISOFormatError, RelativeValueError
 from aniso8601.time import parse_time
 from aniso8601 import compat
 
@@ -70,7 +70,7 @@ def _parse_duration_prescribed(durationstr, relative):
 
             if int(years) != years or int(months) != months:
                 #https://github.com/dateutil/dateutil/issues/40
-                raise ISOFormatError('Fractional months and years are not defined for relative intervals.')
+                raise RelativeValueError('Fractional months and years are not defined for relative intervals.')
 
             return dateutil.relativedelta.relativedelta(years=int(years), months=int(months), weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
         except ImportError:

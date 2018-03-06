@@ -9,6 +9,9 @@
 class ISOFormatError(ValueError):
     """Raised when ISO 8601 string fails a format check."""
 
+class RelativeValueError(ValueError):
+    """Raised when an invalid value is given for calendar level accuracy."""
+
 class YearOutOfBoundsError(ValueError):
     """Raised when year exceeds limits."""
 

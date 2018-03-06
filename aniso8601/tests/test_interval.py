@@ -11,7 +11,7 @@ import datetime
 import dateutil.relativedelta
 
 from aniso8601 import compat
-from aniso8601.exceptions import ISOFormatError
+from aniso8601.exceptions import ISOFormatError, RelativeValueError
 from aniso8601.interval import parse_interval, parse_repeating_interval, _parse_interval_parts
 
 class TestIntervalParserFunctions(unittest.TestCase):
@@ -23,6 +23,10 @@ class TestIntervalParserFunctions(unittest.TestCase):
         resultinterval = parse_interval('P1M/1981-04-05')
         self.assertEqual(resultinterval[0], datetime.date(year=1981, month=4, day=5))
         self.assertEqual(resultinterval[1], datetime.date(year=1981, month=3, day=6))
+
+        resultinterval = parse_interval('P1.5Y/2018-03-06')
+        self.assertEqual(resultinterval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(resultinterval[1], datetime.date(year=2016, month=9, day=5))
 
         resultinterval = parse_interval('PT1H/2014-11-12')
         self.assertEqual(resultinterval[0], datetime.date(year=2014, month=11, day=12))
@@ -39,6 +43,10 @@ class TestIntervalParserFunctions(unittest.TestCase):
         resultinterval = parse_interval('1981-04-05/P1M1D')
         self.assertEqual(resultinterval[0], datetime.date(year=1981, month=4, day=5))
         self.assertEqual(resultinterval[1], datetime.date(year=1981, month=5, day=6))
+
+        resultinterval = parse_interval('2018-03-06/P2.5M')
+        self.assertEqual(resultinterval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(resultinterval[1], datetime.date(year=2018, month=5, day=20))
 
         resultinterval = parse_interval('2014-11-12/PT1H')
         self.assertEqual(resultinterval[0], datetime.date(year=2014, month=11, day=12))
@@ -197,6 +205,18 @@ class TestRelativeIntervalParserFunctions(unittest.TestCase):
         resultinterval = parse_interval('1980-03-05 01:01:00/1981-04-05 01:01:00', datetimedelimiter=' ', relative=True)
         self.assertEqual(resultinterval[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
         self.assertEqual(resultinterval[1], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
+
+    def test_parse_interval_relative_fractionalyear(self):
+        #Fractional months and years are not defined
+        #https://github.com/dateutil/dateutil/issues/40
+        with self.assertRaises(RelativeValueError):
+            parse_interval('P1.5Y/2018-03-06', relative=True)
+
+    def test_parse_interval_relative_fractionalmonth(self):
+        #Fractional months and years are not defined
+        #https://github.com/dateutil/dateutil/issues/40
+        with self.assertRaises(RelativeValueError):
+            parse_interval('2018-03-06/P2.5M', relative=True)
 
     def test_parse_interval_relative_suffixgarbage(self):
         #Don't allow garbage after the duration

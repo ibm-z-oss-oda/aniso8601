@@ -10,7 +10,7 @@ import datetime
 import unittest
 import dateutil
 
-from aniso8601.exceptions import ISOFormatError
+from aniso8601.exceptions import ISOFormatError, RelativeValueError
 from aniso8601.duration import parse_duration, _parse_duration_prescribed, \
         _parse_duration_combined, _parse_duration_prescribed_notime, \
         _parse_duration_prescribed_time, _parse_duration_element, \
@@ -413,13 +413,13 @@ class TestRelativeDurationParserFunctions(unittest.TestCase):
     def test_parse_duration_prescribed_relative_fractionalyear(self):
         #Fractional months and years are not defined
         #https://github.com/dateutil/dateutil/issues/40
-        with self.assertRaises(ISOFormatError):
+        with self.assertRaises(RelativeValueError):
             _parse_duration_prescribed('P1.5Y', True)
 
     def test_parse_duration_prescribed_relative_fractionalmonth(self):
         #Fractional months and years are not defined
         #https://github.com/dateutil/dateutil/issues/40
-        with self.assertRaises(ISOFormatError):
+        with self.assertRaises(RelativeValueError):
             _parse_duration_prescribed('P1.5M', True)
 
     def test_parse_duration_prescribed_relative_nodateutil(self):
