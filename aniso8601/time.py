@@ -104,18 +104,10 @@ def parse_time(isotimestr):
     #hhmm±hh
     #hh±hh
 
-    #State variable, required since LeapSecondErrors only apply when parsing
-    #a datetimetime, and python2 does not support exception chaining
-    leapexception = False
-
     try:
         return _parse_time(isotimestr)
     except LeapSecondError:
         #Leap second errors only apply when parsing a datetime
-        leapexception = True
-
-    if leapexception is True:
-        #Required since python2 does not support exception chaining
         raise SecondsOutOfBoundsError('Seconds must be less than 60.')
 
 def parse_datetime(isodatetimestr, delimiter='T'):
