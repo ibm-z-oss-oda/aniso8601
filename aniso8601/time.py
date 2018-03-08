@@ -104,11 +104,14 @@ def parse_time(isotimestr):
     #hhmm±hh
     #hh±hh
 
-    try:
-        return _parse_time(isotimestr)
-    except LeapSecondError:
-        #Leap second errors only apply when parsing a datetime
-        raise SecondsOutOfBoundsError('Seconds must be less than 60.')
+    (timestr, tzstr) = _split_tz(isotimestr)
+
+    if tzstr is None:
+        return _parse_time_naive(timestr)
+    else:
+        tzinfo = parse_timezone(tzstr)
+
+    return _parse_time_naive(timestr).replace(tzinfo=tzinfo)
 
 def parse_datetime(isodatetimestr, delimiter='T'):
     #Given a string in ISO 8601 date time format, return a datetime.datetime
@@ -121,21 +124,9 @@ def parse_datetime(isodatetimestr, delimiter='T'):
 
     datepart = parse_date(isodatestr)
 
-    timepart = _parse_time(isotimestr)
+    timepart = parse_time(isotimestr)
 
     return datetime.datetime.combine(datepart, timepart)
-
-def _parse_time(isotimestr):
-    #Shim function used to allow parse_time to catch a LeapSecondError and
-    #recast it to a SecondsOutOfBoundsError
-    (timestr, tzstr) = _split_tz(isotimestr)
-
-    if tzstr is None:
-        return _parse_time_naive(timestr)
-    else:
-        tzinfo = parse_timezone(tzstr)
-
-    return _parse_time_naive(timestr).replace(tzinfo=tzinfo)
 
 def _parse_time_naive(timestr):
     #timestr is of the format hh:mm:ss, hh:mm, hhmmss, hhmm, hh
