@@ -102,6 +102,7 @@ class TestIntervalParserFunctions(unittest.TestCase):
         self.assertEqual(resultinterval[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
         self.assertEqual(resultinterval[1], datetime.datetime(year=1981, month=4, day=5, hour=14, minute=43, second=59, microsecond=999999))
 
+        #Test different separators
         resultinterval = parse_interval('1980-03-05T01:01:00--1981-04-05T01:01:00', intervaldelimiter='--')
         self.assertEqual(resultinterval[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
         self.assertEqual(resultinterval[1], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
@@ -154,6 +155,16 @@ class TestRelativeIntervalParserFunctions(unittest.TestCase):
         self.assertEqual(resultinterval[0], datetime.date(year=2014, month=11, day=12))
         self.assertEqual(resultinterval[1], datetime.datetime(year=2014, month=11, day=11, hour=19, minute=5, second=53, microsecond=500000))
 
+        #Make sure we truncate, not round
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        resultinterval = parse_interval('PT0.0000001S/2018-03-06', relative=True)
+        self.assertEqual(resultinterval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(resultinterval[1], datetime.datetime(year=2018, month=3, day=6))
+
+        resultinterval = parse_interval('PT2.0000048S/2018-03-06', relative=True)
+        self.assertEqual(resultinterval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(resultinterval[1], datetime.datetime(year=2018, month=3, day=5, hour=23, minute=59, second=57, microsecond=999996))
+
         resultinterval = parse_interval('1981-04-05T01:01:00/P1M1DT1M', relative=True)
         self.assertEqual(resultinterval[0], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
         self.assertEqual(resultinterval[1], datetime.datetime(year=1981, month=5, day=6, hour=1, minute=2))
@@ -204,6 +215,16 @@ class TestRelativeIntervalParserFunctions(unittest.TestCase):
         self.assertEqual(resultinterval[0], datetime.date(year=2001, month=3, day=1))
         self.assertEqual(resultinterval[1], datetime.date(year=2000, month=3, day=1))
 
+        #Make sure we truncate, not round
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        resultinterval = parse_interval('2018-03-06/PT0.0000001S', relative=True)
+        self.assertEqual(resultinterval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(resultinterval[1], datetime.datetime(year=2018, month=3, day=6))
+
+        resultinterval = parse_interval('2018-03-06/PT2.0000048S', relative=True)
+        self.assertEqual(resultinterval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(resultinterval[1], datetime.datetime(year=2018, month=3, day=6, hour=0, minute=0, second=2, microsecond=4))
+
         resultinterval = parse_interval('1980-03-05T01:01:00/1981-04-05T01:01:00', relative=True)
         self.assertEqual(resultinterval[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
         self.assertEqual(resultinterval[1], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
@@ -224,6 +245,13 @@ class TestRelativeIntervalParserFunctions(unittest.TestCase):
         self.assertEqual(resultinterval[0], datetime.date(year=1981, month=4, day=5))
         self.assertEqual(resultinterval[1], datetime.date(year=1980, month=3, day=5))
 
+        #Make sure we truncate, not round
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        resultinterval = parse_interval('1980-03-05T01:01:00.0000001/1981-04-05T14:43:59.9999997', relative=True)
+        self.assertEqual(resultinterval[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
+        self.assertEqual(resultinterval[1], datetime.datetime(year=1981, month=4, day=5, hour=14, minute=43, second=59, microsecond=999999))
+
+        #Test different separators
         resultinterval = parse_interval('1980-03-05T01:01:00--1981-04-05T01:01:00', intervaldelimiter='--', relative=True)
         self.assertEqual(resultinterval[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
         self.assertEqual(resultinterval[1], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
