@@ -66,13 +66,13 @@ Leap seconds are currently not supported and attempting to parse one raises a :c
   >>> aniso8601.parse_datetime('2018-03-06T23:59:60')
   Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
-    File "aniso8601/time.py", line 124, in parse_datetime
-      timepart = _parse_time(isotimestr)
-    File "aniso8601/time.py", line 134, in _parse_time
+    File "aniso8601/time.py", line 127, in parse_datetime
+      timepart = parse_time(isotimestr)
+    File "aniso8601/time.py", line 110, in parse_time
       return _parse_time_naive(timestr)
-    File "aniso8601/time.py", line 149, in _parse_time_naive
+    File "aniso8601/time.py", line 140, in _parse_time_naive
       return _RESOLUTION_MAP[get_time_resolution(timestr)](timestr)
-    File "aniso8601/time.py", line 223, in _parse_second_time
+    File "aniso8601/time.py", line 214, in _parse_second_time
       raise LeapSecondError('Leap seconds are not supported.')
   aniso8601.exceptions.LeapSecondError: Leap seconds are not supported.
 
@@ -134,6 +134,19 @@ A decimal fraction is always allowed on the lowest order element of an ISO 8601 
   datetime.time(22, 33, 30)
   >>> aniso8601.parse_time('23.75')
   datetime.time(23, 45)
+
+Leap seconds are currently not supported and attempting to parse one raises a :code:`LeapSecondError`::
+
+  >>> aniso8601.parse_time('23:59:60')
+  Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "aniso8601/time.py", line 110, in parse_time
+      return _parse_time_naive(timestr)
+    File "aniso8601/time.py", line 140, in _parse_time_naive
+      return _RESOLUTION_MAP[get_time_resolution(timestr)](timestr)
+    File "aniso8601/time.py", line 214, in _parse_second_time
+      raise LeapSecondError('Leap seconds are not supported.')
+  aniso8601.exceptions.LeapSecondError: Leap seconds are not supported.
 
 Parsing durations
 -----------------
