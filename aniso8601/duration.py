@@ -220,6 +220,15 @@ def _parse_duration_element(durationstr, elementstr):
         #Replace the comma with a 'full-stop'
         durationstr = durationstr.replace(',', '.')
 
+    if elementstr == 'S':
+        #We truncate seconds to avoid precision issues with microseconds
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        if '.' in durationstr[durationstartindex:durationendindex]:
+            stopindex = durationstr.index('.')
+
+            if durationendindex - stopindex > 7:
+                durationendindex = stopindex + 7
+
     return float(durationstr[durationstartindex:durationendindex])
 
 def _has_any_component(durationstr, components):

@@ -42,6 +42,14 @@ class TestDurationParserFunctions(unittest.TestCase):
         resultduration = parse_duration('PT4H54M6,5S')
         self.assertEqual(resultduration, datetime.timedelta(hours=4, minutes=54, seconds=6.5))
 
+        #Make sure we truncate, not round
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        resultduration = parse_duration('PT0.0000001S')
+        self.assertEqual(resultduration, datetime.timedelta(0))
+
+        resultduration = parse_duration('PT2.0000048S')
+        self.assertEqual(resultduration, datetime.timedelta(seconds=2, microseconds=4))
+
         resultduration = parse_duration('P1Y')
         self.assertEqual(resultduration, datetime.timedelta(days=365))
 
@@ -83,6 +91,11 @@ class TestDurationParserFunctions(unittest.TestCase):
 
         resultduration = parse_duration('P0003-06-04T12:30:05.5')
         self.assertEqual(resultduration, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5.5))
+
+        #Make sure we truncate, not round
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        resultduration = parse_duration('P0001-02-03T14:43:59.9999997')
+        self.assertEqual(resultduration, datetime.timedelta(days=428, hours=14, minutes=43, seconds=59, microseconds=999999))
 
         #Verify overflows
         self.assertEqual(parse_duration('PT36H'), parse_duration('P1DT12H'))
