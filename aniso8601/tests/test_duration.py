@@ -392,6 +392,11 @@ class TestRelativeDurationParserFunctions(unittest.TestCase):
         resultduration = parse_duration('P0003-06-04T12:30:05.5', relative=True)
         self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=3, months=6, days=4, hours=12, minutes=30, seconds=5, microseconds=500000))
 
+        #Make sure we truncate, not round
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        resultduration = parse_duration('P0001-02-03T14:43:59.9999997', relative=True)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=14, minutes=43, seconds=59, microseconds=999999))
+
     def test_parse_duration_prescribed_relative(self):
         resultduration = _parse_duration_prescribed('P1Y', True)
         self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1))
@@ -406,6 +411,14 @@ class TestRelativeDurationParserFunctions(unittest.TestCase):
 
         resultduration = _parse_duration_prescribed('P1.5W', True)
         self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=10.5))
+
+        #Make sure we truncate, not round
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        resultduration = parse_duration('PT0.0000001S', relative=True)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(0))
+
+        resultduration = parse_duration('PT2.0000048S', relative=True)
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(seconds=2.000004))
 
     def test_parse_duration_prescribed_relative_multiplefractions(self):
         with self.assertRaises(ISOFormatError):
