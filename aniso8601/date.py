@@ -218,7 +218,7 @@ def _parse_ordinal_date(datestr):
 
     #Day of year to a date
     #https://stackoverflow.com/questions/2427555/python-question-year-and-day-of-year-to-date
-    parseddate = PythonTimeBuilder.build_date(isoyear, 1, 1) + PythonTimeBuilder.build_timedelta(isoday - 1)
+    parseddate = PythonTimeBuilder.build_date(isoyear, 1, 1) + PythonTimeBuilder.build_timedelta(days=isoday - 1)
 
     #Enforce ordinal day limitation
     #https://bitbucket.org/nielsenb/aniso8601/issues/14/parsing-ordinal-dates-should-only-allow
