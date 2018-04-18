@@ -13,8 +13,7 @@ from aniso8601.exceptions import HoursOutOfBoundsError, LeapSecondError, \
         MidnightBoundsError, MinutesOutOfBoundsError, SecondsOutOfBoundsError
 from aniso8601.resolution import TimeResolution
 from aniso8601.time import get_time_resolution, parse_datetime, parse_time, \
-    _parse_time_naive, _parse_hour, _parse_minute_time, _parse_second_time, \
-    _build_time, _split_tz
+    _parse_hour, _parse_minute_time, _parse_second_time, _split_tz
 
 class TestTimeParserFunctions(unittest.TestCase):
     def test_get_time_resolution(self):
@@ -315,10 +314,10 @@ class TestTimeParserFunctions(unittest.TestCase):
 
     def test_parse_datetime_leapsecond(self):
         #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
-        with self.assertRaises(ValueError):
+        with self.assertRaises(LeapSecondError):
             parse_datetime('2016-12-31T23:59:60+00:00')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(LeapSecondError):
             parse_datetime('2016-12-31T23:59:60')
 
     def test_parse_datetime_spaceseperated(self):
@@ -328,80 +327,6 @@ class TestTimeParserFunctions(unittest.TestCase):
         tzinfoobject = resultdatetime.tzinfo
         self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=12, minutes=34))
         self.assertEqual(tzinfoobject.tzname(None), '-12:34')
-
-    def test_parse_time_naive(self):
-        time = _parse_time_naive('01:23:45')
-        self.assertEqual(time, datetime.time(hour=1, minute=23, second=45))
-
-        time = _parse_time_naive('24:00:00')
-        self.assertEqual(time, datetime.time(hour=0))
-
-        time = _parse_time_naive('23:21:28.512400')
-        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
-
-        time = _parse_time_naive('01:23')
-        self.assertEqual(time, datetime.time(hour=1, minute=23))
-
-        time = _parse_time_naive('24:00')
-        self.assertEqual(time, datetime.time(hour=0))
-
-        time = _parse_time_naive('01:23.4567')
-        self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
-
-        time = _parse_time_naive('012345')
-        self.assertEqual(time, datetime.time(hour=1, minute=23, second=45))
-
-        time = _parse_time_naive('240000')
-        self.assertEqual(time, datetime.time(hour=0))
-
-        time = _parse_time_naive('0123')
-        self.assertEqual(time, datetime.time(hour=1, minute=23))
-
-        time = _parse_time_naive('2400')
-        self.assertEqual(time, datetime.time(hour=0))
-
-        time = _parse_time_naive('01')
-        self.assertEqual(time, datetime.time(hour=1))
-
-        time = _parse_time_naive('24')
-        self.assertEqual(time, datetime.time(hour=0))
-
-        time = _parse_time_naive('232128.512400')
-        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
-
-        time = _parse_time_naive('0123.4567')
-        self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
-
-        time = _parse_time_naive('01.4567')
-        self.assertEqual(time, datetime.time(hour=1, minute=27, second=24, microsecond=120000))
-
-        with self.assertRaises(MinutesOutOfBoundsError):
-            _parse_time_naive('00:61')
-
-    def test_parse_time_naive_bounds(self):
-        #Leap seconds not supported
-        with self.assertRaises(LeapSecondError):
-            _parse_time_naive('23:59:60')
-
-    def test_parse_time_naive_overflow(self):
-        #Seconds must not be greater than or equal to 60
-        with self.assertRaises(SecondsOutOfBoundsError):
-            _parse_time_naive('00:00:60')
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            _parse_time_naive('00:00:61')
-
-        #Minutes must not be greater than 60
-        with self.assertRaises(MinutesOutOfBoundsError):
-            _parse_time_naive('00:61')
-
-    def test_parse_time_naive_tz(self):
-        #These fail because of the timezone being parsed by the naive parser
-        with self.assertRaises(ValueError):
-            _parse_time_naive('00:00:60+00:00')
-
-        with self.assertRaises(ValueError):
-            _parse_time_naive('00:61+00:00')
 
     def test_parse_hour(self):
         time = _parse_hour('01', None)
