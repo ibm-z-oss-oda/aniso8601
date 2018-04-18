@@ -8,6 +8,8 @@
 
 import datetime
 
+from aniso8601.exceptions import RelativeValueError
+
 class BaseTimeBuilder(object):
     @classmethod
     def build_date(cls, year, month, day):
@@ -101,7 +103,7 @@ class RelativeTimeBuilder(PythonTimeBuilder):
 
             if int(years) != years or int(months) != months:
                 #https://github.com/dateutil/dateutil/issues/40
-                raise ValueError('Fractional months and years are not defined for relative intervals.')
+                raise RelativeValueError('Fractional months and years are not defined for relative intervals.')
 
             if milliseconds != 0:
                 fractional_seconds = seconds + (milliseconds / 1000.0)
