@@ -9,7 +9,7 @@
 import unittest
 
 from decimal import Decimal
-from aniso8601.util import decimal_split
+from aniso8601.util import decimal_split, decimal_truncate
 
 class TestUtilFunctions(unittest.TestCase):
     def test_decimal_split(self):
@@ -84,3 +84,31 @@ class TestUtilFunctions(unittest.TestCase):
 
         result = decimal_split(Decimal('-11.1'))
         self.assertEqual(result, (Decimal('-0.1'), Decimal(-11)))
+
+    def test_decimal_truncate(self):
+        result = decimal_truncate(Decimal(0), 1)
+        self.assertEqual(result, Decimal(0))
+
+        result = decimal_truncate(Decimal(1), 2)
+        self.assertEqual(result, Decimal(1))
+
+        result = decimal_truncate(Decimal('1.234'), 3)
+        self.assertEqual(result, Decimal('1.234'))
+
+        result = decimal_truncate(Decimal('1.234'), 2)
+        self.assertEqual(result, Decimal('1.23'))
+
+        result = decimal_truncate(Decimal('.123'), 1)
+        self.assertEqual(result, Decimal('0.1'))
+
+        result = decimal_truncate(Decimal(-1), 2)
+        self.assertEqual(result, Decimal(-1))
+
+        result = decimal_truncate(Decimal('-1.234'), 3)
+        self.assertEqual(result, Decimal('-1.234'))
+
+        result = decimal_truncate(Decimal('-1.234'), 2)
+        self.assertEqual(result, Decimal('-1.23'))
+
+        result = decimal_truncate(Decimal('-.123'), 1)
+        self.assertEqual(result, Decimal('-0.1'))
