@@ -26,7 +26,7 @@ class BaseTimeBuilder(object):
         raise NotImplementedError
 
     @classmethod
-    def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
+    def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, microseconds=0):
         raise NotImplementedError
 
     @classmethod
@@ -89,7 +89,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         return cls.combine(date, time)
 
     @classmethod
-    def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
+    def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, microseconds=0):
         #Note that weeks can be handled without conversion to days
         totaldays = float(years * 365 + months * 30 + days)
 
@@ -113,18 +113,13 @@ class PythonTimeBuilder(BaseTimeBuilder):
         else:
             seconds = int(seconds)
 
-        if int(milliseconds) != milliseconds:
-            milliseconds = float(milliseconds)
-        else:
-            milliseconds = int(milliseconds)
-
         if int(microseconds) != microseconds:
             microseconds = float(microseconds)
         else:
             microseconds = int(microseconds)
 
 
-        return datetime.timedelta(days=totaldays, seconds=seconds, microseconds=microseconds, milliseconds=milliseconds, minutes=minutes, hours=hours, weeks=weeks)
+        return datetime.timedelta(days=totaldays, seconds=seconds, microseconds=microseconds, minutes=minutes, hours=hours, weeks=weeks)
 
     @classmethod
     def combine(cls, date, time):
@@ -132,7 +127,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
 class RelativeTimeBuilder(PythonTimeBuilder):
     @classmethod
-    def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
+    def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, microseconds=0):
         try:
             import dateutil.relativedelta
         except ImportError:
@@ -169,10 +164,6 @@ class RelativeTimeBuilder(PythonTimeBuilder):
             seconds = float(seconds)
         else:
             seconds = int(seconds)
-
-        if milliseconds != 0:
-            #Milliseconds are added to microseconds
-            microseconds += milliseconds * Decimal(1e3)
 
         if int(microseconds) != microseconds:
             microseconds = float(microseconds)

@@ -96,11 +96,11 @@ class TestPythonTimeBuilder(unittest.TestCase):
         self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+1.5', minutes=90)))
 
     def test_build_timedelta(self):
-        timedelta = PythonTimeBuilder.build_timedelta(years=1, months=2, days=3, weeks=4, hours=5, minutes=6, seconds=7, milliseconds=8, microseconds=9.1011)
-        self.assertEqual(timedelta, datetime.timedelta(days=428, seconds=7, microseconds=9.1011, milliseconds=8, minutes=6, hours=5, weeks=4))
+        timedelta = PythonTimeBuilder.build_timedelta(years=1, months=2, days=3, weeks=4, hours=5, minutes=6, seconds=7, microseconds=9.1011)
+        self.assertEqual(timedelta, datetime.timedelta(days=428, seconds=7, microseconds=9.1011, minutes=6, hours=5, weeks=4))
 
-        timedelta = PythonTimeBuilder.build_timedelta(years=1, months=-2, days=3, weeks=-4, hours=5, minutes=-6, seconds=7, milliseconds=-8, microseconds=9.1011)
-        self.assertEqual(timedelta, datetime.timedelta(days=308, seconds=7, microseconds=9.1011, milliseconds=-8, minutes=-6, hours=5, weeks=-4))
+        timedelta = PythonTimeBuilder.build_timedelta(years=1, months=-2, days=3, weeks=-4, hours=5, minutes=-6, seconds=7, microseconds=9.1011)
+        self.assertEqual(timedelta, datetime.timedelta(days=308, seconds=7, microseconds=9.1011, minutes=-6, hours=5, weeks=-4))
 
     def test_build_combine(self):
         date = PythonTimeBuilder.build_date(1, 2, 3)
@@ -169,11 +169,11 @@ class TestRelativeTimeBuilder(unittest.TestCase):
         self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+1.5', minutes=90)))
 
     def test_build_timedelta(self):
-        timedelta = RelativeTimeBuilder.build_timedelta(years=1, months=2, days=3, weeks=4, hours=5, minutes=6, seconds=7, milliseconds=8, microseconds=Decimal('9.1011'))
-        self.assertEqual(timedelta, dateutil.relativedelta.relativedelta(years=1, months=2, days=31, hours=5, minutes=6, seconds=7, microseconds=8009.1011))
+        timedelta = RelativeTimeBuilder.build_timedelta(years=1, months=2, days=3, weeks=4, hours=5, minutes=6, seconds=7, microseconds=Decimal('9.1011'))
+        self.assertEqual(timedelta, dateutil.relativedelta.relativedelta(years=1, months=2, days=31, hours=5, minutes=6, seconds=7, microseconds=9.1011))
 
-        timedelta = RelativeTimeBuilder.build_timedelta(years=1, months=-2, days=3, weeks=-4, hours=5, minutes=-6, seconds=7, milliseconds=-8, microseconds=Decimal('9.1011'))
-        self.assertEqual(timedelta, dateutil.relativedelta.relativedelta(years=1, months=-2, days=-25, hours=5, minutes=-6, seconds=7, microseconds=-7990.8989))
+        timedelta = RelativeTimeBuilder.build_timedelta(years=1, months=-2, days=3, weeks=-4, hours=5, minutes=-6, seconds=7, microseconds=Decimal('9.1011'))
+        self.assertEqual(timedelta, dateutil.relativedelta.relativedelta(years=1, months=-2, days=-25, hours=5, minutes=-6, seconds=7, microseconds=9.1011))
 
     def test_build_timedelta_nodateutil(self):
         import sys
@@ -184,7 +184,7 @@ class TestRelativeTimeBuilder(unittest.TestCase):
         sys.modules['dateutil'] = None
 
         with self.assertRaises(RuntimeError):
-            RelativeTimeBuilder.build_timedelta(years=1, months=2, days=3, weeks=4, hours=5, minutes=6, seconds=7, milliseconds=8, microseconds=9.1011)
+            RelativeTimeBuilder.build_timedelta(years=1, months=2, days=3, weeks=4, hours=5, minutes=6, seconds=7, microseconds=9.1011)
 
         #Reinstall dateutil
         sys.modules['dateutil'] = dateutil
