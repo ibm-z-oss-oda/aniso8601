@@ -57,7 +57,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
             minutes = int(minutes)
 
         if int(seconds) != seconds:
-            fractional_seconds = seconds
+            fractional_seconds = _truncate(seconds, 6)
             seconds = 0
         else:
             seconds = int(seconds)
@@ -113,3 +113,12 @@ class RelativeTimeBuilder(PythonTimeBuilder):
             return dateutil.relativedelta.relativedelta(years=int(years), months=int(months), weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=fractional_seconds, microseconds=microseconds)
         except ImportError:
             raise RuntimeError('dateutil must be installed for relativedelta support.')
+
+def _truncate(f, n):
+    '''Truncates/pads a float f to n decimal places without rounding
+
+    https://stackoverflow.com/a/783927
+    '''
+    s = '%.12f' % f
+    i, _, d = s.partition('.')
+    return float('.'.join([i, (d + '0' * n)[:n]]))
