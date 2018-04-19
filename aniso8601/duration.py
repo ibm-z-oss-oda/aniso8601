@@ -6,6 +6,7 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
+from decimal import Decimal
 from aniso8601 import compat
 from aniso8601.builder import PythonTimeBuilder, RelativeTimeBuilder
 from aniso8601.date import parse_date
@@ -211,7 +212,7 @@ def _parse_duration_element(durationstr, elementstr):
             if durationendindex - stopindex > 7:
                 durationendindex = stopindex + 7
 
-    return float(durationstr[durationstartindex:durationendindex])
+    return Decimal(durationstr[durationstartindex:durationendindex])
 
 def _has_any_component(durationstr, components):
     #Given a duration string, and a list of components, returns True

@@ -6,6 +6,7 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
+from decimal import Decimal, InvalidOperation
 from aniso8601.builder import PythonTimeBuilder
 from aniso8601.date import parse_date
 from aniso8601.exceptions import HoursOutOfBoundsError, ISOFormatError, \
@@ -129,7 +130,10 @@ def parse_datetime(isodatetimestr, delimiter='T'):
 
 def _parse_hour(timestr, tzinfo):
     #Format must be hh or hh.
-    isohour = float(timestr)
+    try:
+        isohour = Decimal(timestr)
+    except InvalidOperation:
+        raise ISOFormatError('Invalid hour string.')
 
     if isohour == 24:
         return PythonTimeBuilder.build_time(hours=0, minutes=0, tzinfo=tzinfo)
@@ -145,11 +149,19 @@ def _parse_minute_time(timestr, tzinfo):
         timestrarray = timestr.split(':')
 
         isohour = int(timestrarray[0])
-        isominute = float(timestrarray[1])  #Minute may now be a fraction
+
+        try:
+            isominute = Decimal(timestrarray[1])  #Minute may now be a fraction
+        except InvalidOperation:
+            raise ISOFormatError('Invalid minute string.')
     else:
         #hhmm or hhmm.
         isohour = int(timestr[0:2])
-        isominute = float(timestr[2:])
+
+        try:
+            isominute = Decimal(timestr[2:])
+        except InvalidOperation:
+            raise ISOFormatError('Invalid minute string.')
 
     if isominute >= 60:
         raise MinutesOutOfBoundsError('Minutes must be less than 60.')
@@ -170,12 +182,20 @@ def _parse_second_time(timestr, tzinfo):
 
         isohour = int(timestrarray[0])
         isominute = int(timestrarray[1])
-        isoseconds = float(timestrarray[2])
+
+        try:
+            isoseconds = Decimal(timestrarray[2])
+        except InvalidOperation:
+            raise ISOFormatError('Invalid second string.')
     else:
         #hhmmss or hhmmss.
         isohour = int(timestr[0:2])
         isominute = int(timestr[2:4])
-        isoseconds = float(timestr[4:])
+
+        try:
+            isoseconds = Decimal(timestr[4:])
+        except InvalidOperation:
+            raise ISOFormatError('Invalid second string.')
 
     if isohour == 23 and isominute == 59 and isoseconds == 60:
         #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is

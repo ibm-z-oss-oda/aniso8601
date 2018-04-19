@@ -8,7 +8,9 @@
 
 import datetime
 
+from decimal import Decimal
 from aniso8601.exceptions import RelativeValueError
+from aniso8601.util import decimal_split, decimal_truncate
 
 class BaseTimeBuilder(object):
     @classmethod
@@ -39,37 +41,39 @@ class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
     def build_time(cls, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
         #Builds a time from the given parts, handling fractional arguments where necessary
-        fractional_hours = 0
-        fractional_minutes = 0
-        fractional_seconds = 0
-        fractional_microseconds = 0
+        fractional_hours = Decimal(0)
+        fractional_minutes = Decimal(0)
+        fractional_seconds = Decimal(0)
 
         if int(hours) != hours:
-            fractional_hours = hours
-            hours = 0
+            fractional_hours, hours = decimal_split(hours)
+            hours = int(hours)
         else:
             hours = int(hours)
 
         if int(minutes) != minutes:
-            fractional_minutes = minutes
-            minutes = 0
+            fractional_minutes, minutes = decimal_split(minutes)
+            minutes = int(minutes)
         else:
             minutes = int(minutes)
 
         if int(seconds) != seconds:
-            fractional_seconds = _truncate(seconds, 6)
-            seconds = 0
+            fractional_seconds, seconds = decimal_split(seconds)
+            seconds = int(seconds)
         else:
             seconds = int(seconds)
 
-        if int(microseconds) != microseconds:
-            fractional_microseconds = microseconds
-            microseconds = 0
-        else:
-            microseconds = int(microseconds)
+        #No fractional microseconds
+        microseconds = int(microseconds)
+
+        #Combine fractions
+        fractional_seconds += (fractional_hours * 60 * 60) + (fractional_minutes * 60)
+
+        #Truncate to microsecond resolution and cast to float
+        fractional_seconds = float(decimal_truncate(fractional_seconds, 6))
 
         #Datetimes don't handle fractional components, so we use a timedelta
-        result_datetime = datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, microsecond=microseconds, tzinfo=tzinfo) + cls.build_timedelta(seconds=fractional_seconds, microseconds=fractional_microseconds, minutes=fractional_minutes, hours=fractional_hours)
+        result_datetime = datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, microsecond=microseconds, tzinfo=tzinfo) + cls.build_timedelta(seconds=fractional_seconds)
 
         if tzinfo is None:
             return result_datetime.time()
@@ -87,7 +91,38 @@ class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
     def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
         #Note that weeks can be handled without conversion to days
-        totaldays = years * 365 + months * 30 + days
+        totaldays = float(years * 365 + months * 30 + days)
+
+        if int(weeks) != weeks:
+            weeks = float(weeks)
+        else:
+            weeks = int(weeks)
+
+        if int(hours) != hours:
+            hours = float(hours)
+        else:
+            hours = int(hours)
+
+        if int(minutes) != minutes:
+            minutes = float(minutes)
+        else:
+            minutes = int(minutes)
+
+        if int(seconds) != seconds:
+            seconds = float(seconds)
+        else:
+            seconds = int(seconds)
+
+        if int(milliseconds) != milliseconds:
+            milliseconds = float(milliseconds)
+        else:
+            milliseconds = int(milliseconds)
+
+        if int(microseconds) != microseconds:
+            microseconds = float(microseconds)
+        else:
+            microseconds = int(microseconds)
+
 
         return datetime.timedelta(days=totaldays, seconds=seconds, microseconds=microseconds, milliseconds=milliseconds, minutes=minutes, hours=hours, weeks=weeks)
 
@@ -100,25 +135,48 @@ class RelativeTimeBuilder(PythonTimeBuilder):
     def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
         try:
             import dateutil.relativedelta
-
-            if int(years) != years or int(months) != months:
-                #https://github.com/dateutil/dateutil/issues/40
-                raise RelativeValueError('Fractional months and years are not defined for relative intervals.')
-
-            if milliseconds != 0:
-                fractional_seconds = seconds + (milliseconds / 1000.0)
-            else:
-                fractional_seconds = seconds
-
-            return dateutil.relativedelta.relativedelta(years=int(years), months=int(months), weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=fractional_seconds, microseconds=microseconds)
         except ImportError:
             raise RuntimeError('dateutil must be installed for relativedelta support.')
 
-def _truncate(f, n):
-    '''Truncates/pads a float f to n decimal places without rounding
+        if int(years) != years or int(months) != months:
+            #https://github.com/dateutil/dateutil/issues/40
+            raise RelativeValueError('Fractional months and years are not defined for relative intervals.')
 
-    https://stackoverflow.com/a/783927
-    '''
-    s = '%.12f' % f
-    i, _, d = s.partition('.')
-    return float('.'.join([i, (d + '0' * n)[:n]]))
+        years = int(years)
+        months = int(months)
+
+        if int(days) != days:
+            days = float(days)
+        else:
+            days = int(days)
+
+        if int(weeks) != weeks:
+            weeks = float(weeks)
+        else:
+            weeks = int(weeks)
+
+        if int(hours) != hours:
+            hours = float(hours)
+        else:
+            hours = int(hours)
+
+        if int(minutes) != minutes:
+            minutes = float(minutes)
+        else:
+            minutes = int(minutes)
+
+        if int(seconds) != seconds:
+            seconds = float(seconds)
+        else:
+            seconds = int(seconds)
+
+        if milliseconds != 0:
+            #Milliseconds are added to microseconds
+            microseconds += milliseconds * Decimal(1e3)
+
+        if int(microseconds) != microseconds:
+            microseconds = float(microseconds)
+        else:
+            microseconds = int(microseconds)
+
+        return dateutil.relativedelta.relativedelta(years=int(years), months=int(months), weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds, microseconds=microseconds)
