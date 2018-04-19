@@ -47,21 +47,18 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
         if int(hours) != hours:
             fractional_hours, hours = decimal_split(hours)
-            hours = int(hours)
-        else:
-            hours = int(hours)
+
+        hours = int(hours)
 
         if int(minutes) != minutes:
             fractional_minutes, minutes = decimal_split(minutes)
-            minutes = int(minutes)
-        else:
-            minutes = int(minutes)
+
+        minutes = int(minutes)
 
         if int(seconds) != seconds:
             fractional_seconds, seconds = decimal_split(seconds)
-            seconds = int(seconds)
-        else:
-            seconds = int(seconds)
+
+        seconds = int(seconds)
 
         #No fractional microseconds
         microseconds = int(microseconds)
