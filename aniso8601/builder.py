@@ -112,7 +112,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
     def build_datetime(cls, year, month, day, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
         #Builds a datetime from the given parts, handling fractional arguments where necessary
-        date = datetime.date(year, month, day)
+        date = cls.build_date(year, month, day)
         time = cls.build_time(hours=hours, minutes=minutes, seconds=seconds, microseconds=microseconds, tzinfo=tzinfo)
 
         return cls.combine(date, time)
