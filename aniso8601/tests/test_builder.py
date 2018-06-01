@@ -10,7 +10,6 @@ import datetime
 import unittest
 import dateutil.relativedelta
 
-from decimal import Decimal
 from aniso8601.builder import BaseTimeBuilder, PythonTimeBuilder, RelativeTimeBuilder
 from aniso8601.timezone import UTCOffset
 
@@ -46,10 +45,10 @@ class TestPythonTimeBuilder(unittest.TestCase):
         time = PythonTimeBuilder.build_time(hours=1, minutes=23)
         self.assertEqual(time, datetime.time(hour=1, minute=23))
 
-        time = PythonTimeBuilder.build_time(hours=1, minutes=Decimal('23.4567'))
+        time = PythonTimeBuilder.build_time(hours=1, minutes='23.4567')
         self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
 
-        time = PythonTimeBuilder.build_time(hours=23, minutes=21, seconds=Decimal('28.512400'))
+        time = PythonTimeBuilder.build_time(hours=23, minutes=21, seconds='28.512400')
         self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
 
         time = PythonTimeBuilder.build_time(hours=23, minutes=21, seconds=28, microseconds=512400)
@@ -61,10 +60,10 @@ class TestPythonTimeBuilder(unittest.TestCase):
         time = PythonTimeBuilder.build_time(hours=1, minutes=23, tzinfo=UTCOffset(name='+1', minutes=60))
         self.assertEqual(time, datetime.time(hour=1, minute=23, tzinfo=UTCOffset(name='+1', minutes=60)))
 
-        time = PythonTimeBuilder.build_time(hours=1, minutes=Decimal('23.4567'), tzinfo=UTCOffset(name='-1', minutes=-60))
+        time = PythonTimeBuilder.build_time(hours=1, minutes='23.4567', tzinfo=UTCOffset(name='-1', minutes=-60))
         self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000, tzinfo=UTCOffset(name='-1', minutes=-60)))
 
-        time = PythonTimeBuilder.build_time(hours=23, minutes=21, seconds=Decimal('28.512400'), tzinfo=UTCOffset(name='+1.5', minutes=90))
+        time = PythonTimeBuilder.build_time(hours=23, minutes=21, seconds='28.512400', tzinfo=UTCOffset(name='+1.5', minutes=90))
         self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+1.5', minutes=90)))
 
         time = PythonTimeBuilder.build_time(hours=23, minutes=21, seconds=28, microseconds=512400, tzinfo=UTCOffset(name='-1.5', minutes=-90))
@@ -74,10 +73,10 @@ class TestPythonTimeBuilder(unittest.TestCase):
         resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5)
         self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5))
 
-        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=1, minutes=Decimal('23.4567'))
+        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=1, minutes='23.4567')
         self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=1, minute=23, second=27, microsecond=402000))
 
-        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds=Decimal('28.512400'))
+        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds='28.512400')
         self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400))
 
         resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds=28, microseconds=512400)
@@ -86,10 +85,10 @@ class TestPythonTimeBuilder(unittest.TestCase):
         resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, tzinfo=UTCOffset(name='UTC', minutes=0))
         self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, tzinfo=UTCOffset(name='UTC', minutes=0)))
 
-        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=1, minutes=Decimal('23.4567'), tzinfo=UTCOffset(name='+1', minutes=60))
+        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=1, minutes='23.4567', tzinfo=UTCOffset(name='+1', minutes=60))
         self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=1, minute=23, second=27, microsecond=402000, tzinfo=UTCOffset(name='+1', minutes=60)))
 
-        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds=Decimal('28.512400'), tzinfo=UTCOffset(name='-1', minutes=-60))
+        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds='28.512400', tzinfo=UTCOffset(name='-1', minutes=-60))
         self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='-1', minutes=-60)))
 
         resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds=28, microseconds=512400, tzinfo=UTCOffset(name='+1.5', minutes=90))
@@ -119,10 +118,10 @@ class TestRelativeTimeBuilder(unittest.TestCase):
         time = RelativeTimeBuilder.build_time(hours=1, minutes=23)
         self.assertEqual(time, datetime.time(hour=1, minute=23))
 
-        time = RelativeTimeBuilder.build_time(hours=1, minutes=Decimal('23.4567'))
+        time = RelativeTimeBuilder.build_time(hours=1, minutes='23.4567')
         self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
 
-        time = RelativeTimeBuilder.build_time(hours=23, minutes=21, seconds=Decimal('28.512400'))
+        time = RelativeTimeBuilder.build_time(hours=23, minutes=21, seconds='28.512400')
         self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
 
         time = RelativeTimeBuilder.build_time(hours=23, minutes=21, seconds=28, microseconds=512400)
@@ -134,10 +133,10 @@ class TestRelativeTimeBuilder(unittest.TestCase):
         time = RelativeTimeBuilder.build_time(hours=1, minutes=23, tzinfo=UTCOffset(name='+1', minutes=60))
         self.assertEqual(time, datetime.time(hour=1, minute=23, tzinfo=UTCOffset(name='+1', minutes=60)))
 
-        time = RelativeTimeBuilder.build_time(hours=1, minutes=Decimal('23.4567'), tzinfo=UTCOffset(name='-1', minutes=-60))
+        time = RelativeTimeBuilder.build_time(hours=1, minutes='23.4567', tzinfo=UTCOffset(name='-1', minutes=-60))
         self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000, tzinfo=UTCOffset(name='-1', minutes=-60)))
 
-        time = RelativeTimeBuilder.build_time(hours=23, minutes=21, seconds=Decimal('28.512400'), tzinfo=UTCOffset(name='+1.5', minutes=90))
+        time = RelativeTimeBuilder.build_time(hours=23, minutes=21, seconds='28.512400', tzinfo=UTCOffset(name='+1.5', minutes=90))
         self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+1.5', minutes=90)))
 
         time = RelativeTimeBuilder.build_time(hours=23, minutes=21, seconds=28, microseconds=512400, tzinfo=UTCOffset(name='-1.5', minutes=-90))
@@ -147,10 +146,10 @@ class TestRelativeTimeBuilder(unittest.TestCase):
         resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5)
         self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5))
 
-        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=1, minutes=Decimal('23.4567'))
+        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=1, minutes='23.4567')
         self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=1, minute=23, second=27, microsecond=402000))
 
-        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds=Decimal('28.512400'))
+        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds='28.512400')
         self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400))
 
         resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds=28, microseconds=512400)
@@ -159,20 +158,20 @@ class TestRelativeTimeBuilder(unittest.TestCase):
         resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, tzinfo=UTCOffset(name='UTC', minutes=0))
         self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, tzinfo=UTCOffset(name='UTC', minutes=0)))
 
-        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=1, minutes=Decimal('23.4567'), tzinfo=UTCOffset(name='+1', minutes=60))
+        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=1, minutes='23.4567', tzinfo=UTCOffset(name='+1', minutes=60))
         self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=1, minute=23, second=27, microsecond=402000, tzinfo=UTCOffset(name='+1', minutes=60)))
 
-        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds=Decimal('28.512400'), tzinfo=UTCOffset(name='-1', minutes=-60))
+        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds='28.512400', tzinfo=UTCOffset(name='-1', minutes=-60))
         self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='-1', minutes=-60)))
 
         resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds=28, microseconds=512400, tzinfo=UTCOffset(name='+1.5', minutes=90))
         self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+1.5', minutes=90)))
 
     def test_build_timedelta(self):
-        timedelta = RelativeTimeBuilder.build_timedelta(years=1, months=2, days=3, weeks=4, hours=5, minutes=6, seconds=7, microseconds=Decimal('9.1011'))
+        timedelta = RelativeTimeBuilder.build_timedelta(years=1, months=2, days=3, weeks=4, hours=5, minutes=6, seconds=7, microseconds='9.1011')
         self.assertEqual(timedelta, dateutil.relativedelta.relativedelta(years=1, months=2, days=31, hours=5, minutes=6, seconds=7, microseconds=9.1011))
 
-        timedelta = RelativeTimeBuilder.build_timedelta(years=1, months=-2, days=3, weeks=-4, hours=5, minutes=-6, seconds=7, microseconds=Decimal('9.1011'))
+        timedelta = RelativeTimeBuilder.build_timedelta(years=1, months=-2, days=3, weeks=-4, hours=5, minutes=-6, seconds=7, microseconds='9.1011')
         self.assertEqual(timedelta, dateutil.relativedelta.relativedelta(years=1, months=-2, days=-25, hours=5, minutes=-6, seconds=7, microseconds=9.1011))
 
     def test_build_timedelta_nodateutil(self):

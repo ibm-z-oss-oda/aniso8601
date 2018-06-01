@@ -8,9 +8,9 @@
 
 import datetime
 
-from decimal import Decimal
-from aniso8601.exceptions import RelativeValueError
-from aniso8601.util import decimal_split, decimal_truncate
+from aniso8601.exceptions import HoursOutOfBoundsError, ISOFormatError, \
+        LeapSecondError, MidnightBoundsError, MinutesOutOfBoundsError, \
+        RelativeValueError, SecondsOutOfBoundsError
 
 class BaseTimeBuilder(object):
     @classmethod
@@ -41,36 +41,68 @@ class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
     def build_time(cls, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
         #Builds a time from the given parts, handling fractional arguments where necessary
-        fractional_hours = Decimal(0)
-        fractional_minutes = Decimal(0)
-        fractional_seconds = Decimal(0)
+        float_hours = float(0)
+        float_minutes = float(0)
+        float_seconds = float(0)
 
-        if int(hours) != hours:
-            fractional_hours, hours = decimal_split(hours)
+        try:
+            if '.' in str(hours):
+                float_hours = float(hours)
+                hours = 0
 
-        hours = int(hours)
+            hours = int(hours)
+        except ValueError:
+            raise ISOFormatError('Invalid hour string.')
 
-        if int(minutes) != minutes:
-            fractional_minutes, minutes = decimal_split(minutes)
+        try:
+            if '.' in str(minutes):
+                float_minutes = float(minutes)
+                minutes = 0
 
-        minutes = int(minutes)
+            minutes = int(minutes)
+        except ValueError:
+            raise ISOFormatError('Invalid minute string.')
 
-        if int(seconds) != seconds:
-            fractional_seconds, seconds = decimal_split(seconds)
+        try:
+            if '.' in str(seconds):
+                float_seconds = float(seconds[0:str(seconds).index('.') + 7])
+                seconds = 0
 
-        seconds = int(seconds)
+            seconds = int(seconds)
+        except ValueError:
+            raise ISOFormatError('Invalid second string.')
 
         #No fractional microseconds
-        microseconds = int(microseconds)
+        try:
+            microseconds = int(microseconds)
+        except ValueError:
+            raise ISOFormatError('Invalid microsecond string.')
 
-        #Combine fractions
-        fractional_seconds += (fractional_hours * 60 * 60) + (fractional_minutes * 60)
+        #Range checks
+        if hours == 23 and float_hours == 0 and minutes == 59 and float_minutes == 0 and seconds == 60 and float_seconds == 0:
+            #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+            raise LeapSecondError('Leap seconds are not supported.')
 
-        #Truncate to microsecond resolution and cast to float
-        fractional_seconds = float(decimal_truncate(fractional_seconds, 6))
+        if hours == 24 and float_hours == 0 and (minutes != 0 or float_minutes != 0 or seconds != 0 or float_seconds != 0 or microseconds != 0):
+            raise MidnightBoundsError('Hour 24 may only represent midnight.')
+
+        if hours > 24 or float_hours > 24:
+            raise HoursOutOfBoundsError('Hour must be between 0..24 with 24 representing midnight.')
+
+        if minutes >= 60 or float_minutes >= 60:
+            raise MinutesOutOfBoundsError('Minutes must be less than 60.')
+
+        if seconds >= 60 or float_seconds >= 60:
+            raise SecondsOutOfBoundsError('Seconds must be less than 60.')
+
+        #Fix ranges that have passed range checks
+        if hours == 24:
+            hours = 0
+            minutes = 0
+            seconds = 0
 
         #Datetimes don't handle fractional components, so we use a timedelta
-        result_datetime = datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, microsecond=microseconds, tzinfo=tzinfo) + cls.build_timedelta(seconds=fractional_seconds)
+        result_datetime = datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, microsecond=microseconds, tzinfo=tzinfo) + cls.build_timedelta(hours=float_hours, minutes=float_minutes, seconds=float_seconds)
 
         if tzinfo is None:
             return result_datetime.time()
@@ -90,31 +122,30 @@ class PythonTimeBuilder(BaseTimeBuilder):
         #Note that weeks can be handled without conversion to days
         totaldays = float(years * 365 + months * 30 + days)
 
-        if int(weeks) != weeks:
+        if '.' in str(weeks):
             weeks = float(weeks)
         else:
             weeks = int(weeks)
 
-        if int(hours) != hours:
+        if '.' in str(hours):
             hours = float(hours)
         else:
             hours = int(hours)
 
-        if int(minutes) != minutes:
+        if '.' in str(minutes):
             minutes = float(minutes)
         else:
             minutes = int(minutes)
 
-        if int(seconds) != seconds:
+        if '.' in str(seconds):
             seconds = float(seconds)
         else:
             seconds = int(seconds)
 
-        if int(microseconds) != microseconds:
+        if '.' in str(microseconds):
             microseconds = float(microseconds)
         else:
             microseconds = int(microseconds)
-
 
         return datetime.timedelta(days=totaldays, seconds=seconds, microseconds=microseconds, minutes=minutes, hours=hours, weeks=weeks)
 
@@ -137,32 +168,32 @@ class RelativeTimeBuilder(PythonTimeBuilder):
         years = int(years)
         months = int(months)
 
-        if int(days) != days:
+        if '.' in str(days):
             days = float(days)
         else:
             days = int(days)
 
-        if int(weeks) != weeks:
+        if '.' in str(weeks):
             weeks = float(weeks)
         else:
             weeks = int(weeks)
 
-        if int(hours) != hours:
+        if '.' in str(hours):
             hours = float(hours)
         else:
             hours = int(hours)
 
-        if int(minutes) != minutes:
+        if '.' in str(minutes):
             minutes = float(minutes)
         else:
             minutes = int(minutes)
 
-        if int(seconds) != seconds:
+        if '.' in str(seconds):
             seconds = float(seconds)
         else:
             seconds = int(seconds)
 
-        if int(microseconds) != microseconds:
+        if '.' in str(microseconds):
             microseconds = float(microseconds)
         else:
             microseconds = int(microseconds)

@@ -6,12 +6,9 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-from decimal import Decimal, InvalidOperation
 from aniso8601.builder import PythonTimeBuilder
 from aniso8601.date import parse_date
-from aniso8601.exceptions import HoursOutOfBoundsError, ISOFormatError, \
-        LeapSecondError, MidnightBoundsError, MinutesOutOfBoundsError, \
-        SecondsOutOfBoundsError
+from aniso8601.exceptions import ISOFormatError
 from aniso8601.resolution import TimeResolution
 from aniso8601.timezone import parse_timezone
 
@@ -130,92 +127,37 @@ def parse_datetime(isodatetimestr, delimiter='T'):
 
 def _parse_hour(timestr, tzinfo):
     #Format must be hh or hh.
-    try:
-        isohour = Decimal(timestr)
-    except InvalidOperation:
-        raise ISOFormatError('Invalid hour string.')
+    hourstr = timestr
 
-    if isohour == 24:
+    if hourstr == '24':
         return PythonTimeBuilder.build_time(hours=0, minutes=0, tzinfo=tzinfo)
-    elif isohour > 24:
-        raise HoursOutOfBoundsError('Hour must be between 0..24 with 24 representing midnight.')
 
-    return PythonTimeBuilder.build_time(hours=isohour, tzinfo=tzinfo)
+    return PythonTimeBuilder.build_time(hours=hourstr, tzinfo=tzinfo)
 
 def _parse_minute_time(timestr, tzinfo):
     #Format must be hhmm, hhmm., hh:mm or hh:mm.
     if timestr.count(':') == 1:
         #hh:mm or hh:mm.
-        timestrarray = timestr.split(':')
-
-        isohour = int(timestrarray[0])
-
-        try:
-            isominute = Decimal(timestrarray[1])  #Minute may now be a fraction
-        except InvalidOperation:
-            raise ISOFormatError('Invalid minute string.')
+        hourstr, minutestr = timestr.split(':')
     else:
         #hhmm or hhmm.
-        isohour = int(timestr[0:2])
+        hourstr = timestr[0:2]
+        minutestr = timestr[2:]
 
-        try:
-            isominute = Decimal(timestr[2:])
-        except InvalidOperation:
-            raise ISOFormatError('Invalid minute string.')
-
-    if isominute >= 60:
-        raise MinutesOutOfBoundsError('Minutes must be less than 60.')
-
-    if isohour == 24:
-        if isominute != 0:
-            raise MidnightBoundsError('Hour 24 may only represent midnight.')
-
-        return PythonTimeBuilder.build_time(hours=0, minutes=0, tzinfo=tzinfo)
-
-    return PythonTimeBuilder.build_time(hours=isohour, minutes=isominute, tzinfo=tzinfo)
+    return PythonTimeBuilder.build_time(hours=hourstr, minutes=minutestr, tzinfo=tzinfo)
 
 def _parse_second_time(timestr, tzinfo):
     #Format must be hhmmss, hhmmss., hh:mm:ss or hh:mm:ss.
     if timestr.count(':') == 2:
         #hh:mm:ss or hh:mm:ss.
-        timestrarray = timestr.split(':')
-
-        isohour = int(timestrarray[0])
-        isominute = int(timestrarray[1])
-
-        try:
-            isoseconds = Decimal(timestrarray[2])
-        except InvalidOperation:
-            raise ISOFormatError('Invalid second string.')
+        hourstr, minutestr, secondstr = timestr.split(':')
     else:
         #hhmmss or hhmmss.
-        isohour = int(timestr[0:2])
-        isominute = int(timestr[2:4])
+        hourstr = timestr[0:2]
+        minutestr = timestr[2:4]
+        secondstr = timestr[4:]
 
-        try:
-            isoseconds = Decimal(timestr[4:])
-        except InvalidOperation:
-            raise ISOFormatError('Invalid second string.')
-
-    if isohour == 23 and isominute == 59 and isoseconds == 60:
-        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
-        raise LeapSecondError('Leap seconds are not supported.')
-
-    if isoseconds >= 60:
-        #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
-        raise SecondsOutOfBoundsError('Seconds must be less than 60.')
-
-    if isominute >= 60:
-        raise MinutesOutOfBoundsError('Minutes must be less than 60.')
-
-    if isohour == 24:
-        #Midnight, see 4.2.1, 4.2.3
-        if isominute != 0 or isoseconds != 0:
-            raise MidnightBoundsError('Hour 24 may only represent midnight.')
-
-        return PythonTimeBuilder.build_time(hours=0, minutes=0, tzinfo=tzinfo)
-
-    return PythonTimeBuilder.build_time(hours=isohour, minutes=isominute, seconds=isoseconds, tzinfo=tzinfo)
+    return PythonTimeBuilder.build_time(hours=hourstr, minutes=minutestr, seconds=secondstr, tzinfo=tzinfo)
 
 def _split_tz(isotimestr):
     if isotimestr.find('+') != -1:
