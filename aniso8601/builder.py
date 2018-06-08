@@ -10,7 +10,7 @@ import datetime
 
 from aniso8601.exceptions import HoursOutOfBoundsError, ISOFormatError, \
         LeapSecondError, MidnightBoundsError, MinutesOutOfBoundsError, \
-        RelativeValueError, SecondsOutOfBoundsError
+        RelativeValueError, SecondsOutOfBoundsError, YearOutOfBoundsError
 
 class BaseTimeBuilder(object):
     @classmethod
@@ -36,6 +36,25 @@ class BaseTimeBuilder(object):
 class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
     def build_date(cls, year, month, day):
+        try:
+            year = int(year)
+        except ValueError:
+            raise ISOFormatError('Invalid year string.')
+
+        try:
+            month = int(month)
+        except ValueError:
+            raise ISOFormatError('Invalid month string.')
+
+        try:
+            day = int(day)
+        except ValueError:
+            raise ISOFormatError('Invalid day string.')
+
+        #Range checks
+        if year == 0:
+            raise YearOutOfBoundsError('Year must be between 1..9999.')
+
         return datetime.date(year, month, day)
 
     @classmethod
@@ -119,33 +138,63 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
     @classmethod
     def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, microseconds=0):
+        try:
+            years = float(years)
+        except ValueError:
+            raise ISOFormatError('Invalid year string.')
+
+        try:
+            months = float(months)
+        except ValueError:
+            raise ISOFormatError('Invalid month string.')
+
+        try:
+            days = float(days)
+        except ValueError:
+            raise ISOFormatError('Invalid day string.')
+
+        try:
+            if '.' in str(weeks):
+                weeks = float(weeks)
+            else:
+                weeks = int(weeks)
+        except ValueError:
+            raise ISOFormatError('Invalid week string.')
+
+        try:
+            if '.' in str(hours):
+                hours = float(hours)
+            else:
+                hours = int(hours)
+        except ValueError:
+            raise ISOFormatError('Invalid hour string.')
+
+        try:
+            if '.' in str(minutes):
+                minutes = float(minutes)
+            else:
+                minutes = int(minutes)
+        except ValueError:
+            raise ISOFormatError('Invalid minute string.')
+
+        try:
+            if '.' in str(seconds):
+                seconds = float(seconds)
+            else:
+                seconds = int(seconds)
+        except ValueError:
+            raise ISOFormatError('Invalid second string.')
+
+        try:
+            if '.' in str(microseconds):
+                microseconds = float(microseconds)
+            else:
+                microseconds = int(microseconds)
+        except ValueError:
+            raise ISOFormatError('Invalid microsecond string.')
+
         #Note that weeks can be handled without conversion to days
-        totaldays = float(years * 365 + months * 30 + days)
-
-        if '.' in str(weeks):
-            weeks = float(weeks)
-        else:
-            weeks = int(weeks)
-
-        if '.' in str(hours):
-            hours = float(hours)
-        else:
-            hours = int(hours)
-
-        if '.' in str(minutes):
-            minutes = float(minutes)
-        else:
-            minutes = int(minutes)
-
-        if '.' in str(seconds):
-            seconds = float(seconds)
-        else:
-            seconds = int(seconds)
-
-        if '.' in str(microseconds):
-            microseconds = float(microseconds)
-        else:
-            microseconds = int(microseconds)
+        totaldays = years * 365 + months * 30 + days
 
         return datetime.timedelta(days=totaldays, seconds=seconds, microseconds=microseconds, minutes=minutes, hours=hours, weeks=weeks)
 
