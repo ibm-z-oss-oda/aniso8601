@@ -210,7 +210,7 @@ class RelativeTimeBuilder(PythonTimeBuilder):
         except ImportError:
             raise RuntimeError('dateutil must be installed for relativedelta support.')
 
-        if int(years) != years or int(months) != months:
+        if '.' in str(years) or '.' in str(months):
             #https://github.com/dateutil/dateutil/issues/40
             raise RelativeValueError('Fractional months and years are not defined for relative intervals.')
 

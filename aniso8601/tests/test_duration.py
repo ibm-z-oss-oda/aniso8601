@@ -10,7 +10,6 @@ import datetime
 import unittest
 import dateutil
 
-from decimal import Decimal
 from aniso8601.exceptions import ISOFormatError, RelativeValueError
 from aniso8601.builder import BaseTimeBuilder, PythonTimeBuilder, RelativeTimeBuilder
 from aniso8601.duration import parse_duration, _parse_duration_prescribed, \
@@ -366,15 +365,15 @@ class TestDurationParserFunctions(unittest.TestCase):
             parse_duration('P0003-06-04T12:30:05.5asdfasdf')
 
     def test_parse_duration_element(self):
-        self.assertEqual(_parse_duration_element('P1Y2M3D', 'Y'), 1)
-        self.assertEqual(_parse_duration_element('P1Y2M3D', 'M'), 2)
-        self.assertEqual(_parse_duration_element('P1Y2M3D', 'D'), 3)
-        self.assertEqual(_parse_duration_element('T4H5M6.1234S', 'H'), 4)
-        self.assertEqual(_parse_duration_element('T4H5M6.1234S', 'M'), 5)
-        self.assertEqual(_parse_duration_element('T4H5M6.1234S', 'S'), Decimal('6.1234'))
-        self.assertEqual(_parse_duration_element('PT4H54M6,5S', 'H'), 4)
-        self.assertEqual(_parse_duration_element('PT4H54M6,5S', 'M'), 54)
-        self.assertEqual(_parse_duration_element('PT4H54M6,5S', 'S'), Decimal('6.5'))
+        self.assertEqual(_parse_duration_element('P1Y2M3D', 'Y'), '1')
+        self.assertEqual(_parse_duration_element('P1Y2M3D', 'M'), '2')
+        self.assertEqual(_parse_duration_element('P1Y2M3D', 'D'), '3')
+        self.assertEqual(_parse_duration_element('T4H5M6.1234S', 'H'), '4')
+        self.assertEqual(_parse_duration_element('T4H5M6.1234S', 'M'), '5')
+        self.assertEqual(_parse_duration_element('T4H5M6.1234S', 'S'), '6.1234')
+        self.assertEqual(_parse_duration_element('PT4H54M6,5S', 'H'), '4')
+        self.assertEqual(_parse_duration_element('PT4H54M6,5S', 'M'), '54')
+        self.assertEqual(_parse_duration_element('PT4H54M6,5S', 'S'), '6.5')
 
     def test_has_any_component(self):
         self.assertTrue(_has_any_component('P1Y', ['Y', 'M']))

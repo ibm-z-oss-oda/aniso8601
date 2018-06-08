@@ -6,11 +6,10 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-from decimal import Decimal
 from aniso8601 import compat
 from aniso8601.builder import PythonTimeBuilder, RelativeTimeBuilder
 from aniso8601.date import parse_date
-from aniso8601.exceptions import ISOFormatError, RelativeValueError
+from aniso8601.exceptions import ISOFormatError
 from aniso8601.time import parse_time
 
 def parse_duration(isodurationstr, relative=False):
@@ -81,31 +80,31 @@ def _parse_duration_prescribed_notime(durationstr, builder):
         raise ISOFormatError('ISO 8601 duration components must be in the correct order.')
 
     if durationstr.find('Y') != -1:
-        years = _parse_duration_element(durationstr, 'Y')
+        yearstr = _parse_duration_element(durationstr, 'Y')
     else:
-        years = 0
+        yearstr = '0'
 
     if durationstr.find('M') != -1:
-        months = _parse_duration_element(durationstr, 'M')
+        monthstr = _parse_duration_element(durationstr, 'M')
     else:
-        months = 0
+        monthstr = '0'
 
     if durationstr.find('W') != -1:
-        weeks = _parse_duration_element(durationstr, 'W')
+        weekstr = _parse_duration_element(durationstr, 'W')
     else:
-        weeks = 0
+        weekstr = '0'
 
     if durationstr.find('D') != -1:
-        days = _parse_duration_element(durationstr, 'D')
+        daystr = _parse_duration_element(durationstr, 'D')
     else:
-        days = 0
+        daystr = '0'
 
     #No hours, minutes or seconds
-    hours = 0
-    minutes = 0
-    seconds = 0
+    hourstr = '0'
+    minutestr = '0'
+    secondstr = '0'
 
-    return builder.build_timedelta(years=years, months=months, weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
+    return builder.build_timedelta(years=yearstr, months=monthstr, weeks=weekstr, days=daystr, hours=hourstr, minutes=minutestr, seconds=secondstr)
 
 def _parse_duration_prescribed_time(durationstr, builder):
     #durationstr can be of the form PnYnMnDTnHnMnS
@@ -129,42 +128,41 @@ def _parse_duration_prescribed_time(durationstr, builder):
         raise ISOFormatError('ISO 8601 time components in duration must be in the correct order.')
 
     if firsthalf.find('Y') != -1:
-        years = _parse_duration_element(firsthalf, 'Y')
+        yearstr = _parse_duration_element(firsthalf, 'Y')
     else:
-        years = 0
+        yearstr = '0'
 
     if firsthalf.find('M') != -1:
-        months = _parse_duration_element(firsthalf, 'M')
+        monthstr = _parse_duration_element(firsthalf, 'M')
     else:
-        months = 0
+        monthstr = '0'
 
     if firsthalf.find('D') != -1:
-        days = _parse_duration_element(firsthalf, 'D')
+        daystr = _parse_duration_element(firsthalf, 'D')
     else:
-        days = 0
+        daystr = '0'
 
     if secondhalf.find('H') != -1:
-        hours = _parse_duration_element(secondhalf, 'H')
+        hourstr = _parse_duration_element(secondhalf, 'H')
     else:
-        hours = 0
+        hourstr = '0'
 
     if secondhalf.find('M') != -1:
-        minutes = _parse_duration_element(secondhalf, 'M')
+        minutestr = _parse_duration_element(secondhalf, 'M')
     else:
-        minutes = 0
+        minutestr = '0'
 
     if secondhalf.find('S') != -1:
-        seconds = _parse_duration_element(secondhalf, 'S')
+        secondstr = _parse_duration_element(secondhalf, 'S')
     else:
-        seconds = 0
+        secondstr = '0'
 
     #Weeks can't be included
-    weeks = 0
+    weekstr = '0'
 
-    return builder.build_timedelta(years=years, months=months, weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
+    return builder.build_timedelta(years=yearstr, months=monthstr, weeks=weekstr, days=daystr, hours=hourstr, minutes=minutestr, seconds=secondstr)
 
 def _parse_duration_combined(durationstr, relative):
-
     #Period of the form P<date>T<time>
     builder = PythonTimeBuilder
 
@@ -177,7 +175,7 @@ def _parse_duration_combined(durationstr, relative):
     datevalue = parse_date(datepart)
     timevalue = parse_time(timepart)
 
-    return builder.build_timedelta(years=datevalue.year, months=datevalue.month, days=datevalue.day, hours=timevalue.hour, minutes=timevalue.minute, seconds=timevalue.second, microseconds=timevalue.microsecond)
+    return builder.build_timedelta(years=str(datevalue.year), months=str(datevalue.month), days=str(datevalue.day), hours=str(timevalue.hour), minutes=str(timevalue.minute), seconds=str(timevalue.second), microseconds=str(timevalue.microsecond))
 
 def _parse_duration_element(durationstr, elementstr):
     #Extracts the specified portion of a duration, for instance, given:
@@ -212,7 +210,7 @@ def _parse_duration_element(durationstr, elementstr):
             if durationendindex - stopindex > 7:
                 durationendindex = stopindex + 7
 
-    return Decimal(durationstr[durationstartindex:durationendindex])
+    return durationstr[durationstartindex:durationendindex]
 
 def _has_any_component(durationstr, components):
     #Given a duration string, and a list of components, returns True
