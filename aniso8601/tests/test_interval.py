@@ -475,7 +475,7 @@ class TestIntervalPartParserFunctions(unittest.TestCase):
         resultinterval = _parse_interval_parts('PT4H54M6.5S/2014-11-12', relative=True)
         self.assertEqual(resultinterval[0], datetime.date(year=2014, month=11, day=12))
         self.assertEqual(resultinterval[1], datetime.datetime(year=2014, month=11, day=11, hour=19, minute=5, second=53, microsecond=500000))
-        self.assertEqual(resultinterval[2], -dateutil.relativedelta.relativedelta(hours=4, minutes=54, seconds=6.5))
+        self.assertEqual(resultinterval[2], -dateutil.relativedelta.relativedelta(hours=4, minutes=54, seconds=6, microseconds=500000))
 
         resultinterval = _parse_interval_parts('1981-04-05T01:01:00/P1M1DT1M', relative=True)
         self.assertEqual(resultinterval[0], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
@@ -495,7 +495,7 @@ class TestIntervalPartParserFunctions(unittest.TestCase):
         resultinterval = _parse_interval_parts('2014-11-12/PT4H54M6.5S', relative=True)
         self.assertEqual(resultinterval[0], datetime.date(year=2014, month=11, day=12))
         self.assertEqual(resultinterval[1], datetime.datetime(year=2014, month=11, day=12, hour=4, minute=54, second=6, microsecond=500000))
-        self.assertEqual(resultinterval[2], dateutil.relativedelta.relativedelta(hours=4, minutes=54, seconds=6.5))
+        self.assertEqual(resultinterval[2], dateutil.relativedelta.relativedelta(hours=4, minutes=54, seconds=6, microseconds=500000))
 
         #Some relativedelta examples
         #http://dateutil.readthedocs.org/en/latest/examples.html#relativedelta-examples

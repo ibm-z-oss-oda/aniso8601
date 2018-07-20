@@ -70,7 +70,7 @@ def get_time_resolution(isotimestr):
 
     raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'.format(isotimestr))
 
-def parse_time(isotimestr):
+def parse_time(isotimestr, builder=PythonTimeBuilder):
     #Given a string in any ISO 8601 time format, return a datetime.time object
     #that corresponds to the given time. Fixed offset tzdata will be included
     #if UTC offset is given in the input string. Valid time formats are:
@@ -108,9 +108,9 @@ def parse_time(isotimestr):
     else:
         tzinfo = parse_timezone(tzstr)
 
-    return _RESOLUTION_MAP[get_time_resolution(timestr)](timestr, tzinfo)
+    return _RESOLUTION_MAP[get_time_resolution(timestr)](timestr, tzinfo, builder)
 
-def parse_datetime(isodatetimestr, delimiter='T'):
+def parse_datetime(isodatetimestr, delimiter='T', builder=PythonTimeBuilder):
     #Given a string in ISO 8601 date time format, return a datetime.datetime
     #object that corresponds to the given date time.
     #By default, the ISO 8601 specified T delimiter is used to split the
@@ -119,22 +119,22 @@ def parse_datetime(isodatetimestr, delimiter='T'):
 
     isodatestr, isotimestr = isodatetimestr.split(delimiter)
 
-    datepart = parse_date(isodatestr)
+    datepart = parse_date(isodatestr, builder=builder)
 
-    timepart = parse_time(isotimestr)
+    timepart = parse_time(isotimestr, builder=builder)
 
-    return PythonTimeBuilder.combine(datepart, timepart)
+    return builder.combine(datepart, timepart)
 
-def _parse_hour(timestr, tzinfo):
+def _parse_hour(timestr, tzinfo, builder):
     #Format must be hh or hh.
     hourstr = timestr
 
     if hourstr == '24':
-        return PythonTimeBuilder.build_time(hours=0, minutes=0, tzinfo=tzinfo)
+        return builder.build_time(hours=0, minutes=0, tzinfo=tzinfo)
 
-    return PythonTimeBuilder.build_time(hours=hourstr, tzinfo=tzinfo)
+    return builder.build_time(hours=hourstr, tzinfo=tzinfo)
 
-def _parse_minute_time(timestr, tzinfo):
+def _parse_minute_time(timestr, tzinfo, builder):
     #Format must be hhmm, hhmm., hh:mm or hh:mm.
     if timestr.count(':') == 1:
         #hh:mm or hh:mm.
@@ -144,9 +144,9 @@ def _parse_minute_time(timestr, tzinfo):
         hourstr = timestr[0:2]
         minutestr = timestr[2:]
 
-    return PythonTimeBuilder.build_time(hours=hourstr, minutes=minutestr, tzinfo=tzinfo)
+    return builder.build_time(hours=hourstr, minutes=minutestr, tzinfo=tzinfo)
 
-def _parse_second_time(timestr, tzinfo):
+def _parse_second_time(timestr, tzinfo, builder):
     #Format must be hhmmss, hhmmss., hh:mm:ss or hh:mm:ss.
     if timestr.count(':') == 2:
         #hh:mm:ss or hh:mm:ss.
@@ -157,7 +157,7 @@ def _parse_second_time(timestr, tzinfo):
         minutestr = timestr[2:4]
         secondstr = timestr[4:]
 
-    return PythonTimeBuilder.build_time(hours=hourstr, minutes=minutestr, seconds=secondstr, tzinfo=tzinfo)
+    return builder.build_time(hours=hourstr, minutes=minutestr, seconds=secondstr, tzinfo=tzinfo)
 
 def _split_tz(isotimestr):
     if isotimestr.find('+') != -1:

@@ -7,7 +7,7 @@
 # of the BSD license.  See the LICENSE file for details.
 
 from aniso8601 import compat
-from aniso8601.builder import PythonTimeBuilder, RelativeTimeBuilder
+from aniso8601.builder import NoneBuilder, PythonTimeBuilder, RelativeTimeBuilder
 from aniso8601.date import parse_date
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.time import parse_time
@@ -172,10 +172,10 @@ def _parse_duration_combined(durationstr, relative):
     #Split the string in to its component parts
     datepart, timepart = durationstr[1:].split('T') #We skip the 'P'
 
-    datevalue = parse_date(datepart)
-    timevalue = parse_time(timepart)
+    datevalue = parse_date(datepart, builder=NoneBuilder)
+    timevalue = parse_time(timepart, builder=NoneBuilder)
 
-    return builder.build_timedelta(years=str(datevalue.year), months=str(datevalue.month), days=str(datevalue.day), hours=str(timevalue.hour), minutes=str(timevalue.minute), seconds=str(timevalue.second), microseconds=str(timevalue.microsecond))
+    return builder.build_timedelta(years=datevalue[0], months=datevalue[1], days=datevalue[2], hours=timevalue[0], minutes=timevalue[1], seconds=timevalue[2], microseconds=timevalue[3])
 
 def _parse_duration_element(durationstr, elementstr):
     #Extracts the specified portion of a duration, for instance, given:

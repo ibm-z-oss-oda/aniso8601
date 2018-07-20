@@ -388,7 +388,7 @@ class TestDurationParserFunctions(unittest.TestCase):
 class TestRelativeDurationParserFunctions(unittest.TestCase):
     def test_parse_duration_relative(self):
         resultduration = parse_duration('P1Y2M3DT4H54M6.5S', relative=True)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6.5))
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6, microseconds=500000))
 
         resultduration = parse_duration('P0003-06-04T12:30:05.5', relative=True)
         self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=3, months=6, days=4, hours=12, minutes=30, seconds=5, microseconds=500000))
@@ -419,7 +419,7 @@ class TestRelativeDurationParserFunctions(unittest.TestCase):
         self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(0))
 
         resultduration = parse_duration('PT2.0000048S', relative=True)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(seconds=2.000004))
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(seconds=2, microseconds=4))
 
     def test_parse_duration_prescribed_relative_multiplefractions(self):
         with self.assertRaises(ISOFormatError):
@@ -533,16 +533,16 @@ class TestRelativeDurationParserFunctions(unittest.TestCase):
         self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6))
 
         resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6.5S', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6.5))
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6, microseconds=500000))
 
         resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6,5S', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6.5))
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6, microseconds=500000))
 
         resultduration = _parse_duration_prescribed_time('PT4H54M6.5S', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(hours=4, minutes=54, seconds=6.5))
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(hours=4, minutes=54, seconds=6, microseconds=500000))
 
         resultduration = _parse_duration_prescribed_time('PT4H54M6,5S', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(hours=4, minutes=54, seconds=6.5))
+        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(hours=4, minutes=54, seconds=6, microseconds=500000))
 
     def test_parse_duration_combined_relative(self):
         resultduration = _parse_duration_combined('P0003-06-04T12:30:05', True)

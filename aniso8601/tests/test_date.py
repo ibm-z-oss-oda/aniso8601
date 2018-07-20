@@ -9,6 +9,7 @@
 import datetime
 import unittest
 
+from aniso8601.builder import NoneBuilder, PythonTimeBuilder
 from aniso8601.exceptions import DayOutOfBoundsError, ISOFormatError, \
         WeekOutOfBoundsError, YearOutOfBoundsError
 from aniso8601.date import parse_date, _parse_year, _parse_calendar_day, \
@@ -114,126 +115,132 @@ class TestDateParserFunctions(unittest.TestCase):
             parse_date('2001W028')
 
     def test_parse_year(self):
-        date = _parse_year('2013')
-        self.assertEqual(date, datetime.date(2013, 1, 1))
+        date = _parse_year('2013', NoneBuilder)
+        self.assertEqual(date, ('2013', 1, 1))
 
-        date = _parse_year('0001')
-        self.assertEqual(date, datetime.date(1, 1, 1))
+        date = _parse_year('0001', NoneBuilder)
+        self.assertEqual(date, ('0001', 1, 1))
 
-        date = _parse_year('19')
-        self.assertEqual(date, datetime.date(1900, 1, 1))
+        date = _parse_year('19', NoneBuilder)
+        self.assertEqual(date, ('1900', 1, 1))
 
     def test_parse_year_zero(self):
-        #0 isn't a valid year
+        #0 isn't a valid year for a Python builder
         with self.assertRaises(YearOutOfBoundsError):
-            _parse_year('0')
+            _parse_year('0', PythonTimeBuilder)
 
     def test_parse_calendar_day(self):
-        date = _parse_calendar_day('1981-04-05')
-        self.assertEqual(date, datetime.date(1981, 4, 5))
+        date = _parse_calendar_day('1981-04-05', NoneBuilder)
+        self.assertEqual(date, ('1981', '04', '05'))
 
-        date = _parse_calendar_day('19810405')
-        self.assertEqual(date, datetime.date(1981, 4, 5))
+        date = _parse_calendar_day('19810405', NoneBuilder)
+        self.assertEqual(date, ('1981', '04', '5'))
 
     def test_parse_calendar_month(self):
-        date = _parse_calendar_month('1981-04')
-        self.assertEqual(date, datetime.date(1981, 4, 1))
+        date = _parse_calendar_month('1981-04', NoneBuilder)
+        self.assertEqual(date, ('1981', '04', 1))
 
     def test_parse_calendar_month_nohyphen(self):
         #Hyphen is required
         with self.assertRaises(ISOFormatError):
-            _parse_calendar_month('198104')
+            _parse_calendar_month('198104', NoneBuilder)
 
     def test_parse_week_day(self):
-        date = _parse_week_day('2004-W53-6')
+        #Week days chain builders, so we have to test with a real builder
+        date = _parse_week_day('2004-W53-6', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2005, 1, 1))
         self.assertEqual(date.weekday(), 5)
 
-        date = _parse_week_day('2009-W01-1')
+        date = _parse_week_day('2009-W01-1', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2008, 12, 29))
         self.assertEqual(date.weekday(), 0)
 
-        date = _parse_week_day('2009-W53-7')
+        date = _parse_week_day('2009-W53-7', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2010, 1, 3))
         self.assertEqual(date.weekday(), 6)
 
-        date = _parse_week_day('2010-W01-1')
+        date = _parse_week_day('2010-W01-1', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2010, 1, 4))
         self.assertEqual(date.weekday(), 0)
 
-        date = _parse_week_day('2004W536')
+        date = _parse_week_day('2004W536', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2005, 1, 1))
         self.assertEqual(date.weekday(), 5)
 
-        date = _parse_week_day('2009W011')
+        date = _parse_week_day('2009W011', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2008, 12, 29))
         self.assertEqual(date.weekday(), 0)
 
-        date = _parse_week_day('2009W537')
+        date = _parse_week_day('2009W537', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2010, 1, 3))
         self.assertEqual(date.weekday(), 6)
 
-        date = _parse_week_day('2010W011')
+        date = _parse_week_day('2010W011', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2010, 1, 4))
         self.assertEqual(date.weekday(), 0)
 
     def test_parse_week(self):
-        date = _parse_week('2004-W53')
+        #Weeks chain builders, so we have to test with a real builder
+        date = _parse_week('2004-W53', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2004, 12, 27))
         self.assertEqual(date.weekday(), 0)
 
-        date = _parse_week('2009-W01')
+        date = _parse_week('2009-W01', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2008, 12, 29))
         self.assertEqual(date.weekday(), 0)
 
-        date = _parse_week('2009-W53')
+        date = _parse_week('2009-W53', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2009, 12, 28))
         self.assertEqual(date.weekday(), 0)
 
-        date = _parse_week('2010-W01')
+        date = _parse_week('2010-W01', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2010, 1, 4))
         self.assertEqual(date.weekday(), 0)
 
-        date = _parse_week('2004W53')
+        date = _parse_week('2004W53', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2004, 12, 27))
         self.assertEqual(date.weekday(), 0)
 
-        date = _parse_week('2009W01')
+        date = _parse_week('2009W01', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2008, 12, 29))
         self.assertEqual(date.weekday(), 0)
 
-        date = _parse_week('2009W53')
+        date = _parse_week('2009W53', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2009, 12, 28))
         self.assertEqual(date.weekday(), 0)
 
-        date = _parse_week('2010W01')
+        date = _parse_week('2010W01', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(2010, 1, 4))
         self.assertEqual(date.weekday(), 0)
 
     def test_parse_ordinal_date(self):
-        date = _parse_ordinal_date('1981-095')
+        #Ordinal dates chain builders, so we have to test with a real builder
+        date = _parse_ordinal_date('1981-095', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(1981, 4, 5))
 
-        date = _parse_ordinal_date('1981095')
+        date = _parse_ordinal_date('1981095', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(1981, 4, 5))
 
-        date = _parse_ordinal_date('1981365')
+        date = _parse_ordinal_date('1981365', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(1981, 12, 31))
 
-        date = _parse_ordinal_date('1980366')
+        date = _parse_ordinal_date('1980366', PythonTimeBuilder)
         self.assertEqual(date, datetime.date(1980, 12, 31))
 
     def test_parse_ordinal_date_zero(self):
+        #Ordinal dates chain builders, so we have to test with a real builder
         #0 isn't a valid day of year
         with self.assertRaises(DayOutOfBoundsError):
-            _parse_ordinal_date('1981000')
+            _parse_ordinal_date('1981000', PythonTimeBuilder)
 
     def test_parse_ordinal_date_nonleap(self):
+        #Ordinal dates chain builders, so we have to test with a real builder
         #Day 366 is only valid on a leap year
         with self.assertRaises(DayOutOfBoundsError):
-            _parse_ordinal_date('1981366')
+            _parse_ordinal_date('1981366', PythonTimeBuilder)
 
     def test_parse_ordinal_date_overflow(self):
+        #Ordinal dates chain builders, so we have to test with a real builder
         #Day must me 365, or 366, not larger
         with self.assertRaises(DayOutOfBoundsError):
-            _parse_ordinal_date('1981367')
+            _parse_ordinal_date('1981367', PythonTimeBuilder)

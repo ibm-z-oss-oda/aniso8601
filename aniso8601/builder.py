@@ -33,25 +33,41 @@ class BaseTimeBuilder(object):
     def combine(cls, date, time):
         raise NotImplementedError
 
+    @staticmethod
+    def cast(value, castfunction, caughtexceptions=(ValueError,), thrownexception=ISOFormatError, thrownmessage=None):
+        try:
+            result = castfunction(value)
+        except caughtexceptions:
+            raise thrownexception(thrownmessage)
+
+        return result
+
+class NoneBuilder(BaseTimeBuilder):
+    #Builder used to return the arguments, helps clean up some parse methods
+    @classmethod
+    def build_date(cls, year, month, day):
+        return (year, month, day)
+
+    @classmethod
+    def build_time(cls, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
+        return (hours, minutes, seconds, microseconds, tzinfo)
+
+    @classmethod
+    def build_datetime(cls, year, month, day, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
+        return (year, month, day, hours, minutes, seconds, microseconds, tzinfo)
+
+    @classmethod
+    def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, microseconds=0):
+        return (years, months, days, weeks, hours, minutes, seconds, microseconds)
+
 class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
     def build_date(cls, year, month, day):
-        try:
-            year = int(year)
-        except ValueError:
-            raise ISOFormatError('Invalid year string.')
+        year = BaseTimeBuilder.cast(year, int, thrownmessage='Invalid year string.')
+        month = BaseTimeBuilder.cast(month, int, thrownmessage='Invalid month string.')
+        day = BaseTimeBuilder.cast(day, int, thrownmessage='Invalid day string.')
 
-        try:
-            month = int(month)
-        except ValueError:
-            raise ISOFormatError('Invalid month string.')
-
-        try:
-            day = int(day)
-        except ValueError:
-            raise ISOFormatError('Invalid day string.')
-
-        #Range checks
+        #Range check
         if year == 0:
             raise YearOutOfBoundsError('Year must be between 1..9999.')
 
@@ -60,58 +76,46 @@ class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
     def build_time(cls, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
         #Builds a time from the given parts, handling fractional arguments where necessary
-        float_hours = float(0)
-        float_minutes = float(0)
-        float_seconds = float(0)
+        floathours = float(0)
+        floatminutes = float(0)
+        floatseconds = float(0)
 
-        try:
-            if '.' in str(hours):
-                float_hours = float(hours)
-                hours = 0
+        if '.' in str(hours):
+            floathours = BaseTimeBuilder.cast(hours, float, thrownmessage='Invalid hour string.')
+            hours = 0
+        else:
+            hours = BaseTimeBuilder.cast(hours, int, thrownmessage='Invalid hour string.')
 
-            hours = int(hours)
-        except ValueError:
-            raise ISOFormatError('Invalid hour string.')
+        if '.' in str(minutes):
+            floatminutes = BaseTimeBuilder.cast(minutes, float, thrownmessage='Invalid minute string.')
+            minutes = 0
+        else:
+            minutes = BaseTimeBuilder.cast(minutes, int, thrownmessage='Invalid minute string.')
 
-        try:
-            if '.' in str(minutes):
-                float_minutes = float(minutes)
-                minutes = 0
-
-            minutes = int(minutes)
-        except ValueError:
-            raise ISOFormatError('Invalid minute string.')
-
-        try:
-            if '.' in str(seconds):
-                float_seconds = float(seconds[0:str(seconds).index('.') + 7])
-                seconds = 0
-
-            seconds = int(seconds)
-        except ValueError:
-            raise ISOFormatError('Invalid second string.')
+        if '.' in str(seconds):
+            floatseconds = BaseTimeBuilder.cast(seconds, float, thrownmessage='Invalid second string.')
+            seconds = 0
+        else:
+            seconds = BaseTimeBuilder.cast(seconds, int, thrownmessage='Invalid second string.')
 
         #No fractional microseconds
-        try:
-            microseconds = int(microseconds)
-        except ValueError:
-            raise ISOFormatError('Invalid microsecond string.')
+        microseconds = BaseTimeBuilder.cast(microseconds, int, thrownmessage='Invalid microsecond string.')
 
         #Range checks
-        if hours == 23 and float_hours == 0 and minutes == 59 and float_minutes == 0 and seconds == 60 and float_seconds == 0:
+        if hours == 23 and floathours == 0 and minutes == 59 and floatminutes == 0 and seconds == 60 and floatseconds == 0:
             #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
             raise LeapSecondError('Leap seconds are not supported.')
 
-        if hours == 24 and float_hours == 0 and (minutes != 0 or float_minutes != 0 or seconds != 0 or float_seconds != 0 or microseconds != 0):
+        if hours == 24 and floathours == 0 and (minutes != 0 or floatminutes != 0 or seconds != 0 or floatseconds != 0 or microseconds != 0):
             raise MidnightBoundsError('Hour 24 may only represent midnight.')
 
-        if hours > 24 or float_hours > 24:
+        if hours > 24 or floathours > 24:
             raise HoursOutOfBoundsError('Hour must be between 0..24 with 24 representing midnight.')
 
-        if minutes >= 60 or float_minutes >= 60:
+        if minutes >= 60 or floatminutes >= 60:
             raise MinutesOutOfBoundsError('Minutes must be less than 60.')
 
-        if seconds >= 60 or float_seconds >= 60:
+        if seconds >= 60 or floatseconds >= 60:
             raise SecondsOutOfBoundsError('Seconds must be less than 60.')
 
         #Fix ranges that have passed range checks
@@ -121,7 +125,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
             seconds = 0
 
         #Datetimes don't handle fractional components, so we use a timedelta
-        result_datetime = datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, microsecond=microseconds, tzinfo=tzinfo) + cls.build_timedelta(hours=float_hours, minutes=float_minutes, seconds=float_seconds)
+        result_datetime = datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, microsecond=microseconds, tzinfo=tzinfo) + cls.build_timedelta(hours=floathours, minutes=floatminutes, seconds=floatseconds)
 
         if tzinfo is None:
             return result_datetime.time()
@@ -138,60 +142,37 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
     @classmethod
     def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, microseconds=0):
-        try:
-            years = float(years)
-        except ValueError:
-            raise ISOFormatError('Invalid year string.')
+        years = BaseTimeBuilder.cast(years, float, thrownmessage='Invalid year string.')
+        months = BaseTimeBuilder.cast(months, float, thrownmessage='Invalid month string.')
+        days = BaseTimeBuilder.cast(days, float, thrownmessage='Invalid day string.')
 
-        try:
-            months = float(months)
-        except ValueError:
-            raise ISOFormatError('Invalid month string.')
+        if '.' in str(weeks):
+            weeks = BaseTimeBuilder.cast(weeks, float, thrownmessage='Invalid week string.')
+        else:
+            weeks = BaseTimeBuilder.cast(weeks, int, thrownmessage='Invalid week string.')
 
-        try:
-            days = float(days)
-        except ValueError:
-            raise ISOFormatError('Invalid day string.')
+        if '.' in str(hours):
+            hours = BaseTimeBuilder.cast(hours, float, thrownmessage='Invalid hour string.')
+        else:
+            hours = BaseTimeBuilder.cast(hours, int, thrownmessage='Invalid hour string.')
 
-        try:
-            if '.' in str(weeks):
-                weeks = float(weeks)
-            else:
-                weeks = int(weeks)
-        except ValueError:
-            raise ISOFormatError('Invalid week string.')
+        if '.' in str(minutes):
+            minutes = BaseTimeBuilder.cast(minutes, float, thrownmessage='Invalid minute string.')
+        else:
+            minutes = BaseTimeBuilder.cast(minutes, int, thrownmessage='Invalid minute string.')
 
-        try:
-            if '.' in str(hours):
-                hours = float(hours)
-            else:
-                hours = int(hours)
-        except ValueError:
-            raise ISOFormatError('Invalid hour string.')
+        if '.' in str(seconds):
+            #Truncate to maximum supported precision
+            seconds = str(seconds)
 
-        try:
-            if '.' in str(minutes):
-                minutes = float(minutes)
-            else:
-                minutes = int(minutes)
-        except ValueError:
-            raise ISOFormatError('Invalid minute string.')
+            seconds = BaseTimeBuilder.cast(seconds[0:seconds.index('.') + 7], float, thrownmessage='Invalid second string.')
+        else:
+            seconds = BaseTimeBuilder.cast(seconds, int, thrownmessage='Invalid second string.')
 
-        try:
-            if '.' in str(seconds):
-                seconds = float(seconds)
-            else:
-                seconds = int(seconds)
-        except ValueError:
-            raise ISOFormatError('Invalid second string.')
-
-        try:
-            if '.' in str(microseconds):
-                microseconds = float(microseconds)
-            else:
-                microseconds = int(microseconds)
-        except ValueError:
-            raise ISOFormatError('Invalid microsecond string.')
+        if '.' in str(microseconds):
+            microseconds = BaseTimeBuilder.cast(microseconds, float, thrownmessage='Invalid microsecond string.')
+        else:
+            microseconds = BaseTimeBuilder.cast(microseconds, int, thrownmessage='Invalid microsecond string.')
 
         #Note that weeks can be handled without conversion to days
         totaldays = years * 365 + months * 30 + days
@@ -214,37 +195,45 @@ class RelativeTimeBuilder(PythonTimeBuilder):
             #https://github.com/dateutil/dateutil/issues/40
             raise RelativeValueError('Fractional months and years are not defined for relative intervals.')
 
-        years = int(years)
-        months = int(months)
+        years = BaseTimeBuilder.cast(years, int, thrownmessage='Invalid year string.')
+        months = BaseTimeBuilder.cast(months, int, thrownmessage='Invalid month string.')
 
         if '.' in str(days):
-            days = float(days)
+            days = BaseTimeBuilder.cast(days, float, thrownmessage='Invalid day string.')
         else:
-            days = int(days)
+            days = BaseTimeBuilder.cast(days, int, thrownmessage='Invalid day string.')
 
         if '.' in str(weeks):
-            weeks = float(weeks)
+            weeks = BaseTimeBuilder.cast(weeks, float, thrownmessage='Invalid week string.')
         else:
-            weeks = int(weeks)
+            weeks = BaseTimeBuilder.cast(weeks, int, thrownmessage='Invalid week string.')
 
         if '.' in str(hours):
-            hours = float(hours)
+            hours = BaseTimeBuilder.cast(hours, float, thrownmessage='Invalid hour string.')
         else:
-            hours = int(hours)
+            hours = BaseTimeBuilder.cast(hours, int, thrownmessage='Invalid hour string.')
 
         if '.' in str(minutes):
-            minutes = float(minutes)
+            minutes = BaseTimeBuilder.cast(minutes, float, thrownmessage='Invalid minute string.')
         else:
-            minutes = int(minutes)
+            minutes = BaseTimeBuilder.cast(minutes, int, thrownmessage='Invalid minute string.')
 
         if '.' in str(seconds):
-            seconds = float(seconds)
+            #Truncate to maximum supported precision
+            seconds, secondsremainder = str(seconds).split('.')
+
+            seconds = BaseTimeBuilder.cast(seconds, int, thrownmessage='Invalid second string.')
+
+            secondsremainder = BaseTimeBuilder.cast('.' + secondsremainder[0:6], float, thrownmessage='Invalid second string.')
         else:
-            seconds = int(seconds)
+            seconds = seconds = BaseTimeBuilder.cast(seconds, int, thrownmessage='Invalid second string.')
+            secondsremainder = 0
 
         if '.' in str(microseconds):
-            microseconds = float(microseconds)
+            microseconds = BaseTimeBuilder.cast(microseconds, float, thrownmessage='Invalid microsecond string.')
         else:
-            microseconds = int(microseconds)
+            microseconds = BaseTimeBuilder.cast(microseconds, int, thrownmessage='Invalid microsecond string.')
 
-        return dateutil.relativedelta.relativedelta(years=int(years), months=int(months), weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds, microseconds=microseconds)
+        microseconds += secondsremainder * 1e6 #Add remaining microseconds
+
+        return dateutil.relativedelta.relativedelta(years=years, months=months, weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds, microseconds=microseconds)

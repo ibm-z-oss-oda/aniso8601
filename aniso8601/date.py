@@ -6,10 +6,8 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-import calendar
-
 from aniso8601.exceptions import DayOutOfBoundsError, ISOFormatError, \
-        WeekOutOfBoundsError, YearOutOfBoundsError
+        WeekOutOfBoundsError
 from aniso8601.builder import PythonTimeBuilder
 from aniso8601.resolution import DateResolution
 
@@ -84,7 +82,7 @@ def get_date_resolution(isodatestr):
     #None of the date representations match
     raise ISOFormatError('"{0}" is not an ISO 8601 date, perhaps it represents a time or datetime.'.format(isodatestr))
 
-def parse_date(isodatestr):
+def parse_date(isodatestr, builder=PythonTimeBuilder):
     #Given a string in any ISO 8601 date format, return a datetime.date
     #object that corresponds to the given date. Valid string formats are:
     #
@@ -100,9 +98,9 @@ def parse_date(isodatestr):
     #YYYYDDD
     #
     #Note that the ISO 8601 date format of ±YYYYY is expressly not supported
-    return _RESOLUTION_MAP[get_date_resolution(isodatestr)](isodatestr)
+    return _RESOLUTION_MAP[get_date_resolution(isodatestr)](isodatestr, builder)
 
-def _parse_year(yearstr):
+def _parse_year(yearstr, builder):
     #yearstr is of the format Y[YYY]
     #
     #0000 (1 BC) is not representible as a Python date so a ValueError is
@@ -118,9 +116,9 @@ def _parse_year(yearstr):
         #Shift 0s in from the left to form complete year
         yearstr = yearstr.ljust(4, '0')
 
-    return PythonTimeBuilder.build_date(yearstr, 1, 1)
+    return builder.build_date(yearstr, 1, 1)
 
-def _parse_calendar_day(datestr):
+def _parse_calendar_day(datestr, builder):
     #datestr is of the format YYYY-MM-DD or YYYYMMDD
     if len(datestr) == 10:
         #YYYY-MM-DD
@@ -135,9 +133,9 @@ def _parse_calendar_day(datestr):
     else:
         raise ISOFormatError('"{0}" is not a valid ISO 8601 calendar day.'.format(datestr))
 
-    return PythonTimeBuilder.build_date(yearstr, monthstr, daystr)
+    return builder.build_date(yearstr, monthstr, daystr)
 
-def _parse_calendar_month(datestr):
+def _parse_calendar_month(datestr, builder):
     #datestr is of the format YYYY-MM
     if len(datestr) != 7:
         raise ISOFormatError('"{0}" is not a valid ISO 8601 calendar month.'.format(datestr))
@@ -145,9 +143,9 @@ def _parse_calendar_month(datestr):
     yearstr = datestr[0:4]
     monthstr = datestr[5:]
 
-    return PythonTimeBuilder.build_date(yearstr, monthstr, 1)
+    return builder.build_date(yearstr, monthstr, 1)
 
-def _parse_week_day(datestr):
+def _parse_week_day(datestr, builder):
     #datestr is of the format YYYY-Www-D, YYYYWwwD
     #
     #W is the week number prefix, ww is the week number, between 1 and 53
@@ -158,7 +156,7 @@ def _parse_week_day(datestr):
 
     #TODO: Avoid casting back and forth from int to string
     isoyear = int(datestr[0:4])
-    gregorianyearstart = _iso_year_start(isoyear)
+    gregorianyearstart = _iso_year_start(isoyear, builder)
 
     #Week number will be the two characters after the W
     windex = datestr.find('W')
@@ -179,9 +177,9 @@ def _parse_week_day(datestr):
     if isoday == 0 or isoday > 7:
         raise DayOutOfBoundsError('Weekday number must be between 1..7.')
 
-    return gregorianyearstart + PythonTimeBuilder.build_timedelta(weeks=str(isoweeknumber - 1), days=str(isoday - 1))
+    return gregorianyearstart + builder.build_timedelta(weeks=str(isoweeknumber - 1), days=str(isoday - 1))
 
-def _parse_week(datestr):
+def _parse_week(datestr, builder):
     #datestr is of the format YYYY-Www, YYYYWww
     #
     #W is the week number prefix, ww is the week number, between 1 and 53
@@ -189,7 +187,7 @@ def _parse_week(datestr):
 
     #TODO: Avoid casting back and forth from int to string
     isoyear = int(datestr[0:4])
-    gregorianyearstart = _iso_year_start(isoyear)
+    gregorianyearstart = _iso_year_start(isoyear, builder)
 
     #Week number will be the two characters after the W
     windex = datestr.find('W')
@@ -198,9 +196,9 @@ def _parse_week(datestr):
     if isoweeknumber == 0 or isoweeknumber > 53:
         raise WeekOutOfBoundsError('Week number must be between 1..53.')
 
-    return gregorianyearstart + PythonTimeBuilder.build_timedelta(weeks=str(isoweeknumber - 1), days=str(0))
+    return gregorianyearstart + builder.build_timedelta(weeks=str(isoweeknumber - 1), days=str(0))
 
-def _parse_ordinal_date(datestr):
+def _parse_ordinal_date(datestr, builder):
     #datestr is of the format YYYY-DDD or YYYYDDD
     #DDD can be from 1 - 36[5,6], this matches Python's definition
 
@@ -216,7 +214,7 @@ def _parse_ordinal_date(datestr):
 
     #Day of year to a date
     #https://stackoverflow.com/questions/2427555/python-question-year-and-day-of-year-to-date
-    parseddate = PythonTimeBuilder.build_date(str(isoyear), str(1), str(1)) + PythonTimeBuilder.build_timedelta(days=str(isoday - 1))
+    parseddate = builder.build_date(str(isoyear), str(1), str(1)) + PythonTimeBuilder.build_timedelta(days=str(isoday - 1))
 
     #Enforce ordinal day limitation
     #https://bitbucket.org/nielsenb/aniso8601/issues/14/parsing-ordinal-dates-should-only-allow
@@ -225,7 +223,7 @@ def _parse_ordinal_date(datestr):
 
     return parseddate
 
-def _iso_year_start(isoyear):
+def _iso_year_start(isoyear, builder):
     #Given an ISO year, returns the equivalent of the start of the year
     #on the Gregorian calendar (which is used by Python)
     #Stolen from:
@@ -234,10 +232,10 @@ def _iso_year_start(isoyear):
     #Determine the location of the 4th of January, the first week of
     #the ISO year is the week containing the 4th of January
     #http://en.wikipedia.org/wiki/ISO_week_date
-    fourth_jan = PythonTimeBuilder.build_date(str(isoyear), str(1), str(4))
+    fourth_jan = builder.build_date(str(isoyear), str(1), str(4))
 
     #Note the conversion from ISO day (1 - 7) and Python day (0 - 6)
-    delta = PythonTimeBuilder.build_timedelta(days=str(fourth_jan.isoweekday() - 1))
+    delta = builder.build_timedelta(days=str(fourth_jan.isoweekday() - 1))
 
     #Return the start of the year
     return fourth_jan - delta
