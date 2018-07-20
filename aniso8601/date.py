@@ -129,7 +129,7 @@ def _parse_calendar_day(datestr, builder):
         #YYYYMMDD
         yearstr = datestr[0:4]
         monthstr = datestr[4:6]
-        daystr = datestr[7:]
+        daystr = datestr[6:]
     else:
         raise ISOFormatError('"{0}" is not a valid ISO 8601 calendar day.'.format(datestr))
 
