@@ -134,7 +134,7 @@ class TestDateParserFunctions(unittest.TestCase):
         self.assertEqual(date, ('1981', '04', '05'))
 
         date = _parse_calendar_day('19810405', NoneBuilder)
-        self.assertEqual(date, ('1981', '04', '5'))
+        self.assertEqual(date, ('1981', '04', '05'))
 
     def test_parse_calendar_month(self):
         date = _parse_calendar_month('1981-04', NoneBuilder)
