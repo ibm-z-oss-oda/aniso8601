@@ -8,13 +8,14 @@
 
 import datetime
 
-from aniso8601.exceptions import HoursOutOfBoundsError, ISOFormatError, \
-        LeapSecondError, MidnightBoundsError, MinutesOutOfBoundsError, \
-        RelativeValueError, SecondsOutOfBoundsError, YearOutOfBoundsError
+from aniso8601.exceptions import DayOutOfBoundsError, \
+        HoursOutOfBoundsError, ISOFormatError, LeapSecondError, \
+        MidnightBoundsError, MinutesOutOfBoundsError, RelativeValueError, \
+        SecondsOutOfBoundsError, WeekOutOfBoundsError, YearOutOfBoundsError
 
 class BaseTimeBuilder(object):
     @classmethod
-    def build_date(cls, year, month, day):
+    def build_date(cls, YYYY=None, MM=None, DD=None, Www=None, D=None, DDD=None):
         raise NotImplementedError
 
     @classmethod
@@ -45,8 +46,8 @@ class BaseTimeBuilder(object):
 class NoneBuilder(BaseTimeBuilder):
     #Builder used to return the arguments, helps clean up some parse methods
     @classmethod
-    def build_date(cls, year, month, day):
-        return (year, month, day)
+    def build_date(cls, YYYY=None, MM=None, DD=None, Www=None, D=None, DDD=None):
+        return (YYYY, MM, DD, Www, D, DDD)
 
     @classmethod
     def build_time(cls, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
@@ -62,14 +63,48 @@ class NoneBuilder(BaseTimeBuilder):
 
 class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
-    def build_date(cls, year, month, day):
-        year = BaseTimeBuilder.cast(year, int, thrownmessage='Invalid year string.')
-        month = BaseTimeBuilder.cast(month, int, thrownmessage='Invalid month string.')
-        day = BaseTimeBuilder.cast(day, int, thrownmessage='Invalid day string.')
+    def build_date(cls, YYYY=None, MM=None, DD=None, Www=None, D=None, DDD=None):
+        if YYYY is not None:
+            year = BaseTimeBuilder.cast(YYYY, int, thrownmessage='Invalid year string.')
+
+        if MM is not None:
+            month = BaseTimeBuilder.cast(MM, int, thrownmessage='Invalid month string.')
+        else:
+            month = 1
+
+        if DD is not None:
+            day = BaseTimeBuilder.cast(DD, int, thrownmessage='Invalid day string.')
+        else:
+            day = 1
+
+        if Www is not None:
+            weeknumber = BaseTimeBuilder.cast(Www, int, thrownmessage='Invalid week string.')
+            if weeknumber == 0 or weeknumber > 53:
+                raise WeekOutOfBoundsError('Week number must be between 1..53.')
+        else:
+            weeknumber = None
+
+        if DDD is not None:
+            dayofyear = BaseTimeBuilder.cast(DDD, int, thrownmessage='Invalid day string.')
+        else:
+            dayofyear = None
+
+        if D is not None:
+            dayofweek = BaseTimeBuilder.cast(D, int, thrownmessage='Invalid day string.')
+
+            if dayofweek == 0 or dayofweek > 7:
+                raise DayOutOfBoundsError('Weekday number must be between 1..7.')
+        else:
+            dayofweek = None
 
         #Range check
         if year == 0:
             raise YearOutOfBoundsError('Year must be between 1..9999.')
+
+        if dayofyear is not None:
+            return PythonTimeBuilder._build_ordinal_date(year, dayofyear)
+        elif weeknumber is not None:
+            return PythonTimeBuilder._build_week_date(year, weeknumber, isoday=dayofweek)
 
         return datetime.date(year, month, day)
 
@@ -182,6 +217,44 @@ class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
     def combine(cls, date, time):
         return datetime.datetime.combine(date, time)
+
+    @staticmethod
+    def _build_week_date(isoyear, isoweek, isoday=None):
+        if isoday is None:
+            return PythonTimeBuilder._iso_year_start(isoyear) + datetime.timedelta(weeks=isoweek - 1)
+
+        return PythonTimeBuilder._iso_year_start(isoyear) + datetime.timedelta(weeks=isoweek - 1, days=isoday - 1)
+
+    @staticmethod
+    def _build_ordinal_date(isoyear, isoday):
+        #Day of year to a date
+        #https://stackoverflow.com/questions/2427555/python-question-year-and-day-of-year-to-date
+        builtdate = datetime.date(isoyear, 1, 1) + datetime.timedelta(days=isoday - 1)
+
+        #Enforce ordinal day limitation
+        #https://bitbucket.org/nielsenb/aniso8601/issues/14/parsing-ordinal-dates-should-only-allow
+        if isoday == 0 or builtdate.year != isoyear:
+            raise DayOutOfBoundsError('Day of year must be from 1..365, 1..366 for leap year.')
+
+        return builtdate
+
+    @staticmethod
+    def _iso_year_start(isoyear):
+        #Given an ISO year, returns the equivalent of the start of the year
+        #on the Gregorian calendar (which is used by Python)
+        #Stolen from:
+        #http://stackoverflow.com/questions/304256/whats-the-best-way-to-find-the-inverse-of-datetime-isocalendar
+
+        #Determine the location of the 4th of January, the first week of
+        #the ISO year is the week containing the 4th of January
+        #http://en.wikipedia.org/wiki/ISO_week_date
+        fourth_jan = datetime.date(isoyear, 1, 4)
+
+        #Note the conversion from ISO day (1 - 7) and Python day (0 - 6)
+        delta = datetime.timedelta(days=fourth_jan.isoweekday() - 1)
+
+        #Return the start of the year
+        return fourth_jan - delta
 
 class RelativeTimeBuilder(PythonTimeBuilder):
     @classmethod

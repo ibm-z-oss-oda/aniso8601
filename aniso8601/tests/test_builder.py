@@ -11,12 +11,14 @@ import unittest
 import dateutil.relativedelta
 
 from aniso8601.builder import BaseTimeBuilder, PythonTimeBuilder, RelativeTimeBuilder
+from aniso8601.exceptions import DayOutOfBoundsError, WeekOutOfBoundsError, \
+        YearOutOfBoundsError
 from aniso8601.timezone import UTCOffset
 
 class TestBaseTimeBuilder(unittest.TestCase):
     def test_build_date(self):
         with self.assertRaises(NotImplementedError):
-            BaseTimeBuilder.build_date(1, 2, 3)
+            BaseTimeBuilder.build_date()
 
     def test_build_time(self):
         with self.assertRaises(NotImplementedError):
@@ -36,7 +38,93 @@ class TestBaseTimeBuilder(unittest.TestCase):
 
 class TestPythonTimeBuilder(unittest.TestCase):
     def test_build_date(self):
-        self.assertEqual(PythonTimeBuilder.build_date(1, 2, 3), datetime.date(1, 2, 3))
+        date = PythonTimeBuilder.build_date(YYYY='2013', MM=None, DD=None, Www=None, D=None, DDD=None)
+        self.assertEqual(date, datetime.date(2013, 1, 1))
+
+        date = PythonTimeBuilder.build_date(YYYY='0001', MM=None, DD=None, Www=None, D=None, DDD=None)
+        self.assertEqual(date, datetime.date(1, 1, 1))
+
+        date = PythonTimeBuilder.build_date(YYYY='1900', MM=None, DD=None, Www=None, D=None, DDD=None)
+        self.assertEqual(date, datetime.date(1900, 1, 1))
+
+        date = PythonTimeBuilder.build_date(YYYY='1981', MM='04', DD='05', Www=None, D=None, DDD=None)
+        self.assertEqual(date, datetime.date(1981, 4, 5))
+
+        date = PythonTimeBuilder.build_date(YYYY='1981', MM='04', DD=None, Www=None, D=None, DDD=None)
+        self.assertEqual(date, datetime.date(1981, 4, 1))
+
+        date = PythonTimeBuilder.build_date(YYYY='2004', MM=None, DD=None, Www='53', D=None, DDD=None)
+        self.assertEqual(date, datetime.date(2004, 12, 27))
+        self.assertEqual(date.weekday(), 0)
+
+        date = PythonTimeBuilder.build_date(YYYY='2009', MM=None, DD=None, Www='01', D=None, DDD=None)
+        self.assertEqual(date, datetime.date(2008, 12, 29))
+        self.assertEqual(date.weekday(), 0)
+
+        date = PythonTimeBuilder.build_date(YYYY='2010', MM=None, DD=None, Www='01', D=None, DDD=None)
+        self.assertEqual(date, datetime.date(2010, 1, 4))
+        self.assertEqual(date.weekday(), 0)
+
+        date = PythonTimeBuilder.build_date(YYYY='2009', MM=None, DD=None, Www='53', D=None, DDD=None)
+        self.assertEqual(date, datetime.date(2009, 12, 28))
+        self.assertEqual(date.weekday(), 0)
+
+        date = PythonTimeBuilder.build_date(YYYY='2009', MM=None, DD=None, Www='01', D='1', DDD=None)
+        self.assertEqual(date, datetime.date(2008, 12, 29))
+        self.assertEqual(date.weekday(), 0)
+
+        date = PythonTimeBuilder.build_date(YYYY='2009', MM=None, DD=None, Www='53', D='7', DDD=None)
+        self.assertEqual(date, datetime.date(2010, 1, 3))
+        self.assertEqual(date.weekday(), 6)
+
+        date = PythonTimeBuilder.build_date(YYYY='2010', MM=None, DD=None, Www='01', D='1', DDD=None)
+        self.assertEqual(date, datetime.date(2010, 1, 4))
+        self.assertEqual(date.weekday(), 0)
+
+        date = PythonTimeBuilder.build_date(YYYY='2004', MM=None, DD=None, Www='53', D='6', DDD=None)
+        self.assertEqual(date, datetime.date(2005, 1, 1))
+        self.assertEqual(date.weekday(), 5)
+
+        date = PythonTimeBuilder.build_date(YYYY='1981', MM=None, DD=None, Www=None, D=None, DDD='095')
+        self.assertEqual(date, datetime.date(1981, 4, 5))
+
+        date = PythonTimeBuilder.build_date(YYYY='1981', MM=None, DD=None, Www=None, D=None, DDD='365')
+        self.assertEqual(date, datetime.date(1981, 12, 31))
+
+        date = PythonTimeBuilder.build_date(YYYY='1980', MM=None, DD=None, Www=None, D=None, DDD='366')
+        self.assertEqual(date, datetime.date(1980, 12, 31))
+
+    def test_build_date_bounds_checking(self):
+        #0 isn't a valid week number
+        with self.assertRaises(WeekOutOfBoundsError):
+            PythonTimeBuilder.build_date(YYYY='2003', Www='00')
+
+        #Week must not be larger than 53
+        with self.assertRaises(WeekOutOfBoundsError):
+            PythonTimeBuilder.build_date(YYYY='2004', Www='54')
+
+        #0 isn't a valid day number
+        with self.assertRaises(DayOutOfBoundsError):
+            PythonTimeBuilder.build_date(YYYY='2001', Www='02', D='0')
+
+        #Day must not be larger than 7
+        with self.assertRaises(DayOutOfBoundsError):
+            PythonTimeBuilder.build_date(YYYY='2001', Www='02', D='8')
+
+        #0 isn't a valid year for a Python builder
+        with self.assertRaises(YearOutOfBoundsError):
+            PythonTimeBuilder.build_date(YYYY='0000')
+
+        with self.assertRaises(DayOutOfBoundsError):
+            PythonTimeBuilder.build_date(YYYY='1981', DDD='000')
+
+        #Day 366 is only valid on a leap year
+        with self.assertRaises(DayOutOfBoundsError):
+            PythonTimeBuilder.build_date(YYYY='1981', DDD='366')
+
+        #Day must me 365, or 366, not larger
+        with self.assertRaises(DayOutOfBoundsError):
+            PythonTimeBuilder.build_date(YYYY='1981', DDD='367')
 
     def test_build_time(self):
         time = PythonTimeBuilder.build_time()

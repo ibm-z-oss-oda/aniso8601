@@ -6,8 +6,7 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-from aniso8601.exceptions import DayOutOfBoundsError, ISOFormatError, \
-        WeekOutOfBoundsError
+from aniso8601.exceptions import ISOFormatError
 from aniso8601.builder import PythonTimeBuilder
 from aniso8601.resolution import DateResolution
 
@@ -116,7 +115,7 @@ def _parse_year(yearstr, builder):
         #Shift 0s in from the left to form complete year
         yearstr = yearstr.ljust(4, '0')
 
-    return builder.build_date(yearstr, 1, 1)
+    return builder.build_date(YYYY=yearstr)
 
 def _parse_calendar_day(datestr, builder):
     #datestr is of the format YYYY-MM-DD or YYYYMMDD
@@ -133,7 +132,7 @@ def _parse_calendar_day(datestr, builder):
     else:
         raise ISOFormatError('"{0}" is not a valid ISO 8601 calendar day.'.format(datestr))
 
-    return builder.build_date(yearstr, monthstr, daystr)
+    return builder.build_date(YYYY=yearstr, MM=monthstr, DD=daystr)
 
 def _parse_calendar_month(datestr, builder):
     #datestr is of the format YYYY-MM
@@ -143,7 +142,7 @@ def _parse_calendar_month(datestr, builder):
     yearstr = datestr[0:4]
     monthstr = datestr[5:]
 
-    return builder.build_date(yearstr, monthstr, 1)
+    return builder.build_date(YYYY=yearstr, MM=monthstr)
 
 def _parse_week_day(datestr, builder):
     #datestr is of the format YYYY-Www-D, YYYYWwwD
@@ -155,29 +154,22 @@ def _parse_week_day(datestr, builder):
     #implementation which is between 0 and 6
 
     #TODO: Avoid casting back and forth from int to string
-    isoyear = int(datestr[0:4])
-    gregorianyearstart = _iso_year_start(isoyear, builder)
+    yearstr = datestr[0:4]
 
     #Week number will be the two characters after the W
     windex = datestr.find('W')
-    isoweeknumber = int(datestr[windex + 1:windex + 3])
-
-    if isoweeknumber == 0 or isoweeknumber > 53:
-        raise WeekOutOfBoundsError('Week number must be between 1..53.')
+    weekstr = datestr[windex + 1:windex + 3]
 
     if datestr.find('-') != -1 and len(datestr) == 10:
         #YYYY-Www-D
-        isoday = int(datestr[9:10])
+        daystr = datestr[9:10]
     elif len(datestr) == 8:
          #YYYYWwwD
-        isoday = int(datestr[7:8])
+        daystr = datestr[7:8]
     else:
         raise ISOFormatError('"{0}" is not a valid ISO 8601 week date.'.format(datestr))
 
-    if isoday == 0 or isoday > 7:
-        raise DayOutOfBoundsError('Weekday number must be between 1..7.')
-
-    return gregorianyearstart + builder.build_timedelta(weeks=str(isoweeknumber - 1), days=str(isoday - 1))
+    return builder.build_date(YYYY=yearstr, Www=weekstr, D=daystr)
 
 def _parse_week(datestr, builder):
     #datestr is of the format YYYY-Www, YYYYWww
@@ -185,60 +177,29 @@ def _parse_week(datestr, builder):
     #W is the week number prefix, ww is the week number, between 1 and 53
     #0 is not a valid week number, which differs from the Python implementation
 
-    #TODO: Avoid casting back and forth from int to string
-    isoyear = int(datestr[0:4])
-    gregorianyearstart = _iso_year_start(isoyear, builder)
+    yearstr = datestr[0:4]
 
     #Week number will be the two characters after the W
     windex = datestr.find('W')
-    isoweeknumber = int(datestr[windex + 1:windex + 3])
+    weekstr = datestr[windex + 1:windex + 3]
 
-    if isoweeknumber == 0 or isoweeknumber > 53:
-        raise WeekOutOfBoundsError('Week number must be between 1..53.')
-
-    return gregorianyearstart + builder.build_timedelta(weeks=str(isoweeknumber - 1), days=str(0))
+    return builder.build_date(YYYY=yearstr, Www=weekstr)
 
 def _parse_ordinal_date(datestr, builder):
     #datestr is of the format YYYY-DDD or YYYYDDD
     #DDD can be from 1 - 36[5,6], this matches Python's definition
 
     #TODO: Avoid casting back and forth from int to string
-    isoyear = int(datestr[0:4])
+    yearstr = datestr[0:4]
 
     if datestr.find('-') != -1:
         #YYYY-DDD
-        isoday = int(datestr[(datestr.find('-') + 1):])
+        daystr = datestr[(datestr.find('-') + 1):]
     else:
         #YYYYDDD
-        isoday = int(datestr[4:])
+        daystr = datestr[4:]
 
-    #Day of year to a date
-    #https://stackoverflow.com/questions/2427555/python-question-year-and-day-of-year-to-date
-    parseddate = builder.build_date(str(isoyear), str(1), str(1)) + PythonTimeBuilder.build_timedelta(days=str(isoday - 1))
-
-    #Enforce ordinal day limitation
-    #https://bitbucket.org/nielsenb/aniso8601/issues/14/parsing-ordinal-dates-should-only-allow
-    if isoday == 0 or parseddate.year != isoyear:
-        raise DayOutOfBoundsError('Day of year must be from 1..365, 1..366 for leap year.')
-
-    return parseddate
-
-def _iso_year_start(isoyear, builder):
-    #Given an ISO year, returns the equivalent of the start of the year
-    #on the Gregorian calendar (which is used by Python)
-    #Stolen from:
-    #http://stackoverflow.com/questions/304256/whats-the-best-way-to-find-the-inverse-of-datetime-isocalendar
-
-    #Determine the location of the 4th of January, the first week of
-    #the ISO year is the week containing the 4th of January
-    #http://en.wikipedia.org/wiki/ISO_week_date
-    fourth_jan = builder.build_date(str(isoyear), str(1), str(4))
-
-    #Note the conversion from ISO day (1 - 7) and Python day (0 - 6)
-    delta = builder.build_timedelta(days=str(fourth_jan.isoweekday() - 1))
-
-    #Return the start of the year
-    return fourth_jan - delta
+    return builder.build_date(YYYY=yearstr, DDD=daystr)
 
 _RESOLUTION_MAP = {
     DateResolution.Day: _parse_calendar_day,
