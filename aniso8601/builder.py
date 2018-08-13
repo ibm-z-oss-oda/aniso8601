@@ -23,11 +23,11 @@ class BaseTimeBuilder(object):
         raise NotImplementedError
 
     @classmethod
-    def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
+    def build_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None, TnH=None, TnM=None, TnS=None):
         raise NotImplementedError
 
     @classmethod
-    def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, microseconds=0):
+    def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
         raise NotImplementedError
 
     @classmethod
@@ -54,16 +54,16 @@ class NoneBuilder(BaseTimeBuilder):
         return (hh, mm, ss, tz)
 
     @classmethod
-    def build_datetime(cls, year, month, day, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
-        return (year, month, day, hours, minutes, seconds, microseconds, tzinfo)
+    def build_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None, TnH=None, TnM=None, TnS=None):
+        return (PnY, PnM, PnW, PnD, TnH, TnM, TnS)
 
     @classmethod
     def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
         return (negative, Z, hh, mm, name)
 
     @classmethod
-    def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, microseconds=0):
-        return (years, months, days, weeks, hours, minutes, seconds, microseconds)
+    def combine(cls, date, time):
+        return (date, time)
 
 class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
@@ -139,7 +139,8 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
         if ss is not None:
             if '.' in ss:
-                floatseconds = BaseTimeBuilder.cast(ss, float, thrownmessage='Invalid second string.')
+                #Truncate to maximum supported precision
+                floatseconds = BaseTimeBuilder.cast(ss[0:ss.index('.') + 7], float, thrownmessage='Invalid second string.')
                 seconds = 0
             else:
                 seconds = BaseTimeBuilder.cast(ss, int, thrownmessage='Invalid second string.')
@@ -168,12 +169,60 @@ class PythonTimeBuilder(BaseTimeBuilder):
             seconds = 0
 
         #Datetimes don't handle fractional components, so we use a timedelta
-        result_datetime = datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, tzinfo=tz) + cls.build_timedelta(hours=floathours, minutes=floatminutes, seconds=floatseconds)
+        result_datetime = datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, tzinfo=tz) + datetime.timedelta(hours=floathours, minutes=floatminutes, seconds=floatseconds)
 
         if tz is None:
             return result_datetime.time()
 
         return result_datetime.timetz()
+
+    @classmethod
+    def build_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None, TnH=None, TnM=None, TnS=None):
+        years = 0
+        months = 0
+        days = 0
+        weeks = 0
+        hours = 0
+        minutes = 0
+        seconds = 0
+
+        if PnY is not None:
+            years = BaseTimeBuilder.cast(PnY, float, thrownmessage='Invalid year string.')
+
+        if PnM is not None:
+            months = BaseTimeBuilder.cast(PnM, float, thrownmessage='Invalid month string.')
+        if PnD is not None:
+            days = BaseTimeBuilder.cast(PnD, float, thrownmessage='Invalid day string.')
+
+        if PnW is not None:
+            if '.' in PnW:
+                weeks = BaseTimeBuilder.cast(PnW, float, thrownmessage='Invalid week string.')
+            else:
+                weeks = BaseTimeBuilder.cast(PnW, int, thrownmessage='Invalid week string.')
+
+        if TnH is not None:
+            if '.' in TnH:
+                hours = BaseTimeBuilder.cast(TnH, float, thrownmessage='Invalid hour string.')
+            else:
+                hours = BaseTimeBuilder.cast(TnH, int, thrownmessage='Invalid hour string.')
+
+        if TnM is not None:
+            if '.' in TnM:
+                minutes = BaseTimeBuilder.cast(TnM, float, thrownmessage='Invalid minute string.')
+            else:
+                minutes = BaseTimeBuilder.cast(TnM, int, thrownmessage='Invalid minute string.')
+
+        if TnS is not None:
+            if '.' in TnS:
+                #Truncate to maximum supported precision
+                seconds = BaseTimeBuilder.cast(TnS[0:TnS.index('.') + 7], float, thrownmessage='Invalid second string.')
+            else:
+                seconds = BaseTimeBuilder.cast(TnS, int, thrownmessage='Invalid second string.')
+
+        #Note that weeks can be handled without conversion to days
+        totaldays = years * 365 + months * 30 + days
+
+        return datetime.timedelta(days=totaldays, seconds=seconds, minutes=minutes, hours=hours, weeks=weeks)
 
     @classmethod
     def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
@@ -195,45 +244,6 @@ class PythonTimeBuilder(BaseTimeBuilder):
             return UTCOffset(name=name, minutes=-(tzhour * 60 + tzminute))
 
         return UTCOffset(name=name, minutes=tzhour * 60 + tzminute)
-
-    @classmethod
-    def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, microseconds=0):
-        years = BaseTimeBuilder.cast(years, float, thrownmessage='Invalid year string.')
-        months = BaseTimeBuilder.cast(months, float, thrownmessage='Invalid month string.')
-        days = BaseTimeBuilder.cast(days, float, thrownmessage='Invalid day string.')
-
-        if '.' in str(weeks):
-            weeks = BaseTimeBuilder.cast(weeks, float, thrownmessage='Invalid week string.')
-        else:
-            weeks = BaseTimeBuilder.cast(weeks, int, thrownmessage='Invalid week string.')
-
-        if '.' in str(hours):
-            hours = BaseTimeBuilder.cast(hours, float, thrownmessage='Invalid hour string.')
-        else:
-            hours = BaseTimeBuilder.cast(hours, int, thrownmessage='Invalid hour string.')
-
-        if '.' in str(minutes):
-            minutes = BaseTimeBuilder.cast(minutes, float, thrownmessage='Invalid minute string.')
-        else:
-            minutes = BaseTimeBuilder.cast(minutes, int, thrownmessage='Invalid minute string.')
-
-        if '.' in str(seconds):
-            #Truncate to maximum supported precision
-            seconds = str(seconds)
-
-            seconds = BaseTimeBuilder.cast(seconds[0:seconds.index('.') + 7], float, thrownmessage='Invalid second string.')
-        else:
-            seconds = BaseTimeBuilder.cast(seconds, int, thrownmessage='Invalid second string.')
-
-        if '.' in str(microseconds):
-            microseconds = BaseTimeBuilder.cast(microseconds, float, thrownmessage='Invalid microsecond string.')
-        else:
-            microseconds = BaseTimeBuilder.cast(microseconds, int, thrownmessage='Invalid microsecond string.')
-
-        #Note that weeks can be handled without conversion to days
-        totaldays = years * 365 + months * 30 + days
-
-        return datetime.timedelta(days=totaldays, seconds=seconds, microseconds=microseconds, minutes=minutes, hours=hours, weeks=weeks)
 
     @classmethod
     def combine(cls, date, time):

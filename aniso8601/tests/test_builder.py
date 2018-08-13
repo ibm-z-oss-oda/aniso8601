@@ -24,9 +24,9 @@ class TestBaseTimeBuilder(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             BaseTimeBuilder.build_time()
 
-    def test_build_timedelta(self):
+    def test_build_duration(self):
         with self.assertRaises(NotImplementedError):
-            BaseTimeBuilder.build_timedelta()
+            BaseTimeBuilder.build_duration()
 
     def test_build_timezone(self):
         with self.assertRaises(NotImplementedError):
@@ -200,14 +200,81 @@ class TestPythonTimeBuilder(unittest.TestCase):
         self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=12))
         self.assertEqual(tzinfoobject.tzname(None), '-12')
 
-    def test_build_timedelta(self):
-        timedelta = PythonTimeBuilder.build_timedelta(years=1, months=2, days=3, weeks=4, hours=5, minutes=6, seconds=7, microseconds=9.1011)
-        self.assertEqual(timedelta, datetime.timedelta(days=428, seconds=7, microseconds=9.1011, minutes=6, hours=5, weeks=4))
+    def test_build_duration(self):
+        timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
+        self.assertEqual(timedelta, datetime.timedelta(days=428, seconds=17646))
 
-        timedelta = PythonTimeBuilder.build_timedelta(years=1, months=-2, days=3, weeks=-4, hours=5, minutes=-6, seconds=7, microseconds=9.1011)
-        self.assertEqual(timedelta, datetime.timedelta(days=308, seconds=7, microseconds=9.1011, minutes=-6, hours=5, weeks=-4))
+        timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6.5')
+        self.assertEqual(timedelta, datetime.timedelta(days=428, seconds=17646.5))
 
-    def test_build_combine(self):
+        timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
+        self.assertEqual(timedelta, datetime.timedelta(days=428, hours=4, minutes=54, seconds=6))
+
+        timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6.5')
+        self.assertEqual(timedelta, datetime.timedelta(days=428, hours=4, minutes=54, seconds=6.5))
+
+        timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3')
+        self.assertEqual(timedelta, datetime.timedelta(days=428))
+
+        timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3.5')
+        self.assertEqual(timedelta, datetime.timedelta(days=428.5))
+
+        timedelta = PythonTimeBuilder.build_duration(TnH='4', TnM='54', TnS='6.5')
+        self.assertEqual(timedelta, datetime.timedelta(hours=4, minutes=54, seconds=6.5))
+
+        #Make sure we truncate, not round
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        timedelta = PythonTimeBuilder.build_duration(TnS='0.0000001')
+        self.assertEqual(timedelta, datetime.timedelta(0))
+
+        timedelta = PythonTimeBuilder.build_duration(TnS='2.0000048')
+        self.assertEqual(timedelta, datetime.timedelta(seconds=2, microseconds=4))
+
+        timedelta = PythonTimeBuilder.build_duration(PnY='1')
+        self.assertEqual(timedelta, datetime.timedelta(days=365))
+
+        timedelta = PythonTimeBuilder.build_duration(PnY='1.5')
+        self.assertEqual(timedelta, datetime.timedelta(days=547.5))
+
+        timedelta = PythonTimeBuilder.build_duration(PnM='1')
+        self.assertEqual(timedelta, datetime.timedelta(days=30))
+
+        timedelta = PythonTimeBuilder.build_duration(PnM='1.5')
+        self.assertEqual(timedelta, datetime.timedelta(days=45))
+
+        timedelta = PythonTimeBuilder.build_duration(PnW='1')
+        self.assertEqual(timedelta, datetime.timedelta(days=7))
+
+        timedelta = PythonTimeBuilder.build_duration(PnW='1.5')
+        self.assertEqual(timedelta, datetime.timedelta(days=10.5))
+
+        timedelta = PythonTimeBuilder.build_duration(PnD='1')
+        self.assertEqual(timedelta, datetime.timedelta(days=1))
+
+        timedelta = PythonTimeBuilder.build_duration(PnD='1.5')
+        self.assertEqual(timedelta, datetime.timedelta(days=1.5))
+
+        timedelta = PythonTimeBuilder.build_duration(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05')
+        self.assertEqual(timedelta, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5))
+
+        timedelta = PythonTimeBuilder.build_duration(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05.5')
+        self.assertEqual(timedelta, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5.5))
+
+        timedelta = PythonTimeBuilder.build_duration(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05')
+        self.assertEqual(timedelta, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5))
+
+        timedelta = PythonTimeBuilder.build_duration(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05.5')
+        self.assertEqual(timedelta, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5.5))
+
+        #Make sure we truncate, not round
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        timedelta = PythonTimeBuilder.build_duration(PnY='0001', PnM='02', PnD='03', TnH='14', TnM='43', TnS='59.9999997')
+        self.assertEqual(timedelta, datetime.timedelta(days=428, hours=14, minutes=43, seconds=59, microseconds=999999))
+
+        #Verify overflows
+        self.assertEqual(PythonTimeBuilder.build_duration(TnH='36'), PythonTimeBuilder.build_duration(PnD='1', TnH='12'))
+
+    def test_combine(self):
         date = datetime.date(1, 2, 3)
         time = datetime.time(hour=23, minute=21, second=28, microsecond=512400)
 

@@ -12,7 +12,7 @@ from aniso8601.date import parse_date
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.time import parse_time
 
-def parse_duration(isodurationstr, relative=False):
+def parse_duration(isodurationstr, relative=False, builder=PythonTimeBuilder):
     #Given a string representing an ISO 8601 duration, return a
     #datetime.timedelta (or dateutil.relativedelta.relativedelta
     #if relative=True) that matches the given duration. Valid formats are:
@@ -23,19 +23,17 @@ def parse_duration(isodurationstr, relative=False):
     if isodurationstr[0] != 'P':
         raise ISOFormatError('ISO 8601 duration must start with a P.')
 
-    #If Y, M, D, H, S, or W are in the string, assume it is a specified duration
-    if _has_any_component(isodurationstr, ['Y', 'M', 'D', 'H', 'S', 'W']) is True:
-        return _parse_duration_prescribed(isodurationstr, relative)
-
-    return _parse_duration_combined(isodurationstr, relative)
-
-def _parse_duration_prescribed(durationstr, relative):
-    #durationstr can be of the form PnYnMnDTnHnMnS or PnW
-
-    builder = PythonTimeBuilder
-
     if relative is True:
         builder = RelativeTimeBuilder
+
+    #If Y, M, D, H, S, or W are in the string, assume it is a specified duration
+    if _has_any_component(isodurationstr, ['Y', 'M', 'D', 'H', 'S', 'W']) is True:
+        return _parse_duration_prescribed(isodurationstr, builder)
+
+    return _parse_duration_combined(isodurationstr, builder)
+
+def _parse_duration_prescribed(durationstr, builder):
+    #durationstr can be of the form PnYnMnDTnHnMnS or PnW
 
     #Make sure the end character is valid
     #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
@@ -82,29 +80,24 @@ def _parse_duration_prescribed_notime(durationstr, builder):
     if durationstr.find('Y') != -1:
         yearstr = _parse_duration_element(durationstr, 'Y')
     else:
-        yearstr = '0'
+        yearstr = None
 
     if durationstr.find('M') != -1:
         monthstr = _parse_duration_element(durationstr, 'M')
     else:
-        monthstr = '0'
+        monthstr = None
 
     if durationstr.find('W') != -1:
         weekstr = _parse_duration_element(durationstr, 'W')
     else:
-        weekstr = '0'
+        weekstr = None
 
     if durationstr.find('D') != -1:
         daystr = _parse_duration_element(durationstr, 'D')
     else:
-        daystr = '0'
+        daystr = None
 
-    #No hours, minutes or seconds
-    hourstr = '0'
-    minutestr = '0'
-    secondstr = '0'
-
-    return builder.build_timedelta(years=yearstr, months=monthstr, weeks=weekstr, days=daystr, hours=hourstr, minutes=minutestr, seconds=secondstr)
+    return builder.build_duration(PnY=yearstr, PnM=monthstr, PnW=weekstr, PnD=daystr)
 
 def _parse_duration_prescribed_time(durationstr, builder):
     #durationstr can be of the form PnYnMnDTnHnMnS
@@ -130,44 +123,37 @@ def _parse_duration_prescribed_time(durationstr, builder):
     if firsthalf.find('Y') != -1:
         yearstr = _parse_duration_element(firsthalf, 'Y')
     else:
-        yearstr = '0'
+        yearstr = None
 
     if firsthalf.find('M') != -1:
         monthstr = _parse_duration_element(firsthalf, 'M')
     else:
-        monthstr = '0'
+        monthstr = None
 
     if firsthalf.find('D') != -1:
         daystr = _parse_duration_element(firsthalf, 'D')
     else:
-        daystr = '0'
+        daystr = None
 
     if secondhalf.find('H') != -1:
         hourstr = _parse_duration_element(secondhalf, 'H')
     else:
-        hourstr = '0'
+        hourstr = None
 
     if secondhalf.find('M') != -1:
         minutestr = _parse_duration_element(secondhalf, 'M')
     else:
-        minutestr = '0'
+        minutestr = None
 
     if secondhalf.find('S') != -1:
         secondstr = _parse_duration_element(secondhalf, 'S')
     else:
-        secondstr = '0'
+        secondstr = None
 
-    #Weeks can't be included
-    weekstr = '0'
+    return builder.build_duration(PnY=yearstr, PnM=monthstr, PnD=daystr, TnH=hourstr, TnM=minutestr, TnS=secondstr)
 
-    return builder.build_timedelta(years=yearstr, months=monthstr, weeks=weekstr, days=daystr, hours=hourstr, minutes=minutestr, seconds=secondstr)
-
-def _parse_duration_combined(durationstr, relative):
+def _parse_duration_combined(durationstr, builder):
     #Period of the form P<date>T<time>
-    builder = PythonTimeBuilder
-
-    if relative is True:
-        builder = RelativeTimeBuilder
 
     #Split the string in to its component parts
     datepart, timepart = durationstr[1:].split('T') #We skip the 'P'
@@ -175,7 +161,7 @@ def _parse_duration_combined(durationstr, relative):
     datevalue = parse_date(datepart, builder=NoneBuilder)
     timevalue = parse_time(timepart, builder=NoneBuilder)
 
-    return builder.build_timedelta(years=datevalue[0], months=datevalue[1], days=datevalue[2], hours=timevalue[0], minutes=timevalue[1], seconds=timevalue[2], microseconds=timevalue[3])
+    return builder.build_duration(PnY=datevalue[0], PnM=datevalue[1], PnD=datevalue[2], TnH=timevalue[0], TnM=timevalue[1], TnS=timevalue[2])
 
 def _parse_duration_element(durationstr, elementstr):
     #Extracts the specified portion of a duration, for instance, given:
@@ -200,15 +186,6 @@ def _parse_duration_element(durationstr, elementstr):
     if ',' in durationstr:
         #Replace the comma with a 'full-stop'
         durationstr = durationstr.replace(',', '.')
-
-    if elementstr == 'S':
-        #We truncate seconds to avoid precision issues with microseconds
-        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
-        if '.' in durationstr[durationstartindex:durationendindex]:
-            stopindex = durationstr.index('.')
-
-            if durationendindex - stopindex > 7:
-                durationendindex = stopindex + 7
 
     return durationstr[durationstartindex:durationendindex]
 
