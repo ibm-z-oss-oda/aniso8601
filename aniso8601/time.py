@@ -104,11 +104,11 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
     (timestr, tzstr) = _split_tz(isotimestr)
 
     if tzstr is None:
-        tzinfo = None
+        tz = None
     else:
-        tzinfo = parse_timezone(tzstr)
+        tz = parse_timezone(tzstr, builder=builder)
 
-    return _RESOLUTION_MAP[get_time_resolution(timestr)](timestr, tzinfo, builder)
+    return _RESOLUTION_MAP[get_time_resolution(timestr)](timestr, tz, builder)
 
 def parse_datetime(isodatetimestr, delimiter='T', builder=PythonTimeBuilder):
     #Given a string in ISO 8601 date time format, return a datetime.datetime
@@ -125,16 +125,16 @@ def parse_datetime(isodatetimestr, delimiter='T', builder=PythonTimeBuilder):
 
     return builder.combine(datepart, timepart)
 
-def _parse_hour(timestr, tzinfo, builder):
+def _parse_hour(timestr, tz, builder):
     #Format must be hh or hh.
     hourstr = timestr
 
     if hourstr == '24':
-        return builder.build_time(hours=0, minutes=0, tzinfo=tzinfo)
+        return builder.build_time(tz=tz)
 
-    return builder.build_time(hours=hourstr, tzinfo=tzinfo)
+    return builder.build_time(hh=hourstr, tz=tz)
 
-def _parse_minute_time(timestr, tzinfo, builder):
+def _parse_minute_time(timestr, tz, builder):
     #Format must be hhmm, hhmm., hh:mm or hh:mm.
     if timestr.count(':') == 1:
         #hh:mm or hh:mm.
@@ -144,9 +144,9 @@ def _parse_minute_time(timestr, tzinfo, builder):
         hourstr = timestr[0:2]
         minutestr = timestr[2:]
 
-    return builder.build_time(hours=hourstr, minutes=minutestr, tzinfo=tzinfo)
+    return builder.build_time(hh=hourstr, mm=minutestr, tz=tz)
 
-def _parse_second_time(timestr, tzinfo, builder):
+def _parse_second_time(timestr, tz, builder):
     #Format must be hhmmss, hhmmss., hh:mm:ss or hh:mm:ss.
     if timestr.count(':') == 2:
         #hh:mm:ss or hh:mm:ss.
@@ -157,7 +157,7 @@ def _parse_second_time(timestr, tzinfo, builder):
         minutestr = timestr[2:4]
         secondstr = timestr[4:]
 
-    return builder.build_time(hours=hourstr, minutes=minutestr, seconds=secondstr, tzinfo=tzinfo)
+    return builder.build_time(hh=hourstr, mm=minutestr, ss=secondstr, tz=tz)
 
 def _split_tz(isotimestr):
     if isotimestr.find('+') != -1:

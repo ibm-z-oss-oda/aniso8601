@@ -7,13 +7,13 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import datetime
+import pickle
 import unittest
 import dateutil.relativedelta
 
-from aniso8601.builder import BaseTimeBuilder, PythonTimeBuilder, RelativeTimeBuilder
+from aniso8601.builder import BaseTimeBuilder, PythonTimeBuilder, RelativeTimeBuilder, UTCOffset
 from aniso8601.exceptions import DayOutOfBoundsError, WeekOutOfBoundsError, \
         YearOutOfBoundsError
-from aniso8601.timezone import UTCOffset
 
 class TestBaseTimeBuilder(unittest.TestCase):
     def test_build_date(self):
@@ -24,13 +24,13 @@ class TestBaseTimeBuilder(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             BaseTimeBuilder.build_time()
 
-    def test_build_datetime(self):
-        with self.assertRaises(NotImplementedError):
-            BaseTimeBuilder.build_datetime(1, 2, 3)
-
     def test_build_timedelta(self):
         with self.assertRaises(NotImplementedError):
             BaseTimeBuilder.build_timedelta()
+
+    def test_build_timezone(self):
+        with self.assertRaises(NotImplementedError):
+            BaseTimeBuilder.build_timezone()
 
     def test_build_combine(self):
         with self.assertRaises(NotImplementedError):
@@ -130,57 +130,75 @@ class TestPythonTimeBuilder(unittest.TestCase):
         time = PythonTimeBuilder.build_time()
         self.assertEqual(time, datetime.time())
 
-        time = PythonTimeBuilder.build_time(hours=1, minutes=23)
+        time = PythonTimeBuilder.build_time(hh='1', mm='23')
         self.assertEqual(time, datetime.time(hour=1, minute=23))
 
-        time = PythonTimeBuilder.build_time(hours=1, minutes='23.4567')
+        time = PythonTimeBuilder.build_time(hh='1', mm='23.4567')
         self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
 
-        time = PythonTimeBuilder.build_time(hours=23, minutes=21, seconds='28.512400')
+        time = PythonTimeBuilder.build_time(hh='23', mm='21', ss='28.512400')
         self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
 
-        time = PythonTimeBuilder.build_time(hours=23, minutes=21, seconds=28, microseconds=512400)
-        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
-
-        time = PythonTimeBuilder.build_time(tzinfo=UTCOffset(name='UTC', minutes=0))
+        time = PythonTimeBuilder.build_time(tz=UTCOffset(name='UTC', minutes=0))
         self.assertEqual(time, datetime.time(tzinfo=UTCOffset(name='UTC', minutes=0)))
 
-        time = PythonTimeBuilder.build_time(hours=1, minutes=23, tzinfo=UTCOffset(name='+1', minutes=60))
+        time = PythonTimeBuilder.build_time(hh='1', mm='23', tz=UTCOffset(name='+1', minutes=60))
         self.assertEqual(time, datetime.time(hour=1, minute=23, tzinfo=UTCOffset(name='+1', minutes=60)))
 
-        time = PythonTimeBuilder.build_time(hours=1, minutes='23.4567', tzinfo=UTCOffset(name='-1', minutes=-60))
+        time = PythonTimeBuilder.build_time(hh='1', mm='23.4567', tz=UTCOffset(name='-1', minutes=-60))
         self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000, tzinfo=UTCOffset(name='-1', minutes=-60)))
 
-        time = PythonTimeBuilder.build_time(hours=23, minutes=21, seconds='28.512400', tzinfo=UTCOffset(name='+1.5', minutes=90))
+        time = PythonTimeBuilder.build_time(hh='23', mm='21', ss='28.512400', tz=UTCOffset(name='+1.5', minutes=90))
         self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+1.5', minutes=90)))
 
-        time = PythonTimeBuilder.build_time(hours=23, minutes=21, seconds=28, microseconds=512400, tzinfo=UTCOffset(name='-1.5', minutes=-90))
-        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='-1.5', minutes=-90)))
+    def test_build_timezone(self):
+        tzinfoobject = PythonTimeBuilder.build_timezone(Z=True, name='Z')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
+        self.assertEqual(tzinfoobject.tzname(None), 'UTC')
 
-    def test_build_datetime(self):
-        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5)
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5))
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='00', mm='00', name='+00:00')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
+        self.assertEqual(tzinfoobject.tzname(None), '+00:00')
 
-        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=1, minutes='23.4567')
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=1, minute=23, second=27, microsecond=402000))
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='01', mm='00', name='+01:00')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=1))
+        self.assertEqual(tzinfoobject.tzname(None), '+01:00')
 
-        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds='28.512400')
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400))
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=True, hh='01', mm='00', name='-01:00')
+        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=1))
+        self.assertEqual(tzinfoobject.tzname(None), '-01:00')
 
-        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds=28, microseconds=512400)
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400))
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='00', mm='12', name='+00:12')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(minutes=12))
+        self.assertEqual(tzinfoobject.tzname(None), '+00:12')
 
-        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, tzinfo=UTCOffset(name='UTC', minutes=0))
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, tzinfo=UTCOffset(name='UTC', minutes=0)))
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='01', mm='23', name='+01:23')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=1, minutes=23))
+        self.assertEqual(tzinfoobject.tzname(None), '+01:23')
 
-        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=1, minutes='23.4567', tzinfo=UTCOffset(name='+1', minutes=60))
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=1, minute=23, second=27, microsecond=402000, tzinfo=UTCOffset(name='+1', minutes=60)))
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=True, hh='01', mm='23', name='-01:23')
+        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=1, minutes=23))
+        self.assertEqual(tzinfoobject.tzname(None), '-01:23')
 
-        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds='28.512400', tzinfo=UTCOffset(name='-1', minutes=-60))
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='-1', minutes=-60)))
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='00', name='+00')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
+        self.assertEqual(tzinfoobject.tzname(None), '+00')
 
-        resultdatetime = PythonTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds=28, microseconds=512400, tzinfo=UTCOffset(name='+1.5', minutes=90))
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+1.5', minutes=90)))
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='01', name='+01')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=1))
+        self.assertEqual(tzinfoobject.tzname(None), '+01')
+
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=True, hh='01', name='-01')
+        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=1))
+        self.assertEqual(tzinfoobject.tzname(None), '-01')
+
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='12', name='+12')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=12))
+        self.assertEqual(tzinfoobject.tzname(None), '+12')
+
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=True, hh='12', name='-12')
+        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=12))
+        self.assertEqual(tzinfoobject.tzname(None), '-12')
 
     def test_build_timedelta(self):
         timedelta = PythonTimeBuilder.build_timedelta(years=1, months=2, days=3, weeks=4, hours=5, minutes=6, seconds=7, microseconds=9.1011)
@@ -190,8 +208,8 @@ class TestPythonTimeBuilder(unittest.TestCase):
         self.assertEqual(timedelta, datetime.timedelta(days=308, seconds=7, microseconds=9.1011, minutes=-6, hours=5, weeks=-4))
 
     def test_build_combine(self):
-        date = PythonTimeBuilder.build_date(1, 2, 3)
-        time = PythonTimeBuilder.build_time(hours=23, minutes=21, seconds=28, microseconds=512400)
+        date = datetime.date(1, 2, 3)
+        time = datetime.time(hour=23, minute=21, second=28, microsecond=512400)
 
         self.assertEqual(PythonTimeBuilder.combine(date, time), datetime.datetime(1, 2, 3, hour=23, minute=21, second=28, microsecond=512400))
 
@@ -203,57 +221,75 @@ class TestRelativeTimeBuilder(unittest.TestCase):
         time = RelativeTimeBuilder.build_time()
         self.assertEqual(time, datetime.time())
 
-        time = RelativeTimeBuilder.build_time(hours=1, minutes=23)
+        time = RelativeTimeBuilder.build_time(hh='1', mm='23')
         self.assertEqual(time, datetime.time(hour=1, minute=23))
 
-        time = RelativeTimeBuilder.build_time(hours=1, minutes='23.4567')
+        time = RelativeTimeBuilder.build_time(hh='1', mm='23.4567')
         self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
 
-        time = RelativeTimeBuilder.build_time(hours=23, minutes=21, seconds='28.512400')
+        time = RelativeTimeBuilder.build_time(hh='23', mm='21', ss='28.512400')
         self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
 
-        time = RelativeTimeBuilder.build_time(hours=23, minutes=21, seconds=28, microseconds=512400)
-        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
-
-        time = RelativeTimeBuilder.build_time(tzinfo=UTCOffset(name='UTC', minutes=0))
+        time = RelativeTimeBuilder.build_time(tz=UTCOffset(name='UTC', minutes=0))
         self.assertEqual(time, datetime.time(tzinfo=UTCOffset(name='UTC', minutes=0)))
 
-        time = RelativeTimeBuilder.build_time(hours=1, minutes=23, tzinfo=UTCOffset(name='+1', minutes=60))
+        time = RelativeTimeBuilder.build_time(hh='1', mm='23', tz=UTCOffset(name='+1', minutes=60))
         self.assertEqual(time, datetime.time(hour=1, minute=23, tzinfo=UTCOffset(name='+1', minutes=60)))
 
-        time = RelativeTimeBuilder.build_time(hours=1, minutes='23.4567', tzinfo=UTCOffset(name='-1', minutes=-60))
+        time = RelativeTimeBuilder.build_time(hh='1', mm='23.4567', tz=UTCOffset(name='-1', minutes=-60))
         self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000, tzinfo=UTCOffset(name='-1', minutes=-60)))
 
-        time = RelativeTimeBuilder.build_time(hours=23, minutes=21, seconds='28.512400', tzinfo=UTCOffset(name='+1.5', minutes=90))
+        time = RelativeTimeBuilder.build_time(hh='23', mm='21', ss='28.512400', tz=UTCOffset(name='+1.5', minutes=90))
         self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+1.5', minutes=90)))
 
-        time = RelativeTimeBuilder.build_time(hours=23, minutes=21, seconds=28, microseconds=512400, tzinfo=UTCOffset(name='-1.5', minutes=-90))
-        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='-1.5', minutes=-90)))
+    def test_build_timezone(self):
+        tzinfoobject = RelativeTimeBuilder.build_timezone(Z=True, name='Z')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
+        self.assertEqual(tzinfoobject.tzname(None), 'UTC')
 
-    def test_build_datetime(self):
-        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5)
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5))
+        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=False, hh='00', mm='00', name='+00:00')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
+        self.assertEqual(tzinfoobject.tzname(None), '+00:00')
 
-        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=1, minutes='23.4567')
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=1, minute=23, second=27, microsecond=402000))
+        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=False, hh='01', mm='00', name='+01:00')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=1))
+        self.assertEqual(tzinfoobject.tzname(None), '+01:00')
 
-        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds='28.512400')
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400))
+        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=True, hh='01', mm='00', name='-01:00')
+        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=1))
+        self.assertEqual(tzinfoobject.tzname(None), '-01:00')
 
-        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds=28, microseconds=512400)
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400))
+        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=False, hh='00', mm='12', name='+00:12')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(minutes=12))
+        self.assertEqual(tzinfoobject.tzname(None), '+00:12')
 
-        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, tzinfo=UTCOffset(name='UTC', minutes=0))
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, tzinfo=UTCOffset(name='UTC', minutes=0)))
+        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=False, hh='01', mm='23', name='+01:23')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=1, minutes=23))
+        self.assertEqual(tzinfoobject.tzname(None), '+01:23')
 
-        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=1, minutes='23.4567', tzinfo=UTCOffset(name='+1', minutes=60))
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=1, minute=23, second=27, microsecond=402000, tzinfo=UTCOffset(name='+1', minutes=60)))
+        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=True, hh='01', mm='23', name='-01:23')
+        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=1, minutes=23))
+        self.assertEqual(tzinfoobject.tzname(None), '-01:23')
 
-        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds='28.512400', tzinfo=UTCOffset(name='-1', minutes=-60))
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='-1', minutes=-60)))
+        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=False, hh='00', name='+00')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
+        self.assertEqual(tzinfoobject.tzname(None), '+00')
 
-        resultdatetime = RelativeTimeBuilder.build_datetime(1981, 4, 5, hours=23, minutes=21, seconds=28, microseconds=512400, tzinfo=UTCOffset(name='+1.5', minutes=90))
-        self.assertEqual(resultdatetime, datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+1.5', minutes=90)))
+        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=False, hh='01', name='+01')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=1))
+        self.assertEqual(tzinfoobject.tzname(None), '+01')
+
+        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=True, hh='01', name='-01')
+        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=1))
+        self.assertEqual(tzinfoobject.tzname(None), '-01')
+
+        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=False, hh='12', name='+12')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=12))
+        self.assertEqual(tzinfoobject.tzname(None), '+12')
+
+        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=True, hh='12', name='-12')
+        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=12))
+        self.assertEqual(tzinfoobject.tzname(None), '-12')
 
     def test_build_timedelta(self):
         timedelta = RelativeTimeBuilder.build_timedelta(years=1, months=2, days=3, weeks=4, hours=5, minutes=6, seconds=7, microseconds='9.1011')
@@ -277,7 +313,49 @@ class TestRelativeTimeBuilder(unittest.TestCase):
         sys.modules['dateutil'] = dateutil
 
     def test_build_combine(self):
-        date = RelativeTimeBuilder.build_date(1, 2, 3)
-        time = RelativeTimeBuilder.build_time(hours=23, minutes=21, seconds=28, microseconds=512400)
+        date = datetime.date(1, 2, 3)
+        time = datetime.time(hour=23, minute=21, second=28, microsecond=512400)
 
         self.assertEqual(RelativeTimeBuilder.combine(date, time), datetime.datetime(1, 2, 3, hour=23, minute=21, second=28, microsecond=512400))
+
+class TestUTCOffset(unittest.TestCase):
+    def test_pickle(self):
+        #Make sure timezone objects are pickleable
+        testutcoffset = UTCOffset(name='UTC', minutes=0)
+
+        utcoffsetpickle = pickle.dumps(testutcoffset)
+
+        resultutcoffset = pickle.loads(utcoffsetpickle)
+
+        self.assertEqual(resultutcoffset._name, testutcoffset._name)
+        self.assertEqual(resultutcoffset._utcdelta, testutcoffset._utcdelta)
+
+    def test_repr(self):
+        self.assertEqual(str(UTCOffset(minutes=0)), '+0:00:00 UTC')
+
+        self.assertEqual(str(UTCOffset(minutes=60)), '+1:00:00 UTC')
+
+        self.assertEqual(str(UTCOffset(minutes=-60)), '-1:00:00 UTC')
+
+        self.assertEqual(str(UTCOffset(minutes=12)), '+0:12:00 UTC')
+
+        self.assertEqual(str(UTCOffset(minutes=-12)), '-0:12:00 UTC')
+
+        self.assertEqual(str(UTCOffset(minutes=83)), '+1:23:00 UTC')
+
+        self.assertEqual(str(UTCOffset(minutes=-83)), '-1:23:00 UTC')
+
+        self.assertEqual(str(UTCOffset(minutes=1440)), '+1 day, 0:00:00 UTC')
+
+        self.assertEqual(str(UTCOffset(minutes=-1440)), '-1 day, 0:00:00 UTC')
+
+        self.assertEqual(str(UTCOffset(minutes=2967)), '+2 days, 1:27:00 UTC')
+
+        self.assertEqual(str(UTCOffset(minutes=-2967)), '-2 days, 1:27:00 UTC')
+
+    def test_dst(self):
+        tzinfoobject = UTCOffset(minutes=240)
+        #This would raise ISOFormatError or a TypeError if dst info is invalid
+        result = datetime.datetime.now(tzinfoobject)
+        #Hacky way to make sure the tzinfo is what we'd expect
+        self.assertEqual(result.tzinfo.utcoffset(None), datetime.timedelta(hours=4))

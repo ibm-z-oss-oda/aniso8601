@@ -19,11 +19,11 @@ class BaseTimeBuilder(object):
         raise NotImplementedError
 
     @classmethod
-    def build_time(cls, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
+    def build_time(cls, hh=None, mm=None, ss=None, tz=None):
         raise NotImplementedError
 
     @classmethod
-    def build_datetime(cls, year, month, day, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
+    def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
         raise NotImplementedError
 
     @classmethod
@@ -50,12 +50,16 @@ class NoneBuilder(BaseTimeBuilder):
         return (YYYY, MM, DD, Www, D, DDD)
 
     @classmethod
-    def build_time(cls, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
-        return (hours, minutes, seconds, microseconds, tzinfo)
+    def build_time(cls, hh=None, mm=None, ss=None, tz=None):
+        return (hh, mm, ss, tz)
 
     @classmethod
     def build_datetime(cls, year, month, day, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
         return (year, month, day, hours, minutes, seconds, microseconds, tzinfo)
+
+    @classmethod
+    def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
+        return (negative, Z, hh, mm, name)
 
     @classmethod
     def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, microseconds=0):
@@ -109,39 +113,43 @@ class PythonTimeBuilder(BaseTimeBuilder):
         return datetime.date(year, month, day)
 
     @classmethod
-    def build_time(cls, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
+    def build_time(cls, hh=None, mm=None, ss=None, tz=None):
         #Builds a time from the given parts, handling fractional arguments where necessary
+        hours = 0
+        minutes = 0
+        seconds = 0
+
         floathours = float(0)
         floatminutes = float(0)
         floatseconds = float(0)
 
-        if '.' in str(hours):
-            floathours = BaseTimeBuilder.cast(hours, float, thrownmessage='Invalid hour string.')
-            hours = 0
-        else:
-            hours = BaseTimeBuilder.cast(hours, int, thrownmessage='Invalid hour string.')
+        if hh is not None:
+            if '.' in hh:
+                floathours = BaseTimeBuilder.cast(hh, float, thrownmessage='Invalid hour string.')
+                hours = 0
+            else:
+                hours = BaseTimeBuilder.cast(hh, int, thrownmessage='Invalid hour string.')
 
-        if '.' in str(minutes):
-            floatminutes = BaseTimeBuilder.cast(minutes, float, thrownmessage='Invalid minute string.')
-            minutes = 0
-        else:
-            minutes = BaseTimeBuilder.cast(minutes, int, thrownmessage='Invalid minute string.')
+        if mm is not None:
+            if '.' in mm:
+                floatminutes = BaseTimeBuilder.cast(mm, float, thrownmessage='Invalid minute string.')
+                minutes = 0
+            else:
+                minutes = BaseTimeBuilder.cast(mm, int, thrownmessage='Invalid minute string.')
 
-        if '.' in str(seconds):
-            floatseconds = BaseTimeBuilder.cast(seconds, float, thrownmessage='Invalid second string.')
-            seconds = 0
-        else:
-            seconds = BaseTimeBuilder.cast(seconds, int, thrownmessage='Invalid second string.')
-
-        #No fractional microseconds
-        microseconds = BaseTimeBuilder.cast(microseconds, int, thrownmessage='Invalid microsecond string.')
+        if ss is not None:
+            if '.' in ss:
+                floatseconds = BaseTimeBuilder.cast(ss, float, thrownmessage='Invalid second string.')
+                seconds = 0
+            else:
+                seconds = BaseTimeBuilder.cast(ss, int, thrownmessage='Invalid second string.')
 
         #Range checks
         if hours == 23 and floathours == 0 and minutes == 59 and floatminutes == 0 and seconds == 60 and floatseconds == 0:
             #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
             raise LeapSecondError('Leap seconds are not supported.')
 
-        if hours == 24 and floathours == 0 and (minutes != 0 or floatminutes != 0 or seconds != 0 or floatseconds != 0 or microseconds != 0):
+        if hours == 24 and floathours == 0 and (minutes != 0 or floatminutes != 0 or seconds != 0 or floatseconds != 0):
             raise MidnightBoundsError('Hour 24 may only represent midnight.')
 
         if hours > 24 or floathours > 24:
@@ -160,20 +168,33 @@ class PythonTimeBuilder(BaseTimeBuilder):
             seconds = 0
 
         #Datetimes don't handle fractional components, so we use a timedelta
-        result_datetime = datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, microsecond=microseconds, tzinfo=tzinfo) + cls.build_timedelta(hours=floathours, minutes=floatminutes, seconds=floatseconds)
+        result_datetime = datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, tzinfo=tz) + cls.build_timedelta(hours=floathours, minutes=floatminutes, seconds=floatseconds)
 
-        if tzinfo is None:
+        if tz is None:
             return result_datetime.time()
 
         return result_datetime.timetz()
 
     @classmethod
-    def build_datetime(cls, year, month, day, hours=0, minutes=0, seconds=0, microseconds=0, tzinfo=None):
-        #Builds a datetime from the given parts, handling fractional arguments where necessary
-        date = cls.build_date(year, month, day)
-        time = cls.build_time(hours=hours, minutes=minutes, seconds=seconds, microseconds=microseconds, tzinfo=tzinfo)
+    def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
+        if Z is True:
+            #Z -> UTC
+            return UTCOffset(name='UTC', minutes=0)
 
-        return cls.combine(date, time)
+        if hh is not None:
+            tzhour = BaseTimeBuilder.cast(hh, int, thrownmessage='Invalid hour string.')
+        else:
+            tzhour = 0
+
+        if mm is not None:
+            tzminute = BaseTimeBuilder.cast(mm, int, thrownmessage='Invalid minute string.')
+        else:
+            tzminute = 0
+
+        if negative is True:
+            return UTCOffset(name=name, minutes=-(tzhour * 60 + tzminute))
+
+        return UTCOffset(name=name, minutes=tzhour * 60 + tzminute)
 
     @classmethod
     def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, microseconds=0):
@@ -310,3 +331,55 @@ class RelativeTimeBuilder(PythonTimeBuilder):
         microseconds += secondsremainder * 1e6 #Add remaining microseconds
 
         return dateutil.relativedelta.relativedelta(years=years, months=months, weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds, microseconds=microseconds)
+
+class UTCOffset(datetime.tzinfo):
+    def __init__(self, name=None, minutes=None):
+        #We build an offset in this manner since the
+        #tzinfo class must have an init
+        #"method that can be called with no arguments"
+        self._name = name
+
+        if minutes is not None:
+            self._utcdelta = datetime.timedelta(minutes=minutes)
+        else:
+            self._utcdelta = None
+
+    def __repr__(self):
+        if self._utcdelta >= datetime.timedelta(hours=0):
+            return '+{0} UTC'.format(self._utcdelta)
+
+        #From the docs:
+        #String representations of timedelta objects are normalized
+        #similarly to their internal representation. This leads to
+        #somewhat unusual results for negative timedeltas.
+
+        #Clean this up for printing purposes
+        correcteddays = abs(self._utcdelta.days + 1) #Negative deltas start at -1 day
+
+        deltaseconds = (24 * 60 * 60) - self._utcdelta.seconds #Negative deltas have a positive seconds
+
+        days, remainder = divmod(deltaseconds, 24 * 60 * 60) #(24 hours / day) * (60 minutes / hour) * (60 seconds / hour)
+        hours, remainder = divmod(remainder, 1 * 60 * 60) #(1 hour) * (60 minutes / hour) * (60 seconds / hour)
+        minutes, seconds = divmod(remainder, 1 * 60) #(1 minute) * (60 seconds / minute)
+
+        #Add any remaining days to the correctedDays count
+        correcteddays += days
+
+        if correcteddays == 0:
+            return '-{0}:{1:02}:{2:02} UTC'.format(hours, minutes, seconds)
+        elif correcteddays == 1:
+            return '-1 day, {0}:{1:02}:{2:02} UTC'.format(hours, minutes, seconds)
+
+        return '-{0} days, {1}:{2:02}:{3:02} UTC'.format(correcteddays, hours, minutes, seconds)
+
+    def utcoffset(self, dt):
+        return self._utcdelta
+
+    def tzname(self, dt):
+        return self._name
+
+    def dst(self, dt):
+        #ISO 8601 specifies offsets should be different if DST is required,
+        #instead of allowing for a DST to be specified
+        # https://docs.python.org/2/library/datetime.html#datetime.tzinfo.dst
+        return datetime.timedelta(0)
