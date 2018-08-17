@@ -39,7 +39,7 @@ def parse_interval(isointervalstr, intervaldelimiter='/', datetimedelimiter='T',
 
     return _parse_interval(isointervalstr, builder, intervaldelimiter, datetimedelimiter)
 
-def parse_repeating_interval(isointervalstr, intervaldelimiter='/', datetimedelimiter='T', relative=True, builder=PythonTimeBuilder):
+def parse_repeating_interval(isointervalstr, intervaldelimiter='/', datetimedelimiter='T', relative=False, builder=PythonTimeBuilder):
     #Given a string representing an ISO 8601 interval repating, return a
     #generator of datetime.date or date.datetime objects representing the
     #dates specified by the repeating interval. Valid formats are:
