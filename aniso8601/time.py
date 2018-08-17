@@ -103,6 +103,9 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
 
     (timestr, tzstr) = _split_tz(isotimestr)
 
+    if timestr[0].isdigit() is False or timestr[-1].isdigit() is False:
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'.format(timestr))
+
     if tzstr is None:
         tz = None
     else:

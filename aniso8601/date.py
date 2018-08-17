@@ -26,6 +26,9 @@ def get_date_resolution(isodatestr):
     if isodatestr.startswith('+') or isodatestr.startswith('-'):
         raise NotImplementedError('ISO 8601 extended year representation not supported.')
 
+    if isodatestr[0].isdigit() is False or isodatestr[-1].isdigit() is False:
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 date.'.format(isodatestr))
+
     if isodatestr.find('W') != -1:
         #Handle ISO 8601 week date format
         hyphens_present = 1 if isodatestr.find('-') != -1 else 0
