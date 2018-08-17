@@ -6,7 +6,7 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-from aniso8601.builder import PythonTimeBuilder
+from aniso8601.builder import NoneBuilder, PythonTimeBuilder
 from aniso8601.date import parse_date
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.resolution import TimeResolution
@@ -122,11 +122,11 @@ def parse_datetime(isodatetimestr, delimiter='T', builder=PythonTimeBuilder):
 
     isodatestr, isotimestr = isodatetimestr.split(delimiter)
 
-    datepart = parse_date(isodatestr, builder=builder)
+    datepart = parse_date(isodatestr, builder=NoneBuilder)
 
-    timepart = parse_time(isotimestr, builder=builder)
+    timepart = parse_time(isotimestr, builder=NoneBuilder)
 
-    return builder.combine(datepart, timepart)
+    return builder.build_datetime(datepart, timepart)
 
 def _parse_hour(timestr, tz, builder):
     #Format must be hh or hh.

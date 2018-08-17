@@ -23,6 +23,10 @@ class BaseTimeBuilder(object):
         raise NotImplementedError
 
     @classmethod
+    def build_datetime(cls, date, time):
+        raise NotImplementedError
+
+    @classmethod
     def build_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None, TnH=None, TnM=None, TnS=None):
         raise NotImplementedError
 
@@ -38,10 +42,6 @@ class BaseTimeBuilder(object):
 
     @classmethod
     def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
-        raise NotImplementedError
-
-    @classmethod
-    def combine(cls, date, time):
         raise NotImplementedError
 
     @staticmethod
@@ -64,6 +64,10 @@ class NoneBuilder(BaseTimeBuilder):
         return (hh, mm, ss, tz, 'time')
 
     @classmethod
+    def build_datetime(cls, date, time):
+        return (date, time, 'datetime')
+
+    @classmethod
     def build_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None, TnH=None, TnM=None, TnS=None):
         return (PnY, PnM, PnW, PnD, TnH, TnM, TnS, 'duration')
 
@@ -78,11 +82,6 @@ class NoneBuilder(BaseTimeBuilder):
     @classmethod
     def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
         return (negative, Z, hh, mm, name, 'timezone')
-
-    @classmethod
-    def combine(cls, date, time):
-        #date and time are tuples
-        return (date, time, 'datetime')
 
 class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
@@ -196,6 +195,10 @@ class PythonTimeBuilder(BaseTimeBuilder):
         return result_datetime.timetz()
 
     @classmethod
+    def build_datetime(cls, date, time):
+        return datetime.datetime.combine(cls._build_object(date), cls._build_object(time))
+
+    @classmethod
     def build_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None, TnH=None, TnM=None, TnS=None):
         years = 0
         months = 0
@@ -252,7 +255,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
             if end[-1] == 'date' and (duration[4] is not None or duration[5] is not None or duration[6] is not None):
                 #<end> is a date, and <duration> requires datetime resolution
-                return (endobject, cls.combine(endobject, cls.build_time()) - durationobject)
+                return (endobject, cls.build_datetime(end, NoneBuilder.build_time()) - durationobject)
 
             return (endobject, endobject - durationobject)
         elif start is not None and duration is not None:
@@ -262,7 +265,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
             if start[-1] == 'date' and (duration[4] is not None or duration[5] is not None or duration[6] is not None):
                 #<start> is a date, and <duration> requires datetime resolution
-                return (startobject, cls.combine(startobject, cls.build_time()) + durationobject)
+                return (startobject, cls.build_datetime(start, NoneBuilder.build_time()) + durationobject)
 
             return (startobject, startobject + durationobject)
 
@@ -308,10 +311,6 @@ class PythonTimeBuilder(BaseTimeBuilder):
         return UTCOffset(name=name, minutes=tzhour * 60 + tzminute)
 
     @classmethod
-    def combine(cls, date, time):
-        return datetime.datetime.combine(date, time)
-
-    @classmethod
     def _build_object(cls, parsetuple):
         #Given a NoneBuilder tuple, return a Python date, datetime, timedelta
         if parsetuple[-1] == 'date':
@@ -322,17 +321,16 @@ class PythonTimeBuilder(BaseTimeBuilder):
                 return cls.build_time(hh=parsetuple[0], mm=parsetuple[1], ss=parsetuple[2])
 
             return cls.build_time(hh=parsetuple[0], mm=parsetuple[1], ss=parsetuple[2], tz=cls._build_object(parsetuple[3]))
+        elif parsetuple[-1] == 'datetime':
+            return cls.build_datetime(parsetuple[0], parsetuple[1])
         elif parsetuple[-1] == 'duration':
             return cls.build_duration(PnY=parsetuple[0], PnM=parsetuple[1], PnW=parsetuple[2], PnD=parsetuple[3], TnH=parsetuple[4], TnM=parsetuple[5], TnS=parsetuple[6])
         elif parsetuple[-1] == 'interval':
             return cls.build_interval(start=parsetuple[0], end=parsetuple[1], duration=parsetuple[2])
         elif parsetuple[-1] == 'repeatinginterval':
             return cls.build_repeating_interval(R=parsetuple[0], Rnn=parsetuple[1], interval=parsetuple[2])
-        elif parsetuple[-1] == 'timezone':
-            cls.build_timezone(negative=parsetuple[0], Z=parsetuple[1], hh=parsetuple[2], mm=parsetuple[3], name=parsetuple[4])
 
-        #combine tuple
-        return cls.combine(cls._build_object(parsetuple[0]), cls._build_object(parsetuple[1]))
+        return cls.build_timezone(negative=parsetuple[0], Z=parsetuple[1], hh=parsetuple[2], mm=parsetuple[3], name=parsetuple[4])
 
     @staticmethod
     def _build_week_date(isoyear, isoweek, isoday=None):

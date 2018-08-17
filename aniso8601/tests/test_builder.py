@@ -233,6 +233,11 @@ class TestPythonTimeBuilder(unittest.TestCase):
         with self.assertRaises(MidnightBoundsError):
             PythonTimeBuilder.build_time(hh='24', mm='01')
 
+    def test_build_datetime(self):
+        self.assertEqual(PythonTimeBuilder.build_datetime(('1', '2', '3', None, None, None, 'date'), ('23', '21', '28.512400', None, 'time')), datetime.datetime(1, 2, 3, hour=23, minute=21, second=28, microsecond=512400))
+
+        self.assertEqual(PythonTimeBuilder.build_datetime(('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28.512400', (False, None, '11', '15', '+11:15', 'timezone'), 'time')), datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+11:15', minutes=675)))
+
     def test_build_duration(self):
         timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
         self.assertEqual(timedelta, datetime.timedelta(days=428, seconds=17646))
@@ -467,17 +472,6 @@ class TestPythonTimeBuilder(unittest.TestCase):
         tzinfoobject = PythonTimeBuilder.build_timezone(negative=True, hh='12', name='-12')
         self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=12))
         self.assertEqual(tzinfoobject.tzname(None), '-12')
-
-    def test_combine(self):
-        date = datetime.date(1, 2, 3)
-        time = datetime.time(hour=23, minute=21, second=28, microsecond=512400)
-
-        self.assertEqual(PythonTimeBuilder.combine(date, time), datetime.datetime(1, 2, 3, hour=23, minute=21, second=28, microsecond=512400))
-
-        date = datetime.date(1981, 4, 5)
-        time = datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+11:15', minutes=675))
-
-        self.assertEqual(PythonTimeBuilder.combine(date, time), datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+11:15', minutes=675)))
 
 class TestRelativeTimeBuilder(unittest.TestCase):
     def test_build_date(self):
