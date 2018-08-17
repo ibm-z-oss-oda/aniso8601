@@ -331,16 +331,16 @@ class TestTimeParserFunctions(unittest.TestCase):
 
     def test_parse_hour(self):
         time = _parse_hour('01', None, NoneBuilder)
-        self.assertEqual(time, ('01', None, None, None))
+        self.assertEqual(time, ('01', None, None, None, 'time'))
 
         time = _parse_hour('24', None, NoneBuilder)
-        self.assertEqual(time, (None, None, None, None))
+        self.assertEqual(time, (None, None, None, None, 'time'))
 
         time = _parse_hour('01.4567', None, NoneBuilder)
-        self.assertEqual(time, ('01.4567', None, None, None))
+        self.assertEqual(time, ('01.4567', None, None, None, 'time'))
 
         time = _parse_hour('12.5', None, NoneBuilder)
-        self.assertEqual(time, ('12.5', None, None, None))
+        self.assertEqual(time, ('12.5', None, None, None, 'time'))
 
     def test_parse_hour_bounds(self):
         #Hour cannot be larger than 24, range checking happens in the builder
@@ -349,22 +349,22 @@ class TestTimeParserFunctions(unittest.TestCase):
 
     def test_parse_minute_time(self):
         time = _parse_minute_time('01:23', None, NoneBuilder)
-        self.assertEqual(time, ('01', '23', None, None))
+        self.assertEqual(time, ('01', '23', None, None, 'time'))
 
         time = _parse_minute_time('24:00', None, NoneBuilder)
-        self.assertEqual(time, ('24', '00', None, None))
+        self.assertEqual(time, ('24', '00', None, None, 'time'))
 
         time = _parse_minute_time('01:23.4567', None, NoneBuilder)
-        self.assertEqual(time, ('01', '23.4567', None, None))
+        self.assertEqual(time, ('01', '23.4567', None, None, 'time'))
 
         time = _parse_minute_time('0123', None, NoneBuilder)
-        self.assertEqual(time, ('01', '23', None, None))
+        self.assertEqual(time, ('01', '23', None, None, 'time'))
 
         time = _parse_minute_time('2400', None, NoneBuilder)
-        self.assertEqual(time, ('24', '00', None, None))
+        self.assertEqual(time, ('24', '00', None, None, 'time'))
 
         time = _parse_minute_time('0123.4567', None, NoneBuilder)
-        self.assertEqual(time, ('01', '23.4567', None, None))
+        self.assertEqual(time, ('01', '23.4567', None, None, 'time'))
 
     def test_parse_minute_time_overflow(self):
         #Range checking happens in the builder
@@ -395,28 +395,28 @@ class TestTimeParserFunctions(unittest.TestCase):
 
     def test_parse_second_time(self):
         parseresult = _parse_second_time('01:23:45', None, NoneBuilder)
-        self.assertEqual(parseresult, ('01', '23', '45', None))
+        self.assertEqual(parseresult, ('01', '23', '45', None, 'time'))
 
         parseresult = _parse_second_time('24:00:00', None, NoneBuilder)
-        self.assertEqual(parseresult, ('24', '00', '00', None))
+        self.assertEqual(parseresult, ('24', '00', '00', None, 'time'))
 
         parseresult = _parse_second_time('23:21:28.512400', None, NoneBuilder)
-        self.assertEqual(parseresult, ('23', '21', '28.512400', None))
+        self.assertEqual(parseresult, ('23', '21', '28.512400', None, 'time'))
 
         parseresult = _parse_second_time('14:43:59.9999997', None, NoneBuilder)
-        self.assertEqual(parseresult, ('14', '43', '59.9999997', None))
+        self.assertEqual(parseresult, ('14', '43', '59.9999997', None, 'time'))
 
         parseresult = _parse_second_time('012345', None, NoneBuilder)
-        self.assertEqual(parseresult, ('01', '23', '45', None))
+        self.assertEqual(parseresult, ('01', '23', '45', None, 'time'))
 
         parseresult = _parse_second_time('240000', None, NoneBuilder)
-        self.assertEqual(parseresult, ('24', '00', '00', None))
+        self.assertEqual(parseresult, ('24', '00', '00', None, 'time'))
 
         parseresult = _parse_second_time('232128.512400', None, NoneBuilder)
-        self.assertEqual(parseresult, ('23', '21', '28.512400', None))
+        self.assertEqual(parseresult, ('23', '21', '28.512400', None, 'time'))
 
         parseresult = _parse_second_time('144359.9999997', None, NoneBuilder)
-        self.assertEqual(parseresult, ('14', '43', '59.9999997', None))
+        self.assertEqual(parseresult, ('14', '43', '59.9999997', None, 'time'))
 
     def test_parse_second_time_bounds(self):
         #Leap seconds not supported by the Python builder

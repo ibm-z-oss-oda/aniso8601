@@ -27,6 +27,16 @@ class BaseTimeBuilder(object):
         raise NotImplementedError
 
     @classmethod
+    def build_interval(cls, start=None, end=None, duration=None):
+        #start, end, and duration are all tuples
+        raise NotImplementedError
+
+    @classmethod
+    def build_repeating_interval(cls, R=None, Rnn=None, interval=None):
+        #interval is a tuple
+        raise NotImplementedError
+
+    @classmethod
     def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
         raise NotImplementedError
 
@@ -47,23 +57,32 @@ class NoneBuilder(BaseTimeBuilder):
     #Builder used to return the arguments, helps clean up some parse methods
     @classmethod
     def build_date(cls, YYYY=None, MM=None, DD=None, Www=None, D=None, DDD=None):
-        return (YYYY, MM, DD, Www, D, DDD)
+        return (YYYY, MM, DD, Www, D, DDD, 'date')
 
     @classmethod
     def build_time(cls, hh=None, mm=None, ss=None, tz=None):
-        return (hh, mm, ss, tz)
+        return (hh, mm, ss, tz, 'time')
 
     @classmethod
     def build_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None, TnH=None, TnM=None, TnS=None):
-        return (PnY, PnM, PnW, PnD, TnH, TnM, TnS)
+        return (PnY, PnM, PnW, PnD, TnH, TnM, TnS, 'duration')
+
+    @classmethod
+    def build_interval(cls, start=None, end=None, duration=None):
+        return (start, end, duration, 'interval')
+
+    @classmethod
+    def build_repeating_interval(cls, R=None, Rnn=None, interval=None):
+        return (R, Rnn, interval, 'repeatinginterval')
 
     @classmethod
     def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
-        return (negative, Z, hh, mm, name)
+        return (negative, Z, hh, mm, name, 'timezone')
 
     @classmethod
     def combine(cls, date, time):
-        return (date, time)
+        #date and time are tuples
+        return (date, time, 'datetime')
 
 class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
@@ -225,6 +244,49 @@ class PythonTimeBuilder(BaseTimeBuilder):
         return datetime.timedelta(days=totaldays, seconds=seconds, minutes=minutes, hours=hours, weeks=weeks)
 
     @classmethod
+    def build_interval(cls, start=None, end=None, duration=None):
+        if end is not None and duration is not None:
+            #<duration>/<end>
+            endobject = cls._build_object(end)
+            durationobject = cls._build_object(duration)
+
+            if end[-1] == 'date' and (duration[4] is not None or duration[5] is not None or duration[6] is not None):
+                #<end> is a date, and <duration> requires datetime resolution
+                return (endobject, cls.combine(endobject, cls.build_time()) - durationobject)
+
+            return (endobject, endobject - durationobject)
+        elif start is not None and duration is not None:
+            #<start>/<duration>
+            startobject = cls._build_object(start)
+            durationobject = cls._build_object(duration)
+
+            if start[-1] == 'date' and (duration[4] is not None or duration[5] is not None or duration[6] is not None):
+                #<start> is a date, and <duration> requires datetime resolution
+                return (startobject, cls.combine(startobject, cls.build_time()) + durationobject)
+
+            return (startobject, startobject + durationobject)
+
+        #<start>/<end>
+        startobject = cls._build_object(start)
+        endobject = cls._build_object(end)
+
+        return (startobject, endobject)
+
+    @classmethod
+    def build_repeating_interval(cls, R=None, Rnn=None, interval=None):
+        intervalobject = cls._build_object(interval)
+
+        startobject = intervalobject[0]
+        endobject = intervalobject[1]
+
+        if R is True:
+            return PythonTimeBuilder._date_generator_unbounded(startobject, endobject - startobject)
+
+        iterations = BaseTimeBuilder.cast(Rnn, int, thrownmessage='Invalid iterations.')
+
+        return PythonTimeBuilder._date_generator(startobject, endobject - startobject, iterations)
+
+    @classmethod
     def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
         if Z is True:
             #Z -> UTC
@@ -248,6 +310,29 @@ class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
     def combine(cls, date, time):
         return datetime.datetime.combine(date, time)
+
+    @classmethod
+    def _build_object(cls, parsetuple):
+        #Given a NoneBuilder tuple, return a Python date, datetime, timedelta
+        if parsetuple[-1] == 'date':
+            return cls.build_date(YYYY=parsetuple[0], MM=parsetuple[1], DD=parsetuple[2], Www=parsetuple[3], D=parsetuple[4], DDD=parsetuple[5])
+        elif parsetuple[-1] == 'time':
+            if parsetuple[3] is None:
+                #No timezone
+                return cls.build_time(hh=parsetuple[0], mm=parsetuple[1], ss=parsetuple[2])
+
+            return cls.build_time(hh=parsetuple[0], mm=parsetuple[1], ss=parsetuple[2], tz=cls._build_object(parsetuple[3]))
+        elif parsetuple[-1] == 'duration':
+            return cls.build_duration(PnY=parsetuple[0], PnM=parsetuple[1], PnW=parsetuple[2], PnD=parsetuple[3], TnH=parsetuple[4], TnM=parsetuple[5], TnS=parsetuple[6])
+        elif parsetuple[-1] == 'interval':
+            return cls.build_interval(start=parsetuple[0], end=parsetuple[1], duration=parsetuple[2])
+        elif parsetuple[-1] == 'repeatinginterval':
+            return cls.build_repeating_interval(R=parsetuple[0], Rnn=parsetuple[1], interval=parsetuple[2])
+        elif parsetuple[-1] == 'timezone':
+            cls.build_timezone(negative=parsetuple[0], Z=parsetuple[1], hh=parsetuple[2], mm=parsetuple[3], name=parsetuple[4])
+
+        #combine tuple
+        return cls.combine(cls._build_object(parsetuple[0]), cls._build_object(parsetuple[1]))
 
     @staticmethod
     def _build_week_date(isoyear, isoweek, isoday=None):
@@ -286,6 +371,28 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
         #Return the start of the year
         return fourth_jan - delta
+
+    @staticmethod
+    def _date_generator(startdate, timedelta, iterations):
+        currentdate = startdate
+        currentiteration = 0
+
+        while currentiteration < iterations:
+            yield currentdate
+
+            #Update the values
+            currentdate += timedelta
+            currentiteration += 1
+
+    @staticmethod
+    def _date_generator_unbounded(startdate, timedelta):
+        currentdate = startdate
+
+        while True:
+            yield currentdate
+
+            #Update the value
+            currentdate += timedelta
 
 class RelativeTimeBuilder(PythonTimeBuilder):
     @classmethod

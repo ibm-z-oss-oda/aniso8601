@@ -11,6 +11,7 @@ import pickle
 import unittest
 import dateutil.relativedelta
 
+from aniso8601 import compat
 from aniso8601.builder import BaseTimeBuilder, PythonTimeBuilder, RelativeTimeBuilder, UTCOffset
 from aniso8601.exceptions import DayOutOfBoundsError, WeekOutOfBoundsError, \
         YearOutOfBoundsError
@@ -151,55 +152,6 @@ class TestPythonTimeBuilder(unittest.TestCase):
         time = PythonTimeBuilder.build_time(hh='23', mm='21', ss='28.512400', tz=UTCOffset(name='+1.5', minutes=90))
         self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+1.5', minutes=90)))
 
-    def test_build_timezone(self):
-        tzinfoobject = PythonTimeBuilder.build_timezone(Z=True, name='Z')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
-        self.assertEqual(tzinfoobject.tzname(None), 'UTC')
-
-        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='00', mm='00', name='+00:00')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
-        self.assertEqual(tzinfoobject.tzname(None), '+00:00')
-
-        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='01', mm='00', name='+01:00')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=1))
-        self.assertEqual(tzinfoobject.tzname(None), '+01:00')
-
-        tzinfoobject = PythonTimeBuilder.build_timezone(negative=True, hh='01', mm='00', name='-01:00')
-        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=1))
-        self.assertEqual(tzinfoobject.tzname(None), '-01:00')
-
-        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='00', mm='12', name='+00:12')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(minutes=12))
-        self.assertEqual(tzinfoobject.tzname(None), '+00:12')
-
-        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='01', mm='23', name='+01:23')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=1, minutes=23))
-        self.assertEqual(tzinfoobject.tzname(None), '+01:23')
-
-        tzinfoobject = PythonTimeBuilder.build_timezone(negative=True, hh='01', mm='23', name='-01:23')
-        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=1, minutes=23))
-        self.assertEqual(tzinfoobject.tzname(None), '-01:23')
-
-        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='00', name='+00')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
-        self.assertEqual(tzinfoobject.tzname(None), '+00')
-
-        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='01', name='+01')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=1))
-        self.assertEqual(tzinfoobject.tzname(None), '+01')
-
-        tzinfoobject = PythonTimeBuilder.build_timezone(negative=True, hh='01', name='-01')
-        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=1))
-        self.assertEqual(tzinfoobject.tzname(None), '-01')
-
-        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='12', name='+12')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=12))
-        self.assertEqual(tzinfoobject.tzname(None), '+12')
-
-        tzinfoobject = PythonTimeBuilder.build_timezone(negative=True, hh='12', name='-12')
-        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=12))
-        self.assertEqual(tzinfoobject.tzname(None), '-12')
-
     def test_build_duration(self):
         timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
         self.assertEqual(timedelta, datetime.timedelta(days=428, seconds=17646))
@@ -273,6 +225,167 @@ class TestPythonTimeBuilder(unittest.TestCase):
 
         #Verify overflows
         self.assertEqual(PythonTimeBuilder.build_duration(TnH='36'), PythonTimeBuilder.build_duration(PnD='1', TnH='12'))
+
+    def test_build_interval(self):
+        interval = PythonTimeBuilder.build_interval(end=(('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), duration=(None, '1', None, None, None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
+        self.assertEqual(interval[1], datetime.datetime(year=1981, month=3, day=6, hour=1, minute=1))
+
+        interval = PythonTimeBuilder.build_interval(end=('1981', '04', '05', None, None, None, 'date'), duration=(None, '1', None, None, None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=1981, month=4, day=5))
+        self.assertEqual(interval[1], datetime.date(year=1981, month=3, day=6))
+
+        interval = PythonTimeBuilder.build_interval(end=('2018', '03', '06', None, None, None, 'date'), duration=('1.5', None, None, None, None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(interval[1], datetime.date(year=2016, month=9, day=5))
+
+        interval = PythonTimeBuilder.build_interval(end=('2014', '11', '12', None, None, None, 'date'), duration=(None, None, None, None, '1', None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2014, month=11, day=12))
+        self.assertEqual(interval[1], datetime.datetime(year=2014, month=11, day=11, hour=23))
+
+        interval = PythonTimeBuilder.build_interval(end=('2014', '11', '12', None, None, None, 'date'), duration=(None, None, None, None, '4', '54', '6.5', 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2014, month=11, day=12))
+        self.assertEqual(interval[1], datetime.datetime(year=2014, month=11, day=11, hour=19, minute=5, second=53, microsecond=500000))
+
+        #Make sure we truncate, not round
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        interval = PythonTimeBuilder.build_interval(end=('2018', '03', '06', None, None, None, 'date'), duration=(None, None, None, None, None, None, '0.0000001', 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(interval[1], datetime.datetime(year=2018, month=3, day=6))
+
+        interval = PythonTimeBuilder.build_interval(end=('2018', '03', '06', None, None, None, 'date'), duration=(None, None, None, None, None, None, '2.0000048', 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(interval[1], datetime.datetime(year=2018, month=3, day=5, hour=23, minute=59, second=57, microsecond=999996))
+
+        interval = PythonTimeBuilder.build_interval(start=(('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), duration=(None, '1', None, '1', None, '1', None, 'duration'))
+        self.assertEqual(interval[0], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
+        self.assertEqual(interval[1], datetime.datetime(year=1981, month=5, day=6, hour=1, minute=2))
+
+        interval = PythonTimeBuilder.build_interval(start=('1981', '04', '05', None, None, None, 'date'), duration=(None, '1', None, '1', None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=1981, month=4, day=5))
+        self.assertEqual(interval[1], datetime.date(year=1981, month=5, day=6))
+
+        interval = PythonTimeBuilder.build_interval(start=('2018', '03', '06', None, None, None, 'date'), duration=(None, '2.5', None, None, None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(interval[1], datetime.date(year=2018, month=5, day=20))
+
+        interval = PythonTimeBuilder.build_interval(start=('2014', '11', '12', None, None, None, 'date'), duration=(None, None, None, None, '1', None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2014, month=11, day=12))
+        self.assertEqual(interval[1], datetime.datetime(year=2014, month=11, day=12, hour=1, minute=0))
+
+        interval = PythonTimeBuilder.build_interval(start=('2014', '11', '12', None, None, None, 'date'), duration=(None, None, None, None, '4', '54', '6.5', 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2014, month=11, day=12))
+        self.assertEqual(interval[1], datetime.datetime(year=2014, month=11, day=12, hour=4, minute=54, second=6, microsecond=500000))
+
+        #Make sure we truncate, not round
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        interval = PythonTimeBuilder.build_interval(start=('2018', '03', '06', None, None, None, 'date'), duration=(None, None, None, None, None, None, '0.0000001', 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(interval[1], datetime.datetime(year=2018, month=3, day=6))
+
+        interval = PythonTimeBuilder.build_interval(start=('2018', '03', '06', None, None, None, 'date'), duration=(None, None, None, None, None, None, '2.0000048', 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(interval[1], datetime.datetime(year=2018, month=3, day=6, hour=0, minute=0, second=2, microsecond=4))
+
+        interval = PythonTimeBuilder.build_interval(start=(('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), end=(('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'))
+        self.assertEqual(interval[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
+        self.assertEqual(interval[1], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
+
+        interval = PythonTimeBuilder.build_interval(start=(('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), end=('1981', '04', '05', None, None, None, 'date'))
+        self.assertEqual(interval[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
+        self.assertEqual(interval[1], datetime.date(year=1981, month=4, day=5))
+
+        interval = PythonTimeBuilder.build_interval(start=('1980', '03', '05', None, None, None, 'date'), end=(('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'))
+        self.assertEqual(interval[0], datetime.date(year=1980, month=3, day=5))
+        self.assertEqual(interval[1], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
+
+        interval = PythonTimeBuilder.build_interval(start=('1980', '03', '05', None, None, None, 'date'), end=('1981', '04', '05', None, None, None, 'date'))
+        self.assertEqual(interval[0], datetime.date(year=1980, month=3, day=5))
+        self.assertEqual(interval[1], datetime.date(year=1981, month=4, day=5))
+
+        interval = PythonTimeBuilder.build_interval(start=('1981', '04', '05', None, None, None, 'date'), end=('1980', '03', '05', None, None, None, 'date'))
+        self.assertEqual(interval[0], datetime.date(year=1981, month=4, day=5))
+        self.assertEqual(interval[1], datetime.date(year=1980, month=3, day=5))
+
+        #Make sure we truncate, not round
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        interval = PythonTimeBuilder.build_interval(start=(('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00.0000001', None, 'time'), 'datetime'), end=(('1981', '04', '05', None, None, None, 'date'), ('14', '43', '59.9999997', None, 'time'), 'datetime'))
+        self.assertEqual(interval[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
+        self.assertEqual(interval[1], datetime.datetime(year=1981, month=4, day=5, hour=14, minute=43, second=59, microsecond=999999))
+
+    def test_build_repeating_interval(self):
+        results = list(PythonTimeBuilder.build_repeating_interval(Rnn='3', interval=(('1981', '04', '05', None, None, None, 'date'), None, (None, None, None, '1', None, None, None, 'duration'), 'interval')))
+        self.assertEqual(results[0], datetime.date(year=1981, month=4, day=5))
+        self.assertEqual(results[1], datetime.date(year=1981, month=4, day=6))
+        self.assertEqual(results[2], datetime.date(year=1981, month=4, day=7))
+
+        results = list(PythonTimeBuilder.build_repeating_interval(Rnn='11', interval=(None, (('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (None, None, None, None, '1', '2', None, 'duration'), 'interval')))
+
+        for dateindex in compat.range(0, 11):
+             self.assertEqual(results[dateindex], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1) - dateindex * datetime.timedelta(hours=1, minutes=2))
+
+        results = list(PythonTimeBuilder.build_repeating_interval(Rnn='2', interval=((('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), None, 'interval')))
+        self.assertEqual(results[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
+        self.assertEqual(results[1], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
+
+        results = list(PythonTimeBuilder.build_repeating_interval(Rnn='2', interval=((('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), None, 'interval')))
+        self.assertEqual(results[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
+        self.assertEqual(results[1], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
+
+        resultgenerator = PythonTimeBuilder.build_repeating_interval(R=True, interval=(None, (('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (None, None, None, None, '1', '2', None, 'duration'), 'interval'))
+
+        #Tets the first 11 generated
+        for dateindex in compat.range(0, 11):
+             self.assertEqual(next(resultgenerator), datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1) - dateindex * datetime.timedelta(hours=1, minutes=2))
+
+    def test_build_timezone(self):
+        tzinfoobject = PythonTimeBuilder.build_timezone(Z=True, name='Z')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
+        self.assertEqual(tzinfoobject.tzname(None), 'UTC')
+
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='00', mm='00', name='+00:00')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
+        self.assertEqual(tzinfoobject.tzname(None), '+00:00')
+
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='01', mm='00', name='+01:00')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=1))
+        self.assertEqual(tzinfoobject.tzname(None), '+01:00')
+
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=True, hh='01', mm='00', name='-01:00')
+        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=1))
+        self.assertEqual(tzinfoobject.tzname(None), '-01:00')
+
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='00', mm='12', name='+00:12')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(minutes=12))
+        self.assertEqual(tzinfoobject.tzname(None), '+00:12')
+
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='01', mm='23', name='+01:23')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=1, minutes=23))
+        self.assertEqual(tzinfoobject.tzname(None), '+01:23')
+
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=True, hh='01', mm='23', name='-01:23')
+        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=1, minutes=23))
+        self.assertEqual(tzinfoobject.tzname(None), '-01:23')
+
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='00', name='+00')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
+        self.assertEqual(tzinfoobject.tzname(None), '+00')
+
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='01', name='+01')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=1))
+        self.assertEqual(tzinfoobject.tzname(None), '+01')
+
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=True, hh='01', name='-01')
+        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=1))
+        self.assertEqual(tzinfoobject.tzname(None), '-01')
+
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=False, hh='12', name='+12')
+        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=12))
+        self.assertEqual(tzinfoobject.tzname(None), '+12')
+
+        tzinfoobject = PythonTimeBuilder.build_timezone(negative=True, hh='12', name='-12')
+        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=12))
+        self.assertEqual(tzinfoobject.tzname(None), '-12')
 
     def test_combine(self):
         date = datetime.date(1, 2, 3)

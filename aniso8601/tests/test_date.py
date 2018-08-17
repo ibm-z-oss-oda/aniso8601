@@ -40,64 +40,64 @@ class TestDateResolutionFunctions(unittest.TestCase):
 class TestDateParserFunctions(unittest.TestCase):
     def test_parse_date(self):
         parse = parse_date('2013', builder=NoneBuilder)
-        self.assertEqual(parse, ('2013', None, None, None, None, None))
+        self.assertEqual(parse, ('2013', None, None, None, None, None, 'date'))
 
         parse = parse_date('0001', builder=NoneBuilder)
-        self.assertEqual(parse, ('0001', None, None, None, None, None))
+        self.assertEqual(parse, ('0001', None, None, None, None, None, 'date'))
 
         parse = parse_date('19', builder=NoneBuilder)
-        self.assertEqual(parse, ('1900', None, None, None, None, None))
+        self.assertEqual(parse, ('1900', None, None, None, None, None, 'date'))
 
         parse = parse_date('1981-04-05', builder=NoneBuilder)
-        self.assertEqual(parse, ('1981', '04', '05', None, None, None))
+        self.assertEqual(parse, ('1981', '04', '05', None, None, None, 'date'))
 
         parse = parse_date('19810405', builder=NoneBuilder)
-        self.assertEqual(parse, ('1981', '04', '05', None, None, None))
+        self.assertEqual(parse, ('1981', '04', '05', None, None, None, 'date'))
 
         parse = parse_date('1981-04', builder=NoneBuilder)
-        self.assertEqual(parse, ('1981', '04', None, None, None, None))
+        self.assertEqual(parse, ('1981', '04', None, None, None, None, 'date'))
 
         parse = parse_date('2004-W53', builder=NoneBuilder)
-        self.assertEqual(parse, ('2004', None, None, '53', None, None))
+        self.assertEqual(parse, ('2004', None, None, '53', None, None, 'date'))
 
         parse = parse_date('2009-W01', builder=NoneBuilder)
-        self.assertEqual(parse, ('2009', None, None, '01', None, None))
+        self.assertEqual(parse, ('2009', None, None, '01', None, None, 'date'))
 
         parse = parse_date('2004-W53-6', builder=NoneBuilder)
-        self.assertEqual(parse, ('2004', None, None, '53', '6', None))
+        self.assertEqual(parse, ('2004', None, None, '53', '6', None, 'date'))
 
         parse = parse_date('2004W53', builder=NoneBuilder)
-        self.assertEqual(parse, ('2004', None, None, '53', None, None))
+        self.assertEqual(parse, ('2004', None, None, '53', None, None, 'date'))
 
         parse = parse_date('2004W536', builder=NoneBuilder)
-        self.assertEqual(parse, ('2004', None, None, '53', '6', None))
+        self.assertEqual(parse, ('2004', None, None, '53', '6', None, 'date'))
 
         parse = parse_date('1981-095', builder=NoneBuilder)
-        self.assertEqual(parse, ('1981', None, None, None, None, '095'))
+        self.assertEqual(parse, ('1981', None, None, None, None, '095', 'date'))
 
         parse = parse_date('1981095', builder=NoneBuilder)
-        self.assertEqual(parse, ('1981', None, None, None, None, '095'))
+        self.assertEqual(parse, ('1981', None, None, None, None, '095', 'date'))
 
     def test_parse_year(self):
         parse = _parse_year('2013', NoneBuilder)
-        self.assertEqual(parse, ('2013', None, None, None, None, None))
+        self.assertEqual(parse, ('2013', None, None, None, None, None, 'date'))
 
         parse = _parse_year('0001', NoneBuilder)
-        self.assertEqual(parse, ('0001', None, None, None, None, None))
+        self.assertEqual(parse, ('0001', None, None, None, None, None, 'date'))
 
         parse = _parse_year('19', NoneBuilder)
-        self.assertEqual(parse, ('1900', None, None, None, None, None))
+        self.assertEqual(parse, ('1900', None, None, None, None, None, 'date'))
 
     def test_parse_calendar_day(self):
         parse = _parse_calendar_day('1981-04-05', NoneBuilder)
-        self.assertEqual(parse, ('1981', '04', '05', None, None, None))
+        self.assertEqual(parse, ('1981', '04', '05', None, None, None, 'date'))
 
         parse = _parse_calendar_day('19810405', NoneBuilder)
-        self.assertEqual(parse, ('1981', '04', '05', None, None, None))
+        self.assertEqual(parse, ('1981', '04', '05', None, None, None, 'date'))
 
     def test_parse_calendar_month(self):
         parse = _parse_calendar_month('1981-04', NoneBuilder)
-        self.assertEqual(parse, ('1981', '04', None, None, None, None))
+        self.assertEqual(parse, ('1981', '04', None, None, None, None, 'date'))
 
     def test_parse_calendar_month_nohyphen(self):
         #Hyphen is required
@@ -106,63 +106,63 @@ class TestDateParserFunctions(unittest.TestCase):
 
     def test_parse_week_day(self):
         parse = _parse_week_day('2004-W53-6', NoneBuilder)
-        self.assertEqual(parse, ('2004', None, None, '53', '6', None))
+        self.assertEqual(parse, ('2004', None, None, '53', '6', None, 'date'))
 
         parse = _parse_week_day('2009-W01-1', NoneBuilder)
-        self.assertEqual(parse, ('2009', None, None, '01', '1', None))
+        self.assertEqual(parse, ('2009', None, None, '01', '1', None, 'date'))
 
         parse = _parse_week_day('2009-W53-7', NoneBuilder)
-        self.assertEqual(parse, ('2009', None, None, '53', '7', None))
+        self.assertEqual(parse, ('2009', None, None, '53', '7', None, 'date'))
 
         parse = _parse_week_day('2010-W01-1', NoneBuilder)
-        self.assertEqual(parse, ('2010', None, None, '01', '1', None))
+        self.assertEqual(parse, ('2010', None, None, '01', '1', None, 'date'))
 
         parse = _parse_week_day('2004W536', NoneBuilder)
-        self.assertEqual(parse, ('2004', None, None, '53', '6', None))
+        self.assertEqual(parse, ('2004', None, None, '53', '6', None, 'date'))
 
         parse = _parse_week_day('2009W011', NoneBuilder)
-        self.assertEqual(parse, ('2009', None, None, '01', '1', None))
+        self.assertEqual(parse, ('2009', None, None, '01', '1', None, 'date'))
 
         parse = _parse_week_day('2009W537', NoneBuilder)
-        self.assertEqual(parse, ('2009', None, None, '53', '7', None))
+        self.assertEqual(parse, ('2009', None, None, '53', '7', None, 'date'))
 
         parse = _parse_week_day('2010W011', NoneBuilder)
-        self.assertEqual(parse, ('2010', None, None, '01', '1', None))
+        self.assertEqual(parse, ('2010', None, None, '01', '1', None, 'date'))
 
     def test_parse_week(self):
         parse = _parse_week('2004-W53', NoneBuilder)
-        self.assertEqual(parse, ('2004', None, None, '53', None, None))
+        self.assertEqual(parse, ('2004', None, None, '53', None, None, 'date'))
 
         parse = _parse_week('2009-W01', NoneBuilder)
-        self.assertEqual(parse, ('2009', None, None, '01', None, None))
+        self.assertEqual(parse, ('2009', None, None, '01', None, None, 'date'))
 
         parse = _parse_week('2009-W53', NoneBuilder)
-        self.assertEqual(parse, ('2009', None, None, '53', None, None))
+        self.assertEqual(parse, ('2009', None, None, '53', None, None, 'date'))
 
         parse = _parse_week('2010-W01', NoneBuilder)
-        self.assertEqual(parse, ('2010', None, None, '01', None, None))
+        self.assertEqual(parse, ('2010', None, None, '01', None, None, 'date'))
 
         parse = _parse_week('2004W53', NoneBuilder)
-        self.assertEqual(parse, ('2004', None, None, '53', None, None))
+        self.assertEqual(parse, ('2004', None, None, '53', None, None, 'date'))
 
         parse = _parse_week('2009W01', NoneBuilder)
-        self.assertEqual(parse, ('2009', None, None, '01', None, None))
+        self.assertEqual(parse, ('2009', None, None, '01', None, None, 'date'))
 
         parse = _parse_week('2009W53', NoneBuilder)
-        self.assertEqual(parse, ('2009', None, None, '53', None, None))
+        self.assertEqual(parse, ('2009', None, None, '53', None, None, 'date'))
 
         parse = _parse_week('2010W01', NoneBuilder)
-        self.assertEqual(parse, ('2010', None, None, '01', None, None))
+        self.assertEqual(parse, ('2010', None, None, '01', None, None, 'date'))
 
     def test_parse_ordinal_date(self):
         parse = _parse_ordinal_date('1981-095', NoneBuilder)
-        self.assertEqual(parse, ('1981', None, None, None, None, '095'))
+        self.assertEqual(parse, ('1981', None, None, None, None, '095', 'date'))
 
         parse = _parse_ordinal_date('1981095', NoneBuilder)
-        self.assertEqual(parse, ('1981', None, None, None, None, '095'))
+        self.assertEqual(parse, ('1981', None, None, None, None, '095', 'date'))
 
         parse = _parse_ordinal_date('1981365', NoneBuilder)
-        self.assertEqual(parse, ('1981', None, None, None, None, '365'))
+        self.assertEqual(parse, ('1981', None, None, None, None, '365', 'date'))
 
         parse = _parse_ordinal_date('1980366', NoneBuilder)
-        self.assertEqual(parse, ('1980', None, None, None, None, '366'))
+        self.assertEqual(parse, ('1980', None, None, None, None, '366', 'date'))
