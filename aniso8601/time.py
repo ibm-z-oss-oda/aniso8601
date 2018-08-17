@@ -109,7 +109,7 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
     if tzstr is None:
         tz = None
     else:
-        tz = parse_timezone(tzstr, builder=builder)
+        tz = parse_timezone(tzstr, builder=NoneBuilder)
 
     return _RESOLUTION_MAP[get_time_resolution(timestr)](timestr, tz, builder)
 

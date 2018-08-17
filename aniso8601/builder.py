@@ -187,12 +187,10 @@ class PythonTimeBuilder(BaseTimeBuilder):
             seconds = 0
 
         #Datetimes don't handle fractional components, so we use a timedelta
-        result_datetime = datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, tzinfo=tz) + datetime.timedelta(hours=floathours, minutes=floatminutes, seconds=floatseconds)
+        if tz is not None:
+            return (datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds, tzinfo=cls._build_object(tz)) + datetime.timedelta(hours=floathours, minutes=floatminutes, seconds=floatseconds)).timetz()
 
-        if tz is None:
-            return result_datetime.time()
-
-        return result_datetime.timetz()
+        return (datetime.datetime(1, 1, 1, hour=hours, minute=minutes, second=seconds) + datetime.timedelta(hours=floathours, minutes=floatminutes, seconds=floatseconds)).time()
 
     @classmethod
     def build_datetime(cls, date, time):
@@ -316,11 +314,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         if parsetuple[-1] == 'date':
             return cls.build_date(YYYY=parsetuple[0], MM=parsetuple[1], DD=parsetuple[2], Www=parsetuple[3], D=parsetuple[4], DDD=parsetuple[5])
         elif parsetuple[-1] == 'time':
-            if parsetuple[3] is None:
-                #No timezone
-                return cls.build_time(hh=parsetuple[0], mm=parsetuple[1], ss=parsetuple[2])
-
-            return cls.build_time(hh=parsetuple[0], mm=parsetuple[1], ss=parsetuple[2], tz=cls._build_object(parsetuple[3]))
+            return cls.build_time(hh=parsetuple[0], mm=parsetuple[1], ss=parsetuple[2], tz=parsetuple[3])
         elif parsetuple[-1] == 'datetime':
             return cls.build_datetime(parsetuple[0], parsetuple[1])
         elif parsetuple[-1] == 'duration':
