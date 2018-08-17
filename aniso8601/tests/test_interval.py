@@ -280,10 +280,10 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
     def test_parse_repeating_interval_suffixgarbage(self):
         #Don't allow garbage after the duration
         #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             parse_repeating_interval('R3/1981-04-05/P1Dasdf', builder=NoneBuilder)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             parse_repeating_interval('R3/1981-04-05/P0003-06-04T12:30:05.5asdfasdf', builder=NoneBuilder)
 
     def test_parse_repeating_interval_relative(self):
