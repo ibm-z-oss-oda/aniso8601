@@ -146,72 +146,56 @@ class TestTimeParserFunctions(unittest.TestCase):
         #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
         #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
         with self.assertRaises(LeapSecondError):
-            parse_time('23:59:60')
+            parse_time('23:59:60', builder=NoneBuilder)
 
         with self.assertRaises(LeapSecondError):
-            parse_time('23:59:60Z')
+            parse_time('23:59:60Z', builder=NoneBuilder)
 
         with self.assertRaises(LeapSecondError):
-            parse_time('23:59:60+00:00')
+            parse_time('23:59:60+00:00', builder=NoneBuilder)
 
     def test_parse_time_overflow(self):
         with self.assertRaises(SecondsOutOfBoundsError):
-            parse_time('00:00:60')
+            parse_time('00:00:60', builder=NoneBuilder)
 
         with self.assertRaises(SecondsOutOfBoundsError):
-            parse_time('00:00:60Z')
+            parse_time('00:00:60Z', builder=NoneBuilder)
 
         with self.assertRaises(SecondsOutOfBoundsError):
-            parse_time('00:00:60+00:00')
+            parse_time('00:00:60+00:00', builder=NoneBuilder)
 
         #Seconds must not be greater than or equal to 60
         with self.assertRaises(SecondsOutOfBoundsError):
-            parse_time('00:00:61')
+            parse_time('00:00:61', builder=NoneBuilder)
 
         with self.assertRaises(SecondsOutOfBoundsError):
-            parse_time('00:00:61Z')
+            parse_time('00:00:61Z', builder=NoneBuilder)
 
         with self.assertRaises(SecondsOutOfBoundsError):
-            parse_time('00:00:61+00:00')
+            parse_time('00:00:61+00:00', builder=NoneBuilder)
 
         #Minutes must not be greater than 60
         with self.assertRaises(MinutesOutOfBoundsError):
-            parse_time('00:61')
+            parse_time('00:61', builder=NoneBuilder)
 
         with self.assertRaises(MinutesOutOfBoundsError):
-            parse_time('00:61Z')
+            parse_time('00:61Z', builder=NoneBuilder)
 
         with self.assertRaises(MinutesOutOfBoundsError):
-            parse_time('00:61+00:00')
+            parse_time('00:61+00:00', builder=NoneBuilder)
 
     def test_parse_datetime(self):
-        resultdatetime = parse_datetime('1981-04-05T23:21:28.512400Z')
-        self.assertEqual(resultdatetime.replace(tzinfo=None), datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400))
+        resultdatetime = parse_datetime('1981-04-05T23:21:28.512400Z', builder=NoneBuilder)
+        self.assertEqual(resultdatetime, (('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28.512400', (False, True, None, None, 'Z', 'timezone'), 'time'), 'datetime'))
 
-        tzinfoobject = resultdatetime.tzinfo
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
-        self.assertEqual(tzinfoobject.tzname(None), 'UTC')
+        resultdatetime = parse_datetime('1981095T23:21:28.512400-12:34', builder=NoneBuilder)
+        self.assertEqual(resultdatetime, (('1981', None, None, None, None, '095', 'date'), ('23', '21', '28.512400', (True, None, '12', '34', '-12:34', 'timezone'), 'time'), 'datetime'))
 
-        resultdatetime = parse_datetime('1981095T23:21:28.512400-12:34')
-        self.assertEqual(resultdatetime.replace(tzinfo=None), datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400))
+        resultdatetime = parse_datetime('19810405T23:21:28+00', builder=NoneBuilder)
+        self.assertEqual(resultdatetime, (('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28', (False, None, '00', None, '+00', 'timezone'), 'time'), 'datetime'))
 
-        tzinfoobject = resultdatetime.tzinfo
-        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=12, minutes=34))
-        self.assertEqual(tzinfoobject.tzname(None), '-12:34')
-
-        resultdatetime = parse_datetime('19810405T23:21:28+00')
-        self.assertEqual(resultdatetime.replace(tzinfo=None), datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28))
-
-        tzinfoobject = resultdatetime.tzinfo
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
-        self.assertEqual(tzinfoobject.tzname(None), '+00')
-
-        resultdatetime = parse_datetime('19810405T23:21:28+00:00')
-        self.assertEqual(resultdatetime.replace(tzinfo=None), datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28))
-
-        tzinfoobject = resultdatetime.tzinfo
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
-        self.assertEqual(tzinfoobject.tzname(None), '+00:00')
+        resultdatetime = parse_datetime('19810405T23:21:28+00:00', builder=NoneBuilder)
+        self.assertEqual(resultdatetime, (('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28', (False, None, '00', '00', '+00:00', 'timezone'), 'time'), 'datetime'))
 
     def test_parse_datetime_bounds(self):
         #Leap seconds not supported

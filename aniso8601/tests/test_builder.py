@@ -134,14 +134,35 @@ class TestPythonTimeBuilder(unittest.TestCase):
         time = PythonTimeBuilder.build_time(hh='1', mm='23')
         self.assertEqual(time, datetime.time(hour=1, minute=23))
 
+        time = PythonTimeBuilder.build_time(hh='1', mm='23', ss='45')
+        self.assertEqual(time, datetime.time(hour=1, minute=23, second=45))
+
         time = PythonTimeBuilder.build_time(hh='1', mm='23.4567')
         self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
 
         time = PythonTimeBuilder.build_time(hh='23', mm='21', ss='28.512400')
         self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
 
+        time = PythonTimeBuilder.build_time(hh='14', mm='43', ss='59.9999997')
+        self.assertEqual(time, datetime.time(hour=14, minute=43, second=59, microsecond=999999))
+
+        time = PythonTimeBuilder.build_time(hh='12.5')
+        self.assertEqual(time, datetime.time(hour=12, minute=30))
+
+        time = PythonTimeBuilder.build_time(hh='24')
+        self.assertEqual(time, datetime.time(hour=0))
+
+        time = PythonTimeBuilder.build_time(hh='24', mm='00')
+        self.assertEqual(time, datetime.time(hour=0))
+
+        time = PythonTimeBuilder.build_time(hh='24', mm='00', ss='00')
+        self.assertEqual(time, datetime.time(hour=0))
+
         time = PythonTimeBuilder.build_time(tz=UTCOffset(name='UTC', minutes=0))
         self.assertEqual(time, datetime.time(tzinfo=UTCOffset(name='UTC', minutes=0)))
+
+        time = PythonTimeBuilder.build_time(hh='23', mm='21', ss='28.512400', tz=UTCOffset(name='+00:00', minutes=0))
+        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+00:00', minutes=0)))
 
         time = PythonTimeBuilder.build_time(hh='1', mm='23', tz=UTCOffset(name='+1', minutes=60))
         self.assertEqual(time, datetime.time(hour=1, minute=23, tzinfo=UTCOffset(name='+1', minutes=60)))
@@ -151,6 +172,15 @@ class TestPythonTimeBuilder(unittest.TestCase):
 
         time = PythonTimeBuilder.build_time(hh='23', mm='21', ss='28.512400', tz=UTCOffset(name='+1.5', minutes=90))
         self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+1.5', minutes=90)))
+
+        time = PythonTimeBuilder.build_time(hh='23', mm='21', ss='28.512400', tz=UTCOffset(name='+11:15', minutes=675))
+        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+11:5', minutes=675)))
+
+        time = PythonTimeBuilder.build_time(hh='23', mm='21', ss='28.512400', tz=UTCOffset(name='-12:34', minutes=754))
+        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+11.5', minutes=754)))
+
+        time = PythonTimeBuilder.build_time(hh='23', mm='21', ss='28.512400', tz=UTCOffset(name='UTC', minutes=0))
+        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='UTC', minutes=0)))
 
     def test_build_duration(self):
         timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
@@ -392,6 +422,11 @@ class TestPythonTimeBuilder(unittest.TestCase):
         time = datetime.time(hour=23, minute=21, second=28, microsecond=512400)
 
         self.assertEqual(PythonTimeBuilder.combine(date, time), datetime.datetime(1, 2, 3, hour=23, minute=21, second=28, microsecond=512400))
+
+        date = datetime.date(1981, 4, 5)
+        time = datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+11:15', minutes=675))
+
+        self.assertEqual(PythonTimeBuilder.combine(date, time), datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+11:15', minutes=675)))
 
 class TestRelativeTimeBuilder(unittest.TestCase):
     def test_build_date(self):
