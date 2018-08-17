@@ -13,8 +13,9 @@ import dateutil.relativedelta
 
 from aniso8601 import compat
 from aniso8601.builder import BaseTimeBuilder, PythonTimeBuilder, RelativeTimeBuilder, UTCOffset
-from aniso8601.exceptions import DayOutOfBoundsError, WeekOutOfBoundsError, \
-        YearOutOfBoundsError
+from aniso8601.exceptions import DayOutOfBoundsError, HoursOutOfBoundsError, \
+        LeapSecondError, MidnightBoundsError, MinutesOutOfBoundsError, \
+        SecondsOutOfBoundsError, WeekOutOfBoundsError, YearOutOfBoundsError
 
 class TestBaseTimeBuilder(unittest.TestCase):
     def test_build_date(self):
@@ -181,6 +182,56 @@ class TestPythonTimeBuilder(unittest.TestCase):
 
         time = PythonTimeBuilder.build_time(hh='23', mm='21', ss='28.512400', tz=UTCOffset(name='UTC', minutes=0))
         self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='UTC', minutes=0)))
+
+    def test_build_time_bounds_checking(self):
+        #Leap seconds not supported
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
+        with self.assertRaises(LeapSecondError):
+            PythonTimeBuilder.build_time(hh='23', mm='59', ss='60')
+
+        with self.assertRaises(LeapSecondError):
+            PythonTimeBuilder.build_time(hh='23', mm='59', ss='60', tz=UTCOffset(name='UTC', minutes=0))
+
+        with self.assertRaises(SecondsOutOfBoundsError):
+            PythonTimeBuilder.build_time(hh='00', mm='00', ss='60')
+
+        with self.assertRaises(SecondsOutOfBoundsError):
+            PythonTimeBuilder.build_time(hh='00', mm='00', ss='60', tz=UTCOffset(name='UTC', minutes=0))
+
+        with self.assertRaises(SecondsOutOfBoundsError):
+            PythonTimeBuilder.build_time(hh='00', mm='00', ss='61')
+
+        with self.assertRaises(SecondsOutOfBoundsError):
+            PythonTimeBuilder.build_time(hh='00', mm='00', ss='61', tz=UTCOffset(name='UTC', minutes=0))
+
+        with self.assertRaises(MinutesOutOfBoundsError):
+            PythonTimeBuilder.build_time(hh='00', mm='61')
+
+        with self.assertRaises(MinutesOutOfBoundsError):
+            PythonTimeBuilder.build_time(hh='00', mm='61', tz=UTCOffset(name='UTC', minutes=0))
+
+        with self.assertRaises(MinutesOutOfBoundsError):
+            PythonTimeBuilder.build_time(hh='00', mm='60')
+
+        with self.assertRaises(MinutesOutOfBoundsError):
+            PythonTimeBuilder.build_time(hh='00', mm='60.1')
+
+        with self.assertRaises(HoursOutOfBoundsError):
+            PythonTimeBuilder.build_time(hh='25')
+
+        with self.assertRaises(HoursOutOfBoundsError):
+            PythonTimeBuilder.build_time(hh='24.1')
+
+        #Hour 24 can only represent midnight
+        with self.assertRaises(MidnightBoundsError):
+            PythonTimeBuilder.build_time(hh='24', mm='00', ss='01')
+
+        with self.assertRaises(MidnightBoundsError):
+            PythonTimeBuilder.build_time(hh='24', mm='00.1')
+
+        with self.assertRaises(MidnightBoundsError):
+            PythonTimeBuilder.build_time(hh='24', mm='01')
 
     def test_build_duration(self):
         timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')

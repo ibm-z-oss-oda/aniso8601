@@ -141,49 +141,6 @@ class TestTimeParserFunctions(unittest.TestCase):
         time = parse_time('06:14:00.000123Z', builder=NoneBuilder)
         self.assertEqual(time, ('06', '14', '00.000123', (False, True, None, None, 'Z', 'timezone'), 'time'))
 
-    def test_parse_time_bounds(self):
-        #Leap seconds not supported
-        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
-        #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
-        with self.assertRaises(LeapSecondError):
-            parse_time('23:59:60', builder=NoneBuilder)
-
-        with self.assertRaises(LeapSecondError):
-            parse_time('23:59:60Z', builder=NoneBuilder)
-
-        with self.assertRaises(LeapSecondError):
-            parse_time('23:59:60+00:00', builder=NoneBuilder)
-
-    def test_parse_time_overflow(self):
-        with self.assertRaises(SecondsOutOfBoundsError):
-            parse_time('00:00:60', builder=NoneBuilder)
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            parse_time('00:00:60Z', builder=NoneBuilder)
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            parse_time('00:00:60+00:00', builder=NoneBuilder)
-
-        #Seconds must not be greater than or equal to 60
-        with self.assertRaises(SecondsOutOfBoundsError):
-            parse_time('00:00:61', builder=NoneBuilder)
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            parse_time('00:00:61Z', builder=NoneBuilder)
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            parse_time('00:00:61+00:00', builder=NoneBuilder)
-
-        #Minutes must not be greater than 60
-        with self.assertRaises(MinutesOutOfBoundsError):
-            parse_time('00:61', builder=NoneBuilder)
-
-        with self.assertRaises(MinutesOutOfBoundsError):
-            parse_time('00:61Z', builder=NoneBuilder)
-
-        with self.assertRaises(MinutesOutOfBoundsError):
-            parse_time('00:61+00:00', builder=NoneBuilder)
-
     def test_parse_datetime(self):
         resultdatetime = parse_datetime('1981-04-05T23:21:28.512400Z', builder=NoneBuilder)
         self.assertEqual(resultdatetime, (('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28.512400', (False, True, None, None, 'Z', 'timezone'), 'time'), 'datetime'))
@@ -270,11 +227,6 @@ class TestTimeParserFunctions(unittest.TestCase):
         time = _parse_hour('12.5', None, NoneBuilder)
         self.assertEqual(time, ('12.5', None, None, None, 'time'))
 
-    def test_parse_hour_bounds(self):
-        #Hour cannot be larger than 24, range checking happens in the builder
-        with self.assertRaises(HoursOutOfBoundsError):
-            _parse_hour('24.1', None, NoneBuilder)
-
     def test_parse_minute_time(self):
         time = _parse_minute_time('01:23', None, NoneBuilder)
         self.assertEqual(time, ('01', '23', None, None, 'time'))
@@ -293,33 +245,6 @@ class TestTimeParserFunctions(unittest.TestCase):
 
         time = _parse_minute_time('0123.4567', None, NoneBuilder)
         self.assertEqual(time, ('01', '23.4567', None, None, 'time'))
-
-    def test_parse_minute_time_overflow(self):
-        #Range checking happens in the builder
-        with self.assertRaises(MinutesOutOfBoundsError):
-            _parse_minute_time('0060', None, NoneBuilder)
-
-        with self.assertRaises(MinutesOutOfBoundsError):
-            _parse_minute_time('0060.1', None, NoneBuilder)
-
-        with self.assertRaises(MinutesOutOfBoundsError):
-            _parse_minute_time('00:60', None, NoneBuilder)
-
-        with self.assertRaises(MinutesOutOfBoundsError):
-            _parse_minute_time('00:60.1', None, NoneBuilder)
-
-        #Hour 24 can only represent midnight
-        with self.assertRaises(MidnightBoundsError):
-            _parse_minute_time('2401', None, NoneBuilder)
-
-        with self.assertRaises(MidnightBoundsError):
-            _parse_minute_time('2400.1', None, NoneBuilder)
-
-        with self.assertRaises(MidnightBoundsError):
-            _parse_minute_time('24:01', None, NoneBuilder)
-
-        with self.assertRaises(MidnightBoundsError):
-            _parse_minute_time('24:00.1', None, NoneBuilder)
 
     def test_parse_second_time(self):
         parseresult = _parse_second_time('01:23:45', None, NoneBuilder)
@@ -345,50 +270,6 @@ class TestTimeParserFunctions(unittest.TestCase):
 
         parseresult = _parse_second_time('144359.9999997', None, NoneBuilder)
         self.assertEqual(parseresult, ('14', '43', '59.9999997', None, 'time'))
-
-    def test_parse_second_time_bounds(self):
-        #Leap seconds not supported by the Python builder
-        with self.assertRaises(LeapSecondError):
-            _parse_second_time('235960', None, NoneBuilder)
-
-        with self.assertRaises(LeapSecondError):
-            _parse_second_time('23:59:60', None, NoneBuilder)
-
-    def test_parse_second_time_overflow(self):
-        #Seconds must be less than 60
-        #Leap seconds not supported by Python builder
-        with self.assertRaises(SecondsOutOfBoundsError):
-            _parse_second_time('000060', None, NoneBuilder)
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            _parse_second_time('00:00:60', None, NoneBuilder)
-
-        #Range checking happens in the builder
-        with self.assertRaises(SecondsOutOfBoundsError):
-            _parse_second_time('000061', None, NoneBuilder)
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            _parse_second_time('00:00:61', None, NoneBuilder)
-
-        #Minutes must be less than 60
-        with self.assertRaises(MinutesOutOfBoundsError):
-            _parse_second_time('006000', None, NoneBuilder)
-
-        with self.assertRaises(MinutesOutOfBoundsError):
-            _parse_second_time('00:60:00', None, NoneBuilder)
-
-        #Hour 24 can only represent midnight
-        with self.assertRaises(MidnightBoundsError):
-            _parse_second_time('240001', None, NoneBuilder)
-
-        with self.assertRaises(MidnightBoundsError):
-            _parse_second_time('24:00:01', None, NoneBuilder)
-
-        with self.assertRaises(MidnightBoundsError):
-            _parse_second_time('240100', None, NoneBuilder)
-
-        with self.assertRaises(MidnightBoundsError):
-            _parse_second_time('24:01:00', None, NoneBuilder)
 
     def test_split_tz(self):
         self.assertEqual(_split_tz('01:23:45'), ('01:23:45', None))
