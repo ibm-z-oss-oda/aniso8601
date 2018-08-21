@@ -154,62 +154,6 @@ class TestTimeParserFunctions(unittest.TestCase):
         resultdatetime = parse_datetime('19810405T23:21:28+00:00', builder=NoneBuilder)
         self.assertEqual(resultdatetime, (('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28', (False, None, '00', '00', '+00:00', 'timezone'), 'time'), 'datetime'))
 
-    def test_parse_datetime_bounds(self):
-        #Leap seconds not supported
-        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
-        #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
-        with self.assertRaises(LeapSecondError):
-            parse_datetime('2016-12-31T23:59:60+00:00', builder=NoneBuilder)
-
-        with self.assertRaises(LeapSecondError):
-            parse_datetime('2016-12-31T23:59:60', builder=NoneBuilder)
-
-        with self.assertRaises(LeapSecondError):
-            parse_datetime('2016-12-31T23:59:60Z', builder=NoneBuilder)
-
-    def test_parse_datetime_overflow(self):
-        with self.assertRaises(SecondsOutOfBoundsError):
-            parse_datetime('1981-04-05T00:00:60', builder=NoneBuilder)
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            parse_datetime('1981-04-05T00:00:60Z', builder=NoneBuilder)
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            parse_datetime('1981-04-05T00:00:60+00:00', builder=NoneBuilder)
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            parse_datetime('2016-12-31T23:59:61+00:00', builder=NoneBuilder)
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            parse_datetime('2016-12-31T23:59:61', builder=NoneBuilder)
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            parse_datetime('1981-04-05T00:00:61', builder=NoneBuilder)
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            parse_datetime('1981-04-05T00:00:61Z', builder=NoneBuilder)
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            parse_datetime('1981-04-05T00:00:61+00:00', builder=NoneBuilder)
-
-        #Minutes can't be greater than 60
-        with self.assertRaises(MinutesOutOfBoundsError):
-            parse_datetime('1981-04-05T00:61', builder=NoneBuilder)
-
-        with self.assertRaises(MinutesOutOfBoundsError):
-            parse_datetime('1981-04-05T00:61Z', builder=NoneBuilder)
-
-        with self.assertRaises(MinutesOutOfBoundsError):
-            parse_datetime('1981-04-05T00:61+00:00', builder=NoneBuilder)
-
-    def test_parse_datetime_leapsecond(self):
-        #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
-        with self.assertRaises(LeapSecondError):
-            parse_datetime('2016-12-31T23:59:60+00:00', builder=NoneBuilder)
-
-        with self.assertRaises(LeapSecondError):
-            parse_datetime('2016-12-31T23:59:60', builder=NoneBuilder)
-
     def test_parse_datetime_spaceseperated(self):
         resultdatetime = parse_datetime('2004-W53-6 23:21:28.512400-12:34', ' ', builder=NoneBuilder)
         self.assertEqual(resultdatetime, (('2004', None, None, '53', '6', None, 'date'), ('23', '21', '28.512400', (True, None, '12', '34', '-12:34', 'timezone'), 'time'), 'datetime'))

@@ -238,6 +238,40 @@ class TestPythonTimeBuilder(unittest.TestCase):
 
         self.assertEqual(PythonTimeBuilder.build_datetime(('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28.512400', (False, None, '11', '15', '+11:15', 'timezone'), 'time')), datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+11:15', minutes=675)))
 
+    def test_build_datetime_bounds_checking(self):
+        #Leap seconds not supported
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
+        with self.assertRaises(LeapSecondError):
+            PythonTimeBuilder.build_datetime(('2016', '12', '31', None, None, None, 'date'), ('23', '59', '60', None, 'time'))
+
+        with self.assertRaises(LeapSecondError):
+            PythonTimeBuilder.build_datetime(('2016', '12', '31', None, None, None, 'date'), ('23', '59', '60', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
+
+        with self.assertRaises(SecondsOutOfBoundsError):
+            PythonTimeBuilder.build_datetime(('1981', '04', '05', None, None, None, 'date'), ('00', '00', '60', None, 'time'))
+
+        with self.assertRaises(SecondsOutOfBoundsError):
+            PythonTimeBuilder.build_datetime(('1981', '04', '05', None, None, None, 'date'), ('00', '00', '60', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
+
+        with self.assertRaises(SecondsOutOfBoundsError):
+            PythonTimeBuilder.build_datetime(('1981', '04', '05', None, None, None, 'date'), ('00', '00', '61', None, 'time'))
+
+        with self.assertRaises(SecondsOutOfBoundsError):
+            PythonTimeBuilder.build_datetime(('1981', '04', '05', None, None, None, 'date'), ('00', '00', '61', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
+
+        with self.assertRaises(SecondsOutOfBoundsError):
+            PythonTimeBuilder.build_datetime(('1981', '04', '05', None, None, None, 'date'), ('00', '59', '61', None, 'time'))
+
+        with self.assertRaises(SecondsOutOfBoundsError):
+            PythonTimeBuilder.build_datetime(('1981', '04', '05', None, None, None, 'date'), ('00', '59', '61', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
+
+        with self.assertRaises(MinutesOutOfBoundsError):
+            PythonTimeBuilder.build_datetime(('1981', '04', '05', None, None, None, 'date'), ('00', '61', None, None, 'time'))
+
+        with self.assertRaises(MinutesOutOfBoundsError):
+            PythonTimeBuilder.build_datetime(('1981', '04', '05', None, None, None, 'date'), ('00', '61', None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
+
     def test_build_duration(self):
         timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
         self.assertEqual(timedelta, datetime.timedelta(days=428, seconds=17646))
