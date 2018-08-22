@@ -286,38 +286,6 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
         with self.assertRaises(ISOFormatError):
             parse_repeating_interval('R3/1981-04-05/P0003-06-04T12:30:05.5asdfasdf', builder=NoneBuilder)
 
-    def test_parse_repeating_interval_relative(self):
-        results = list(parse_repeating_interval('R3/1981-04-05/P1D', relative=True))
-        self.assertEqual(results[0], datetime.date(year=1981, month=4, day=5))
-        self.assertEqual(results[1], datetime.date(year=1981, month=4, day=6))
-        self.assertEqual(results[2], datetime.date(year=1981, month=4, day=7))
-
-        results = list(parse_repeating_interval('R11/PT1H2M/1980-03-05T01:01:00', relative=True))
-
-        for dateindex in compat.range(0, 11):
-             self.assertEqual(results[dateindex], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1) - dateindex * datetime.timedelta(hours=1, minutes=2))
-
-        results = list(parse_repeating_interval('R2--1980-03-05T01:01:00--1981-04-05T01:01:00', intervaldelimiter='--', relative=True))
-        self.assertEqual(results[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
-        self.assertEqual(results[1], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
-
-        results = list(parse_repeating_interval('R2/1980-03-05 01:01:00/1981-04-05 01:01:00', datetimedelimiter=' ', relative=True))
-        self.assertEqual(results[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
-        self.assertEqual(results[1], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
-
-        #Make sure relative is correctly applied for months
-        #https://bitbucket.org/nielsenb/aniso8601/issues/12/month-intervals-calculated-incorrectly-or
-        results = list(parse_repeating_interval('R4/2017-04-30T00:00:00/P1M', relative=True))
-        self.assertEqual(results[0], datetime.datetime(year=2017, month=4, day=30))
-        self.assertEqual(results[1], datetime.datetime(year=2017, month=5, day=30))
-        self.assertEqual(results[2], datetime.datetime(year=2017, month=6, day=30))
-        self.assertEqual(results[3], datetime.datetime(year=2017, month=7, day=30))
-
-        resultgenerator = parse_repeating_interval('R/PT1H2M/1980-03-05T01:01:00', relative=True)
-
-        for dateindex in compat.range(0, 11):
-             self.assertEqual(next(resultgenerator), datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1) - dateindex * datetime.timedelta(hours=1, minutes=2))
-
     def test_parse_repeating_interval_relative_suffixgarbage(self):
         #Don't allow garbage after the duration
         #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed

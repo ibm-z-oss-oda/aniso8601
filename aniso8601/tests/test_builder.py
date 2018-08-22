@@ -592,6 +592,32 @@ class TestRelativeTimeBuilder(unittest.TestCase):
         #Reinstall dateutil
         sys.modules['dateutil'] = dateutil_import
 
+    def test_build_repeating_interval(self):
+        #Repeating intervals are contingent on durations, make sure they work
+        results = list(RelativeTimeBuilder.build_repeating_interval(Rnn=3, interval=(('1981', '04', '05', None, None, None, 'date'), None, (None, None, None, '1', None, None, None, 'duration'), 'interval')))
+        self.assertEqual(results[0], datetime.date(year=1981, month=4, day=5))
+        self.assertEqual(results[1], datetime.date(year=1981, month=4, day=6))
+        self.assertEqual(results[2], datetime.date(year=1981, month=4, day=7))
+
+        results = list(RelativeTimeBuilder.build_repeating_interval(Rnn=11, interval=(None, (('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (None, None, None, None, '1', '2', None, 'duration'), 'interval')))
+
+        for dateindex in compat.range(0, 11):
+             self.assertEqual(results[dateindex], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1) - dateindex * datetime.timedelta(hours=1, minutes=2))
+
+        #Make sure relative is correctly applied for months
+        #https://bitbucket.org/nielsenb/aniso8601/issues/12/month-intervals-calculated-incorrectly-or
+        results = list(RelativeTimeBuilder.build_repeating_interval(Rnn=4, interval=((('2017', '04', '30', None, None, None, 'date'), ('00', '00', '00', None, 'time'), 'datetime'), None, (None, '1', None, None, None, None, None, 'duration'), 'interval')))
+
+        self.assertEqual(results[0], datetime.datetime(year=2017, month=4, day=30))
+        self.assertEqual(results[1], datetime.datetime(year=2017, month=5, day=30))
+        self.assertEqual(results[2], datetime.datetime(year=2017, month=6, day=30))
+        self.assertEqual(results[3], datetime.datetime(year=2017, month=7, day=30))
+
+        resultgenerator = RelativeTimeBuilder.build_repeating_interval(R=True, interval=(None, (('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (None, None, None, None, '1', '2', None, 'duration'), 'interval'))
+
+        for dateindex in compat.range(0, 11):
+             self.assertEqual(next(resultgenerator), datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1) - dateindex * datetime.timedelta(hours=1, minutes=2))
+
 class TestUTCOffset(unittest.TestCase):
     def test_pickle(self):
         #Make sure timezone objects are pickleable

@@ -275,17 +275,31 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
     @classmethod
     def build_repeating_interval(cls, R=None, Rnn=None, interval=None):
-        intervalobject = cls._build_object(interval)
+        startobject = None
+        endobject = None
 
-        startobject = intervalobject[0]
-        endobject = intervalobject[1]
+        if interval[0] is not None:
+            startobject = cls._build_object(interval[0])
+
+        if interval[1] is not None:
+            endobject = cls._build_object(interval[1])
+
+        if interval[2] is not None:
+            durationobject = cls._build_object(interval[2])
+        else:
+            durationobject = endobject - startobject
 
         if R is True:
-            return PythonTimeBuilder._date_generator_unbounded(startobject, endobject - startobject)
+            if startobject is not None:
+                return PythonTimeBuilder._date_generator_unbounded(startobject, durationobject)
+            return PythonTimeBuilder._date_generator_unbounded(endobject, -durationobject)
 
         iterations = BaseTimeBuilder.cast(Rnn, int, thrownmessage='Invalid iterations.')
 
-        return PythonTimeBuilder._date_generator(startobject, endobject - startobject, iterations)
+        if startobject is not None:
+            return PythonTimeBuilder._date_generator(startobject, durationobject, iterations)
+
+        return PythonTimeBuilder._date_generator(endobject, -durationobject, iterations)
 
     @classmethod
     def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
