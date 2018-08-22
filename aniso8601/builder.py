@@ -388,56 +388,62 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
 class RelativeTimeBuilder(PythonTimeBuilder):
     @classmethod
-    def build_timedelta(cls, years=0, months=0, days=0, weeks=0, hours=0, minutes=0, seconds=0, microseconds=0):
+    def build_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None, TnH=None, TnM=None, TnS=None):
         try:
             import dateutil.relativedelta
         except ImportError:
             raise RuntimeError('dateutil must be installed for relativedelta support.')
 
-        if '.' in str(years) or '.' in str(months):
+        if (PnY is not None and '.' in PnY) or (PnM is not None and '.' in PnM):
             #https://github.com/dateutil/dateutil/issues/40
             raise RelativeValueError('Fractional months and years are not defined for relative intervals.')
 
-        years = BaseTimeBuilder.cast(years, int, thrownmessage='Invalid year string.')
-        months = BaseTimeBuilder.cast(months, int, thrownmessage='Invalid month string.')
+        years = 0
+        months = 0
+        days = 0
+        weeks = 0
+        hours = 0
+        minutes = 0
+        seconds = 0
+        microseconds = 0
 
-        if '.' in str(days):
-            days = BaseTimeBuilder.cast(days, float, thrownmessage='Invalid day string.')
-        else:
-            days = BaseTimeBuilder.cast(days, int, thrownmessage='Invalid day string.')
+        if PnY is not None:
+            years = BaseTimeBuilder.cast(PnY, float, thrownmessage='Invalid year string.')
 
-        if '.' in str(weeks):
-            weeks = BaseTimeBuilder.cast(weeks, float, thrownmessage='Invalid week string.')
-        else:
-            weeks = BaseTimeBuilder.cast(weeks, int, thrownmessage='Invalid week string.')
+        if PnM is not None:
+            months = BaseTimeBuilder.cast(PnM, float, thrownmessage='Invalid month string.')
+        if PnD is not None:
+            days = BaseTimeBuilder.cast(PnD, float, thrownmessage='Invalid day string.')
 
-        if '.' in str(hours):
-            hours = BaseTimeBuilder.cast(hours, float, thrownmessage='Invalid hour string.')
-        else:
-            hours = BaseTimeBuilder.cast(hours, int, thrownmessage='Invalid hour string.')
+        if PnW is not None:
+            if '.' in PnW:
+                weeks = BaseTimeBuilder.cast(PnW, float, thrownmessage='Invalid week string.')
+            else:
+                weeks = BaseTimeBuilder.cast(PnW, int, thrownmessage='Invalid week string.')
 
-        if '.' in str(minutes):
-            minutes = BaseTimeBuilder.cast(minutes, float, thrownmessage='Invalid minute string.')
-        else:
-            minutes = BaseTimeBuilder.cast(minutes, int, thrownmessage='Invalid minute string.')
+        if TnH is not None:
+            if '.' in TnH:
+                hours = BaseTimeBuilder.cast(TnH, float, thrownmessage='Invalid hour string.')
+            else:
+                hours = BaseTimeBuilder.cast(TnH, int, thrownmessage='Invalid hour string.')
 
-        if '.' in str(seconds):
-            #Truncate to maximum supported precision
-            seconds, secondsremainder = str(seconds).split('.')
+        if TnM is not None:
+            if '.' in TnM:
+                minutes = BaseTimeBuilder.cast(TnM, float, thrownmessage='Invalid minute string.')
+            else:
+                minutes = BaseTimeBuilder.cast(TnM, int, thrownmessage='Invalid minute string.')
 
-            seconds = BaseTimeBuilder.cast(seconds, int, thrownmessage='Invalid second string.')
+        if TnS is not None:
+            if '.' in TnS:
+                #Split into seconds and microseoncds
+                seconds = BaseTimeBuilder.cast(TnS[0:TnS.index('.')], int, thrownmessage='Invalid second string.')
+                #Truncate to maximum supported precision
+                microseconds = BaseTimeBuilder.cast(TnS[TnS.index('.'):TnS.index('.') + 7], float, thrownmessage='Invalid second string.') * 1e6
+            else:
+                seconds = BaseTimeBuilder.cast(TnS, int, thrownmessage='Invalid second string.')
 
-            secondsremainder = BaseTimeBuilder.cast('.' + secondsremainder[0:6], float, thrownmessage='Invalid second string.')
-        else:
-            seconds = seconds = BaseTimeBuilder.cast(seconds, int, thrownmessage='Invalid second string.')
-            secondsremainder = 0
-
-        if '.' in str(microseconds):
-            microseconds = BaseTimeBuilder.cast(microseconds, float, thrownmessage='Invalid microsecond string.')
-        else:
-            microseconds = BaseTimeBuilder.cast(microseconds, int, thrownmessage='Invalid microsecond string.')
-
-        microseconds += secondsremainder * 1e6 #Add remaining microseconds
+        #Note that weeks can be handled without conversion to days
+        #totaldays = years * 365 + months * 30 + days
 
         return dateutil.relativedelta.relativedelta(years=years, months=months, weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds, microseconds=microseconds)
 

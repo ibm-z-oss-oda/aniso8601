@@ -326,20 +326,3 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
 
         with self.assertRaises(ISOFormatError):
             parse_interval('R3/1981-04-05/P0003-06-04T12:30:05.5asdfasdf')
-
-    def test_parse_repeating_interval_relative_nodateutil(self):
-        import sys
-        import dateutil
-
-        dateutil_import = dateutil
-
-        sys.modules['dateutil'] = None
-
-        with self.assertRaises(RuntimeError):
-            parse_repeating_interval('R3/1981-04-05/P1D', relative=True)
-
-        with self.assertRaises(RuntimeError):
-            parse_repeating_interval('R4/2017-04-30T00:00:00/P1M', relative=True)
-
-        #Reinstall dateutil
-        sys.modules['dateutil'] = dateutil

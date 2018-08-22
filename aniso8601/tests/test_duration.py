@@ -298,42 +298,6 @@ class TestDurationParserFunctions(unittest.TestCase):
         self.assertFalse(_component_order_correct('P1D1Y1M', ['P', 'Y', 'M', 'D']))
         self.assertFalse(_component_order_correct('PT1S1H', ['T', 'H', 'M', 'S']))
 
-class TestRelativeDurationParserFunctions(unittest.TestCase):
-    def test_parse_duration_relative(self):
-        resultduration = parse_duration('P1Y2M3DT4H54M6.5S', relative=True)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6, microseconds=500000))
-
-        resultduration = parse_duration('P0003-06-04T12:30:05.5', relative=True)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=3, months=6, days=4, hours=12, minutes=30, seconds=5, microseconds=500000))
-
-        #Make sure we truncate, not round
-        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
-        resultduration = parse_duration('P0001-02-03T14:43:59.9999997', relative=True)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=14, minutes=43, seconds=59, microseconds=999999))
-
-    def test_parse_duration_prescribed_relative(self):
-        resultduration = _parse_duration_prescribed('P1Y', True)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1))
-
-        resultduration = _parse_duration_prescribed('P1M', True)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(months=1))
-
-        #Add the relative ‘days’ argument to the absolute day. Notice that the ‘weeks’ argument is multiplied by 7 and added to ‘days’.
-        #http://dateutil.readthedocs.org/en/latest/relativedelta.html
-        resultduration = _parse_duration_prescribed('P1W', True)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=7))
-
-        resultduration = _parse_duration_prescribed('P1.5W', True)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=10.5))
-
-        #Make sure we truncate, not round
-        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
-        resultduration = parse_duration('PT0.0000001S', relative=True)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(0))
-
-        resultduration = parse_duration('PT2.0000048S', relative=True)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(seconds=2, microseconds=4))
-
     def test_parse_duration_prescribed_relative_multiplefractions(self):
         with self.assertRaises(ISOFormatError):
             #Multiple fractions are not allowed
@@ -349,18 +313,6 @@ class TestRelativeDurationParserFunctions(unittest.TestCase):
         #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
         with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed('P1Dasdfasdf', True)
-
-    def test_parse_duration_prescribed_relative_fractionalyear(self):
-        #Fractional months and years are not defined
-        #https://github.com/dateutil/dateutil/issues/40
-        with self.assertRaises(RelativeValueError):
-            _parse_duration_prescribed('P1.5Y', True)
-
-    def test_parse_duration_prescribed_relative_fractionalmonth(self):
-        #Fractional months and years are not defined
-        #https://github.com/dateutil/dateutil/issues/40
-        with self.assertRaises(RelativeValueError):
-            _parse_duration_prescribed('P1.5M', True)
 
     def test_parse_duration_prescribed_relative_outoforder(self):
         #Ensure durations are required to be in the correct order
@@ -393,93 +345,8 @@ class TestRelativeDurationParserFunctions(unittest.TestCase):
         with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed('PT1S1H', True)
 
-    def test_parse_duration_prescribed_relative_nodateutil(self):
-        import sys
-        import dateutil
-
-        dateutil_import = dateutil
-
-        sys.modules['dateutil'] = None
-
-        with self.assertRaises(RuntimeError):
-            _parse_duration_prescribed('P1Y', True)
-
-        #Reinstall dateutil
-        sys.modules['dateutil'] = dateutil
-
-    def test_parse_duration_prescribed_notime_RelativeTimeBuilder(self):
-        resultduration = _parse_duration_prescribed_notime('P1Y2M3D', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3))
-
-        resultduration = _parse_duration_prescribed_notime('P1Y2M3.5D', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3.5))
-
-        resultduration = _parse_duration_prescribed_notime('P1Y2M3,5D', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3.5))
-
-        resultduration = _parse_duration_prescribed_notime('P1Y', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1))
-
-        resultduration = _parse_duration_prescribed_notime('P1M', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(months=1))
-
-        resultduration = _parse_duration_prescribed_notime('P1W', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=7))
-
-        resultduration = _parse_duration_prescribed_notime('P1.5W', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=10.5))
-
-        resultduration = _parse_duration_prescribed_notime('P1,5W', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=10.5))
-
-        resultduration = _parse_duration_prescribed_notime('P1D', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=1))
-
-        resultduration = _parse_duration_prescribed_notime('P1.5D', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=1.5))
-
-        resultduration = _parse_duration_prescribed_notime('P1,5D', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(days=1.5))
-
-    def test_parse_duration_prescribed_time_RelativeTimeBuilder(self):
-        resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6S', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6))
-
-        resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6.5S', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6, microseconds=500000))
-
-        resultduration = _parse_duration_prescribed_time('P1Y2M3DT4H54M6,5S', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6, microseconds=500000))
-
-        resultduration = _parse_duration_prescribed_time('PT4H54M6.5S', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(hours=4, minutes=54, seconds=6, microseconds=500000))
-
-        resultduration = _parse_duration_prescribed_time('PT4H54M6,5S', RelativeTimeBuilder)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(hours=4, minutes=54, seconds=6, microseconds=500000))
-
-    def test_parse_duration_combined_relative(self):
-        resultduration = _parse_duration_combined('P0003-06-04T12:30:05', True)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=3, months=6, days=4, hours=12, minutes=30, seconds=5))
-
-        resultduration = _parse_duration_combined('P0003-06-04T12:30:05.5', True)
-        self.assertEqual(resultduration, dateutil.relativedelta.relativedelta(years=3, months=6, days=4, hours=12, minutes=30, seconds=5, microseconds=500000))
-
     def test_parse_duration_combined_relative_suffixgarbage(self):
         #Don't allow garbage after the duration
         #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
         with self.assertRaises(ISOFormatError):
             _parse_duration_combined('P0003-06-04T12:30:05.5asdfasdf', True)
-
-    def test_parse_duration_combined_relative_nodateutil(self):
-        import sys
-        import dateutil
-
-        dateutil_import = dateutil
-
-        sys.modules['dateutil'] = None
-
-        with self.assertRaises(RuntimeError):
-            _parse_duration_combined('P0003-06-04T12:30:05', True)
-
-        #Reinstall dateutil
-        sys.modules['dateutil'] = dateutil

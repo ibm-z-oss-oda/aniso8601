@@ -15,7 +15,8 @@ from aniso8601 import compat
 from aniso8601.builder import BaseTimeBuilder, PythonTimeBuilder, RelativeTimeBuilder, UTCOffset
 from aniso8601.exceptions import DayOutOfBoundsError, HoursOutOfBoundsError, \
         LeapSecondError, MidnightBoundsError, MinutesOutOfBoundsError, \
-        SecondsOutOfBoundsError, WeekOutOfBoundsError, YearOutOfBoundsError
+        RelativeValueError, SecondsOutOfBoundsError, WeekOutOfBoundsError, \
+        YearOutOfBoundsError
 
 class TestBaseTimeBuilder(unittest.TestCase):
     def test_build_date(self):
@@ -516,121 +517,68 @@ class TestPythonTimeBuilder(unittest.TestCase):
         self.assertEqual(tzinfoobject.tzname(None), '-12')
 
 class TestRelativeTimeBuilder(unittest.TestCase):
-    def test_build_date(self):
-        self.assertEqual(RelativeTimeBuilder.build_date(1, 2, 3), datetime.date(1, 2, 3))
+    def test_build_duration(self):
+        duration = RelativeTimeBuilder.build_duration(PnY='1')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(years=1))
 
-    def test_build_time(self):
-        time = RelativeTimeBuilder.build_time()
-        self.assertEqual(time, datetime.time())
+        duration = RelativeTimeBuilder.build_duration(PnM='1')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(months=1))
 
-        time = RelativeTimeBuilder.build_time(hh='1', mm='23')
-        self.assertEqual(time, datetime.time(hour=1, minute=23))
+        #Add the relative ‘days’ argument to the absolute day. Notice that the ‘weeks’ argument is multiplied by 7 and added to ‘days’.
+        #http://dateutil.readthedocs.org/en/latest/relativedelta.html
+        duration = RelativeTimeBuilder.build_duration(PnW='1')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(days=7))
 
-        time = RelativeTimeBuilder.build_time(hh='1', mm='23', ss='45')
-        self.assertEqual(time, datetime.time(hour=1, minute=23, second=45))
+        duration = RelativeTimeBuilder.build_duration(PnW='1.5')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(days=10.5))
 
-        time = RelativeTimeBuilder.build_time(hh='1', mm='23.4567')
-        self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000))
+        duration = RelativeTimeBuilder.build_duration(PnD='1')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(days=1))
 
-        time = RelativeTimeBuilder.build_time(hh='23', mm='21', ss='28.512400')
-        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400))
+        duration = RelativeTimeBuilder.build_duration(PnD='1.5')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(days=1.5))
 
-        time = RelativeTimeBuilder.build_time(hh='14', mm='43', ss='59.9999997')
-        self.assertEqual(time, datetime.time(hour=14, minute=43, second=59, microsecond=999999))
+        duration = RelativeTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3))
 
-        time = RelativeTimeBuilder.build_time(hh='12.5')
-        self.assertEqual(time, datetime.time(hour=12, minute=30))
+        duration = RelativeTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3.5')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3.5))
 
-        time = RelativeTimeBuilder.build_time(hh='24')
-        self.assertEqual(time, datetime.time(hour=0))
+        duration = RelativeTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6.5')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=4, minutes=54, seconds=6, microseconds=500000))
 
-        time = RelativeTimeBuilder.build_time(hh='24', mm='00')
-        self.assertEqual(time, datetime.time(hour=0))
+        duration = RelativeTimeBuilder.build_duration(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(years=3, months=6, days=4, hours=12, minutes=30, seconds=5))
 
-        time = RelativeTimeBuilder.build_time(hh='24', mm='00', ss='00')
-        self.assertEqual(time, datetime.time(hour=0))
+        duration = RelativeTimeBuilder.build_duration(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05.5')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(years=3, months=6, days=4, hours=12, minutes=30, seconds=5, microseconds=500000))
 
-        time = RelativeTimeBuilder.build_time(tz=UTCOffset(name='UTC', minutes=0))
-        self.assertEqual(time, datetime.time(tzinfo=UTCOffset(name='UTC', minutes=0)))
+        duration = RelativeTimeBuilder.build_duration(TnH='4', TnM='54', TnS='6.5')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(hours=4, minutes=54, seconds=6, microseconds=500000))
 
-        time = RelativeTimeBuilder.build_time(hh='23', mm='21', ss='28.512400', tz=UTCOffset(name='+00:00', minutes=0))
-        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+00:00', minutes=0)))
+        #Make sure we truncate, not round
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        duration = RelativeTimeBuilder.build_duration(TnS='0.0000001')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(0))
 
-        time = RelativeTimeBuilder.build_time(hh='1', mm='23', tz=UTCOffset(name='+1', minutes=60))
-        self.assertEqual(time, datetime.time(hour=1, minute=23, tzinfo=UTCOffset(name='+1', minutes=60)))
+        duration = RelativeTimeBuilder.build_duration(TnS='2.0000048')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(seconds=2, microseconds=4))
 
-        time = RelativeTimeBuilder.build_time(hh='1', mm='23.4567', tz=UTCOffset(name='-1', minutes=-60))
-        self.assertEqual(time, datetime.time(hour=1, minute=23, second=27, microsecond=402000, tzinfo=UTCOffset(name='-1', minutes=-60)))
+        duration = RelativeTimeBuilder.build_duration(PnY='0001', PnM='02', PnD='03', TnH='14', TnM='43', TnS='59.9999997')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(years=1, months=2, days=3, hours=14, minutes=43, seconds=59, microseconds=999999))
 
-        time = RelativeTimeBuilder.build_time(hh='23', mm='21', ss='28.512400', tz=UTCOffset(name='+1.5', minutes=90))
-        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+1.5', minutes=90)))
+        duration = RelativeTimeBuilder.build_duration(PnY='1', PnM='2', PnW='4', PnD='3', TnH='5', TnM='6', TnS='7.0000091011')
+        self.assertEqual(duration, dateutil.relativedelta.relativedelta(years=1, months=2, days=31, hours=5, minutes=6, seconds=7, microseconds=9))
 
-        time = RelativeTimeBuilder.build_time(hh='23', mm='21', ss='28.512400', tz=UTCOffset(name='+11:15', minutes=675))
-        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+11:5', minutes=675)))
+    def test_build_duration_fractional_year(self):
+        with self.assertRaises(RelativeValueError):
+            RelativeTimeBuilder.build_duration(PnY='1.5')
 
-        time = RelativeTimeBuilder.build_time(hh='23', mm='21', ss='28.512400', tz=UTCOffset(name='-12:34', minutes=754))
-        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+11.5', minutes=754)))
+    def test_build_duration_fractional_month(self):
+        with self.assertRaises(RelativeValueError):
+            RelativeTimeBuilder.build_duration(PnM='1.5')
 
-        time = RelativeTimeBuilder.build_time(hh='23', mm='21', ss='28.512400', tz=UTCOffset(name='UTC', minutes=0))
-        self.assertEqual(time, datetime.time(hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='UTC', minutes=0)))
-
-    def test_build_timezone(self):
-        tzinfoobject = RelativeTimeBuilder.build_timezone(Z=True, name='Z')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
-        self.assertEqual(tzinfoobject.tzname(None), 'UTC')
-
-        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=False, hh='00', mm='00', name='+00:00')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
-        self.assertEqual(tzinfoobject.tzname(None), '+00:00')
-
-        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=False, hh='01', mm='00', name='+01:00')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=1))
-        self.assertEqual(tzinfoobject.tzname(None), '+01:00')
-
-        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=True, hh='01', mm='00', name='-01:00')
-        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=1))
-        self.assertEqual(tzinfoobject.tzname(None), '-01:00')
-
-        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=False, hh='00', mm='12', name='+00:12')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(minutes=12))
-        self.assertEqual(tzinfoobject.tzname(None), '+00:12')
-
-        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=False, hh='01', mm='23', name='+01:23')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=1, minutes=23))
-        self.assertEqual(tzinfoobject.tzname(None), '+01:23')
-
-        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=True, hh='01', mm='23', name='-01:23')
-        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=1, minutes=23))
-        self.assertEqual(tzinfoobject.tzname(None), '-01:23')
-
-        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=False, hh='00', name='+00')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=0))
-        self.assertEqual(tzinfoobject.tzname(None), '+00')
-
-        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=False, hh='01', name='+01')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=1))
-        self.assertEqual(tzinfoobject.tzname(None), '+01')
-
-        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=True, hh='01', name='-01')
-        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=1))
-        self.assertEqual(tzinfoobject.tzname(None), '-01')
-
-        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=False, hh='12', name='+12')
-        self.assertEqual(tzinfoobject.utcoffset(None), datetime.timedelta(hours=12))
-        self.assertEqual(tzinfoobject.tzname(None), '+12')
-
-        tzinfoobject = RelativeTimeBuilder.build_timezone(negative=True, hh='12', name='-12')
-        self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=12))
-        self.assertEqual(tzinfoobject.tzname(None), '-12')
-
-    def test_build_timedelta(self):
-        timedelta = RelativeTimeBuilder.build_timedelta(years=1, months=2, days=3, weeks=4, hours=5, minutes=6, seconds=7, microseconds='9.1011')
-        self.assertEqual(timedelta, dateutil.relativedelta.relativedelta(years=1, months=2, days=31, hours=5, minutes=6, seconds=7, microseconds=9.1011))
-
-        timedelta = RelativeTimeBuilder.build_timedelta(years=1, months=-2, days=3, weeks=-4, hours=5, minutes=-6, seconds=7, microseconds='9.1011')
-        self.assertEqual(timedelta, dateutil.relativedelta.relativedelta(years=1, months=-2, days=-25, hours=5, minutes=-6, seconds=7, microseconds=9.1011))
-
-    def test_build_timedelta_nodateutil(self):
+    def test_build_duration_nodateutil(self):
         import sys
         import dateutil
 
@@ -639,16 +587,10 @@ class TestRelativeTimeBuilder(unittest.TestCase):
         sys.modules['dateutil'] = None
 
         with self.assertRaises(RuntimeError):
-            RelativeTimeBuilder.build_timedelta(years=1, months=2, days=3, weeks=4, hours=5, minutes=6, seconds=7, microseconds=9.1011)
+            RelativeTimeBuilder.build_duration(PnY='1', PnM='2', PnW='3', PnD='4', TnH='5', TnM='6', TnS='7')
 
         #Reinstall dateutil
-        sys.modules['dateutil'] = dateutil
-
-    def test_build_combine(self):
-        date = datetime.date(1, 2, 3)
-        time = datetime.time(hour=23, minute=21, second=28, microsecond=512400)
-
-        self.assertEqual(RelativeTimeBuilder.combine(date, time), datetime.datetime(1, 2, 3, hour=23, minute=21, second=28, microsecond=512400))
+        sys.modules['dateutil'] = dateutil_import
 
 class TestUTCOffset(unittest.TestCase):
     def test_pickle(self):
