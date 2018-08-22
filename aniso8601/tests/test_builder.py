@@ -26,17 +26,25 @@ class TestBaseTimeBuilder(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             BaseTimeBuilder.build_time()
 
+    def test_build_datetime(self):
+        with self.assertRaises(NotImplementedError):
+            BaseTimeBuilder.build_datetime(None, None)
+
     def test_build_duration(self):
         with self.assertRaises(NotImplementedError):
             BaseTimeBuilder.build_duration()
 
+    def test_build_interval(self):
+        with self.assertRaises(NotImplementedError):
+            BaseTimeBuilder.build_interval()
+
+    def test_build_repeating_interval(self):
+        with self.assertRaises(NotImplementedError):
+            BaseTimeBuilder.build_repeating_interval()
+
     def test_build_timezone(self):
         with self.assertRaises(NotImplementedError):
             BaseTimeBuilder.build_timezone()
-
-    def test_build_combine(self):
-        with self.assertRaises(NotImplementedError):
-            BaseTimeBuilder.combine(None, None)
 
 class TestPythonTimeBuilder(unittest.TestCase):
     def test_build_date(self):
