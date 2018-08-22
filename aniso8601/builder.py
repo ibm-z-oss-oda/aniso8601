@@ -408,10 +408,11 @@ class RelativeTimeBuilder(PythonTimeBuilder):
         microseconds = 0
 
         if PnY is not None:
-            years = BaseTimeBuilder.cast(PnY, float, thrownmessage='Invalid year string.')
+            years = BaseTimeBuilder.cast(PnY, int, thrownmessage='Invalid year string.')
 
         if PnM is not None:
-            months = BaseTimeBuilder.cast(PnM, float, thrownmessage='Invalid month string.')
+            months = BaseTimeBuilder.cast(PnM, int, thrownmessage='Invalid month string.')
+
         if PnD is not None:
             days = BaseTimeBuilder.cast(PnD, float, thrownmessage='Invalid day string.')
 
