@@ -592,6 +592,116 @@ class TestRelativeTimeBuilder(unittest.TestCase):
         #Reinstall dateutil
         sys.modules['dateutil'] = dateutil_import
 
+    def test_build_interval(self):
+        #Intervals are contingent on durations, make sure they work
+        interval = RelativeTimeBuilder.build_interval(end=(('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), duration=(None, '1', None, None, None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
+        self.assertEqual(interval[1], datetime.datetime(year=1981, month=3, day=5, hour=1, minute=1))
+
+        interval = RelativeTimeBuilder.build_interval(end=('1981', '04', '05', None, None, None, 'date'), duration=(None, '1', None, None, None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=1981, month=4, day=5))
+        self.assertEqual(interval[1], datetime.date(year=1981, month=3, day=5))
+
+        interval = RelativeTimeBuilder.build_interval(end=('2014', '11', '12', None, None, None, 'date'), duration=(None, None, None, None, '1', None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2014, month=11, day=12))
+        self.assertEqual(interval[1], datetime.datetime(year=2014, month=11, day=11, hour=23))
+
+        interval = RelativeTimeBuilder.build_interval(end=('2014', '11', '12', None, None, None, 'date'), duration=(None, None, None, None, '4', '54', '6.5', 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2014, month=11, day=12))
+        self.assertEqual(interval[1], datetime.datetime(year=2014, month=11, day=11, hour=19, minute=5, second=53, microsecond=500000))
+
+        #Make sure we truncate, not round
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        interval = RelativeTimeBuilder.build_interval(end=('2018', '03', '06', None, None, None, 'date'), duration=(None, None, None, None, None, None, '0.0000001', 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(interval[1], datetime.datetime(year=2018, month=3, day=6))
+
+        interval = RelativeTimeBuilder.build_interval(end=('2018', '03', '06', None, None, None, 'date'), duration=(None, None, None, None, None, None, '2.0000048', 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(interval[1], datetime.datetime(year=2018, month=3, day=5, hour=23, minute=59, second=57, microsecond=999996))
+
+        interval = RelativeTimeBuilder.build_interval(start=('2018', '03', '06', None, None, None, 'date'), duration=(None, None, None, None, None, None, '0.0000001', 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(interval[1], datetime.datetime(year=2018, month=3, day=6))
+
+        interval = RelativeTimeBuilder.build_interval(start=('2018', '03', '06', None, None, None, 'date'), duration=(None, None, None, None, None, None, '2.0000048', 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2018, month=3, day=6))
+        self.assertEqual(interval[1], datetime.datetime(year=2018, month=3, day=6, hour=0, minute=0, second=2, microsecond=4))
+
+        interval = RelativeTimeBuilder.build_interval(start=(('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), duration=(None, '1', None, '1', None, '1', None, 'duration'))
+        self.assertEqual(interval[0], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
+        self.assertEqual(interval[1], datetime.datetime(year=1981, month=5, day=6, hour=1, minute=2))
+
+        interval = RelativeTimeBuilder.build_interval(start=('1981', '04', '05', None, None, None, 'date'), duration=(None, '1', None, '1', None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=1981, month=4, day=5))
+        self.assertEqual(interval[1], datetime.date(year=1981, month=5, day=6))
+
+        interval = RelativeTimeBuilder.build_interval(start=('2014', '11', '12', None, None, None, 'date'), duration=(None, None, None, None, '1', None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2014, month=11, day=12))
+        self.assertEqual(interval[1], datetime.datetime(year=2014, month=11, day=12, hour=1, minute=0))
+
+        interval = RelativeTimeBuilder.build_interval(start=('2014', '11', '12', None, None, None, 'date'), duration=(None, None, None, None, '4', '54', '6.5', 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2014, month=11, day=12))
+        self.assertEqual(interval[1], datetime.datetime(year=2014, month=11, day=12, hour=4, minute=54, second=6, microsecond=500000))
+
+        interval = RelativeTimeBuilder.build_interval(start=(('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00.0000001', None, 'time'), 'datetime'), end=(('1981', '04', '05', None, None, None, 'date'), ('14', '43', '59.9999997', None, 'time'), 'datetime'))
+        self.assertEqual(interval[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
+        self.assertEqual(interval[1], datetime.datetime(year=1981, month=4, day=5, hour=14, minute=43, second=59, microsecond=999999))
+
+        #Some relativedelta examples
+        #http://dateutil.readthedocs.org/en/latest/examples.html#relativedelta-examples
+        interval = RelativeTimeBuilder.build_interval(start=('2003', '1', '27', None, None, None, 'date'), duration=(None, '1', None, None, None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2003, month=1, day=27))
+        self.assertEqual(interval[1], datetime.date(year=2003, month=2, day=27))
+
+        interval = RelativeTimeBuilder.build_interval(start=('2003', '1', '31', None, None, None, 'date'), duration=(None, '1', None, None, None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2003, month=1, day=31))
+        self.assertEqual(interval[1], datetime.date(year=2003, month=2, day=28))
+
+        interval = RelativeTimeBuilder.build_interval(start=('2003', '1', '31', None, None, None, 'date'), duration=(None, '2', None, None, None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2003, month=1, day=31))
+        self.assertEqual(interval[1], datetime.date(year=2003, month=3, day=31))
+
+        interval = RelativeTimeBuilder.build_interval(start=('2000', '2', '28', None, None, None, 'date'), duration=('1', None, None, None, None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2000, month=2, day=28))
+        self.assertEqual(interval[1], datetime.date(year=2001, month=2, day=28))
+
+        interval = RelativeTimeBuilder.build_interval(start=('1999', '2', '28', None, None, None, 'date'), duration=('1', None, None, None, None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=1999, month=2, day=28))
+        self.assertEqual(interval[1], datetime.date(year=2000, month=2, day=28))
+
+        interval = RelativeTimeBuilder.build_interval(start=('1999', '3', '1', None, None, None, 'date'), duration=('1', None, None, None, None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=1999, month=3, day=1))
+        self.assertEqual(interval[1], datetime.date(year=2000, month=3, day=1))
+
+        interval = RelativeTimeBuilder.build_interval(end=('2001', '2', '28', None, None, None, 'date'), duration=('1', None, None, None, None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2001, month=2, day=28))
+        self.assertEqual(interval[1], datetime.date(year=2000, month=2, day=28))
+
+        interval = RelativeTimeBuilder.build_interval(end=('2001', '3', '1', None, None, None, 'date'), duration=('1', None, None, None, None, None, None, 'duration'))
+        self.assertEqual(interval[0], datetime.date(year=2001, month=3, day=1))
+        self.assertEqual(interval[1], datetime.date(year=2000, month=3, day=1))
+
+        interval = RelativeTimeBuilder.build_interval(start=(('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), end=(('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'))
+        self.assertEqual(interval[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
+        self.assertEqual(interval[1], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
+
+        interval = RelativeTimeBuilder.build_interval(start=(('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), end=('1981', '04', '05', None, None, None, 'date'))
+        self.assertEqual(interval[0], datetime.datetime(year=1980, month=3, day=5, hour=1, minute=1))
+        self.assertEqual(interval[1], datetime.date(year=1981, month=4, day=5))
+
+        interval = RelativeTimeBuilder.build_interval(start=('1980', '03', '05', None, None, None, 'date'), end=(('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'))
+        self.assertEqual(interval[0], datetime.date(year=1980, month=3, day=5))
+        self.assertEqual(interval[1], datetime.datetime(year=1981, month=4, day=5, hour=1, minute=1))
+
+        interval = RelativeTimeBuilder.build_interval(start=('1980', '03', '05', None, None, None, 'date'), end=('1981', '04', '05', None, None, None, 'date'))
+        self.assertEqual(interval[0], datetime.date(year=1980, month=3, day=5))
+        self.assertEqual(interval[1], datetime.date(year=1981, month=4, day=5))
+
+        interval = RelativeTimeBuilder.build_interval(start=('1981', '04', '05', None, None, None, 'date'), end=('1980', '03', '05', None, None, None, 'date'))
+        self.assertEqual(interval[0], datetime.date(year=1981, month=4, day=5))
+        self.assertEqual(interval[1], datetime.date(year=1980, month=3, day=5))
+
     def test_build_repeating_interval(self):
         #Repeating intervals are contingent on durations, make sure they work
         results = list(RelativeTimeBuilder.build_repeating_interval(Rnn=3, interval=(('1981', '04', '05', None, None, None, 'date'), None, (None, None, None, '1', None, None, None, 'duration'), 'interval')))
