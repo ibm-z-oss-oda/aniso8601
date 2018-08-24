@@ -6,12 +6,9 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-import datetime
 import unittest
 
-from aniso8601.builder import NoneBuilder, PythonTimeBuilder
-from aniso8601.exceptions import HoursOutOfBoundsError, LeapSecondError, \
-        MidnightBoundsError, MinutesOutOfBoundsError, SecondsOutOfBoundsError
+from aniso8601.builder import NoneBuilder
 from aniso8601.resolution import TimeResolution
 from aniso8601.time import get_time_resolution, parse_datetime, parse_time, \
     _parse_hour, _parse_minute_time, _parse_second_time, _split_tz
