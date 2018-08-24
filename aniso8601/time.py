@@ -6,7 +6,7 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-from aniso8601.builder import NoneBuilder, PythonTimeBuilder
+from aniso8601.builder import TupleBuilder, PythonTimeBuilder
 from aniso8601.date import parse_date
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.resolution import TimeResolution
@@ -109,7 +109,7 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
     if tzstr is None:
         tz = None
     else:
-        tz = parse_timezone(tzstr, builder=NoneBuilder)
+        tz = parse_timezone(tzstr, builder=TupleBuilder)
 
     return _RESOLUTION_MAP[get_time_resolution(timestr)](timestr, tz, builder)
 
@@ -122,9 +122,9 @@ def parse_datetime(isodatetimestr, delimiter='T', builder=PythonTimeBuilder):
 
     isodatestr, isotimestr = isodatetimestr.split(delimiter)
 
-    datepart = parse_date(isodatestr, builder=NoneBuilder)
+    datepart = parse_date(isodatestr, builder=TupleBuilder)
 
-    timepart = parse_time(isotimestr, builder=NoneBuilder)
+    timepart = parse_time(isotimestr, builder=TupleBuilder)
 
     return builder.build_datetime(datepart, timepart)
 

@@ -7,7 +7,7 @@
 # of the BSD license.  See the LICENSE file for details.
 
 from aniso8601 import compat
-from aniso8601.builder import NoneBuilder, PythonTimeBuilder, RelativeTimeBuilder
+from aniso8601.builder import TupleBuilder, PythonTimeBuilder, RelativeTimeBuilder
 from aniso8601.date import parse_date
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.time import parse_time
@@ -158,8 +158,8 @@ def _parse_duration_combined(durationstr, builder):
     #Split the string in to its component parts
     datepart, timepart = durationstr[1:].split('T') #We skip the 'P'
 
-    datevalue = parse_date(datepart, builder=NoneBuilder)
-    timevalue = parse_time(timepart, builder=NoneBuilder)
+    datevalue = parse_date(datepart, builder=TupleBuilder)
+    timevalue = parse_time(timepart, builder=TupleBuilder)
 
     return builder.build_duration(PnY=datevalue[0], PnM=datevalue[1], PnD=datevalue[2], TnH=timevalue[0], TnM=timevalue[1], TnS=timevalue[2])
 

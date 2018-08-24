@@ -53,8 +53,8 @@ class BaseTimeBuilder(object):
 
         return result
 
-class NoneBuilder(BaseTimeBuilder):
-    #Builder used to return the arguments, helps clean up some parse methods
+class TupleBuilder(BaseTimeBuilder):
+    #Builder used to return the arguments as a tuple, cleans up some parse methods
     @classmethod
     def build_date(cls, YYYY=None, MM=None, DD=None, Www=None, D=None, DDD=None):
         return (YYYY, MM, DD, Www, D, DDD, 'date')
@@ -260,7 +260,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
             if end[-1] == 'date' and (duration[4] is not None or duration[5] is not None or duration[6] is not None):
                 #<end> is a date, and <duration> requires datetime resolution
-                return (endobject, cls.build_datetime(end, NoneBuilder.build_time()) - durationobject)
+                return (endobject, cls.build_datetime(end, TupleBuilder.build_time()) - durationobject)
 
             return (endobject, endobject - durationobject)
         elif start is not None and duration is not None:
@@ -270,7 +270,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
             if start[-1] == 'date' and (duration[4] is not None or duration[5] is not None or duration[6] is not None):
                 #<start> is a date, and <duration> requires datetime resolution
-                return (startobject, cls.build_datetime(start, NoneBuilder.build_time()) + durationobject)
+                return (startobject, cls.build_datetime(start, TupleBuilder.build_time()) + durationobject)
 
             return (startobject, startobject + durationobject)
 
@@ -331,7 +331,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
     @classmethod
     def _build_object(cls, parsetuple):
-        #Given a NoneBuilder tuple, return a Python date, datetime, timedelta
+        #Given a TupleBuilder tuple, return a Python date, datetime, timedelta
         if parsetuple[-1] == 'date':
             return cls.build_date(YYYY=parsetuple[0], MM=parsetuple[1], DD=parsetuple[2], Www=parsetuple[3], D=parsetuple[4], DDD=parsetuple[5])
         elif parsetuple[-1] == 'time':
