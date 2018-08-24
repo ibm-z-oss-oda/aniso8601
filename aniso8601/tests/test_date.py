@@ -6,6 +6,7 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
+import mock
 import unittest
 
 from aniso8601.builder import TupleBuilder
@@ -77,6 +78,59 @@ class TestDateParserFunctions(unittest.TestCase):
 
         parse = parse_date('1981095', builder=TupleBuilder)
         self.assertEqual(parse, ('1981', None, None, None, None, '095', 'date'))
+
+    def test_parse_date_defaultbuilder(self):
+        import aniso8601
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_date') as mockBuildDate:
+            parse_date('2013')
+
+        mockBuildDate.assert_called_once_with(YYYY='2013')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_date') as mockBuildDate:
+            parse_date('1981-04-05')
+
+        mockBuildDate.assert_called_once_with(YYYY='1981', MM='04', DD='05')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_date') as mockBuildDate:
+            parse_date('19810405')
+
+        mockBuildDate.assert_called_once_with(YYYY='1981', MM='04', DD='05')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_date') as mockBuildDate:
+            parse_date('1981-04')
+
+        mockBuildDate.assert_called_once_with(YYYY='1981', MM='04')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_date') as mockBuildDate:
+            parse_date('2004-W53')
+
+        mockBuildDate.assert_called_once_with(YYYY='2004', Www='53')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_date') as mockBuildDate:
+            parse_date('2004-W53-6')
+
+        mockBuildDate.assert_called_once_with(YYYY='2004', Www='53', D='6')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_date') as mockBuildDate:
+            parse_date('2004W53')
+
+        mockBuildDate.assert_called_once_with(YYYY='2004', Www='53')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_date') as mockBuildDate:
+            parse_date('2004W536')
+
+        mockBuildDate.assert_called_once_with(YYYY='2004', Www='53', D='6')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_date') as mockBuildDate:
+            parse_date('1981-095')
+
+        mockBuildDate.assert_called_once_with(YYYY='1981', DDD='095')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_date') as mockBuildDate:
+            parse_date('1981095')
+
+        mockBuildDate.assert_called_once_with(YYYY='1981', DDD='095')
 
     def test_parse_year(self):
         parse = _parse_year('2013', TupleBuilder)
