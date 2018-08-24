@@ -282,75 +282,75 @@ class TestPythonTimeBuilder(unittest.TestCase):
             PythonTimeBuilder.build_datetime(('1981', '04', '05', None, None, None, 'date'), ('00', '61', None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
 
     def test_build_duration(self):
-        timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
-        self.assertEqual(timedelta, datetime.timedelta(days=428, seconds=17646))
+        duration = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
+        self.assertEqual(duration, datetime.timedelta(days=428, seconds=17646))
 
-        timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6.5')
-        self.assertEqual(timedelta, datetime.timedelta(days=428, seconds=17646.5))
+        duration = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6.5')
+        self.assertEqual(duration, datetime.timedelta(days=428, seconds=17646.5))
 
-        timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
-        self.assertEqual(timedelta, datetime.timedelta(days=428, hours=4, minutes=54, seconds=6))
+        duration = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
+        self.assertEqual(duration, datetime.timedelta(days=428, hours=4, minutes=54, seconds=6))
 
-        timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6.5')
-        self.assertEqual(timedelta, datetime.timedelta(days=428, hours=4, minutes=54, seconds=6.5))
+        duration = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6.5')
+        self.assertEqual(duration, datetime.timedelta(days=428, hours=4, minutes=54, seconds=6.5))
 
-        timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3')
-        self.assertEqual(timedelta, datetime.timedelta(days=428))
+        duration = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3')
+        self.assertEqual(duration, datetime.timedelta(days=428))
 
-        timedelta = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3.5')
-        self.assertEqual(timedelta, datetime.timedelta(days=428.5))
+        duration = PythonTimeBuilder.build_duration(PnY='1', PnM='2', PnD='3.5')
+        self.assertEqual(duration, datetime.timedelta(days=428.5))
 
-        timedelta = PythonTimeBuilder.build_duration(TnH='4', TnM='54', TnS='6.5')
-        self.assertEqual(timedelta, datetime.timedelta(hours=4, minutes=54, seconds=6.5))
-
-        #Make sure we truncate, not round
-        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
-        timedelta = PythonTimeBuilder.build_duration(TnS='0.0000001')
-        self.assertEqual(timedelta, datetime.timedelta(0))
-
-        timedelta = PythonTimeBuilder.build_duration(TnS='2.0000048')
-        self.assertEqual(timedelta, datetime.timedelta(seconds=2, microseconds=4))
-
-        timedelta = PythonTimeBuilder.build_duration(PnY='1')
-        self.assertEqual(timedelta, datetime.timedelta(days=365))
-
-        timedelta = PythonTimeBuilder.build_duration(PnY='1.5')
-        self.assertEqual(timedelta, datetime.timedelta(days=547.5))
-
-        timedelta = PythonTimeBuilder.build_duration(PnM='1')
-        self.assertEqual(timedelta, datetime.timedelta(days=30))
-
-        timedelta = PythonTimeBuilder.build_duration(PnM='1.5')
-        self.assertEqual(timedelta, datetime.timedelta(days=45))
-
-        timedelta = PythonTimeBuilder.build_duration(PnW='1')
-        self.assertEqual(timedelta, datetime.timedelta(days=7))
-
-        timedelta = PythonTimeBuilder.build_duration(PnW='1.5')
-        self.assertEqual(timedelta, datetime.timedelta(days=10.5))
-
-        timedelta = PythonTimeBuilder.build_duration(PnD='1')
-        self.assertEqual(timedelta, datetime.timedelta(days=1))
-
-        timedelta = PythonTimeBuilder.build_duration(PnD='1.5')
-        self.assertEqual(timedelta, datetime.timedelta(days=1.5))
-
-        timedelta = PythonTimeBuilder.build_duration(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05')
-        self.assertEqual(timedelta, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5))
-
-        timedelta = PythonTimeBuilder.build_duration(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05.5')
-        self.assertEqual(timedelta, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5.5))
-
-        timedelta = PythonTimeBuilder.build_duration(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05')
-        self.assertEqual(timedelta, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5))
-
-        timedelta = PythonTimeBuilder.build_duration(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05.5')
-        self.assertEqual(timedelta, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5.5))
+        duration = PythonTimeBuilder.build_duration(TnH='4', TnM='54', TnS='6.5')
+        self.assertEqual(duration, datetime.timedelta(hours=4, minutes=54, seconds=6.5))
 
         #Make sure we truncate, not round
         #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
-        timedelta = PythonTimeBuilder.build_duration(PnY='0001', PnM='02', PnD='03', TnH='14', TnM='43', TnS='59.9999997')
-        self.assertEqual(timedelta, datetime.timedelta(days=428, hours=14, minutes=43, seconds=59, microseconds=999999))
+        duration = PythonTimeBuilder.build_duration(TnS='0.0000001')
+        self.assertEqual(duration, datetime.timedelta(0))
+
+        duration = PythonTimeBuilder.build_duration(TnS='2.0000048')
+        self.assertEqual(duration, datetime.timedelta(seconds=2, microseconds=4))
+
+        duration = PythonTimeBuilder.build_duration(PnY='1')
+        self.assertEqual(duration, datetime.timedelta(days=365))
+
+        duration = PythonTimeBuilder.build_duration(PnY='1.5')
+        self.assertEqual(duration, datetime.timedelta(days=547.5))
+
+        duration = PythonTimeBuilder.build_duration(PnM='1')
+        self.assertEqual(duration, datetime.timedelta(days=30))
+
+        duration = PythonTimeBuilder.build_duration(PnM='1.5')
+        self.assertEqual(duration, datetime.timedelta(days=45))
+
+        duration = PythonTimeBuilder.build_duration(PnW='1')
+        self.assertEqual(duration, datetime.timedelta(days=7))
+
+        duration = PythonTimeBuilder.build_duration(PnW='1.5')
+        self.assertEqual(duration, datetime.timedelta(days=10.5))
+
+        duration = PythonTimeBuilder.build_duration(PnD='1')
+        self.assertEqual(duration, datetime.timedelta(days=1))
+
+        duration = PythonTimeBuilder.build_duration(PnD='1.5')
+        self.assertEqual(duration, datetime.timedelta(days=1.5))
+
+        duration = PythonTimeBuilder.build_duration(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05')
+        self.assertEqual(duration, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5))
+
+        duration = PythonTimeBuilder.build_duration(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05.5')
+        self.assertEqual(duration, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5.5))
+
+        duration = PythonTimeBuilder.build_duration(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05')
+        self.assertEqual(duration, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5))
+
+        duration = PythonTimeBuilder.build_duration(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05.5')
+        self.assertEqual(duration, datetime.timedelta(days=1279, hours=12, minutes=30, seconds=5.5))
+
+        #Make sure we truncate, not round
+        #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+        duration = PythonTimeBuilder.build_duration(PnY='0001', PnM='02', PnD='03', TnH='14', TnM='43', TnS='59.9999997')
+        self.assertEqual(duration, datetime.timedelta(days=428, hours=14, minutes=43, seconds=59, microseconds=999999))
 
         #Verify overflows
         self.assertEqual(PythonTimeBuilder.build_duration(TnH='36'), PythonTimeBuilder.build_duration(PnD='1', TnH='12'))
