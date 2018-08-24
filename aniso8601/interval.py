@@ -68,7 +68,8 @@ def parse_repeating_interval(isointervalstr, intervaldelimiter='/', datetimedeli
     return builder.build_repeating_interval(R=R, Rnn=Rnn, interval=interval)
 
 def _parse_interval(isointervalstr, builder, intervaldelimiter='/', datetimedelimiter='T'):
-    #Returns a tuple containing the start of the interval and the end of the interval
+    #Returns a tuple containing the start of the interval, the end of the
+    #interval, and or the interval duration
 
     firstpart, secondpart = isointervalstr.split(intervaldelimiter)
 
