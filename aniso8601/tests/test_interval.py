@@ -124,7 +124,7 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
         resultgenerator = parse_repeating_interval('R/PT1H2M/1980-03-05T01:01:00', builder=NoneBuilder)
         self.assertEqual(resultgenerator, (True, None, (None, (('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (None, None, None, None, '1', '2', None, 'duration'), 'interval'), 'repeatinginterval'))
 
-    def test_parse_repeating_interval_suffix_garbage(self):
+    def test_parse_repeating_interval_suffixgarbage(self):
         #Don't allow garbage after the duration
         #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
         with self.assertRaises(ISOFormatError):
