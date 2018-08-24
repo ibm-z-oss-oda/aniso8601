@@ -88,6 +88,16 @@ class TestDateParserFunctions(unittest.TestCase):
         mockBuildDate.assert_called_once_with(YYYY='2013')
 
         with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_date') as mockBuildDate:
+            parse_date('0001')
+
+        mockBuildDate.assert_called_once_with(YYYY='0001')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_date') as mockBuildDate:
+            parse_date('19')
+
+        mockBuildDate.assert_called_once_with(YYYY='19')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_date') as mockBuildDate:
             parse_date('1981-04-05')
 
         mockBuildDate.assert_called_once_with(YYYY='1981', MM='04', DD='05')
@@ -106,6 +116,11 @@ class TestDateParserFunctions(unittest.TestCase):
             parse_date('2004-W53')
 
         mockBuildDate.assert_called_once_with(YYYY='2004', Www='53')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_date') as mockBuildDate:
+            parse_date('2009-W01')
+
+        mockBuildDate.assert_called_once_with(YYYY='2009', Www='01')
 
         with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_date') as mockBuildDate:
             parse_date('2004-W53-6')
