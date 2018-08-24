@@ -7,7 +7,6 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import unittest
-import datetime
 
 from aniso8601.builder import NoneBuilder
 from aniso8601.exceptions import ISOFormatError
