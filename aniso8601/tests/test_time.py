@@ -54,163 +54,163 @@ class TestTimeParserFunctions(unittest.TestCase):
                          TimeResolution.Seconds)
 
     def test_parse_time(self):
-        time = parse_time('01:23:45', builder=NoneBuilder)
-        self.assertEqual(time, ('01', '23', '45', None, 'time'))
+        parse = parse_time('01:23:45', builder=NoneBuilder)
+        self.assertEqual(parse, ('01', '23', '45', None, 'time'))
 
-        time = parse_time('24:00:00', builder=NoneBuilder)
-        self.assertEqual(time, ('24', '00', '00', None, 'time'))
+        parse = parse_time('24:00:00', builder=NoneBuilder)
+        self.assertEqual(parse, ('24', '00', '00', None, 'time'))
 
-        time = parse_time('23:21:28.512400', builder=NoneBuilder)
-        self.assertEqual(time, ('23', '21', '28.512400', None, 'time'))
+        parse = parse_time('23:21:28.512400', builder=NoneBuilder)
+        self.assertEqual(parse, ('23', '21', '28.512400', None, 'time'))
 
-        time = parse_time('14:43:59.9999997', builder=NoneBuilder)
-        self.assertEqual(time, ('14', '43', '59.9999997', None, 'time'))
+        parse = parse_time('14:43:59.9999997', builder=NoneBuilder)
+        self.assertEqual(parse, ('14', '43', '59.9999997', None, 'time'))
 
-        time = parse_time('01:23', builder=NoneBuilder)
-        self.assertEqual(time, ('01', '23', None, None, 'time'))
+        parse = parse_time('01:23', builder=NoneBuilder)
+        self.assertEqual(parse, ('01', '23', None, None, 'time'))
 
-        time = parse_time('24:00', builder=NoneBuilder)
-        self.assertEqual(time, ('24', '00', None, None, 'time'))
+        parse = parse_time('24:00', builder=NoneBuilder)
+        self.assertEqual(parse, ('24', '00', None, None, 'time'))
 
-        time = parse_time('01:23.4567', builder=NoneBuilder)
-        self.assertEqual(time, ('01', '23.4567', None, None, 'time'))
+        parse = parse_time('01:23.4567', builder=NoneBuilder)
+        self.assertEqual(parse, ('01', '23.4567', None, None, 'time'))
 
-        time = parse_time('012345', builder=NoneBuilder)
-        self.assertEqual(time, ('01', '23', '45', None, 'time'))
+        parse = parse_time('012345', builder=NoneBuilder)
+        self.assertEqual(parse, ('01', '23', '45', None, 'time'))
 
-        time = parse_time('240000', builder=NoneBuilder)
-        self.assertEqual(time, ('24', '00', '00', None, 'time'))
+        parse = parse_time('240000', builder=NoneBuilder)
+        self.assertEqual(parse, ('24', '00', '00', None, 'time'))
 
-        time = parse_time('144359.9999997', builder=NoneBuilder)
-        self.assertEqual(time, ('14', '43', '59.9999997', None, 'time'))
+        parse = parse_time('144359.9999997', builder=NoneBuilder)
+        self.assertEqual(parse, ('14', '43', '59.9999997', None, 'time'))
 
-        time = parse_time('0123', builder=NoneBuilder)
-        self.assertEqual(time, ('01', '23', None, None, 'time'))
+        parse = parse_time('0123', builder=NoneBuilder)
+        self.assertEqual(parse, ('01', '23', None, None, 'time'))
 
-        time = parse_time('2400', builder=NoneBuilder)
-        self.assertEqual(time, ('24', '00', None, None, 'time'))
+        parse = parse_time('2400', builder=NoneBuilder)
+        self.assertEqual(parse, ('24', '00', None, None, 'time'))
 
-        time = parse_time('01', builder=NoneBuilder)
-        self.assertEqual(time, ('01', None, None, None, 'time'))
+        parse = parse_time('01', builder=NoneBuilder)
+        self.assertEqual(parse, ('01', None, None, None, 'time'))
 
-        time = parse_time('24', builder=NoneBuilder)
-        self.assertEqual(time, (None, None, None, None, 'time'))
+        parse = parse_time('24', builder=NoneBuilder)
+        self.assertEqual(parse, (None, None, None, None, 'time'))
 
-        time = parse_time('12.5', builder=NoneBuilder)
-        self.assertEqual(time, ('12.5', None, None, None, 'time'))
+        parse = parse_time('12.5', builder=NoneBuilder)
+        self.assertEqual(parse, ('12.5', None, None, None, 'time'))
 
-        time = parse_time('232128.512400+00:00', builder=NoneBuilder)
-        self.assertEqual(time, ('23', '21', '28.512400', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
+        parse = parse_time('232128.512400+00:00', builder=NoneBuilder)
+        self.assertEqual(parse, ('23', '21', '28.512400', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
 
-        time = parse_time('0123.4567+00:00', builder=NoneBuilder)
-        self.assertEqual(time, ('01', '23.4567', None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
+        parse = parse_time('0123.4567+00:00', builder=NoneBuilder)
+        self.assertEqual(parse, ('01', '23.4567', None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
 
-        time = parse_time('01.4567+00:00', builder=NoneBuilder)
-        self.assertEqual(time, ('01.4567', None, None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
+        parse = parse_time('01.4567+00:00', builder=NoneBuilder)
+        self.assertEqual(parse, ('01.4567', None, None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
 
-        time = parse_time('01:23:45+00:00', builder=NoneBuilder)
-        self.assertEqual(time, ('01', '23', '45', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
+        parse = parse_time('01:23:45+00:00', builder=NoneBuilder)
+        self.assertEqual(parse, ('01', '23', '45', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
 
-        time = parse_time('24:00:00+00:00', builder=NoneBuilder)
-        self.assertEqual(time, ('24', '00', '00', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
+        parse = parse_time('24:00:00+00:00', builder=NoneBuilder)
+        self.assertEqual(parse, ('24', '00', '00', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
 
-        time = parse_time('23:21:28.512400+00:00', builder=NoneBuilder)
-        self.assertEqual(time, ('23', '21', '28.512400', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
+        parse = parse_time('23:21:28.512400+00:00', builder=NoneBuilder)
+        self.assertEqual(parse, ('23', '21', '28.512400', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
 
-        time = parse_time('01:23+00:00', builder=NoneBuilder)
-        self.assertEqual(time, ('01', '23', None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
+        parse = parse_time('01:23+00:00', builder=NoneBuilder)
+        self.assertEqual(parse, ('01', '23', None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
 
-        time = parse_time('24:00+00:00', builder=NoneBuilder)
-        self.assertEqual(time, ('24', '00', None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
+        parse = parse_time('24:00+00:00', builder=NoneBuilder)
+        self.assertEqual(parse, ('24', '00', None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
 
-        time = parse_time('01:23.4567+00:00', builder=NoneBuilder)
-        self.assertEqual(time, ('01', '23.4567', None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
+        parse = parse_time('01:23.4567+00:00', builder=NoneBuilder)
+        self.assertEqual(parse, ('01', '23.4567', None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
 
-        time = parse_time('23:21:28.512400+11:15', builder=NoneBuilder)
-        self.assertEqual(time, ('23', '21', '28.512400', (False, None, '11', '15', '+11:15', 'timezone'), 'time'))
+        parse = parse_time('23:21:28.512400+11:15', builder=NoneBuilder)
+        self.assertEqual(parse, ('23', '21', '28.512400', (False, None, '11', '15', '+11:15', 'timezone'), 'time'))
 
-        time = parse_time('23:21:28.512400-12:34', builder=NoneBuilder)
-        self.assertEqual(time, ('23', '21', '28.512400', (True, None, '12', '34', '-12:34', 'timezone'), 'time'))
+        parse = parse_time('23:21:28.512400-12:34', builder=NoneBuilder)
+        self.assertEqual(parse, ('23', '21', '28.512400', (True, None, '12', '34', '-12:34', 'timezone'), 'time'))
 
-        time = parse_time('23:21:28.512400Z', builder=NoneBuilder)
-        self.assertEqual(time, ('23', '21', '28.512400', (False, True, None, None, 'Z', 'timezone'), 'time'))
+        parse = parse_time('23:21:28.512400Z', builder=NoneBuilder)
+        self.assertEqual(parse, ('23', '21', '28.512400', (False, True, None, None, 'Z', 'timezone'), 'time'))
 
-        time = parse_time('06:14:00.000123Z', builder=NoneBuilder)
-        self.assertEqual(time, ('06', '14', '00.000123', (False, True, None, None, 'Z', 'timezone'), 'time'))
+        parse = parse_time('06:14:00.000123Z', builder=NoneBuilder)
+        self.assertEqual(parse, ('06', '14', '00.000123', (False, True, None, None, 'Z', 'timezone'), 'time'))
 
     def test_parse_datetime(self):
-        resultdatetime = parse_datetime('1981-04-05T23:21:28.512400Z', builder=NoneBuilder)
-        self.assertEqual(resultdatetime, (('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28.512400', (False, True, None, None, 'Z', 'timezone'), 'time'), 'datetime'))
+        parse = parse_datetime('1981-04-05T23:21:28.512400Z', builder=NoneBuilder)
+        self.assertEqual(parse, (('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28.512400', (False, True, None, None, 'Z', 'timezone'), 'time'), 'datetime'))
 
-        resultdatetime = parse_datetime('1981095T23:21:28.512400-12:34', builder=NoneBuilder)
-        self.assertEqual(resultdatetime, (('1981', None, None, None, None, '095', 'date'), ('23', '21', '28.512400', (True, None, '12', '34', '-12:34', 'timezone'), 'time'), 'datetime'))
+        parse = parse_datetime('1981095T23:21:28.512400-12:34', builder=NoneBuilder)
+        self.assertEqual(parse, (('1981', None, None, None, None, '095', 'date'), ('23', '21', '28.512400', (True, None, '12', '34', '-12:34', 'timezone'), 'time'), 'datetime'))
 
-        resultdatetime = parse_datetime('19810405T23:21:28+00', builder=NoneBuilder)
-        self.assertEqual(resultdatetime, (('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28', (False, None, '00', None, '+00', 'timezone'), 'time'), 'datetime'))
+        parse = parse_datetime('19810405T23:21:28+00', builder=NoneBuilder)
+        self.assertEqual(parse, (('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28', (False, None, '00', None, '+00', 'timezone'), 'time'), 'datetime'))
 
-        resultdatetime = parse_datetime('19810405T23:21:28+00:00', builder=NoneBuilder)
-        self.assertEqual(resultdatetime, (('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28', (False, None, '00', '00', '+00:00', 'timezone'), 'time'), 'datetime'))
+        parse = parse_datetime('19810405T23:21:28+00:00', builder=NoneBuilder)
+        self.assertEqual(parse, (('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28', (False, None, '00', '00', '+00:00', 'timezone'), 'time'), 'datetime'))
 
     def test_parse_datetime_spaceseperated(self):
-        resultdatetime = parse_datetime('2004-W53-6 23:21:28.512400-12:34', ' ', builder=NoneBuilder)
-        self.assertEqual(resultdatetime, (('2004', None, None, '53', '6', None, 'date'), ('23', '21', '28.512400', (True, None, '12', '34', '-12:34', 'timezone'), 'time'), 'datetime'))
+        parse = parse_datetime('2004-W53-6 23:21:28.512400-12:34', delimiter=' ', builder=NoneBuilder)
+        self.assertEqual(parse, (('2004', None, None, '53', '6', None, 'date'), ('23', '21', '28.512400', (True, None, '12', '34', '-12:34', 'timezone'), 'time'), 'datetime'))
 
     def test_parse_hour(self):
-        time = _parse_hour('01', None, NoneBuilder)
-        self.assertEqual(time, ('01', None, None, None, 'time'))
+        parse = _parse_hour('01', None, NoneBuilder)
+        self.assertEqual(parse, ('01', None, None, None, 'time'))
 
-        time = _parse_hour('24', None, NoneBuilder)
-        self.assertEqual(time, (None, None, None, None, 'time'))
+        parse = _parse_hour('24', None, NoneBuilder)
+        self.assertEqual(parse, (None, None, None, None, 'time'))
 
-        time = _parse_hour('01.4567', None, NoneBuilder)
-        self.assertEqual(time, ('01.4567', None, None, None, 'time'))
+        parse = _parse_hour('01.4567', None, NoneBuilder)
+        self.assertEqual(parse, ('01.4567', None, None, None, 'time'))
 
-        time = _parse_hour('12.5', None, NoneBuilder)
-        self.assertEqual(time, ('12.5', None, None, None, 'time'))
+        parse = _parse_hour('12.5', None, NoneBuilder)
+        self.assertEqual(parse, ('12.5', None, None, None, 'time'))
 
     def test_parse_minute_time(self):
-        time = _parse_minute_time('01:23', None, NoneBuilder)
-        self.assertEqual(time, ('01', '23', None, None, 'time'))
+        parse = _parse_minute_time('01:23', None, NoneBuilder)
+        self.assertEqual(parse, ('01', '23', None, None, 'time'))
 
-        time = _parse_minute_time('24:00', None, NoneBuilder)
-        self.assertEqual(time, ('24', '00', None, None, 'time'))
+        parse = _parse_minute_time('24:00', None, NoneBuilder)
+        self.assertEqual(parse, ('24', '00', None, None, 'time'))
 
-        time = _parse_minute_time('01:23.4567', None, NoneBuilder)
-        self.assertEqual(time, ('01', '23.4567', None, None, 'time'))
+        parse = _parse_minute_time('01:23.4567', None, NoneBuilder)
+        self.assertEqual(parse, ('01', '23.4567', None, None, 'time'))
 
-        time = _parse_minute_time('0123', None, NoneBuilder)
-        self.assertEqual(time, ('01', '23', None, None, 'time'))
+        parse = _parse_minute_time('0123', None, NoneBuilder)
+        self.assertEqual(parse, ('01', '23', None, None, 'time'))
 
-        time = _parse_minute_time('2400', None, NoneBuilder)
-        self.assertEqual(time, ('24', '00', None, None, 'time'))
+        parse = _parse_minute_time('2400', None, NoneBuilder)
+        self.assertEqual(parse, ('24', '00', None, None, 'time'))
 
-        time = _parse_minute_time('0123.4567', None, NoneBuilder)
-        self.assertEqual(time, ('01', '23.4567', None, None, 'time'))
+        parse = _parse_minute_time('0123.4567', None, NoneBuilder)
+        self.assertEqual(parse, ('01', '23.4567', None, None, 'time'))
 
     def test_parse_second_time(self):
-        parseresult = _parse_second_time('01:23:45', None, NoneBuilder)
-        self.assertEqual(parseresult, ('01', '23', '45', None, 'time'))
+        parse = _parse_second_time('01:23:45', None, NoneBuilder)
+        self.assertEqual(parse, ('01', '23', '45', None, 'time'))
 
-        parseresult = _parse_second_time('24:00:00', None, NoneBuilder)
-        self.assertEqual(parseresult, ('24', '00', '00', None, 'time'))
+        parse = _parse_second_time('24:00:00', None, NoneBuilder)
+        self.assertEqual(parse, ('24', '00', '00', None, 'time'))
 
-        parseresult = _parse_second_time('23:21:28.512400', None, NoneBuilder)
-        self.assertEqual(parseresult, ('23', '21', '28.512400', None, 'time'))
+        parse = _parse_second_time('23:21:28.512400', None, NoneBuilder)
+        self.assertEqual(parse, ('23', '21', '28.512400', None, 'time'))
 
-        parseresult = _parse_second_time('14:43:59.9999997', None, NoneBuilder)
-        self.assertEqual(parseresult, ('14', '43', '59.9999997', None, 'time'))
+        parse = _parse_second_time('14:43:59.9999997', None, NoneBuilder)
+        self.assertEqual(parse, ('14', '43', '59.9999997', None, 'time'))
 
-        parseresult = _parse_second_time('012345', None, NoneBuilder)
-        self.assertEqual(parseresult, ('01', '23', '45', None, 'time'))
+        parse = _parse_second_time('012345', None, NoneBuilder)
+        self.assertEqual(parse, ('01', '23', '45', None, 'time'))
 
-        parseresult = _parse_second_time('240000', None, NoneBuilder)
-        self.assertEqual(parseresult, ('24', '00', '00', None, 'time'))
+        parse = _parse_second_time('240000', None, NoneBuilder)
+        self.assertEqual(parse, ('24', '00', '00', None, 'time'))
 
-        parseresult = _parse_second_time('232128.512400', None, NoneBuilder)
-        self.assertEqual(parseresult, ('23', '21', '28.512400', None, 'time'))
+        parse = _parse_second_time('232128.512400', None, NoneBuilder)
+        self.assertEqual(parse, ('23', '21', '28.512400', None, 'time'))
 
-        parseresult = _parse_second_time('144359.9999997', None, NoneBuilder)
-        self.assertEqual(parseresult, ('14', '43', '59.9999997', None, 'time'))
+        parse = _parse_second_time('144359.9999997', None, NoneBuilder)
+        self.assertEqual(parse, ('14', '43', '59.9999997', None, 'time'))
 
     def test_split_tz(self):
         self.assertEqual(_split_tz('01:23:45'), ('01:23:45', None))
