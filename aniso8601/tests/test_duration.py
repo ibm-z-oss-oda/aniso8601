@@ -6,6 +6,7 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
+import mock
 import unittest
 
 from aniso8601.exceptions import ISOFormatError
@@ -91,6 +92,134 @@ class TestDurationParserFunctions(unittest.TestCase):
 
         parse = parse_duration('P0001-02-03T14:43:59.9999997', builder=TupleBuilder)
         self.assertEqual(parse, ('0001', '02', None, '03', '14', '43', '59.9999997', 'duration'))
+
+    def test_parse_duration_defaultbuilder(self):
+        import aniso8601
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1Y2M3DT4H54M6S')
+
+        mockBuildDuration.assert_called_once_with(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1Y2M3DT4H54M6.5S')
+
+        mockBuildDuration.assert_called_once_with(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6.5')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1Y2M3DT4H54M6,5S')
+
+        mockBuildDuration.assert_called_once_with(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6.5')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1Y2M3D')
+
+        mockBuildDuration.assert_called_once_with(PnY='1', PnW=None, PnM='2', PnD='3')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1Y2M3.5D')
+
+        mockBuildDuration.assert_called_once_with(PnY='1', PnW=None, PnM='2', PnD='3.5')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1Y2M3,5D')
+
+        mockBuildDuration.assert_called_once_with(PnY='1', PnW=None, PnM='2', PnD='3.5')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('PT4H54M6.5S')
+
+        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnD=None, TnH='4', TnM='54', TnS='6.5')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('PT4H54M6,5S')
+
+        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnD=None, TnH='4', TnM='54', TnS='6.5')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('PT0.0000001S')
+
+        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnD=None, TnH=None, TnM=None, TnS='0.0000001')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('PT2.0000048S')
+
+        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnD=None, TnH=None, TnM=None, TnS='2.0000048')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1Y')
+
+        mockBuildDuration.assert_called_once_with(PnY='1', PnM=None, PnW=None, PnD=None)
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1.5Y')
+
+        mockBuildDuration.assert_called_once_with(PnY='1.5', PnM=None, PnW=None, PnD=None)
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1,5Y')
+
+        mockBuildDuration.assert_called_once_with(PnY='1.5', PnM=None, PnW=None, PnD=None)
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1M')
+
+        mockBuildDuration.assert_called_once_with(PnY=None, PnM='1', PnW=None, PnD=None)
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1.5M')
+
+        mockBuildDuration.assert_called_once_with(PnY=None, PnM='1.5', PnW=None, PnD=None)
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1,5M')
+
+        mockBuildDuration.assert_called_once_with(PnY=None, PnM='1.5', PnW=None, PnD=None)
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1W')
+
+        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnW='1', PnD=None)
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1.5W')
+
+        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnW='1.5', PnD=None)
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1,5W')
+
+        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnW='1.5', PnD=None)
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1D')
+
+        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnW=None, PnD='1')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1.5D')
+
+        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnW=None, PnD='1.5')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1,5D')
+
+        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnW=None, PnD='1.5')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P0003-06-04T12:30:05')
+
+        mockBuildDuration.assert_called_once_with(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P0003-06-04T12:30:05.5')
+
+        mockBuildDuration.assert_called_once_with(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05.5')
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P0001-02-03T14:43:59.9999997')
+
+        mockBuildDuration.assert_called_once_with(PnY='0001', PnM='02', PnD='03', TnH='14', TnM='43', TnS='59.9999997')
 
     def test_parse_duration_nop(self):
         with self.assertRaises(ISOFormatError):
