@@ -46,7 +46,7 @@ class TestDateParserFunctions(unittest.TestCase):
         self.assertEqual(parse, ('0001', None, None, None, None, None, 'date'))
 
         parse = parse_date('19', builder=NoneBuilder)
-        self.assertEqual(parse, ('1900', None, None, None, None, None, 'date'))
+        self.assertEqual(parse, ('19', None, None, None, None, None, 'date'))
 
         parse = parse_date('1981-04-05', builder=NoneBuilder)
         self.assertEqual(parse, ('1981', '04', '05', None, None, None, 'date'))
@@ -86,7 +86,7 @@ class TestDateParserFunctions(unittest.TestCase):
         self.assertEqual(parse, ('0001', None, None, None, None, None, 'date'))
 
         parse = _parse_year('19', NoneBuilder)
-        self.assertEqual(parse, ('1900', None, None, None, None, None, 'date'))
+        self.assertEqual(parse, ('19', None, None, None, None, None, 'date'))
 
     def test_parse_calendar_day(self):
         parse = _parse_calendar_day('1981-04-05', NoneBuilder)

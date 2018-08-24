@@ -105,6 +105,16 @@ class TestPythonTimeBuilder(unittest.TestCase):
         date = PythonTimeBuilder.build_date(YYYY='1980', MM=None, DD=None, Www=None, D=None, DDD='366')
         self.assertEqual(date, datetime.date(1980, 12, 31))
 
+        #Make sure we shift in zeros
+        date = PythonTimeBuilder.build_date(YYYY='1', MM=None, DD=None, Www=None, D=None, DDD=None)
+        self.assertEqual(date, datetime.date(1000, 1, 1))
+
+        date = PythonTimeBuilder.build_date(YYYY='12', MM=None, DD=None, Www=None, D=None, DDD=None)
+        self.assertEqual(date, datetime.date(1200, 1, 1))
+
+        date = PythonTimeBuilder.build_date(YYYY='123', MM=None, DD=None, Www=None, D=None, DDD=None)
+        self.assertEqual(date, datetime.date(1230, 1, 1))
+
     def test_build_date_bounds_checking(self):
         #0 isn't a valid week number
         with self.assertRaises(WeekOutOfBoundsError):
@@ -243,7 +253,7 @@ class TestPythonTimeBuilder(unittest.TestCase):
             PythonTimeBuilder.build_time(hh='24', mm='01')
 
     def test_build_datetime(self):
-        self.assertEqual(PythonTimeBuilder.build_datetime(('1', '2', '3', None, None, None, 'date'), ('23', '21', '28.512400', None, 'time')), datetime.datetime(1, 2, 3, hour=23, minute=21, second=28, microsecond=512400))
+        self.assertEqual(PythonTimeBuilder.build_datetime(('1234', '2', '3', None, None, None, 'date'), ('23', '21', '28.512400', None, 'time')), datetime.datetime(1234, 2, 3, hour=23, minute=21, second=28, microsecond=512400))
 
         self.assertEqual(PythonTimeBuilder.build_datetime(('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28.512400', (False, None, '11', '15', '+11:15', 'timezone'), 'time')), datetime.datetime(1981, 4, 5, hour=23, minute=21, second=28, microsecond=512400, tzinfo=UTCOffset(name='+11:15', minutes=675)))
 

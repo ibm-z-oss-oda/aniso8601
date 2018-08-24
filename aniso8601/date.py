@@ -105,18 +105,6 @@ def parse_date(isodatestr, builder=PythonTimeBuilder):
 def _parse_year(yearstr, builder):
     #yearstr is of the format Y[YYY]
     #
-    #0000 (1 BC) is not representible as a Python date so a ValueError is
-    #raised
-    #
-    #Truncated dates, like '19', refer to 1900-1999 inclusive, we simply parse
-    #to 1900-01-01
-    #
-    #Since no additional resolution is provided, the month is set to 1, and
-    #day is set to 1
-
-    if len(yearstr) < 4:
-        #Shift 0s in from the left to form complete year
-        yearstr = yearstr.ljust(4, '0')
 
     return builder.build_date(YYYY=yearstr)
 

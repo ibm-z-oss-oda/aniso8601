@@ -87,6 +87,12 @@ class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
     def build_date(cls, YYYY=None, MM=None, DD=None, Www=None, D=None, DDD=None):
         if YYYY is not None:
+            #Truncated dates, like '19', refer to 1900-1999 inclusive, we simply parse
+            #to 1900
+            if len(YYYY) < 4:
+                #Shift 0s in from the left to form complete year
+                YYYY = YYYY.ljust(4, '0')
+
             year = BaseTimeBuilder.cast(YYYY, int, thrownmessage='Invalid year string.')
 
         if MM is not None:
@@ -119,7 +125,8 @@ class PythonTimeBuilder(BaseTimeBuilder):
         else:
             dayofweek = None
 
-        #Range check
+        #0000 (1 BC) is not representible as a Python date so a ValueError is
+        #raised
         if year == 0:
             raise YearOutOfBoundsError('Year must be between 1..9999.')
 
