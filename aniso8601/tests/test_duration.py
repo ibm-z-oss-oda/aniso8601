@@ -6,11 +6,9 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-import datetime
 import unittest
-import dateutil
 
-from aniso8601.exceptions import ISOFormatError, RelativeValueError
+from aniso8601.exceptions import ISOFormatError
 from aniso8601.builder import NoneBuilder
 from aniso8601.duration import parse_duration, _parse_duration_prescribed, \
         _parse_duration_combined, _parse_duration_prescribed_notime, \
@@ -19,80 +17,80 @@ from aniso8601.duration import parse_duration, _parse_duration_prescribed, \
 
 class TestDurationParserFunctions(unittest.TestCase):
     def test_parse_duration(self):
-        resultduration = parse_duration('P1Y2M3DT4H54M6S', builder=NoneBuilder)
-        self.assertEqual(resultduration, ('1', '2', None, '3', '4', '54', '6', 'duration'))
+        parse = parse_duration('P1Y2M3DT4H54M6S', builder=NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6', 'duration'))
 
-        resultduration = parse_duration('P1Y2M3DT4H54M6.5S', builder=NoneBuilder)
-        self.assertEqual(resultduration, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
+        parse = parse_duration('P1Y2M3DT4H54M6.5S', builder=NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
 
-        resultduration = parse_duration('P1Y2M3DT4H54M6,5S', builder=NoneBuilder)
-        self.assertEqual(resultduration, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
+        parse = parse_duration('P1Y2M3DT4H54M6,5S', builder=NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
 
-        resultduration = parse_duration('P1Y2M3D', builder=NoneBuilder)
-        self.assertEqual(resultduration, ('1', '2', None, '3', None, None, None, 'duration'))
+        parse = parse_duration('P1Y2M3D', builder=NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3', None, None, None, 'duration'))
 
-        resultduration = parse_duration('P1Y2M3.5D', builder=NoneBuilder)
-        self.assertEqual(resultduration, ('1', '2', None, '3.5', None, None, None, 'duration'))
+        parse = parse_duration('P1Y2M3.5D', builder=NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3.5', None, None, None, 'duration'))
 
-        resultduration = parse_duration('P1Y2M3,5D', builder=NoneBuilder)
-        self.assertEqual(resultduration, ('1', '2', None, '3.5', None, None, None, 'duration'))
+        parse = parse_duration('P1Y2M3,5D', builder=NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3.5', None, None, None, 'duration'))
 
-        resultduration = parse_duration('PT4H54M6.5S', builder=NoneBuilder)
-        self.assertEqual(resultduration, (None, None, None, None, '4', '54', '6.5', 'duration'))
+        parse = parse_duration('PT4H54M6.5S', builder=NoneBuilder)
+        self.assertEqual(parse, (None, None, None, None, '4', '54', '6.5', 'duration'))
 
-        resultduration = parse_duration('PT4H54M6,5S', builder=NoneBuilder)
-        self.assertEqual(resultduration, (None, None, None, None, '4', '54', '6.5', 'duration'))
+        parse = parse_duration('PT4H54M6,5S', builder=NoneBuilder)
+        self.assertEqual(parse, (None, None, None, None, '4', '54', '6.5', 'duration'))
 
-        resultduration = parse_duration('PT0.0000001S', builder=NoneBuilder)
-        self.assertEqual(resultduration, (None, None, None, None, None, None, '0.0000001', 'duration'))
+        parse = parse_duration('PT0.0000001S', builder=NoneBuilder)
+        self.assertEqual(parse, (None, None, None, None, None, None, '0.0000001', 'duration'))
 
-        resultduration = parse_duration('PT2.0000048S', builder=NoneBuilder)
-        self.assertEqual(resultduration, (None, None, None, None, None, None, '2.0000048', 'duration'))
+        parse = parse_duration('PT2.0000048S', builder=NoneBuilder)
+        self.assertEqual(parse, (None, None, None, None, None, None, '2.0000048', 'duration'))
 
-        resultduration = parse_duration('P1Y', builder=NoneBuilder)
-        self.assertEqual(resultduration, ('1', None, None, None, None, None, None, 'duration'))
+        parse = parse_duration('P1Y', builder=NoneBuilder)
+        self.assertEqual(parse, ('1', None, None, None, None, None, None, 'duration'))
 
-        resultduration = parse_duration('P1.5Y', builder=NoneBuilder)
-        self.assertEqual(resultduration, ('1.5', None, None, None, None, None, None, 'duration'))
+        parse = parse_duration('P1.5Y', builder=NoneBuilder)
+        self.assertEqual(parse, ('1.5', None, None, None, None, None, None, 'duration'))
 
-        resultduration = parse_duration('P1,5Y', builder=NoneBuilder)
-        self.assertEqual(resultduration, ('1.5', None, None, None, None, None, None, 'duration'))
+        parse = parse_duration('P1,5Y', builder=NoneBuilder)
+        self.assertEqual(parse, ('1.5', None, None, None, None, None, None, 'duration'))
 
-        resultduration = parse_duration('P1M', builder=NoneBuilder)
-        self.assertEqual(resultduration, (None, '1', None, None, None, None, None, 'duration'))
+        parse = parse_duration('P1M', builder=NoneBuilder)
+        self.assertEqual(parse, (None, '1', None, None, None, None, None, 'duration'))
 
-        resultduration = parse_duration('P1.5M', builder=NoneBuilder)
-        self.assertEqual(resultduration, (None, '1.5', None, None, None, None, None, 'duration'))
+        parse = parse_duration('P1.5M', builder=NoneBuilder)
+        self.assertEqual(parse, (None, '1.5', None, None, None, None, None, 'duration'))
 
-        resultduration = parse_duration('P1,5M', builder=NoneBuilder)
-        self.assertEqual(resultduration, (None, '1.5', None, None, None, None, None, 'duration'))
+        parse = parse_duration('P1,5M', builder=NoneBuilder)
+        self.assertEqual(parse, (None, '1.5', None, None, None, None, None, 'duration'))
 
-        resultduration = parse_duration('P1W', builder=NoneBuilder)
-        self.assertEqual(resultduration, (None, None, '1', None, None, None, None, 'duration'))
+        parse = parse_duration('P1W', builder=NoneBuilder)
+        self.assertEqual(parse, (None, None, '1', None, None, None, None, 'duration'))
 
-        resultduration = parse_duration('P1.5W', builder=NoneBuilder)
-        self.assertEqual(resultduration, (None, None, '1.5', None, None, None, None, 'duration'))
+        parse = parse_duration('P1.5W', builder=NoneBuilder)
+        self.assertEqual(parse, (None, None, '1.5', None, None, None, None, 'duration'))
 
-        resultduration = parse_duration('P1,5W', builder=NoneBuilder)
-        self.assertEqual(resultduration, (None, None, '1.5', None, None, None, None, 'duration'))
+        parse = parse_duration('P1,5W', builder=NoneBuilder)
+        self.assertEqual(parse, (None, None, '1.5', None, None, None, None, 'duration'))
 
-        resultduration = parse_duration('P1D', builder=NoneBuilder)
-        self.assertEqual(resultduration, (None, None, None, '1', None, None, None, 'duration'))
+        parse = parse_duration('P1D', builder=NoneBuilder)
+        self.assertEqual(parse, (None, None, None, '1', None, None, None, 'duration'))
 
-        resultduration = parse_duration('P1.5D', builder=NoneBuilder)
-        self.assertEqual(resultduration, (None, None, None, '1.5', None, None, None, 'duration'))
+        parse = parse_duration('P1.5D', builder=NoneBuilder)
+        self.assertEqual(parse, (None, None, None, '1.5', None, None, None, 'duration'))
 
-        resultduration = parse_duration('P1,5D', builder=NoneBuilder)
-        self.assertEqual(resultduration, (None, None, None, '1.5', None, None, None, 'duration'))
+        parse = parse_duration('P1,5D', builder=NoneBuilder)
+        self.assertEqual(parse, (None, None, None, '1.5', None, None, None, 'duration'))
 
-        resultduration = parse_duration('P0003-06-04T12:30:05', builder=NoneBuilder)
-        self.assertEqual(resultduration, ('0003', '06', None, '04', '12', '30', '05', 'duration'))
+        parse = parse_duration('P0003-06-04T12:30:05', builder=NoneBuilder)
+        self.assertEqual(parse, ('0003', '06', None, '04', '12', '30', '05', 'duration'))
 
-        resultduration = parse_duration('P0003-06-04T12:30:05.5', builder=NoneBuilder)
-        self.assertEqual(resultduration, ('0003', '06', None, '04', '12', '30', '05.5', 'duration'))
+        parse = parse_duration('P0003-06-04T12:30:05.5', builder=NoneBuilder)
+        self.assertEqual(parse, ('0003', '06', None, '04', '12', '30', '05.5', 'duration'))
 
-        resultduration = parse_duration('P0001-02-03T14:43:59.9999997', builder=NoneBuilder)
-        self.assertEqual(resultduration, ('0001', '02', None, '03', '14', '43', '59.9999997', 'duration'))
+        parse = parse_duration('P0001-02-03T14:43:59.9999997', builder=NoneBuilder)
+        self.assertEqual(parse, ('0001', '02', None, '03', '14', '43', '59.9999997', 'duration'))
 
     def test_parse_duration_nop(self):
         with self.assertRaises(ISOFormatError):
@@ -137,65 +135,65 @@ class TestDurationParserFunctions(unittest.TestCase):
             parse_duration('PT1S1H', builder=NoneBuilder)
 
     def test_parse_duration_prescribed(self):
-        resultduration = _parse_duration_prescribed('P1Y2M3DT4H54M6S', NoneBuilder)
-        self.assertEqual(resultduration, ('1', '2', None, '3', '4', '54', '6', 'duration'))
+        parse = _parse_duration_prescribed('P1Y2M3DT4H54M6S', NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6', 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1Y2M3DT4H54M6.5S', NoneBuilder)
-        self.assertEqual(resultduration, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
+        parse = _parse_duration_prescribed('P1Y2M3DT4H54M6.5S', NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1Y2M3DT4H54M6,5S', NoneBuilder)
-        self.assertEqual(resultduration, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
+        parse = _parse_duration_prescribed('P1Y2M3DT4H54M6,5S', NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
 
-        resultduration = _parse_duration_prescribed('PT4H54M6.5S', NoneBuilder)
-        self.assertEqual(resultduration, (None, None, None, None, '4', '54', '6.5', 'duration'))
+        parse = _parse_duration_prescribed('PT4H54M6.5S', NoneBuilder)
+        self.assertEqual(parse, (None, None, None, None, '4', '54', '6.5', 'duration'))
 
-        resultduration = _parse_duration_prescribed('PT4H54M6,5S', NoneBuilder)
-        self.assertEqual(resultduration, (None, None, None, None, '4', '54', '6.5', 'duration'))
+        parse = _parse_duration_prescribed('PT4H54M6,5S', NoneBuilder)
+        self.assertEqual(parse, (None, None, None, None, '4', '54', '6.5', 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1Y2M3D', NoneBuilder)
-        self.assertEqual(resultduration, ('1', '2', None, '3', None, None, None, 'duration'))
+        parse = _parse_duration_prescribed('P1Y2M3D', NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3', None, None, None, 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1Y2M3.5D', NoneBuilder)
-        self.assertEqual(resultduration, ('1', '2', None, '3.5', None, None, None, 'duration'))
+        parse = _parse_duration_prescribed('P1Y2M3.5D', NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3.5', None, None, None, 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1Y2M3,5D', NoneBuilder)
-        self.assertEqual(resultduration, ('1', '2', None, '3.5', None, None, None, 'duration'))
+        parse = _parse_duration_prescribed('P1Y2M3,5D', NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3.5', None, None, None, 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1Y', NoneBuilder)
-        self.assertEqual(resultduration, ('1', None, None, None, None, None, None, 'duration'))
+        parse = _parse_duration_prescribed('P1Y', NoneBuilder)
+        self.assertEqual(parse, ('1', None, None, None, None, None, None, 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1.5Y', NoneBuilder)
-        self.assertEqual(resultduration, ('1.5', None, None, None, None, None, None, 'duration'))
+        parse = _parse_duration_prescribed('P1.5Y', NoneBuilder)
+        self.assertEqual(parse, ('1.5', None, None, None, None, None, None, 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1,5Y', NoneBuilder)
-        self.assertEqual(resultduration, ('1.5', None, None, None, None, None, None, 'duration'))
+        parse = _parse_duration_prescribed('P1,5Y', NoneBuilder)
+        self.assertEqual(parse, ('1.5', None, None, None, None, None, None, 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1M', NoneBuilder)
-        self.assertEqual(resultduration, (None, '1', None, None, None, None, None, 'duration'))
+        parse = _parse_duration_prescribed('P1M', NoneBuilder)
+        self.assertEqual(parse, (None, '1', None, None, None, None, None, 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1.5M', NoneBuilder)
-        self.assertEqual(resultduration, (None, '1.5', None, None, None, None, None, 'duration'))
+        parse = _parse_duration_prescribed('P1.5M', NoneBuilder)
+        self.assertEqual(parse, (None, '1.5', None, None, None, None, None, 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1,5M', NoneBuilder)
-        self.assertEqual(resultduration, (None, '1.5', None, None, None, None, None, 'duration'))
+        parse = _parse_duration_prescribed('P1,5M', NoneBuilder)
+        self.assertEqual(parse, (None, '1.5', None, None, None, None, None, 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1W', NoneBuilder)
-        self.assertEqual(resultduration, (None, None, '1', None, None, None, None, 'duration'))
+        parse = _parse_duration_prescribed('P1W', NoneBuilder)
+        self.assertEqual(parse, (None, None, '1', None, None, None, None, 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1.5W', NoneBuilder)
-        self.assertEqual(resultduration, (None, None, '1.5', None, None, None, None, 'duration'))
+        parse = _parse_duration_prescribed('P1.5W', NoneBuilder)
+        self.assertEqual(parse, (None, None, '1.5', None, None, None, None, 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1,5W', NoneBuilder)
-        self.assertEqual(resultduration, (None, None, '1.5', None, None, None, None, 'duration'))
+        parse = _parse_duration_prescribed('P1,5W', NoneBuilder)
+        self.assertEqual(parse, (None, None, '1.5', None, None, None, None, 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1D', NoneBuilder)
-        self.assertEqual(resultduration, (None, None, None, '1', None, None, None, 'duration'))
+        parse = _parse_duration_prescribed('P1D', NoneBuilder)
+        self.assertEqual(parse, (None, None, None, '1', None, None, None, 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1.5D', NoneBuilder)
-        self.assertEqual(resultduration, (None, None, None, '1.5', None, None, None, 'duration'))
+        parse = _parse_duration_prescribed('P1.5D', NoneBuilder)
+        self.assertEqual(parse, (None, None, None, '1.5', None, None, None, 'duration'))
 
-        resultduration = _parse_duration_prescribed('P1,5D', NoneBuilder)
-        self.assertEqual(resultduration, (None, None, None, '1.5', None, None, None, 'duration'))
+        parse = _parse_duration_prescribed('P1,5D', NoneBuilder)
+        self.assertEqual(parse, (None, None, None, '1.5', None, None, None, 'duration'))
 
     def test_parse_duration_prescribed_multiplefractions(self):
         with self.assertRaises(ISOFormatError):
@@ -212,6 +210,83 @@ class TestDurationParserFunctions(unittest.TestCase):
         #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
         with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed('P1Dasdfasdf', NoneBuilder)
+
+    def test_parse_duration_prescribed_outoforder(self):
+        #Ensure durations are required to be in the correct order
+        #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
+        #https://bitbucket.org/nielsenb/aniso8601/issues/8/durations-with-components-in-wrong-order
+        with self.assertRaises(ISOFormatError):
+            _parse_duration_prescribed('P1S', NoneBuilder)
+
+        with self.assertRaises(ISOFormatError):
+            _parse_duration_prescribed('P1D1S', NoneBuilder)
+
+        with self.assertRaises(ISOFormatError):
+            _parse_duration_prescribed('P1H1M', NoneBuilder)
+
+        with self.assertRaises(ISOFormatError):
+            _parse_duration_prescribed('1Y2M3D1SPT1M', NoneBuilder)
+
+        with self.assertRaises(ISOFormatError):
+            _parse_duration_prescribed('P1Y2M3D2MT1S', NoneBuilder)
+
+        with self.assertRaises(ISOFormatError):
+            _parse_duration_prescribed('P2M3D1ST1Y1M', NoneBuilder)
+
+        with self.assertRaises(ISOFormatError):
+            _parse_duration_prescribed('P1Y2M2MT3D1S', NoneBuilder)
+
+        with self.assertRaises(ISOFormatError):
+            _parse_duration_prescribed('P1D1Y1M', NoneBuilder)
+
+        with self.assertRaises(ISOFormatError):
+            _parse_duration_prescribed('PT1S1H', NoneBuilder)
+
+    def test_parse_duration_prescribed_notime(self):
+        parse = _parse_duration_prescribed_notime('P1Y2M3D', NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3', None, None, None, 'duration'))
+
+        parse = _parse_duration_prescribed_notime('P1Y2M3.5D', NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3.5', None, None, None, 'duration'))
+
+        parse = _parse_duration_prescribed_notime('P1Y2M3,5D', NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3.5', None, None, None, 'duration'))
+
+        parse = _parse_duration_prescribed_notime('P1Y', NoneBuilder)
+        self.assertEqual(parse, ('1', None, None, None, None, None, None, 'duration'))
+
+        parse = _parse_duration_prescribed_notime('P1.5Y', NoneBuilder)
+        self.assertEqual(parse, ('1.5', None, None, None, None, None, None, 'duration'))
+
+        parse = _parse_duration_prescribed_notime('P1,5Y', NoneBuilder)
+        self.assertEqual(parse, ('1.5', None, None, None, None, None, None, 'duration'))
+
+        parse = _parse_duration_prescribed_notime('P1M', NoneBuilder)
+        self.assertEqual(parse, (None, '1', None, None, None, None, None, 'duration'))
+
+        parse = _parse_duration_prescribed_notime('P1.5M', NoneBuilder)
+        self.assertEqual(parse, (None, '1.5', None, None, None, None, None, 'duration'))
+
+        parse = _parse_duration_prescribed_notime('P1,5M', NoneBuilder)
+        self.assertEqual(parse, (None, '1.5', None, None, None, None, None, 'duration'))
+
+        parse = _parse_duration_prescribed_notime('P1W', NoneBuilder)
+        self.assertEqual(parse, (None, None, '1', None, None, None, None, 'duration'))
+
+        parse = _parse_duration_prescribed_notime('P1.5W', NoneBuilder)
+        self.assertEqual(parse, (None, None, '1.5', None, None, None, None, 'duration'))
+
+        parse = _parse_duration_prescribed_notime('P1,5W', NoneBuilder)
+        self.assertEqual(parse, (None, None, '1.5', None, None, None, None, 'duration'))
+
+        parse = _parse_duration_prescribed_notime('P1D', NoneBuilder)
+        self.assertEqual(parse, (None, None, None, '1', None, None, None, 'duration'))
+
+        parse = _parse_duration_prescribed_notime('P1.5D', NoneBuilder)
+        self.assertEqual(parse, (None, None, None, '1.5', None, None, None, 'duration'))
+
+        parse = _parse_duration_prescribed_notime('P1,5D', NoneBuilder)
+        self.assertEqual(parse, (None, None, None, '1.5', None, None, None, 'duration'))
 
     def test_parse_duration_prescribed_notime_timepart(self):
         #Ensure no time part is allowed
@@ -238,6 +313,22 @@ class TestDurationParserFunctions(unittest.TestCase):
 
         with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed_notime('P1D1Y1M', NoneBuilder)
+
+    def test_parse_duration_prescribed_time(self):
+        parse = _parse_duration_prescribed_time('P1Y2M3DT4H54M6S', NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6', 'duration'))
+
+        parse = _parse_duration_prescribed_time('P1Y2M3DT4H54M6.5S', NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
+
+        parse = _parse_duration_prescribed_time('P1Y2M3DT4H54M6,5S', NoneBuilder)
+        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
+
+        parse = _parse_duration_prescribed_time('PT4H54M6.5S', NoneBuilder)
+        self.assertEqual(parse, (None, None, None, None, '4', '54', '6.5', 'duration'))
+
+        parse = _parse_duration_prescribed_time('PT4H54M6,5S', NoneBuilder)
+        self.assertEqual(parse, (None, None, None, None, '4', '54', '6.5', 'duration'))
 
     def test_parse_duration_prescribed_time_timeindate(self):
         #Don't allow time components in date half
@@ -271,11 +362,17 @@ class TestDurationParserFunctions(unittest.TestCase):
             _parse_duration_prescribed_time('P1Y2M2MT3D1S', NoneBuilder)
 
     def test_parse_duration_combined(self):
-        resultduration = _parse_duration_combined('P0003-06-04T12:30:05', NoneBuilder)
-        self.assertEqual(resultduration, ('0003', '06', None, '04', '12', '30', '05', 'duration'))
+        parse = _parse_duration_combined('P0003-06-04T12:30:05', NoneBuilder)
+        self.assertEqual(parse, ('0003', '06', None, '04', '12', '30', '05', 'duration'))
 
-        resultduration = _parse_duration_combined('P0003-06-04T12:30:05.5', NoneBuilder)
-        self.assertEqual(resultduration, ('0003', '06', None, '04', '12', '30', '05.5', 'duration'))
+        parse = _parse_duration_combined('P0003-06-04T12:30:05.5', NoneBuilder)
+        self.assertEqual(parse, ('0003', '06', None, '04', '12', '30', '05.5', 'duration'))
+
+    def test_parse_duration_combined_suffixgarbage(self):
+        #Don't allow garbage after the duration
+        #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
+        with self.assertRaises(ISOFormatError):
+            _parse_duration_combined('P0003-06-04T12:30:05.5asdfasdf', NoneBuilder)
 
     def test_parse_duration_element(self):
         self.assertEqual(_parse_duration_element('P1Y2M3D', 'Y'), '1')
@@ -297,56 +394,3 @@ class TestDurationParserFunctions(unittest.TestCase):
         self.assertTrue(_component_order_correct('P1Y1M', ['P', 'Y', 'M', 'D']))
         self.assertFalse(_component_order_correct('P1D1Y1M', ['P', 'Y', 'M', 'D']))
         self.assertFalse(_component_order_correct('PT1S1H', ['T', 'H', 'M', 'S']))
-
-    def test_parse_duration_prescribed_relative_multiplefractions(self):
-        with self.assertRaises(ISOFormatError):
-            #Multiple fractions are not allowed
-            _parse_duration_prescribed('P1Y2M3DT4H5.1234M6.1234S', True)
-
-    def test_parse_duration_prescribed_relative_middlefraction(self):
-        with self.assertRaises(ISOFormatError):
-            #Fraction only allowed on final component
-            _parse_duration_prescribed('P1Y2M3DT4H5.1234M6S', True)
-
-    def test_parse_duration_prescribed_relative_suffixgarbage(self):
-        #Don't allow garbage after the duration
-        #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
-        with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed('P1Dasdfasdf', True)
-
-    def test_parse_duration_prescribed_relative_outoforder(self):
-        #Ensure durations are required to be in the correct order
-        #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
-        #https://bitbucket.org/nielsenb/aniso8601/issues/8/durations-with-components-in-wrong-order
-        with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed('P1S', True)
-
-        with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed('P1D1S', True)
-
-        with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed('P1H1M', True)
-
-        with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed('1Y2M3D1SPT1M', True)
-
-        with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed('P1Y2M3D2MT1S', True)
-
-        with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed('P2M3D1ST1Y1M', True)
-
-        with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed('P1Y2M2MT3D1S', True)
-
-        with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed('P1D1Y1M', True)
-
-        with self.assertRaises(ISOFormatError):
-            _parse_duration_prescribed('PT1S1H', True)
-
-    def test_parse_duration_combined_relative_suffixgarbage(self):
-        #Don't allow garbage after the duration
-        #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
-        with self.assertRaises(ISOFormatError):
-            _parse_duration_combined('P0003-06-04T12:30:05.5asdfasdf', True)
