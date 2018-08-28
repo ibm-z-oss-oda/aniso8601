@@ -83,11 +83,11 @@ class TestTimezoneParserFunctions(unittest.TestCase):
 
     def test_parse_timezone_negativezero(self):
         #A 0 offset cannot be negative
-        with self.assertRaises(ISOFormatError, builder=TupleBuilder):
+        with self.assertRaises(ISOFormatError):
             parse_timezone('-00:00')
 
-        with self.assertRaises(ISOFormatError, builder=TupleBuilder):
+        with self.assertRaises(ISOFormatError):
             parse_timezone('-0000')
 
-        with self.assertRaises(ISOFormatError, builder=TupleBuilder):
+        with self.assertRaises(ISOFormatError):
             parse_timezone('-00')
