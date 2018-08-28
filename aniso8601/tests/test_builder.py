@@ -12,7 +12,8 @@ import unittest
 import dateutil.relativedelta
 
 from aniso8601 import compat
-from aniso8601.builder import BaseTimeBuilder, PythonTimeBuilder, RelativeTimeBuilder, UTCOffset
+from aniso8601.builder import BaseTimeBuilder, PythonTimeBuilder, \
+        RelativeTimeBuilder, TupleBuilder, UTCOffset
 from aniso8601.exceptions import DayOutOfBoundsError, HoursOutOfBoundsError, \
         LeapSecondError, MidnightBoundsError, MinutesOutOfBoundsError, \
         RelativeValueError, SecondsOutOfBoundsError, WeekOutOfBoundsError, \
@@ -46,6 +47,80 @@ class TestBaseTimeBuilder(unittest.TestCase):
     def test_build_timezone(self):
         with self.assertRaises(NotImplementedError):
             BaseTimeBuilder.build_timezone()
+
+class TestTupleBuilder(unittest.TestCase):
+    def test_build_date(self):
+        datetuple = TupleBuilder.build_date()
+        self.assertEqual(datetuple, (None, None, None, None, None, None, 'date'))
+
+        datetuple = TupleBuilder.build_date(YYYY='1', MM='2', DD='3', Www='4', D='5', DDD='6')
+        self.assertEqual(datetuple, ('1', '2', '3', '4', '5', '6', 'date'))
+
+    def test_build_time(self):
+        timetuple = TupleBuilder.build_time()
+        self.assertEqual(timetuple, (None, None, None, None, 'time'))
+
+        timetuple = TupleBuilder.build_time(hh='1', mm='2', ss='3', tz=None)
+        self.assertEqual(timetuple, ('1', '2', '3', None, 'time'))
+
+        timetuple = TupleBuilder.build_time(hh='1', mm='2', ss='3', tz=(False, False, '4', '5', 'tz name', 'timezone'))
+        self.assertEqual(timetuple, ('1', '2', '3', (False, False, '4', '5', 'tz name', 'timezone'), 'time'))
+
+    def test_build_datetime(self):
+        datetimetuple = TupleBuilder.build_datetime(('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', None, 'time'))
+        self.assertEqual(datetimetuple, (('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', None, 'time'), 'datetime'))
+
+        datetimetuple = TupleBuilder.build_datetime(('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', (True, False, '10', '11', 'tz name', 'timezone'), 'time'))
+        self.assertEqual(datetimetuple, (('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', (True, False, '10', '11', 'tz name', 'timezone'), 'time'), 'datetime'))
+
+    def test_build_duration(self):
+        durationtuple = TupleBuilder.build_duration()
+        self.assertEqual(durationtuple, (None, None, None, None, None, None, None, 'duration'))
+
+        durationtuple = TupleBuilder.build_duration(PnY='1', PnM='2', PnW='3', PnD='4', TnH='5', TnM='6', TnS='7')
+        self.assertEqual(durationtuple, ('1', '2', '3', '4', '5', '6', '7', 'duration'))
+
+    def test_build_interval(self):
+        intervaltuple = TupleBuilder.build_interval()
+        self.assertEqual(intervaltuple, (None, None, None, 'interval'))
+
+        intervaltuple = TupleBuilder.build_interval(start=('1', '2', '3', '4', '5', '6', 'date'), end=('7', '8', '9', '10', '11', '12', 'date'))
+        self.assertEqual(intervaltuple, (('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', '10', '11', '12', 'date'), None, 'interval'))
+
+        intervaltuple = TupleBuilder.build_interval(start=('1', '2', '3', (True, False, '7', '8', 'tz name', 'timezone'), 'time'), end=('4', '5', '6', (False, False, '9', '10', 'tz name', 'timezone'), 'time'))
+        self.assertEqual(intervaltuple, (('1', '2', '3', (True, False, '7', '8', 'tz name', 'timezone'), 'time'), ('4', '5', '6', (False, False, '9', '10', 'tz name', 'timezone'), 'time'), None, 'interval'))
+
+        intervaltuple = TupleBuilder.build_interval(start=(('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', (True, False, '10', '11', 'tz name', 'timezone'), 'time'), 'datetime'), end=(('12', '13', '14', '15', '16', '17', 'date'), ('18', '19', '20', (False, False, '21', '22', 'tz name', 'timezone'), 'time'), 'datetime'))
+        self.assertEqual(intervaltuple, ((('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', (True, False, '10', '11', 'tz name', 'timezone'), 'time'), 'datetime'), (('12', '13', '14', '15', '16', '17', 'date'), ('18', '19', '20', (False, False, '21', '22', 'tz name', 'timezone'), 'time'), 'datetime'), None, 'interval'))
+
+        intervaltuple = TupleBuilder.build_interval(start=('1', '2', '3', '4', '5', '6', 'date'), end=None, duration=('7', '8', '9', '10', '11', '12', '13', 'duration'))
+        self.assertEqual(intervaltuple, (('1', '2', '3', '4', '5', '6', 'date'), None, ('7', '8', '9', '10', '11', '12', '13', 'duration'), 'interval'))
+
+        intervaltuple = TupleBuilder.build_interval(start=None, end=('1', '2', '3', (True, False, '4', '5', 'tz name', 'timezone'), 'time'), duration=('6', '7', '8', '9', '10', '11', '12', 'duration'))
+        self.assertEqual(intervaltuple, (None, ('1', '2', '3', (True, False, '4', '5', 'tz name', 'timezone'), 'time'), ('6', '7', '8', '9', '10', '11', '12', 'duration'), 'interval'))
+
+    def test_build_repeating_interval(self):
+        intervaltuple = TupleBuilder.build_repeating_interval()
+        self.assertEqual(intervaltuple, (None, None, None, 'repeatinginterval'))
+
+        intervaltuple = TupleBuilder.build_repeating_interval(R=True, interval=(('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', '10', '11', '12', 'date'), None, 'interval'))
+        self.assertEqual(intervaltuple, (True, None, (('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', '10', '11', '12', 'date'), None, 'interval'), 'repeatinginterval'))
+
+        intervaltuple = TupleBuilder.build_repeating_interval(R=False, Rnn='1', interval=((('2', '3', '4', '5', '6', '7', 'date'), ('8', '9', '10', None, 'time'), 'datetime'), (('11', '12', '13', '14', '15', '16', 'date'), ('17', '18', '19', None, 'time'), 'datetime'), None, 'interval'))
+        self.assertEqual(intervaltuple, (False, '1', ((('2', '3', '4', '5', '6', '7', 'date'), ('8', '9', '10', None, 'time'), 'datetime'), (('11', '12', '13', '14', '15', '16', 'date'), ('17', '18', '19', None, 'time'), 'datetime'), None, 'interval'), 'repeatinginterval'))
+
+    def test_build_timezone(self):
+        tztuple = TupleBuilder.build_timezone()
+        self.assertEqual(tztuple, (None, None, None, None, '', 'timezone'))
+
+        tztuple = TupleBuilder.build_timezone(negative=False, Z=True, name='UTC')
+        self.assertEqual(tztuple, (False, True, None, None, 'UTC', 'timezone'))
+
+        tztuple = TupleBuilder.build_timezone(negative=False, Z=False, hh='1', mm='2', name='+01:02')
+        self.assertEqual(tztuple, (False, False, '1', '2', '+01:02', 'timezone'))
+
+        tztuple = TupleBuilder.build_timezone(negative=True, Z=False, hh='1', mm='2', name='-01:02')
+        self.assertEqual(tztuple, (True, False, '1', '2', '-01:02', 'timezone'))
 
 class TestPythonTimeBuilder(unittest.TestCase):
     def test_build_date(self):
