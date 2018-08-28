@@ -221,6 +221,21 @@ class TestDurationParserFunctions(unittest.TestCase):
 
         mockBuildDuration.assert_called_once_with(PnY='0001', PnM='02', PnD='03', TnH='14', TnM='43', TnS='59.9999997')
 
+    def test_parse_duration_mockbuilder(self):
+        mockBuilder = mock.Mock()
+
+        parse_duration('P1Y2M3DT4H54M6S', builder=mockBuilder)
+
+        mockBuilder.build_duration.assert_called_once_with(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
+
+    def test_parse_duration_relative(self):
+        import aniso8601
+
+        with mock.patch.object(aniso8601.builder.RelativeTimeBuilder, 'build_duration') as mockBuildDuration:
+            parse_duration('P1Y2M3DT4H54M6S', relative=True)
+
+        mockBuildDuration.assert_called_once_with(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
+
     def test_parse_duration_nop(self):
         with self.assertRaises(ISOFormatError):
             #Duration must start with a P

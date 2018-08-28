@@ -88,7 +88,7 @@ class TestIntervalParserFunctions(unittest.TestCase):
         with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_interval') as mockBuildInterval:
             parse_interval('P1M/1981-04-05T01:01:00')
 
-        mockBuildInterval.assert_called_once_with(end=(('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), duration=(None, '1', None, None, None, None, None, 'duration'),)
+        mockBuildInterval.assert_called_once_with(end=(('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), duration=(None, '1', None, None, None, None, None, 'duration'))
 
         with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_interval') as mockBuildInterval:
             parse_interval('P1M/1981-04-05')
@@ -196,6 +196,43 @@ class TestIntervalParserFunctions(unittest.TestCase):
 
         mockBuildInterval.assert_called_once_with(start=(('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), end=(('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'))
 
+    def test_parse_interval_mockbuilder(self):
+        mockBuilder = mock.Mock()
+
+        parse_interval('P1M/1981-04-05T01:01:00', builder=mockBuilder)
+
+        mockBuilder.build_interval.assert_called_once_with(end=(('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), duration=(None, '1', None, None, None, None, None, 'duration'))
+
+        mockBuilder = mock.Mock()
+
+        parse_interval('2014-11-12/PT1H', builder=mockBuilder)
+
+        mockBuilder.build_interval.assert_called_once_with(start=('2014', '11', '12', None, None, None, 'date'), duration=(None, None, None, None, '1', None, None, 'duration'))
+
+        mockBuilder = mock.Mock()
+
+        parse_interval('1980-03-05T01:01:00/1981-04-05T01:01:00', builder=mockBuilder)
+
+        mockBuilder.build_interval.assert_called_once_with(start=(('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), end=(('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'))
+
+    def test_parse_interval_relative(self):
+        import aniso8601
+
+        with mock.patch.object(aniso8601.builder.RelativeTimeBuilder, 'build_interval') as mockBuildInterval:
+            parse_interval('P1M/1981-04-05T01:01:00', relative=True)
+
+        mockBuildInterval.assert_called_once_with(end=(('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), duration=(None, '1', None, None, None, None, None, 'duration'))
+
+        with mock.patch.object(aniso8601.builder.RelativeTimeBuilder, 'build_interval') as mockBuildInterval:
+            parse_interval('2014-11-12/PT1H', relative=True)
+
+        mockBuildInterval.assert_called_once_with(start=('2014', '11', '12', None, None, None, 'date'), duration=(None, None, None, None, '1', None, None, 'duration'))
+
+        with mock.patch.object(aniso8601.builder.RelativeTimeBuilder, 'build_interval') as mockBuildInterval:
+            parse_interval('1980-03-05T01:01:00/1981-04-05T01:01:00', relative=True)
+
+        mockBuildInterval.assert_called_once_with(start=(('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), end=(('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'))
+
     def test_parse_interval_repeating(self):
         #Parse interval can't parse repeating intervals
         with self.assertRaises(ISOFormatError, builder=TupleBuilder):
@@ -266,6 +303,43 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
             parse_repeating_interval('R/PT1H2M/1980-03-05T01:01:00')
 
         mockBuildRepeatingInterval.assert_called_once_with(R=True, Rnn=None, interval=(None, (('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (None, None, None, None, '1', '2', None, 'duration'), 'interval'))
+
+    def test_parse_repeating_interval_mockbuilder(self):
+        mockBuilder = mock.Mock()
+
+        parse_repeating_interval('R3/1981-04-05/P1D', builder=mockBuilder)
+
+        mockBuilder.build_repeating_interval.assert_called_once_with(R=False, Rnn='3', interval=(('1981', '04', '05', None, None, None, 'date'), None, (None, None, None, '1', None, None, None, 'duration'), 'interval'))
+
+        mockBuilder = mock.Mock()
+
+        parse_repeating_interval('R11/PT1H2M/1980-03-05T01:01:00', builder=mockBuilder)
+
+        mockBuilder.build_repeating_interval.assert_called_once_with(R=False, Rnn='11', interval=(None, (('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (None, None, None, None, '1', '2', None, 'duration'), 'interval'))
+
+        mockBuilder = mock.Mock()
+
+        parse_repeating_interval('R/PT1H2M/1980-03-05T01:01:00', builder=mockBuilder)
+
+        mockBuilder.build_repeating_interval.assert_called_once_with(R=True, Rnn=None, interval=(None, (('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (None, None, None, None, '1', '2', None, 'duration'), 'interval'))
+
+    def test_parse_repeating_interval_relative(self):
+        import aniso8601
+
+        with mock.patch.object(aniso8601.builder.RelativeTimeBuilder, 'build_repeating_interval') as mockBuildInterval:
+            parse_repeating_interval('R3/1981-04-05/P1D', relative=True)
+
+        mockBuildInterval.assert_called_once_with(R=False, Rnn='3', interval=(('1981', '04', '05', None, None, None, 'date'), None, (None, None, None, '1', None, None, None, 'duration'), 'interval'))
+
+        with mock.patch.object(aniso8601.builder.RelativeTimeBuilder, 'build_repeating_interval') as mockBuildInterval:
+            parse_repeating_interval('R11/PT1H2M/1980-03-05T01:01:00', relative=True)
+
+        mockBuildInterval.assert_called_once_with(R=False, Rnn='11', interval=(None, (('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (None, None, None, None, '1', '2', None, 'duration'), 'interval'))
+
+        with mock.patch.object(aniso8601.builder.RelativeTimeBuilder, 'build_repeating_interval') as mockBuildInterval:
+            parse_repeating_interval('R/PT1H2M/1980-03-05T01:01:00', relative=True)
+
+        mockBuildInterval.assert_called_once_with(R=True, Rnn=None, interval=(None, (('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (None, None, None, None, '1', '2', None, 'duration'), 'interval'))
 
     def test_parse_repeating_interval_suffixgarbage(self):
         #Don't allow garbage after the duration
