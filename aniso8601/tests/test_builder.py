@@ -627,6 +627,57 @@ class TestPythonTimeBuilder(unittest.TestCase):
         self.assertEqual(tzinfoobject.utcoffset(None), -datetime.timedelta(hours=12))
         self.assertEqual(tzinfoobject.tzname(None), '-12')
 
+    def test_build_object(self):
+        resultdate = PythonTimeBuilder._build_object(('1234', '5', '6', None, None, None, 'date'))
+        self.assertEqual(resultdate, datetime.date(year=1234, month=5, day=6))
+
+        resultdate = PythonTimeBuilder._build_object(('1234', None, None, '6', '7', None, 'date'))
+        self.assertEqual(resultdate, datetime.date(year=1234, month=2, day=12))
+
+        resultdate = PythonTimeBuilder._build_object(('1234', None, None, None, None, '6', 'date'))
+        self.assertEqual(resultdate, datetime.date(year=1234, month=1, day=6))
+
+        resulttime = PythonTimeBuilder._build_object(('1', '2', '3', (False, False, '4', '5', 'tz name', 'timezone'), 'time'))
+        self.assertEqual(resulttime, datetime.time(hour=1, minute=2, second=3, tzinfo=UTCOffset(name='tzname', minutes=245)))
+
+        resultdatetime = PythonTimeBuilder._build_object((('1234', '5', '6', None, None, None, 'date'), ('7', '8', '9', None, 'time'), 'datetime'))
+        self.assertEqual(resultdatetime, datetime.datetime(year=1234, month=5, day=6, hour=7, minute=8, second=9))
+
+        resultduration = PythonTimeBuilder._build_object(('1', '2', '3', '4', '5', '6', '7', 'duration'))
+        self.assertEqual(resultduration, datetime.timedelta(days=450, seconds=18367))
+
+        resultinterval = PythonTimeBuilder._build_object((('1', '2', '3', None, None, None, 'date'), ('4', '5', '6', None, None, None, 'date'), None, 'interval'))
+        self.assertEqual(resultinterval, (datetime.date(1000, 2, 3), datetime.date(4000, 5, 6)))
+
+        resultinterval = PythonTimeBuilder._build_object((('1', '2', '3', None, None, None, 'date'), None, ('4', '5', None, '6', None, None, None, 'duration'), 'interval'))
+        self.assertEqual(resultinterval, (datetime.date(1000, 2, 3), datetime.date(1004, 7, 8)))
+
+        resultinterval = PythonTimeBuilder._build_object( (None, (('1', '2', '3', None, None, None, 'date'), ('4', '5', '6', None, 'time'), 'datetime'), (None, None, None, None, '7', '8', '9', 'duration'), 'interval'))
+        self.assertEqual(resultinterval, (datetime.datetime(year=1000, month=2, day=3, hour=4, minute=5, second=6), datetime.datetime(year=1000, month=2, day=2, hour=20, minute=56, second=57)))
+
+        results = list(PythonTimeBuilder._build_object((False, '10', (('1', '2', '3', None, None, None, 'date'), None, (None, None, None, '4', None, None, None, 'duration'), 'interval'), 'repeatinginterval')))
+
+        for dateindex in compat.range(0, 10):
+             self.assertEqual(results[dateindex], datetime.date(year=1000, month=2, day=3) + dateindex * datetime.timedelta(days=4))
+
+        resultgenerator = PythonTimeBuilder._build_object((True, None, (None, ('1', '2', '3', None, None, None, 'date'), (None, None, None, '4', None, None, None, 'duration'), 'interval'), 'repeatinginterval'))
+
+        #Check the first 10
+        for dateindex in compat.range(0, 10):
+             self.assertEqual(next(resultgenerator), datetime.date(year=1000, month=2, day=3) - dateindex * datetime.timedelta(days=4))
+
+        resulttimezone = PythonTimeBuilder._build_object((False, True, None, None, 'UTC', 'timezone'))
+        self.assertEqual(resulttimezone.utcoffset(None), datetime.timedelta(hours=0))
+        self.assertEqual(resulttimezone.tzname(None), 'UTC')
+
+        resulttimezone = PythonTimeBuilder._build_object((False, False, '1', '2', '+01:02', 'timezone'))
+        self.assertEqual(resulttimezone.utcoffset(None), datetime.timedelta(hours=1, minutes=2))
+        self.assertEqual(resulttimezone.tzname(None), '+01:02')
+
+        resulttimezone = PythonTimeBuilder._build_object((True, False, '1', '2', '-01:02', 'timezone'))
+        self.assertEqual(resulttimezone.utcoffset(None), -datetime.timedelta(hours=1, minutes=2))
+        self.assertEqual(resulttimezone.tzname(None), '-01:02')
+
 class TestRelativeTimeBuilder(unittest.TestCase):
     def test_build_duration(self):
         duration = RelativeTimeBuilder.build_duration(PnY='1')
