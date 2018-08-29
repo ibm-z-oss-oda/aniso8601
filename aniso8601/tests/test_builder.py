@@ -15,9 +15,9 @@ from aniso8601 import compat
 from aniso8601.builder import BaseTimeBuilder, PythonTimeBuilder, \
         RelativeTimeBuilder, TupleBuilder, UTCOffset
 from aniso8601.exceptions import DayOutOfBoundsError, HoursOutOfBoundsError, \
-        LeapSecondError, MidnightBoundsError, MinutesOutOfBoundsError, \
-        RelativeValueError, SecondsOutOfBoundsError, WeekOutOfBoundsError, \
-        YearOutOfBoundsError
+        ISOFormatError, LeapSecondError, MidnightBoundsError, \
+        MinutesOutOfBoundsError, RelativeValueError, SecondsOutOfBoundsError, \
+        WeekOutOfBoundsError, YearOutOfBoundsError
 
 class TestBaseTimeBuilder(unittest.TestCase):
     def test_build_date(self):
@@ -47,6 +47,32 @@ class TestBaseTimeBuilder(unittest.TestCase):
     def test_build_timezone(self):
         with self.assertRaises(NotImplementedError):
             BaseTimeBuilder.build_timezone()
+
+    def test_cast(self):
+        self.assertEqual(BaseTimeBuilder.cast('1', int), 1)
+        self.assertEqual(BaseTimeBuilder.cast('-2', int), -2)
+        self.assertEqual(BaseTimeBuilder.cast('3', float), float(3))
+        self.assertEqual(BaseTimeBuilder.cast('-4', float), float(-4))
+        self.assertEqual(BaseTimeBuilder.cast('5.6', float), 5.6)
+        self.assertEqual(BaseTimeBuilder.cast('-7.8', float), -7.8)
+
+    def test_cast_exception(self):
+        with self.assertRaises(ISOFormatError):
+            BaseTimeBuilder.cast('asdf', int)
+
+        with self.assertRaises(ISOFormatError):
+            BaseTimeBuilder.cast('asdf', float)
+
+    def test_cast_caughtexception(self):
+        def tester(value):
+            raise RuntimeError
+
+        with self.assertRaises(ISOFormatError):
+            BaseTimeBuilder.cast('asdf', tester, caughtexceptions=(RuntimeError,))
+
+    def test_cast_thrownexception(self):
+        with self.assertRaises(RuntimeError):
+            BaseTimeBuilder.cast('asdf', int, thrownexception=RuntimeError)
 
 class TestTupleBuilder(unittest.TestCase):
     def test_build_date(self):
