@@ -696,6 +696,16 @@ class TestPythonTimeBuilder(unittest.TestCase):
         with self.assertRaises(DayOutOfBoundsError):
             PythonTimeBuilder._build_ordinal_date(1234, 367)
 
+    def test_iso_year_start(self):
+        yearstart = PythonTimeBuilder._iso_year_start(2004)
+        self.assertEqual(yearstart, datetime.date(year=2003, month=12, day=29))
+
+        yearstart = PythonTimeBuilder._iso_year_start(2010)
+        self.assertEqual(yearstart, datetime.date(year=2010, month=1, day=4))
+
+        yearstart = PythonTimeBuilder._iso_year_start(2009)
+        self.assertEqual(yearstart, datetime.date(year=2008, month=12, day=29))
+
 class TestRelativeTimeBuilder(unittest.TestCase):
     def test_build_duration(self):
         duration = RelativeTimeBuilder.build_duration(PnY='1')
