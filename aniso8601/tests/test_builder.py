@@ -706,6 +706,12 @@ class TestPythonTimeBuilder(unittest.TestCase):
         yearstart = PythonTimeBuilder._iso_year_start(2009)
         self.assertEqual(yearstart, datetime.date(year=2008, month=12, day=29))
 
+    def test_date_generator(self):
+        results = list(PythonTimeBuilder._date_generator(datetime.date(year=2018, month=8, day=29), datetime.timedelta(days=1), 10))
+
+        for dateindex in compat.range(0, 10):
+             self.assertEqual(results[dateindex], datetime.date(year=2018, month=8, day=29) + dateindex * datetime.timedelta(days=1))
+
 class TestRelativeTimeBuilder(unittest.TestCase):
     def test_build_duration(self):
         duration = RelativeTimeBuilder.build_duration(PnY='1')
