@@ -235,29 +235,29 @@ class TestIntervalParserFunctions(unittest.TestCase):
 
     def test_parse_interval_repeating(self):
         #Parse interval can't parse repeating intervals
-        with self.assertRaises(ISOFormatError):
+        with self.assertRaises(ISOFormatError, builder=None):
             parse_interval('R3/1981-04-05/P1D')
 
-        with self.assertRaises(ISOFormatError):
+        with self.assertRaises(ISOFormatError, builder=None):
             parse_interval('R3/1981-04-05/P0003-06-04T12:30:05.5')
 
-        with self.assertRaises(ISOFormatError):
+        with self.assertRaises(ISOFormatError, builder=None):
             parse_interval('R/PT1H2M/1980-03-05T01:01:00')
 
     def test_parse_interval_suffixgarbage(self):
         #Don't allow garbage after the duration
         #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
         with self.assertRaises(ValueError):
-            parse_interval('2001/P1Dasdf', builder=TupleBuilder)
+            parse_interval('2001/P1Dasdf', builder=None)
 
         with self.assertRaises(ValueError):
-            parse_interval('P1Dasdf/2001', builder=TupleBuilder)
+            parse_interval('P1Dasdf/2001', builder=None)
 
         with self.assertRaises(ValueError):
-            parse_interval('2001/P0003-06-04T12:30:05.5asdfasdf', builder=TupleBuilder)
+            parse_interval('2001/P0003-06-04T12:30:05.5asdfasdf', builder=None)
 
         with self.assertRaises(ValueError):
-            parse_interval('P0003-06-04T12:30:05.5asdfasdf/2001', builder=TupleBuilder)
+            parse_interval('P0003-06-04T12:30:05.5asdfasdf/2001', builder=None)
 
 class TestRepeatingIntervalParserFunctions(unittest.TestCase):
     def test_parse_repeating_interval(self):
@@ -345,10 +345,10 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
         #Don't allow garbage after the duration
         #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
         with self.assertRaises(ISOFormatError):
-            parse_repeating_interval('R3/1981-04-05/P1Dasdf', builder=TupleBuilder)
+            parse_repeating_interval('R3/1981-04-05/P1Dasdf', builder=None)
 
         with self.assertRaises(ISOFormatError):
-            parse_repeating_interval('R3/1981-04-05/P0003-06-04T12:30:05.5asdfasdf', builder=TupleBuilder)
+            parse_repeating_interval('R3/1981-04-05/P0003-06-04T12:30:05.5asdfasdf', builder=None)
 
     def test_parse_interval_internal(self):
         #Test the internal _parse_interval function

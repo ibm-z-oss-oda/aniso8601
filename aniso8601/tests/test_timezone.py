@@ -70,24 +70,24 @@ class TestTimezoneParserFunctions(unittest.TestCase):
 
     def test_parse_timezone_tzstr(self):
         with self.assertRaises(ISOFormatError):
-            parse_timezone('Y', builder=TupleBuilder)
+            parse_timezone('Y', builder=None)
 
         with self.assertRaises(ISOFormatError):
-            parse_timezone(' Z', builder=TupleBuilder)
+            parse_timezone(' Z', builder=None)
 
         with self.assertRaises(ISOFormatError):
-            parse_timezone('Z ', builder=TupleBuilder)
+            parse_timezone('Z ', builder=None)
 
         with self.assertRaises(ISOFormatError):
-            parse_timezone(' Z ', builder=TupleBuilder)
+            parse_timezone(' Z ', builder=None)
 
     def test_parse_timezone_negativezero(self):
         #A 0 offset cannot be negative
         with self.assertRaises(ISOFormatError):
-            parse_timezone('-00:00')
+            parse_timezone('-00:00', builder=None)
 
         with self.assertRaises(ISOFormatError):
-            parse_timezone('-0000')
+            parse_timezone('-0000', builder=None)
 
         with self.assertRaises(ISOFormatError):
-            parse_timezone('-00')
+            parse_timezone('-00', builder=None)

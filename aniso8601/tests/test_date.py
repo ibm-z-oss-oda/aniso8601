@@ -171,7 +171,7 @@ class TestDateParserFunctions(unittest.TestCase):
     def test_parse_calendar_month_nohyphen(self):
         #Hyphen is required
         with self.assertRaises(ISOFormatError):
-            _parse_calendar_month('198104', TupleBuilder)
+            _parse_calendar_month('198104', None)
 
     def test_parse_week_day(self):
         parse = _parse_week_day('2004-W53-6', TupleBuilder)
