@@ -712,6 +712,13 @@ class TestPythonTimeBuilder(unittest.TestCase):
         for dateindex in compat.range(0, 10):
              self.assertEqual(results[dateindex], datetime.date(year=2018, month=8, day=29) + dateindex * datetime.timedelta(days=1))
 
+    def test_date_generator_unbounded(self):
+        resultgenerator = PythonTimeBuilder._date_generator_unbounded(datetime.date(year=2018, month=8, day=29), datetime.timedelta(days=5))
+
+        #Check the first time
+        for dateindex in compat.range(0, 10):
+             self.assertEqual(next(resultgenerator), datetime.date(year=2018, month=8, day=29) + dateindex * datetime.timedelta(days=5))
+
 class TestRelativeTimeBuilder(unittest.TestCase):
     def test_build_duration(self):
         duration = RelativeTimeBuilder.build_duration(PnY='1')
