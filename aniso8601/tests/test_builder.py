@@ -685,6 +685,17 @@ class TestPythonTimeBuilder(unittest.TestCase):
         weekdate = PythonTimeBuilder._build_week_date(2009, 53, isoday=7)
         self.assertEqual(weekdate, datetime.date(year=2010, month=1, day=3))
 
+    def test_build_ordinal_date(self):
+        ordinaldate = PythonTimeBuilder._build_ordinal_date(1981, 95)
+        self.assertEqual(ordinaldate, datetime.date(year=1981, month=4, day=5))
+
+    def test_build_ordinal_date_bounds_checking(self):
+        with self.assertRaises(DayOutOfBoundsError):
+            PythonTimeBuilder._build_ordinal_date(1234, 0)
+
+        with self.assertRaises(DayOutOfBoundsError):
+            PythonTimeBuilder._build_ordinal_date(1234, 367)
+
 class TestRelativeTimeBuilder(unittest.TestCase):
     def test_build_duration(self):
         duration = RelativeTimeBuilder.build_duration(PnY='1')
