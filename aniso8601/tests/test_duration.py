@@ -9,7 +9,7 @@
 import mock
 import unittest
 
-from aniso8601.exceptions import ISOFormatError
+from aniso8601.exceptions import ISOFormatError, NegativeDurationError
 from aniso8601.builder import TupleBuilder
 from aniso8601.duration import parse_duration, _parse_duration_prescribed, \
         _parse_duration_combined, _parse_duration_prescribed_notime, \
@@ -247,6 +247,31 @@ class TestDurationParserFunctions(unittest.TestCase):
             #https://bitbucket.org/nielsenb/aniso8601/issues/2/week-designators-should-not-be-combinable
             parse_duration('P1Y2W', builder=TupleBuilder)
 
+    def test_parse_duration_negative(self):
+        with self.assertRaises(NegativeDurationError):
+            parse_duration('P-1Y', builder=TupleBuilder)
+
+        with self.assertRaises(NegativeDurationError):
+            parse_duration('P-2M', builder=TupleBuilder)
+
+        with self.assertRaises(NegativeDurationError):
+            parse_duration('P-3D', builder=TupleBuilder)
+
+        with self.assertRaises(NegativeDurationError):
+            parse_duration('P-T4H', builder=TupleBuilder)
+
+        with self.assertRaises(NegativeDurationError):
+            parse_duration('P-T54M', builder=TupleBuilder)
+
+        with self.assertRaises(NegativeDurationError):
+            parse_duration('P-T6S', builder=TupleBuilder)
+
+        with self.assertRaises(NegativeDurationError):
+            parse_duration('P-7W', builder=TupleBuilder)
+
+        with self.assertRaises(NegativeDurationError):
+            parse_duration('P-1Y2M3DT4H54M6S', builder=TupleBuilder)
+
     def test_parse_duration_outoforder(self):
         #Ensure durations are required to be in the correct order
         #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
@@ -338,6 +363,22 @@ class TestDurationParserFunctions(unittest.TestCase):
 
         parse = _parse_duration_prescribed('P1,5D', TupleBuilder)
         self.assertEqual(parse, (None, None, None, '1.5', None, None, None, 'duration'))
+
+    def test_parse_duration_prescribed_negative(self):
+        with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed('P-T1H', builder=TupleBuilder)
+
+        with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed('P-T2M', builder=TupleBuilder)
+
+        with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed('P-T3S', builder=TupleBuilder)
+
+        with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed('P-4W', builder=TupleBuilder)
+
+        with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed('P-1Y2M3DT4H54M6S', builder=TupleBuilder)
 
     def test_parse_duration_prescribed_multiplefractions(self):
         with self.assertRaises(ISOFormatError):
@@ -449,6 +490,22 @@ class TestDurationParserFunctions(unittest.TestCase):
         with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed_notime('P1Y2M3D4H5S', TupleBuilder)
 
+    def test_parse_duration_prescribed_notime_negative(self):
+        with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed_notime('P-1Y', TupleBuilder)
+
+        with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed_notime('P-2M', TupleBuilder)
+
+        with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed_notime('P-3D', TupleBuilder)
+
+        with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed_notime('P-7W', TupleBuilder)
+
+        with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed_notime('P-1Y2M3D', TupleBuilder)
+
     def test_parse_duration_prescribed_notime_outoforder(self):
         #Ensure durations are required to be in the correct order
         #https://bitbucket.org/nielsenb/aniso8601/issues/8/durations-with-components-in-wrong-order
@@ -489,6 +546,10 @@ class TestDurationParserFunctions(unittest.TestCase):
 
         with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed_time('P1Y2MT3D4H54M6S', TupleBuilder)
+
+    def test_parse_duration_prescribed_time_negative(self):
+        with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed_time('P-1Y2M3DT4H54M6S', TupleBuilder)
 
     def test_parse_duration_prescribed_time_outoforder(self):
         #Ensure durations are required to be in the correct order

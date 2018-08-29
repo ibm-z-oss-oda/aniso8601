@@ -9,7 +9,7 @@
 from aniso8601 import compat
 from aniso8601.builder import TupleBuilder, PythonTimeBuilder, RelativeTimeBuilder
 from aniso8601.date import parse_date
-from aniso8601.exceptions import ISOFormatError
+from aniso8601.exceptions import ISOFormatError, NegativeDurationError
 from aniso8601.time import parse_time
 
 def parse_duration(isodurationstr, relative=False, builder=PythonTimeBuilder):
@@ -34,6 +34,11 @@ def parse_duration(isodurationstr, relative=False, builder=PythonTimeBuilder):
 
 def _parse_duration_prescribed(durationstr, builder):
     #durationstr can be of the form PnYnMnDTnHnMnS or PnW
+
+    #Don't allow negative elements
+    #https://bitbucket.org/nielsenb/aniso8601/issues/20/negative-duration
+    if durationstr.find('-') != -1:
+        raise NegativeDurationError('ISO 8601 durations must be positive.')
 
     #Make sure the end character is valid
     #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
@@ -69,6 +74,11 @@ def _parse_duration_prescribed(durationstr, builder):
 def _parse_duration_prescribed_notime(durationstr, builder):
     #durationstr can be of the form PnYnMnD or PnW
 
+    #Don't allow negative elements
+    #https://bitbucket.org/nielsenb/aniso8601/issues/20/negative-duration
+    if durationstr.find('-') != -1:
+        raise NegativeDurationError('ISO 8601 durations must be positive.')
+
     #Make sure no time portion is included
     #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
     if _has_any_component(durationstr, ['H', 'S']):
@@ -101,6 +111,11 @@ def _parse_duration_prescribed_notime(durationstr, builder):
 
 def _parse_duration_prescribed_time(durationstr, builder):
     #durationstr can be of the form PnYnMnDTnHnMnS
+
+    #Don't allow negative elements
+    #https://bitbucket.org/nielsenb/aniso8601/issues/20/negative-duration
+    if durationstr.find('-') != -1:
+        raise NegativeDurationError('ISO 8601 durations must be positive.')
 
     firsthalf = durationstr[:durationstr.find('T')]
     secondhalf = durationstr[durationstr.find('T'):]

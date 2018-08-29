@@ -9,6 +9,9 @@
 class ISOFormatError(ValueError):
     """Raised when ISO 8601 string fails a format check."""
 
+class NegativeDurationError(ValueError):
+    """Raised when a duration is negative."""
+
 class RelativeValueError(ValueError):
     """Raised when an invalid value is given for calendar level accuracy."""
 
