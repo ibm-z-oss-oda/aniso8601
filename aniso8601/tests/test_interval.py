@@ -11,7 +11,7 @@ import unittest
 
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.builder import TupleBuilder
-from aniso8601.interval import parse_interval, parse_repeating_interval
+from aniso8601.interval import _parse_interval, parse_interval, parse_repeating_interval
 
 class TestIntervalParserFunctions(unittest.TestCase):
     def test_parse_interval(self):
@@ -349,3 +349,72 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
 
         with self.assertRaises(ISOFormatError):
             parse_repeating_interval('R3/1981-04-05/P0003-06-04T12:30:05.5asdfasdf', builder=TupleBuilder)
+
+    def test_parse_interval_internal(self):
+        #Test the internal _parse_interval function
+        parse = _parse_interval('P1M/1981-04-05T01:01:00', TupleBuilder)
+        self.assertEqual(parse, (None, (('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (None, '1', None, None, None, None, None, 'duration'), 'interval'))
+
+        parse = _parse_interval('P1M/1981-04-05', TupleBuilder)
+        self.assertEqual(parse, (None, ('1981', '04', '05', None, None, None, 'date'), (None, '1', None, None, None, None, None, 'duration'), 'interval'))
+
+        parse = _parse_interval('P1.5Y/2018-03-06', TupleBuilder)
+        self.assertEqual(parse, (None, ('2018', '03', '06', None, None, None, 'date'), ('1.5', None, None, None, None, None, None, 'duration'), 'interval'))
+
+        parse = _parse_interval('PT1H/2014-11-12', TupleBuilder)
+        self.assertEqual(parse, (None, ('2014', '11', '12', None, None, None, 'date'), (None, None, None, None, '1', None, None, 'duration'), 'interval'))
+
+        parse = _parse_interval('PT4H54M6.5S/2014-11-12', TupleBuilder)
+        self.assertEqual(parse, (None, ('2014', '11', '12', None, None, None, 'date'), (None, None, None, None, '4', '54', '6.5', 'duration'), 'interval'))
+
+        parse = _parse_interval('PT0.0000001S/2018-03-06', TupleBuilder)
+        self.assertEqual(parse, (None, ('2018', '03', '06', None, None, None, 'date'), (None, None, None, None, None, None, '0.0000001', 'duration'), 'interval'))
+
+        parse = _parse_interval('PT2.0000048S/2018-03-06', TupleBuilder)
+        self.assertEqual(parse, (None, ('2018', '03', '06', None, None, None, 'date'), (None, None, None, None, None, None, '2.0000048', 'duration'), 'interval'))
+
+        parse = _parse_interval('1981-04-05T01:01:00/P1M1DT1M', TupleBuilder)
+        self.assertEqual(parse, ((('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), None, (None, '1', None, '1', None, '1', None, 'duration'), 'interval'))
+
+        parse = _parse_interval('1981-04-05/P1M1D', TupleBuilder)
+        self.assertEqual(parse, (('1981', '04', '05', None, None, None, 'date'), None, (None, '1', None, '1', None, None, None, 'duration'), 'interval'))
+
+        parse = _parse_interval('2018-03-06/P2.5M', TupleBuilder)
+        self.assertEqual(parse, (('2018', '03', '06', None, None, None, 'date'), None, (None, '2.5', None, None, None, None, None, 'duration'), 'interval'))
+
+        parse = _parse_interval('2014-11-12/PT1H', TupleBuilder)
+        self.assertEqual(parse, (('2014', '11', '12', None, None, None, 'date'), None, (None, None, None, None, '1', None, None, 'duration'), 'interval'))
+
+        parse = _parse_interval('2014-11-12/PT4H54M6.5S', TupleBuilder)
+        self.assertEqual(parse, (('2014', '11', '12', None, None, None, 'date'), None, (None, None, None, None, '4', '54', '6.5', 'duration'), 'interval'))
+
+        parse = _parse_interval('2018-03-06/PT0.0000001S', TupleBuilder)
+        self.assertEqual(parse, (('2018', '03', '06', None, None, None, 'date'), None, (None, None, None, None, None, None, '0.0000001', 'duration'), 'interval'))
+
+        parse = _parse_interval('2018-03-06/PT2.0000048S', TupleBuilder)
+        self.assertEqual(parse, (('2018', '03', '06', None, None, None, 'date'), None, (None, None, None, None, None, None, '2.0000048', 'duration'), 'interval'))
+
+        parse = _parse_interval('1980-03-05T01:01:00/1981-04-05T01:01:00', TupleBuilder)
+        self.assertEqual(parse, ((('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), None, 'interval'))
+
+        parse = _parse_interval('1980-03-05T01:01:00/1981-04-05', TupleBuilder)
+        self.assertEqual(parse, ((('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), ('1981', '04', '05', None, None, None, 'date'), None, 'interval'))
+
+        parse = _parse_interval('1980-03-05/1981-04-05T01:01:00', TupleBuilder)
+        self.assertEqual(parse, (('1980', '03', '05', None, None, None, 'date'), (('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), None, 'interval'))
+
+        parse = _parse_interval('1980-03-05/1981-04-05', TupleBuilder)
+        self.assertEqual(parse, (('1980', '03', '05', None, None, None, 'date'), ('1981', '04', '05', None, None, None, 'date'), None, 'interval'))
+
+        parse = _parse_interval('1981-04-05/1980-03-05', TupleBuilder)
+        self.assertEqual(parse, (('1981', '04', '05', None, None, None, 'date'), ('1980', '03', '05', None, None, None, 'date'), None, 'interval'))
+
+        parse = _parse_interval('1980-03-05T01:01:00.0000001/1981-04-05T14:43:59.9999997', TupleBuilder)
+        self.assertEqual(parse, ((('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00.0000001', None, 'time'), 'datetime'), (('1981', '04', '05', None, None, None, 'date'), ('14', '43', '59.9999997', None, 'time'), 'datetime'), None, 'interval'))
+
+        #Test different separators
+        parse = _parse_interval('1980-03-05T01:01:00--1981-04-05T01:01:00', TupleBuilder, intervaldelimiter='--')
+        self.assertEqual(parse, ((('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), None, 'interval'))
+
+        parse = _parse_interval('1980-03-05 01:01:00/1981-04-05 01:01:00', TupleBuilder, datetimedelimiter=' ')
+        self.assertEqual(parse, ((('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (('1981', '04', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), None, 'interval'))
