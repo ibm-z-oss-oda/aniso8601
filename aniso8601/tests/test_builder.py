@@ -678,6 +678,13 @@ class TestPythonTimeBuilder(unittest.TestCase):
         self.assertEqual(resulttimezone.utcoffset(None), -datetime.timedelta(hours=1, minutes=2))
         self.assertEqual(resulttimezone.tzname(None), '-01:02')
 
+    def test_build_week_date(self):
+        weekdate = PythonTimeBuilder._build_week_date(2009, 1)
+        self.assertEqual(weekdate, datetime.date(year=2008, month=12, day=29))
+
+        weekdate = PythonTimeBuilder._build_week_date(2009, 53, isoday=7)
+        self.assertEqual(weekdate, datetime.date(year=2010, month=1, day=3))
+
 class TestRelativeTimeBuilder(unittest.TestCase):
     def test_build_duration(self):
         duration = RelativeTimeBuilder.build_duration(PnY='1')
