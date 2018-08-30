@@ -16,6 +16,7 @@ setup(
     author_email='nielsenb@jetfuse.net',
     url='https://bitbucket.org/nielsenb/aniso8601',
     extras_require={
+        'dev': ['mock'],
         'relative': ['python-dateutil']
     },
     packages=['aniso8601'],

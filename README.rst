@@ -349,9 +349,9 @@ Setup
 
 It is recommended to develop using a `virtualenv <https://virtualenv.pypa.io/en/stable/>`_.
 
-The tests require the :code:`relative` feature to be enabled, install the necessary dependencies using pip::
+The tests require the :code:`dev` and :code:`relative` features to be enabled, install the necessary dependencies using pip::
 
-  $ pip install .[relative]
+  $ pip install .[dev,relative]
 
 Tests
 -----
