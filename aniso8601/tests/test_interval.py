@@ -235,13 +235,13 @@ class TestIntervalParserFunctions(unittest.TestCase):
 
     def test_parse_interval_repeating(self):
         #Parse interval can't parse repeating intervals
-        with self.assertRaises(ISOFormatError, builder=None):
+        with self.assertRaises(ISOFormatError):
             parse_interval('R3/1981-04-05/P1D')
 
-        with self.assertRaises(ISOFormatError, builder=None):
+        with self.assertRaises(ISOFormatError):
             parse_interval('R3/1981-04-05/P0003-06-04T12:30:05.5')
 
-        with self.assertRaises(ISOFormatError, builder=None):
+        with self.assertRaises(ISOFormatError):
             parse_interval('R/PT1H2M/1980-03-05T01:01:00')
 
     def test_parse_interval_suffixgarbage(self):
