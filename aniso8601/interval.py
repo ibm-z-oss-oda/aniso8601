@@ -6,6 +6,8 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
+import warnings
+
 from aniso8601.builder import TupleBuilder, PythonTimeBuilder, RelativeTimeBuilder
 from aniso8601.date import parse_date
 from aniso8601.duration import parse_duration
@@ -35,6 +37,8 @@ def parse_interval(isointervalstr, intervaldelimiter='/', datetimedelimiter='T',
         raise ISOFormatError('ISO 8601 repeating intervals must be parsed with parse_repeating_interval.')
 
     if relative is True:
+        warnings.warn('relative kwarg is deprecated', DeprecationWarning, stacklevel=2)
+
         builder = RelativeTimeBuilder
 
     return _parse_interval(isointervalstr, builder, intervaldelimiter, datetimedelimiter)
@@ -51,6 +55,8 @@ def parse_repeating_interval(isointervalstr, intervaldelimiter='/', datetimedeli
         raise ISOFormatError('ISO 8601 repeating interval must start with an R.')
 
     if relative is True:
+        warnings.warn('relative kwarg is deprecated', DeprecationWarning, stacklevel=2)
+
         builder = RelativeTimeBuilder
 
     #Parse the number of iterations

@@ -6,6 +6,8 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
+import warnings
+
 from aniso8601 import compat
 from aniso8601.builder import TupleBuilder, PythonTimeBuilder, RelativeTimeBuilder
 from aniso8601.date import parse_date
@@ -24,6 +26,8 @@ def parse_duration(isodurationstr, relative=False, builder=PythonTimeBuilder):
         raise ISOFormatError('ISO 8601 duration must start with a P.')
 
     if relative is True:
+        warnings.warn('relative kwarg is deprecated', DeprecationWarning, stacklevel=2)
+
         builder = RelativeTimeBuilder
 
     #If Y, M, D, H, S, or W are in the string, assume it is a specified duration
