@@ -68,7 +68,8 @@ def get_time_resolution(isotimestr):
         #hh
         return TimeResolution.Hours
 
-    raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'.format(isotimestr))
+    raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
+                         .format(isotimestr))
 
 def parse_time(isotimestr, builder=PythonTimeBuilder):
     #Given a string in any ISO 8601 time format, return a datetime.time object
@@ -104,7 +105,8 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
     (timestr, tzstr) = _split_tz(isotimestr)
 
     if timestr[0].isdigit() is False or timestr[-1].isdigit() is False:
-        raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'.format(timestr))
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
+                             .format(timestr))
 
     if tzstr is None:
         tz = None

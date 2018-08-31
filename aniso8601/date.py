@@ -24,10 +24,12 @@ def get_date_resolution(isodatestr):
     #YYYY-DDD
     #YYYYDDD
     if isodatestr.startswith('+') or isodatestr.startswith('-'):
-        raise NotImplementedError('ISO 8601 extended year representation not supported.')
+        raise NotImplementedError('ISO 8601 extended year representation '
+                                  'not supported.')
 
     if isodatestr[0].isdigit() is False or isodatestr[-1].isdigit() is False:
-        raise ISOFormatError('"{0}" is not a valid ISO 8601 date.'.format(isodatestr))
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 date.'
+                             .format(isodatestr))
 
     if isodatestr.find('W') != -1:
         #Handle ISO 8601 week date format
@@ -44,9 +46,11 @@ def get_date_resolution(isodatestr):
             #YYYYWwwD
             return DateResolution.Weekday
         else:
-            raise ISOFormatError('"{0}" is not a valid ISO 8601 week date.'.format(isodatestr))
+            raise ISOFormatError('"{0}" is not a valid ISO 8601 week date.'
+                                 .format(isodatestr))
 
-    #If the size of the string of 4 or less, assume its a truncated year representation
+    #If the size of the string of 4 or less,
+    #assume its a truncated year representation
     if len(isodatestr) <= 4:
         return DateResolution.Year
 
@@ -61,7 +65,9 @@ def get_date_resolution(isodatestr):
             return DateResolution.Month
 
     if len(datestrsplit) == 3:
-        if len(datestrsplit[0]) == 4 and len(datestrsplit[1]) == 2 and len(datestrsplit[2]) == 2:
+        if (len(datestrsplit[0]) == 4
+                and len(datestrsplit[1]) == 2
+                and len(datestrsplit[2]) == 2):
             return DateResolution.Day
 
     #Check case 2
@@ -82,7 +88,8 @@ def get_date_resolution(isodatestr):
         return DateResolution.Ordinal
 
     #None of the date representations match
-    raise ISOFormatError('"{0}" is not an ISO 8601 date, perhaps it represents a time or datetime.'.format(isodatestr))
+    raise ISOFormatError('"{0}" is not an ISO 8601 date, perhaps it '
+                         'represents a time or datetime.'.format(isodatestr))
 
 def parse_date(isodatestr, builder=PythonTimeBuilder):
     #Given a string in any ISO 8601 date format, return a datetime.date
@@ -100,12 +107,11 @@ def parse_date(isodatestr, builder=PythonTimeBuilder):
     #YYYYDDD
     #
     #Note that the ISO 8601 date format of ±YYYYY is expressly not supported
-    return _RESOLUTION_MAP[get_date_resolution(isodatestr)](isodatestr, builder)
+    return _RESOLUTION_MAP[get_date_resolution(isodatestr)](isodatestr,
+                                                            builder)
 
 def _parse_year(yearstr, builder):
     #yearstr is of the format Y[YYY]
-    #
-
     return builder.build_date(YYYY=yearstr)
 
 def _parse_calendar_day(datestr, builder):
@@ -121,14 +127,16 @@ def _parse_calendar_day(datestr, builder):
         monthstr = datestr[4:6]
         daystr = datestr[6:]
     else:
-        raise ISOFormatError('"{0}" is not a valid ISO 8601 calendar day.'.format(datestr))
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 calendar day.'
+                             .format(datestr))
 
     return builder.build_date(YYYY=yearstr, MM=monthstr, DD=daystr)
 
 def _parse_calendar_month(datestr, builder):
     #datestr is of the format YYYY-MM
     if len(datestr) != 7:
-        raise ISOFormatError('"{0}" is not a valid ISO 8601 calendar month.'.format(datestr))
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 calendar month.'
+                             .format(datestr))
 
     yearstr = datestr[0:4]
     monthstr = datestr[5:]
@@ -144,7 +152,6 @@ def _parse_week_day(datestr, builder):
     #D is the weekday number, between 1 and 7, which differs from the Python
     #implementation which is between 0 and 6
 
-    #TODO: Avoid casting back and forth from int to string
     yearstr = datestr[0:4]
 
     #Week number will be the two characters after the W
@@ -158,7 +165,8 @@ def _parse_week_day(datestr, builder):
          #YYYYWwwD
         daystr = datestr[7:8]
     else:
-        raise ISOFormatError('"{0}" is not a valid ISO 8601 week date.'.format(datestr))
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 week date.'
+                             .format(datestr))
 
     return builder.build_date(YYYY=yearstr, Www=weekstr, D=daystr)
 
@@ -180,7 +188,6 @@ def _parse_ordinal_date(datestr, builder):
     #datestr is of the format YYYY-DDD or YYYYDDD
     #DDD can be from 1 - 36[5,6], this matches Python's definition
 
-    #TODO: Avoid casting back and forth from int to string
     yearstr = datestr[0:4]
 
     if datestr.find('-') != -1:

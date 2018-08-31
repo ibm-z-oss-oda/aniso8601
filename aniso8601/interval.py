@@ -8,13 +8,16 @@
 
 import warnings
 
-from aniso8601.builder import TupleBuilder, PythonTimeBuilder, RelativeTimeBuilder
+from aniso8601.builder import (TupleBuilder, PythonTimeBuilder,
+                               RelativeTimeBuilder)
 from aniso8601.date import parse_date
 from aniso8601.duration import parse_duration
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.time import parse_datetime
 
-def parse_interval(isointervalstr, intervaldelimiter='/', datetimedelimiter='T', relative=False, builder=PythonTimeBuilder):
+def parse_interval(isointervalstr, intervaldelimiter='/',
+                   datetimedelimiter='T', relative=False,
+                   builder=PythonTimeBuilder):
     #Given a string representing an ISO 8601 interval, return a
     #tuple of datetime.date or date.datetime objects representing the beginning
     #and end of the specified interval. Valid formats are:
@@ -30,21 +33,26 @@ def parse_interval(isointervalstr, intervaldelimiter='/', datetimedelimiter='T',
     #
     #<duration>
     #
-    #Is expressly not supported as there is no way to provide the addtional
+    #Is expressly not supported as there is no way to provide the additional
     #required context.
 
     if isointervalstr[0] == 'R':
-        raise ISOFormatError('ISO 8601 repeating intervals must be parsed with parse_repeating_interval.')
+        raise ISOFormatError('ISO 8601 repeating intervals must be parsed '
+                             'with parse_repeating_interval.')
 
     if relative is True:
-        warnings.warn('relative kwarg is deprecated', DeprecationWarning, stacklevel=2)
+        warnings.warn('relative kwarg is deprecated',
+                      DeprecationWarning, stacklevel=2)
 
         builder = RelativeTimeBuilder
 
-    return _parse_interval(isointervalstr, builder, intervaldelimiter, datetimedelimiter)
+    return _parse_interval(isointervalstr, builder,
+                           intervaldelimiter, datetimedelimiter)
 
-def parse_repeating_interval(isointervalstr, intervaldelimiter='/', datetimedelimiter='T', relative=False, builder=PythonTimeBuilder):
-    #Given a string representing an ISO 8601 interval repating, return a
+def parse_repeating_interval(isointervalstr, intervaldelimiter='/',
+                             datetimedelimiter='T', relative=False,
+                             builder=PythonTimeBuilder):
+    #Given a string representing an ISO 8601 interval repeating, return a
     #generator of datetime.date or date.datetime objects representing the
     #dates specified by the repeating interval. Valid formats are:
     #
@@ -52,10 +60,12 @@ def parse_repeating_interval(isointervalstr, intervaldelimiter='/', datetimedeli
     #R/<interval>
 
     if isointervalstr[0] != 'R':
-        raise ISOFormatError('ISO 8601 repeating interval must start with an R.')
+        raise ISOFormatError('ISO 8601 repeating interval must start '
+                             'with an R.')
 
     if relative is True:
-        warnings.warn('relative kwarg is deprecated', DeprecationWarning, stacklevel=2)
+        warnings.warn('relative kwarg is deprecated',
+                      DeprecationWarning, stacklevel=2)
 
         builder = RelativeTimeBuilder
 
@@ -69,11 +79,13 @@ def parse_repeating_interval(isointervalstr, intervaldelimiter='/', datetimedeli
         R = True
         Rnn = None
 
-    interval = _parse_interval(intervalpart, TupleBuilder, intervaldelimiter, datetimedelimiter)
+    interval = _parse_interval(intervalpart, TupleBuilder,
+                               intervaldelimiter, datetimedelimiter)
 
     return builder.build_repeating_interval(R=R, Rnn=Rnn, interval=interval)
 
-def _parse_interval(isointervalstr, builder, intervaldelimiter='/', datetimedelimiter='T'):
+def _parse_interval(isointervalstr, builder, intervaldelimiter='/',
+                    datetimedelimiter='T'):
     #Returns a tuple containing the start of the interval, the end of the
     #interval, and or the interval duration
 
@@ -90,9 +102,12 @@ def _parse_interval(isointervalstr, builder, intervaldelimiter='/', datetimedeli
         if secondpart.find(datetimedelimiter) != -1:
             #<end> is a datetime
             duration = parse_duration(firstpart, builder=TupleBuilder)
-            enddatetime = parse_datetime(secondpart, delimiter=datetimedelimiter, builder=TupleBuilder)
+            enddatetime = parse_datetime(secondpart,
+                                         delimiter=datetimedelimiter,
+                                         builder=TupleBuilder)
 
-            return builder.build_interval(end=enddatetime, duration=duration)
+            return builder.build_interval(end=enddatetime,
+                                          duration=duration)
 
         #<end> must just be a date
         duration = parse_duration(firstpart, builder=TupleBuilder)
@@ -105,35 +120,55 @@ def _parse_interval(isointervalstr, builder, intervaldelimiter='/', datetimedeli
         if firstpart.find(datetimedelimiter) != -1:
             #<start> is a datetime
             duration = parse_duration(secondpart, builder=TupleBuilder)
-            startdatetime = parse_datetime(firstpart, delimiter=datetimedelimiter, builder=TupleBuilder)
+            startdatetime = parse_datetime(firstpart,
+                                           delimiter=datetimedelimiter,
+                                           builder=TupleBuilder)
 
-            return builder.build_interval(start=startdatetime, duration=duration)
+            return builder.build_interval(start=startdatetime,
+                                          duration=duration)
 
         #<start> must just be a date
         duration = parse_duration(secondpart, builder=TupleBuilder)
         startdate = parse_date(firstpart, builder=TupleBuilder)
 
-        return builder.build_interval(start=startdate, duration=duration)
+        return builder.build_interval(start=startdate,
+                                      duration=duration)
 
     #<start>/<end>
-    if firstpart.find(datetimedelimiter) != -1 and secondpart.find(datetimedelimiter) != -1:
+    if (firstpart.find(datetimedelimiter) != -1
+            and secondpart.find(datetimedelimiter) != -1):
         #Both parts are datetimes
-        start_datetime = parse_datetime(firstpart, delimiter=datetimedelimiter, builder=TupleBuilder)
-        end_datetime = parse_datetime(secondpart, delimiter=datetimedelimiter, builder=TupleBuilder)
+        start_datetime = parse_datetime(firstpart,
+                                        delimiter=datetimedelimiter,
+                                        builder=TupleBuilder)
 
-        return builder.build_interval(start=start_datetime, end=end_datetime)
-    elif firstpart.find(datetimedelimiter) != -1 and secondpart.find(datetimedelimiter) == -1:
+        end_datetime = parse_datetime(secondpart,
+                                      delimiter=datetimedelimiter,
+                                      builder=TupleBuilder)
+
+        return builder.build_interval(start=start_datetime,
+                                      end=end_datetime)
+    elif (firstpart.find(datetimedelimiter) != -1
+          and secondpart.find(datetimedelimiter) == -1):
         #First part is a datetime, second part is a date
-        start_datetime = parse_datetime(firstpart, delimiter=datetimedelimiter, builder=TupleBuilder)
+        start_datetime = parse_datetime(firstpart,
+                                        delimiter=datetimedelimiter,
+                                        builder=TupleBuilder)
+
         end_date = parse_date(secondpart, builder=TupleBuilder)
 
-        return builder.build_interval(start=start_datetime, end=end_date)
-    elif firstpart.find(datetimedelimiter) == -1 and secondpart.find(datetimedelimiter) != -1:
+        return builder.build_interval(start=start_datetime,
+                                      end=end_date)
+    elif (firstpart.find(datetimedelimiter) == -1
+          and secondpart.find(datetimedelimiter) != -1):
         #First part is a date, second part is a datetime
         start_date = parse_date(firstpart, builder=TupleBuilder)
-        end_datetime = parse_datetime(secondpart, delimiter=datetimedelimiter, builder=TupleBuilder)
+        end_datetime = parse_datetime(secondpart,
+                                      delimiter=datetimedelimiter,
+                                      builder=TupleBuilder)
 
-        return builder.build_interval(start=start_date, end=end_datetime)
+        return builder.build_interval(start=start_date,
+                                      end=end_datetime)
 
     #Both parts are dates
     start_date = parse_date(firstpart, builder=TupleBuilder)

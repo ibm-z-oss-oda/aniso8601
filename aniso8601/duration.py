@@ -9,7 +9,8 @@
 import warnings
 
 from aniso8601 import compat
-from aniso8601.builder import TupleBuilder, PythonTimeBuilder, RelativeTimeBuilder
+from aniso8601.builder import (TupleBuilder, PythonTimeBuilder,
+                               RelativeTimeBuilder)
 from aniso8601.date import parse_date
 from aniso8601.exceptions import ISOFormatError, NegativeDurationError
 from aniso8601.time import parse_time
@@ -26,12 +27,15 @@ def parse_duration(isodurationstr, relative=False, builder=PythonTimeBuilder):
         raise ISOFormatError('ISO 8601 duration must start with a P.')
 
     if relative is True:
-        warnings.warn('relative kwarg is deprecated', DeprecationWarning, stacklevel=2)
+        warnings.warn('relative kwarg is deprecated',
+                      DeprecationWarning, stacklevel=2)
 
         builder = RelativeTimeBuilder
 
-    #If Y, M, D, H, S, or W are in the string, assume it is a specified duration
-    if _has_any_component(isodurationstr, ['Y', 'M', 'D', 'H', 'S', 'W']) is True:
+    #If Y, M, D, H, S, or W are in the string,
+    #assume it is a specified duration
+    if _has_any_component(isodurationstr,
+                          ['Y', 'M', 'D', 'H', 'S', 'W']) is True:
         return _parse_duration_prescribed(isodurationstr, builder)
 
     return _parse_duration_combined(isodurationstr, builder)
@@ -47,11 +51,13 @@ def _parse_duration_prescribed(durationstr, builder):
     #Make sure the end character is valid
     #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
     if durationstr[-1] not in ['Y', 'M', 'D', 'H', 'S', 'W']:
-        raise ISOFormatError('ISO 8601 duration must end with a valid character.')
+        raise ISOFormatError('ISO 8601 duration must end with a valid '
+                             'character.')
 
     #Make sure only the lowest order element has decimal precision
     if durationstr.count('.') > 1:
-        raise ISOFormatError('ISO 8601 allows only lowest order element to have a decimal fraction.')
+        raise ISOFormatError('ISO 8601 allows only lowest order element to '
+                             'have a decimal fraction.')
     elif durationstr.count('.') == 1:
         #There should only ever be 1 letter after a decimal if there is more
         #then one, the string is invalid
@@ -62,12 +68,16 @@ def _parse_duration_prescribed(durationstr, builder):
                 lettercount += 1
 
                 if lettercount > 1:
-                    raise ISOFormatError('ISO 8601 duration must end with a single valid character.')
+                    raise ISOFormatError('ISO 8601 duration must end with '
+                                         'a single valid character.')
 
     #Do not allow W in combination with other designators
     #https://bitbucket.org/nielsenb/aniso8601/issues/2/week-designators-should-not-be-combinable
-    if durationstr.find('W') != -1 and _has_any_component(durationstr, ['Y', 'M', 'D', 'H', 'S']) is True:
-        raise ISOFormatError('ISO 8601 week designators may not be combined with other time designators.')
+    if (durationstr.find('W') != -1
+            and _has_any_component(durationstr,
+                                   ['Y', 'M', 'D', 'H', 'S']) is True):
+        raise ISOFormatError('ISO 8601 week designators may not be combined '
+                             'with other time designators.')
 
     #Parse the elements of the duration
     if durationstr.find('T') == -1:
@@ -86,10 +96,13 @@ def _parse_duration_prescribed_notime(durationstr, builder):
     #Make sure no time portion is included
     #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
     if _has_any_component(durationstr, ['H', 'S']):
-        raise ISOFormatError('ISO 8601 time components not allowed in duration without prescribed time.')
+        raise ISOFormatError('ISO 8601 time components not allowed in duration '
+                             'without prescribed time.')
 
-    if _component_order_correct(durationstr, ['P', 'Y', 'M', 'D', 'W']) is False:
-        raise ISOFormatError('ISO 8601 duration components must be in the correct order.')
+    if _component_order_correct(durationstr,
+                                ['P', 'Y', 'M', 'D', 'W']) is False:
+        raise ISOFormatError('ISO 8601 duration components must be in the '
+                             'correct order.')
 
     if durationstr.find('Y') != -1:
         yearstr = _parse_duration_element(durationstr, 'Y')
@@ -111,7 +124,8 @@ def _parse_duration_prescribed_notime(durationstr, builder):
     else:
         daystr = None
 
-    return builder.build_duration(PnY=yearstr, PnM=monthstr, PnW=weekstr, PnD=daystr)
+    return builder.build_duration(PnY=yearstr, PnM=monthstr,
+                                  PnW=weekstr, PnD=daystr)
 
 def _parse_duration_prescribed_time(durationstr, builder):
     #durationstr can be of the form PnYnMnDTnHnMnS
@@ -127,17 +141,21 @@ def _parse_duration_prescribed_time(durationstr, builder):
     #Make sure no time portion is included in the date half
     #https://bitbucket.org/nielsenb/aniso8601/issues/7/durations-with-time-components-before-t
     if _has_any_component(firsthalf, ['H', 'S']):
-        raise ISOFormatError('ISO 8601 time components not allowed in date portion of duration.')
+        raise ISOFormatError('ISO 8601 time components not allowed in date '
+                             'portion of duration.')
 
     if _component_order_correct(firsthalf, ['P', 'Y', 'M', 'D', 'W']) is False:
-        raise ISOFormatError('ISO 8601 duration components must be in the correct order.')
+        raise ISOFormatError('ISO 8601 duration components must be in the '
+                             'correct order.')
 
     #Make sure no date component is included in the time half
     if _has_any_component(secondhalf, ['Y', 'D']):
-        raise ISOFormatError('ISO 8601 time components not allowed in date portion of duration.')
+        raise ISOFormatError('ISO 8601 time components not allowed in date '
+                             'portion of duration.')
 
     if _component_order_correct(secondhalf, ['T', 'H', 'M', 'S']) is False:
-        raise ISOFormatError('ISO 8601 time components in duration must be in the correct order.')
+        raise ISOFormatError('ISO 8601 time components in duration must be in '
+                             'the correct order.')
 
     if firsthalf.find('Y') != -1:
         yearstr = _parse_duration_element(firsthalf, 'Y')
@@ -169,7 +187,8 @@ def _parse_duration_prescribed_time(durationstr, builder):
     else:
         secondstr = None
 
-    return builder.build_duration(PnY=yearstr, PnM=monthstr, PnD=daystr, TnH=hourstr, TnM=minutestr, TnS=secondstr)
+    return builder.build_duration(PnY=yearstr, PnM=monthstr, PnD=daystr,
+                                  TnH=hourstr, TnM=minutestr, TnS=secondstr)
 
 def _parse_duration_combined(durationstr, builder):
     #Period of the form P<date>T<time>
@@ -180,7 +199,9 @@ def _parse_duration_combined(durationstr, builder):
     datevalue = parse_date(datepart, builder=TupleBuilder)
     timevalue = parse_time(timepart, builder=TupleBuilder)
 
-    return builder.build_duration(PnY=datevalue[0], PnM=datevalue[1], PnD=datevalue[2], TnH=timevalue[0], TnM=timevalue[1], TnS=timevalue[2])
+    return builder.build_duration(PnY=datevalue[0], PnM=datevalue[1],
+                                  PnD=datevalue[2], TnH=timevalue[0],
+                                  TnM=timevalue[1], TnS=timevalue[2])
 
 def _parse_duration_element(durationstr, elementstr):
     #Extracts the specified portion of a duration, for instance, given:
