@@ -6,235 +6,107 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-import mock
 import unittest
+import mock
+import aniso8601
 
 from aniso8601.exceptions import ISOFormatError, NegativeDurationError
-from aniso8601.builder import TupleBuilder
-from aniso8601.duration import parse_duration, _parse_duration_prescribed, \
-        _parse_duration_combined, _parse_duration_prescribed_notime, \
-        _parse_duration_prescribed_time, _parse_duration_element, \
-        _has_any_component, _component_order_correct
+from aniso8601.duration import (parse_duration, _parse_duration_prescribed,
+                                _parse_duration_combined,
+                                _parse_duration_prescribed_notime,
+                                _parse_duration_prescribed_time,
+                                _parse_duration_element,
+                                _has_any_component, _component_order_correct)
 
 class TestDurationParserFunctions(unittest.TestCase):
     def test_parse_duration(self):
-        parse = parse_duration('P1Y2M3DT4H54M6S', builder=TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6', 'duration'))
-
-        parse = parse_duration('P1Y2M3DT4H54M6.5S', builder=TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
-
-        parse = parse_duration('P1Y2M3DT4H54M6,5S', builder=TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
-
-        parse = parse_duration('P1Y2M3D', builder=TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3', None, None, None, 'duration'))
-
-        parse = parse_duration('P1Y2M3.5D', builder=TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3.5', None, None, None, 'duration'))
-
-        parse = parse_duration('P1Y2M3,5D', builder=TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3.5', None, None, None, 'duration'))
-
-        parse = parse_duration('PT4H54M6.5S', builder=TupleBuilder)
-        self.assertEqual(parse, (None, None, None, None, '4', '54', '6.5', 'duration'))
-
-        parse = parse_duration('PT4H54M6,5S', builder=TupleBuilder)
-        self.assertEqual(parse, (None, None, None, None, '4', '54', '6.5', 'duration'))
-
-        parse = parse_duration('PT0.0000001S', builder=TupleBuilder)
-        self.assertEqual(parse, (None, None, None, None, None, None, '0.0000001', 'duration'))
-
-        parse = parse_duration('PT2.0000048S', builder=TupleBuilder)
-        self.assertEqual(parse, (None, None, None, None, None, None, '2.0000048', 'duration'))
-
-        parse = parse_duration('P1Y', builder=TupleBuilder)
-        self.assertEqual(parse, ('1', None, None, None, None, None, None, 'duration'))
-
-        parse = parse_duration('P1.5Y', builder=TupleBuilder)
-        self.assertEqual(parse, ('1.5', None, None, None, None, None, None, 'duration'))
-
-        parse = parse_duration('P1,5Y', builder=TupleBuilder)
-        self.assertEqual(parse, ('1.5', None, None, None, None, None, None, 'duration'))
-
-        parse = parse_duration('P1M', builder=TupleBuilder)
-        self.assertEqual(parse, (None, '1', None, None, None, None, None, 'duration'))
-
-        parse = parse_duration('P1.5M', builder=TupleBuilder)
-        self.assertEqual(parse, (None, '1.5', None, None, None, None, None, 'duration'))
-
-        parse = parse_duration('P1,5M', builder=TupleBuilder)
-        self.assertEqual(parse, (None, '1.5', None, None, None, None, None, 'duration'))
-
-        parse = parse_duration('P1W', builder=TupleBuilder)
-        self.assertEqual(parse, (None, None, '1', None, None, None, None, 'duration'))
-
-        parse = parse_duration('P1.5W', builder=TupleBuilder)
-        self.assertEqual(parse, (None, None, '1.5', None, None, None, None, 'duration'))
-
-        parse = parse_duration('P1,5W', builder=TupleBuilder)
-        self.assertEqual(parse, (None, None, '1.5', None, None, None, None, 'duration'))
-
-        parse = parse_duration('P1D', builder=TupleBuilder)
-        self.assertEqual(parse, (None, None, None, '1', None, None, None, 'duration'))
-
-        parse = parse_duration('P1.5D', builder=TupleBuilder)
-        self.assertEqual(parse, (None, None, None, '1.5', None, None, None, 'duration'))
-
-        parse = parse_duration('P1,5D', builder=TupleBuilder)
-        self.assertEqual(parse, (None, None, None, '1.5', None, None, None, 'duration'))
-
-        parse = parse_duration('P0003-06-04T12:30:05', builder=TupleBuilder)
-        self.assertEqual(parse, ('0003', '06', None, '04', '12', '30', '05', 'duration'))
-
-        parse = parse_duration('P0003-06-04T12:30:05.5', builder=TupleBuilder)
-        self.assertEqual(parse, ('0003', '06', None, '04', '12', '30', '05.5', 'duration'))
-
-        parse = parse_duration('P0001-02-03T14:43:59.9999997', builder=TupleBuilder)
-        self.assertEqual(parse, ('0001', '02', None, '03', '14', '43', '59.9999997', 'duration'))
-
-    def test_parse_duration_defaultbuilder(self):
-        import aniso8601
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1Y2M3DT4H54M6S')
-
-        mockBuildDuration.assert_called_once_with(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1Y2M3DT4H54M6.5S')
-
-        mockBuildDuration.assert_called_once_with(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6.5')
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1Y2M3DT4H54M6,5S')
-
-        mockBuildDuration.assert_called_once_with(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6.5')
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1Y2M3D')
-
-        mockBuildDuration.assert_called_once_with(PnY='1', PnW=None, PnM='2', PnD='3')
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1Y2M3.5D')
-
-        mockBuildDuration.assert_called_once_with(PnY='1', PnW=None, PnM='2', PnD='3.5')
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1Y2M3,5D')
-
-        mockBuildDuration.assert_called_once_with(PnY='1', PnW=None, PnM='2', PnD='3.5')
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('PT4H54M6.5S')
-
-        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnD=None, TnH='4', TnM='54', TnS='6.5')
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('PT4H54M6,5S')
-
-        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnD=None, TnH='4', TnM='54', TnS='6.5')
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('PT0.0000001S')
-
-        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnD=None, TnH=None, TnM=None, TnS='0.0000001')
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('PT2.0000048S')
-
-        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnD=None, TnH=None, TnM=None, TnS='2.0000048')
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1Y')
-
-        mockBuildDuration.assert_called_once_with(PnY='1', PnM=None, PnW=None, PnD=None)
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1.5Y')
-
-        mockBuildDuration.assert_called_once_with(PnY='1.5', PnM=None, PnW=None, PnD=None)
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1,5Y')
-
-        mockBuildDuration.assert_called_once_with(PnY='1.5', PnM=None, PnW=None, PnD=None)
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1M')
-
-        mockBuildDuration.assert_called_once_with(PnY=None, PnM='1', PnW=None, PnD=None)
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1.5M')
-
-        mockBuildDuration.assert_called_once_with(PnY=None, PnM='1.5', PnW=None, PnD=None)
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1,5M')
-
-        mockBuildDuration.assert_called_once_with(PnY=None, PnM='1.5', PnW=None, PnD=None)
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1W')
-
-        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnW='1', PnD=None)
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1.5W')
-
-        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnW='1.5', PnD=None)
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1,5W')
-
-        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnW='1.5', PnD=None)
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1D')
-
-        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnW=None, PnD='1')
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1.5D')
-
-        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnW=None, PnD='1.5')
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P1,5D')
-
-        mockBuildDuration.assert_called_once_with(PnY=None, PnM=None, PnW=None, PnD='1.5')
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P0003-06-04T12:30:05')
-
-        mockBuildDuration.assert_called_once_with(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05')
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P0003-06-04T12:30:05.5')
-
-        mockBuildDuration.assert_called_once_with(PnY='0003', PnM='06', PnD='04', TnH='12', TnM='30', TnS='05.5')
-
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder, 'build_duration') as mockBuildDuration:
-            parse_duration('P0001-02-03T14:43:59.9999997')
-
-        mockBuildDuration.assert_called_once_with(PnY='0001', PnM='02', PnD='03', TnH='14', TnM='43', TnS='59.9999997')
+        testtuples = (('P1Y2M3DT4H54M6S', {'PnY': '1', 'PnM': '2',
+                                           'PnD': '3', 'TnH': '4',
+                                           'TnM': '54', 'TnS': '6'}),
+                      ('P1Y2M3DT4H54M6.5S', {'PnY': '1', 'PnM': '2',
+                                             'PnD': '3', 'TnH': '4',
+                                             'TnM': '54', 'TnS': '6.5'}),
+                      ('P1Y2M3DT4H54M6,5S', {'PnY': '1', 'PnM': '2',
+                                             'PnD': '3', 'TnH': '4',
+                                             'TnM': '54', 'TnS': '6.5'}),
+                      ('P1Y2M3D', {'PnY': '1', 'PnM': '2',
+                                   'PnW': None, 'PnD': '3'}),
+                      ('P1Y2M3.5D', {'PnY': '1', 'PnM': '2',
+                                     'PnW': None, 'PnD': '3.5'}),
+                      ('P1Y2M3,5D', {'PnY': '1', 'PnM': '2',
+                                     'PnW': None, 'PnD': '3.5'}),
+                      ('PT4H54M6.5S', {'PnY': None, 'PnM': None, 'PnD': None,
+                                       'TnH': '4', 'TnM': '54', 'TnS': '6.5'}),
+                      ('PT4H54M6,5S', {'PnY': None, 'PnM': None, 'PnD': None,
+                                       'TnH': '4', 'TnM': '54', 'TnS': '6.5'}),
+                      ('PT0.0000001S', {'PnY': None, 'PnM': None, 'PnD': None,
+                                        'TnH': None, 'TnM': None,
+                                        'TnS': '0.0000001'}),
+                      ('PT2.0000048S', {'PnY': None, 'PnM': None, 'PnD': None,
+                                        'TnH': None, 'TnM': None,
+                                        'TnS': '2.0000048'}),
+                      ('P1Y', {'PnY': '1', 'PnM': None,
+                               'PnW': None, 'PnD': None}),
+                      ('P1.5Y', {'PnY': '1.5', 'PnM': None, 'PnW': None,
+                                 'PnD': None}),
+                      ('P1,5Y', {'PnY': '1.5', 'PnM': None, 'PnW': None,
+                                 'PnD': None}),
+                      ('P1M', {'PnY': None, 'PnM': '1', 'PnW': None,
+                               'PnD': None}),
+                      ('P1.5M', {'PnY': None, 'PnM': '1.5', 'PnW': None,
+                                 'PnD':None}),
+                      ('P1,5M', {'PnY': None, 'PnM': '1.5', 'PnW': None,
+                                 'PnD':None}),
+                      ('P1W', {'PnY': None, 'PnM': None, 'PnW': '1',
+                               'PnD': None}),
+                      ('P1.5W', {'PnY': None, 'PnM': None, 'PnW': '1.5',
+                                 'PnD': None}),
+                      ('P1,5W', {'PnY': None, 'PnM': None, 'PnW': '1.5',
+                                 'PnD': None}),
+                      ('P1D', {'PnY': None, 'PnM': None, 'PnW': None,
+                               'PnD': '1'}),
+                      ('P1.5D', {'PnY': None, 'PnM': None, 'PnW': None,
+                                 'PnD': '1.5'}),
+                      ('P1,5D', {'PnY': None, 'PnM': None, 'PnW': None,
+                                 'PnD': '1.5'}),
+                      ('P0003-06-04T12:30:05', {'PnY': '0003', 'PnM': '06',
+                                                'PnD': '04', 'TnH': '12',
+                                                'TnM': '30', 'TnS': '05'}),
+                      ('P0003-06-04T12:30:05.5', {'PnY': '0003', 'PnM': '06',
+                                                  'PnD': '04', 'TnH': '12',
+                                                  'TnM': '30', 'TnS': '05.5'}),
+                      ('P0001-02-03T14:43:59.9999997', {'PnY': '0001',
+                                                        'PnM': '02',
+                                                        'PnD': '03',
+                                                        'TnH': '14',
+                                                        'TnM': '43',
+                                                        'TnS':
+                                                        '59.9999997'}))
+
+        for testtuple in testtuples:
+            with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
+                                   'build_duration') as mockBuildDuration:
+                parse_duration(testtuple[0])
+
+            mockBuildDuration.assert_called_once_with(**testtuple[1])
 
     def test_parse_duration_mockbuilder(self):
         mockBuilder = mock.Mock()
 
         parse_duration('P1Y2M3DT4H54M6S', builder=mockBuilder)
 
-        mockBuilder.build_duration.assert_called_once_with(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
+        mockBuilder.build_duration.assert_called_once_with(PnY='1', PnM='2',
+                                                           PnD='3', TnH='4',
+                                                           TnM='54', TnS='6')
 
     def test_parse_duration_relative(self):
-        import aniso8601
-
-        with mock.patch.object(aniso8601.builder.RelativeTimeBuilder, 'build_duration') as mockBuildDuration:
+        with mock.patch.object(aniso8601.builder.RelativeTimeBuilder,
+                               'build_duration') as mockBuildDuration:
             parse_duration('P1Y2M3DT4H54M6S', relative=True)
 
-        mockBuildDuration.assert_called_once_with(PnY='1', PnM='2', PnD='3', TnH='4', TnM='54', TnS='6')
+        mockBuildDuration.assert_called_once_with(PnY='1', PnM='2',
+                                                  PnD='3', TnH='4',
+                                                  TnM='54', TnS='6')
 
     def test_parse_duration_nop(self):
         with self.assertRaises(ISOFormatError):
@@ -304,65 +176,58 @@ class TestDurationParserFunctions(unittest.TestCase):
             parse_duration('PT1S1H', builder=None)
 
     def test_parse_duration_prescribed(self):
-        parse = _parse_duration_prescribed('P1Y2M3DT4H54M6S', TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6', 'duration'))
+        testtuples = (('P1Y2M3DT4H54M6S', {'PnY': '1', 'PnM': '2',
+                                           'PnD': '3', 'TnH': '4',
+                                           'TnM': '54', 'TnS': '6'}),
+                      ('P1Y2M3DT4H54M6.5S', {'PnY': '1', 'PnM': '2',
+                                             'PnD': '3', 'TnH': '4',
+                                             'TnM': '54', 'TnS': '6.5'}),
+                      ('P1Y2M3DT4H54M6,5S', {'PnY': '1', 'PnM': '2',
+                                             'PnD': '3', 'TnH': '4',
+                                             'TnM': '54', 'TnS': '6.5'}),
+                      ('PT4H54M6.5S', {'PnY': None, 'PnM': None, 'PnD': None,
+                                       'TnH': '4', 'TnM': '54', 'TnS': '6.5'}),
+                      ('PT4H54M6,5S', {'PnY': None, 'PnM': None, 'PnD': None,
+                                       'TnH': '4', 'TnM': '54', 'TnS': '6.5'}),
+                      ('P1Y2M3D', {'PnY': '1', 'PnM': '2',
+                                   'PnW': None, 'PnD': '3'}),
+                      ('P1Y2M3.5D', {'PnY': '1', 'PnM': '2',
+                                     'PnW': None, 'PnD': '3.5'}),
+                      ('P1Y2M3,5D', {'PnY': '1', 'PnM': '2',
+                                     'PnW': None, 'PnD': '3.5'}),
+                      ('P1Y', {'PnY': '1', 'PnM': None,
+                               'PnW': None, 'PnD': None}),
+                      ('P1.5Y', {'PnY': '1.5', 'PnM': None, 'PnW': None,
+                                 'PnD': None}),
+                      ('P1,5Y', {'PnY': '1.5', 'PnM': None, 'PnW': None,
+                                 'PnD': None}),
+                      ('P1M', {'PnY': None, 'PnM': '1', 'PnW': None,
+                               'PnD': None}),
+                      ('P1.5M', {'PnY': None, 'PnM': '1.5', 'PnW': None,
+                                 'PnD':None}),
+                      ('P1,5M', {'PnY': None, 'PnM': '1.5', 'PnW': None,
+                                 'PnD':None}),
+                      ('P1W', {'PnY': None, 'PnM': None, 'PnW': '1',
+                               'PnD': None}),
+                      ('P1.5W', {'PnY': None, 'PnM': None, 'PnW': '1.5',
+                                 'PnD': None}),
+                      ('P1,5W', {'PnY': None, 'PnM': None, 'PnW': '1.5',
+                                 'PnD': None}),
+                      ('P1D', {'PnY': None, 'PnM': None, 'PnW': None,
+                               'PnD': '1'}),
+                      ('P1.5D', {'PnY': None, 'PnM': None, 'PnW': None,
+                                 'PnD': '1.5'}),
+                      ('P1,5D', {'PnY': None, 'PnM': None, 'PnW': None,
+                                 'PnD': '1.5'}))
 
-        parse = _parse_duration_prescribed('P1Y2M3DT4H54M6.5S', TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
+        for testtuple in testtuples:
+            mockBuilder = mock.Mock()
+            mockBuilder.build_duration.return_value = testtuple[1]
 
-        parse = _parse_duration_prescribed('P1Y2M3DT4H54M6,5S', TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
+            result = _parse_duration_prescribed(testtuple[0], mockBuilder)
 
-        parse = _parse_duration_prescribed('PT4H54M6.5S', TupleBuilder)
-        self.assertEqual(parse, (None, None, None, None, '4', '54', '6.5', 'duration'))
-
-        parse = _parse_duration_prescribed('PT4H54M6,5S', TupleBuilder)
-        self.assertEqual(parse, (None, None, None, None, '4', '54', '6.5', 'duration'))
-
-        parse = _parse_duration_prescribed('P1Y2M3D', TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3', None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed('P1Y2M3.5D', TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3.5', None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed('P1Y2M3,5D', TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3.5', None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed('P1Y', TupleBuilder)
-        self.assertEqual(parse, ('1', None, None, None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed('P1.5Y', TupleBuilder)
-        self.assertEqual(parse, ('1.5', None, None, None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed('P1,5Y', TupleBuilder)
-        self.assertEqual(parse, ('1.5', None, None, None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed('P1M', TupleBuilder)
-        self.assertEqual(parse, (None, '1', None, None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed('P1.5M', TupleBuilder)
-        self.assertEqual(parse, (None, '1.5', None, None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed('P1,5M', TupleBuilder)
-        self.assertEqual(parse, (None, '1.5', None, None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed('P1W', TupleBuilder)
-        self.assertEqual(parse, (None, None, '1', None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed('P1.5W', TupleBuilder)
-        self.assertEqual(parse, (None, None, '1.5', None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed('P1,5W', TupleBuilder)
-        self.assertEqual(parse, (None, None, '1.5', None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed('P1D', TupleBuilder)
-        self.assertEqual(parse, (None, None, None, '1', None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed('P1.5D', TupleBuilder)
-        self.assertEqual(parse, (None, None, None, '1.5', None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed('P1,5D', TupleBuilder)
-        self.assertEqual(parse, (None, None, None, '1.5', None, None, None, 'duration'))
+            self.assertEqual(result, testtuple[1])
+            mockBuilder.build_duration.assert_called_once_with(**testtuple[1])
 
     def test_parse_duration_prescribed_negative(self):
         with self.assertRaises(NegativeDurationError):
@@ -428,50 +293,45 @@ class TestDurationParserFunctions(unittest.TestCase):
             _parse_duration_prescribed('PT1S1H', None)
 
     def test_parse_duration_prescribed_notime(self):
-        parse = _parse_duration_prescribed_notime('P1Y2M3D', TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3', None, None, None, 'duration'))
+        testtuples = (('P1Y2M3D', {'PnY': '1', 'PnM': '2',
+                                   'PnW': None, 'PnD': '3'}),
+                      ('P1Y2M3.5D', {'PnY': '1', 'PnM': '2',
+                                     'PnW': None, 'PnD': '3.5'}),
+                      ('P1Y2M3,5D', {'PnY': '1', 'PnM': '2',
+                                     'PnW': None, 'PnD': '3.5'}),
+                      ('P1Y', {'PnY': '1', 'PnM': None,
+                               'PnW': None, 'PnD': None}),
+                      ('P1.5Y', {'PnY': '1.5', 'PnM': None, 'PnW': None,
+                                 'PnD': None}),
+                      ('P1,5Y', {'PnY': '1.5', 'PnM': None, 'PnW': None,
+                                 'PnD': None}),
+                      ('P1M', {'PnY': None, 'PnM': '1', 'PnW': None,
+                               'PnD': None}),
+                      ('P1.5M', {'PnY': None, 'PnM': '1.5', 'PnW': None,
+                                 'PnD':None}),
+                      ('P1,5M', {'PnY': None, 'PnM': '1.5', 'PnW': None,
+                                 'PnD':None}),
+                      ('P1W', {'PnY': None, 'PnM': None, 'PnW': '1',
+                               'PnD': None}),
+                      ('P1.5W', {'PnY': None, 'PnM': None, 'PnW': '1.5',
+                                 'PnD': None}),
+                      ('P1,5W', {'PnY': None, 'PnM': None, 'PnW': '1.5',
+                                 'PnD': None}),
+                      ('P1D', {'PnY': None, 'PnM': None, 'PnW': None,
+                               'PnD': '1'}),
+                      ('P1.5D', {'PnY': None, 'PnM': None, 'PnW': None,
+                                 'PnD': '1.5'}),
+                      ('P1,5D', {'PnY': None, 'PnM': None, 'PnW': None,
+                                 'PnD': '1.5'}))
 
-        parse = _parse_duration_prescribed_notime('P1Y2M3.5D', TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3.5', None, None, None, 'duration'))
+        for testtuple in testtuples:
+            mockBuilder = mock.Mock()
+            mockBuilder.build_duration.return_value = testtuple[1]
 
-        parse = _parse_duration_prescribed_notime('P1Y2M3,5D', TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3.5', None, None, None, 'duration'))
+            result = _parse_duration_prescribed_notime(testtuple[0], mockBuilder)
 
-        parse = _parse_duration_prescribed_notime('P1Y', TupleBuilder)
-        self.assertEqual(parse, ('1', None, None, None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed_notime('P1.5Y', TupleBuilder)
-        self.assertEqual(parse, ('1.5', None, None, None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed_notime('P1,5Y', TupleBuilder)
-        self.assertEqual(parse, ('1.5', None, None, None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed_notime('P1M', TupleBuilder)
-        self.assertEqual(parse, (None, '1', None, None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed_notime('P1.5M', TupleBuilder)
-        self.assertEqual(parse, (None, '1.5', None, None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed_notime('P1,5M', TupleBuilder)
-        self.assertEqual(parse, (None, '1.5', None, None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed_notime('P1W', TupleBuilder)
-        self.assertEqual(parse, (None, None, '1', None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed_notime('P1.5W', TupleBuilder)
-        self.assertEqual(parse, (None, None, '1.5', None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed_notime('P1,5W', TupleBuilder)
-        self.assertEqual(parse, (None, None, '1.5', None, None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed_notime('P1D', TupleBuilder)
-        self.assertEqual(parse, (None, None, None, '1', None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed_notime('P1.5D', TupleBuilder)
-        self.assertEqual(parse, (None, None, None, '1.5', None, None, None, 'duration'))
-
-        parse = _parse_duration_prescribed_notime('P1,5D', TupleBuilder)
-        self.assertEqual(parse, (None, None, None, '1.5', None, None, None, 'duration'))
+            self.assertEqual(result, testtuple[1])
+            mockBuilder.build_duration.assert_called_once_with(**testtuple[1])
 
     def test_parse_duration_prescribed_notime_timepart(self):
         #Ensure no time part is allowed
@@ -516,20 +376,28 @@ class TestDurationParserFunctions(unittest.TestCase):
             _parse_duration_prescribed_notime('P1D1Y1M', None)
 
     def test_parse_duration_prescribed_time(self):
-        parse = _parse_duration_prescribed_time('P1Y2M3DT4H54M6S', TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6', 'duration'))
+        testtuples = (('P1Y2M3DT4H54M6S', {'PnY': '1', 'PnM': '2',
+                                           'PnD': '3', 'TnH': '4',
+                                           'TnM': '54', 'TnS': '6'}),
+                      ('P1Y2M3DT4H54M6.5S', {'PnY': '1', 'PnM': '2',
+                                             'PnD': '3', 'TnH': '4',
+                                             'TnM': '54', 'TnS': '6.5'}),
+                      ('P1Y2M3DT4H54M6,5S', {'PnY': '1', 'PnM': '2',
+                                             'PnD': '3', 'TnH': '4',
+                                             'TnM': '54', 'TnS': '6.5'}),
+                      ('PT4H54M6.5S', {'PnY': None, 'PnM': None, 'PnD': None,
+                                       'TnH': '4', 'TnM': '54', 'TnS': '6.5'}),
+                      ('PT4H54M6,5S', {'PnY': None, 'PnM': None, 'PnD': None,
+                                       'TnH': '4', 'TnM': '54', 'TnS': '6.5'}))
 
-        parse = _parse_duration_prescribed_time('P1Y2M3DT4H54M6.5S', TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
+        for testtuple in testtuples:
+            mockBuilder = mock.Mock()
+            mockBuilder.build_duration.return_value = testtuple[1]
 
-        parse = _parse_duration_prescribed_time('P1Y2M3DT4H54M6,5S', TupleBuilder)
-        self.assertEqual(parse, ('1', '2', None, '3', '4', '54', '6.5', 'duration'))
+            result = _parse_duration_prescribed_time(testtuple[0], mockBuilder)
 
-        parse = _parse_duration_prescribed_time('PT4H54M6.5S', TupleBuilder)
-        self.assertEqual(parse, (None, None, None, None, '4', '54', '6.5', 'duration'))
-
-        parse = _parse_duration_prescribed_time('PT4H54M6,5S', TupleBuilder)
-        self.assertEqual(parse, (None, None, None, None, '4', '54', '6.5', 'duration'))
+            self.assertEqual(result, testtuple[1])
+            mockBuilder.build_duration.assert_called_once_with(**testtuple[1])
 
     def test_parse_duration_prescribed_time_timeindate(self):
         #Don't allow time components in date half
@@ -567,11 +435,28 @@ class TestDurationParserFunctions(unittest.TestCase):
             _parse_duration_prescribed_time('P1Y2M2MT3D1S', None)
 
     def test_parse_duration_combined(self):
-        parse = _parse_duration_combined('P0003-06-04T12:30:05', TupleBuilder)
-        self.assertEqual(parse, ('0003', '06', None, '04', '12', '30', '05', 'duration'))
+        testtuples = (('P0003-06-04T12:30:05', {'PnY': '0003', 'PnM': '06',
+                                                'PnD': '04', 'TnH': '12',
+                                                'TnM': '30', 'TnS': '05'}),
+                      ('P0003-06-04T12:30:05.5', {'PnY': '0003', 'PnM': '06',
+                                                  'PnD': '04', 'TnH': '12',
+                                                  'TnM': '30', 'TnS': '05.5'}),
+                      ('P0001-02-03T14:43:59.9999997', {'PnY': '0001',
+                                                        'PnM': '02',
+                                                        'PnD': '03',
+                                                        'TnH': '14',
+                                                        'TnM': '43',
+                                                        'TnS':
+                                                        '59.9999997'}))
 
-        parse = _parse_duration_combined('P0003-06-04T12:30:05.5', TupleBuilder)
-        self.assertEqual(parse, ('0003', '06', None, '04', '12', '30', '05.5', 'duration'))
+        for testtuple in testtuples:
+            mockBuilder = mock.Mock()
+            mockBuilder.build_duration.return_value = testtuple[1]
+
+            result = _parse_duration_combined(testtuple[0], mockBuilder)
+
+            self.assertEqual(result, testtuple[1])
+            mockBuilder.build_duration.assert_called_once_with(**testtuple[1])
 
     def test_parse_duration_combined_suffixgarbage(self):
         #Don't allow garbage after the duration
@@ -580,22 +465,31 @@ class TestDurationParserFunctions(unittest.TestCase):
             _parse_duration_combined('P0003-06-04T12:30:05.5asdfasdf', None)
 
     def test_parse_duration_element(self):
-        self.assertEqual(_parse_duration_element('P1Y2M3D', 'Y'), '1')
-        self.assertEqual(_parse_duration_element('P1Y2M3D', 'M'), '2')
-        self.assertEqual(_parse_duration_element('P1Y2M3D', 'D'), '3')
-        self.assertEqual(_parse_duration_element('T4H5M6.1234S', 'H'), '4')
-        self.assertEqual(_parse_duration_element('T4H5M6.1234S', 'M'), '5')
-        self.assertEqual(_parse_duration_element('T4H5M6.1234S', 'S'), '6.1234')
-        self.assertEqual(_parse_duration_element('PT4H54M6,5S', 'H'), '4')
-        self.assertEqual(_parse_duration_element('PT4H54M6,5S', 'M'), '54')
-        self.assertEqual(_parse_duration_element('PT4H54M6,5S', 'S'), '6.5')
+        testtuples = (('P1Y2M3D', 'Y', '1'),
+                      ('P1Y2M3D', 'M', '2'),
+                      ('P1Y2M3D', 'D', '3'),
+                      ('T4H5M6.1234S', 'H', '4'),
+                      ('T4H5M6.1234S', 'M', '5'),
+                      ('T4H5M6.1234S', 'S', '6.1234'),
+                      ('PT4H54M6,5S', 'H', '4'),
+                      ('PT4H54M6,5S', 'M', '54'),
+                      ('PT4H54M6,5S', 'S', '6.5'))
+
+        for testtuple in testtuples:
+            self.assertEqual(_parse_duration_element(testtuple[0],
+                                                     testtuple[1]),
+                             testtuple[2])
 
     def test_has_any_component(self):
         self.assertTrue(_has_any_component('P1Y', ['Y', 'M']))
         self.assertFalse(_has_any_component('P1Y', ['M', 'D']))
 
     def test_component_order_correct(self):
-        self.assertTrue(_component_order_correct('P1Y1M1D', ['P', 'Y', 'M', 'D']))
-        self.assertTrue(_component_order_correct('P1Y1M', ['P', 'Y', 'M', 'D']))
-        self.assertFalse(_component_order_correct('P1D1Y1M', ['P', 'Y', 'M', 'D']))
-        self.assertFalse(_component_order_correct('PT1S1H', ['T', 'H', 'M', 'S']))
+        self.assertTrue(_component_order_correct('P1Y1M1D',
+                                                 ['P', 'Y', 'M', 'D']))
+        self.assertTrue(_component_order_correct('P1Y1M',
+                                                 ['P', 'Y', 'M', 'D']))
+        self.assertFalse(_component_order_correct('P1D1Y1M',
+                                                  ['P', 'Y', 'M', 'D']))
+        self.assertFalse(_component_order_correct('PT1S1H',
+                                                  ['T', 'H', 'M', 'S']))

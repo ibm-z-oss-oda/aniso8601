@@ -7,68 +7,98 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import unittest
+import mock
+import aniso8601
 
-from aniso8601.builder import TupleBuilder
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.timezone import parse_timezone
 
 class TestTimezoneParserFunctions(unittest.TestCase):
     def test_parse_timezone(self):
-        parse = parse_timezone('Z', builder=TupleBuilder)
-        self.assertEqual(parse, (False, True, None, None, 'Z', 'timezone'))
+        testtuples = (('Z', {'negative': False, 'Z': True, 'name': 'Z'}),
+                      ('+00:00', {'negative': False, 'hh': '00', 'mm': '00',
+                                  'name': '+00:00'}),
+                      ('+01:00', {'negative': False, 'hh': '01', 'mm': '00',
+                                  'name': '+01:00'}),
+                      ('-01:00', {'negative': True, 'hh': '01', 'mm': '00',
+                                  'name': '-01:00'}),
+                      ('+00:12', {'negative': False, 'hh': '00', 'mm': '12',
+                                  'name': '+00:12'}),
+                      ('+01:23', {'negative': False, 'hh': '01', 'mm': '23',
+                                  'name': '+01:23'}),
+                      ('-01:23', {'negative': True, 'hh': '01', 'mm': '23',
+                                  'name': '-01:23'}),
+                      ('+0000', {'negative': False, 'hh': '00', 'mm': '00',
+                                 'name': '+0000'}),
+                      ('+0100', {'negative': False, 'hh': '01', 'mm': '00',
+                                 'name': '+0100'}),
+                      ('-0100', {'negative': True, 'hh': '01', 'mm': '00',
+                                 'name': '-0100'}),
+                      ('+0012', {'negative': False, 'hh': '00', 'mm': '12',
+                                 'name': '+0012'}),
+                      ('+0123', {'negative': False, 'hh': '01', 'mm': '23',
+                                 'name': '+0123'}),
+                      ('-0123', {'negative': True, 'hh': '01', 'mm': '23',
+                                 'name': '-0123'}),
+                      ('+00', {'negative': False, 'hh': '00', 'mm': None,
+                               'name': '+00'}),
+                      ('+01', {'negative': False, 'hh': '01', 'mm': None,
+                               'name': '+01'}),
+                      ('-01', {'negative': True, 'hh': '01', 'mm': None,
+                               'name': '-01'}),
+                      ('+12', {'negative': False, 'hh': '12', 'mm': None,
+                               'name': '+12'}),
+                      ('-12', {'negative': True, 'hh': '12', 'mm': None,
+                               'name': '-12'}))
 
-        parse = parse_timezone('+00:00', builder=TupleBuilder)
-        self.assertEqual(parse, (False, None, '00', '00', '+00:00', 'timezone'))
+        for testtuple in testtuples:
+            with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
+                                   'build_timezone') as mockBuildTimezone:
 
-        parse = parse_timezone('+01:00', builder=TupleBuilder)
-        self.assertEqual(parse, (False, None, '01', '00', '+01:00', 'timezone'))
+                mockBuildTimezone.return_value = testtuple[1]
 
-        parse = parse_timezone('-01:00', builder=TupleBuilder)
-        self.assertEqual(parse, (True, None, '01', '00', '-01:00', 'timezone'))
+                result = parse_timezone(testtuple[0])
 
-        parse = parse_timezone('+00:12', builder=TupleBuilder)
-        self.assertEqual(parse, (False, None, '00', '12', '+00:12', 'timezone'))
+                self.assertEqual(result, testtuple[1])
+                mockBuildTimezone.assert_called_once_with(**testtuple[1])
 
-        parse = parse_timezone('+01:23', builder=TupleBuilder)
-        self.assertEqual(parse, (False, None, '01', '23', '+01:23', 'timezone'))
+    def test_parse_timezone_mockbuilder(self):
+        mockBuilder = mock.Mock()
 
-        parse = parse_timezone('-01:23', builder=TupleBuilder)
-        self.assertEqual(parse, (True, None, '01', '23', '-01:23', 'timezone'))
+        expectedargs = {'negative': False, 'Z': True, 'name': 'Z'}
 
-        parse = parse_timezone('+0000', builder=TupleBuilder)
-        self.assertEqual(parse, (False, None, '00', '00', '+0000', 'timezone'))
+        mockBuilder.build_timezone.return_value = expectedargs
 
-        parse = parse_timezone('+0100', builder=TupleBuilder)
-        self.assertEqual(parse, (False, None, '01', '00', '+0100', 'timezone'))
+        result = parse_timezone('Z', builder=mockBuilder)
 
-        parse = parse_timezone('-0100', builder=TupleBuilder)
-        self.assertEqual(parse, (True, None, '01', '00', '-0100', 'timezone'))
+        self.assertEqual(result, expectedargs)
+        mockBuilder.build_timezone.assert_called_once_with(**expectedargs)
 
-        parse = parse_timezone('+0012', builder=TupleBuilder)
-        self.assertEqual(parse, (False, None, '00', '12', '+0012', 'timezone'))
+        mockBuilder = mock.Mock()
 
-        parse = parse_timezone('+0123', builder=TupleBuilder)
-        self.assertEqual(parse, (False, None, '01', '23', '+0123', 'timezone'))
+        expectedargs = {'negative': False, 'hh': '00', 'mm': '00',
+                        'name': '+00:00'}
 
-        parse = parse_timezone('-0123', builder=TupleBuilder)
-        self.assertEqual(parse, (True, None, '01', '23', '-0123', 'timezone'))
+        mockBuilder.build_timezone.return_value = expectedargs
 
-        parse = parse_timezone('+00', builder=TupleBuilder)
-        self.assertEqual(parse, (False, None, '00', None, '+00', 'timezone'))
+        result = parse_timezone('+00:00', builder=mockBuilder)
 
-        parse = parse_timezone('+01', builder=TupleBuilder)
-        self.assertEqual(parse, (False, None, '01', None, '+01', 'timezone'))
+        self.assertEqual(result, expectedargs)
+        mockBuilder.build_timezone.assert_called_once_with(**expectedargs)
 
-        parse = parse_timezone('-01', builder=TupleBuilder)
-        self.assertEqual(parse, (True, None, '01', None, '-01', 'timezone'))
+        mockBuilder = mock.Mock()
 
-        parse = parse_timezone('+12', builder=TupleBuilder)
-        self.assertEqual(parse, (False, None, '12', None, '+12', 'timezone'))
+        expectedargs = {'negative': True, 'hh': '01', 'mm': '23',
+                        'name': '-01:23'}
 
-        parse = parse_timezone('-12', builder=TupleBuilder)
-        self.assertEqual(parse, (True, None, '12', None, '-12', 'timezone'))
+        mockBuilder.build_timezone.return_value = expectedargs
 
-    def test_parse_timezone_tzstr(self):
+        result = parse_timezone('-01:23', builder=mockBuilder)
+
+        self.assertEqual(result, expectedargs)
+        mockBuilder.build_timezone.assert_called_once_with(**expectedargs)
+
+    def test_parse_timezone_badstr(self):
         with self.assertRaises(ISOFormatError):
             parse_timezone('Y', builder=None)
 

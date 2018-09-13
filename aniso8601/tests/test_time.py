@@ -7,21 +7,26 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import unittest
+import mock
+import aniso8601
 
-from aniso8601.builder import TupleBuilder
 from aniso8601.resolution import TimeResolution
-from aniso8601.time import get_time_resolution, parse_datetime, parse_time, \
-    _parse_hour, _parse_minute_time, _parse_second_time, _split_tz
+from aniso8601.time import (get_time_resolution, parse_datetime, parse_time,
+                            _parse_hour, _parse_minute_time,
+                            _parse_second_time, _split_tz)
 
 class TestTimeParserFunctions(unittest.TestCase):
     def test_get_time_resolution(self):
-        self.assertEqual(get_time_resolution('01:23:45'), TimeResolution.Seconds)
-        self.assertEqual(get_time_resolution('24:00:00'), TimeResolution.Seconds)
+        self.assertEqual(get_time_resolution('01:23:45'),
+                         TimeResolution.Seconds)
+        self.assertEqual(get_time_resolution('24:00:00'),
+                         TimeResolution.Seconds)
         self.assertEqual(get_time_resolution('23:21:28.512400'),
                          TimeResolution.Seconds)
         self.assertEqual(get_time_resolution('01:23'), TimeResolution.Minutes)
         self.assertEqual(get_time_resolution('24:00'), TimeResolution.Minutes)
-        self.assertEqual(get_time_resolution('01:23.4567'), TimeResolution.Minutes)
+        self.assertEqual(get_time_resolution('01:23.4567'),
+                         TimeResolution.Minutes)
         self.assertEqual(get_time_resolution('012345'), TimeResolution.Seconds)
         self.assertEqual(get_time_resolution('240000'), TimeResolution.Seconds)
         self.assertEqual(get_time_resolution('0123'), TimeResolution.Minutes)
@@ -33,15 +38,18 @@ class TestTimeParserFunctions(unittest.TestCase):
                          TimeResolution.Seconds)
         self.assertEqual(get_time_resolution('0123.4567+00:00'),
                          TimeResolution.Minutes)
-        self.assertEqual(get_time_resolution('01.4567+00:00'), TimeResolution.Hours)
+        self.assertEqual(get_time_resolution('01.4567+00:00'),
+                         TimeResolution.Hours)
         self.assertEqual(get_time_resolution('01:23:45+00:00'),
                          TimeResolution.Seconds)
         self.assertEqual(get_time_resolution('24:00:00+00:00'),
                          TimeResolution.Seconds)
         self.assertEqual(get_time_resolution('23:21:28.512400+00:00'),
                          TimeResolution.Seconds)
-        self.assertEqual(get_time_resolution('01:23+00:00'), TimeResolution.Minutes)
-        self.assertEqual(get_time_resolution('24:00+00:00'), TimeResolution.Minutes)
+        self.assertEqual(get_time_resolution('01:23+00:00'),
+                         TimeResolution.Minutes)
+        self.assertEqual(get_time_resolution('24:00+00:00'),
+                         TimeResolution.Minutes)
         self.assertEqual(get_time_resolution('01:23.4567+00:00'),
                          TimeResolution.Minutes)
         self.assertEqual(get_time_resolution('23:21:28.512400+11:15'),
@@ -54,170 +62,240 @@ class TestTimeParserFunctions(unittest.TestCase):
                          TimeResolution.Seconds)
 
     def test_parse_time(self):
-        parse = parse_time('01:23:45', builder=TupleBuilder)
-        self.assertEqual(parse, ('01', '23', '45', None, 'time'))
+        testtuples = (('01:23:45', {'hh': '01', 'mm': '23',
+                                    'ss': '45', 'tz': None}),
+                      ('24:00:00', {'hh': '24', 'mm': '00',
+                                    'ss': '00', 'tz': None}),
+                      ('23:21:28.512400', {'hh': '23', 'mm': '21',
+                                           'ss': '28.512400', 'tz': None}),
+                      ('14:43:59.9999997', {'hh': '14', 'mm': '43',
+                                            'ss': '59.9999997', 'tz': None}),
+                      ('01:23', {'hh': '01', 'mm': '23', 'tz': None}),
+                      ('24:00', {'hh': '24', 'mm': '00', 'tz': None}),
+                      ('01:23.4567', {'hh': '01', 'mm': '23.4567',
+                                      'tz': None}),
+                      ('012345', {'hh': '01', 'mm': '23',
+                                  'ss': '45', 'tz': None}),
+                      ('240000', {'hh': '24', 'mm': '00',
+                                  'ss': '00', 'tz': None}),
+                      ('144359.9999997', {'hh': '14', 'mm': '43',
+                                          'ss': '59.9999997', 'tz': None}),
+                      ('0123', {'hh': '01', 'mm': '23', 'tz': None}),
+                      ('2400', {'hh': '24', 'mm': '00', 'tz': None}),
+                      ('01', {'hh': '01', 'tz': None}),
+                      ('24', {'tz': None}),
+                      ('12.5', {'hh': '12.5', 'tz': None}),
+                      ('232128.512400+00:00', {'hh': '23', 'mm': '21',
+                                               'ss': '28.512400',
+                                               'tz': (False, None,
+                                                      '00', '00',
+                                                      '+00:00', 'timezone')}),
+                      ('0123.4567+00:00', {'hh': '01', 'mm': '23.4567',
+                                           'tz': (False, None,
+                                                  '00', '00',
+                                                  '+00:00', 'timezone')}),
+                      ('01.4567+00:00', {'hh': '01.4567',
+                                         'tz': (False, None,
+                                                '00', '00',
+                                                '+00:00', 'timezone')}),
+                      ('01:23:45+00:00', {'hh': '01', 'mm': '23',
+                                          'ss': '45',
+                                          'tz': (False, None,
+                                                 '00', '00',
+                                                 '+00:00', 'timezone')}),
+                      ('24:00:00+00:00', {'hh': '24', 'mm': '00',
+                                          'ss': '00',
+                                          'tz': (False, None,
+                                                 '00', '00',
+                                                 '+00:00', 'timezone')}),
+                      ('23:21:28.512400+00:00', {'hh': '23', 'mm': '21',
+                                                 'ss': '28.512400',
+                                                 'tz': (False, None,
+                                                        '00', '00',
+                                                        '+00:00',
+                                                        'timezone')}),
+                      ('01:23+00:00', {'hh': '01', 'mm': '23',
+                                       'tz': (False, None,
+                                              '00', '00',
+                                              '+00:00', 'timezone')}),
+                      ('24:00+00:00', {'hh': '24', 'mm': '00',
+                                       'tz': (False, None,
+                                              '00', '00',
+                                              '+00:00', 'timezone')}),
+                      ('01:23.4567+00:00', {'hh': '01', 'mm': '23.4567',
+                                            'tz': (False, None,
+                                                   '00', '00',
+                                                   '+00:00', 'timezone')}),
+                      ('23:21:28.512400+11:15', {'hh': '23', 'mm': '21',
+                                                 'ss': '28.512400',
+                                                 'tz': (False, None,
+                                                        '11', '15',
+                                                        '+11:15',
+                                                        'timezone')}),
+                      ('23:21:28.512400-12:34', {'hh': '23', 'mm': '21',
+                                                 'ss': '28.512400',
+                                                 'tz': (True, None,
+                                                        '12', '34',
+                                                        '-12:34',
+                                                        'timezone')}),
+                      ('23:21:28.512400Z', {'hh': '23', 'mm': '21',
+                                            'ss': '28.512400',
+                                            'tz': (False, True,
+                                                   None, None,
+                                                   'Z', 'timezone')}),
+                      ('06:14:00.000123Z', {'hh': '06', 'mm': '14',
+                                            'ss': '00.000123',
+                                            'tz': (False, True,
+                                                   None, None,
+                                                   'Z', 'timezone')}))
 
-        parse = parse_time('24:00:00', builder=TupleBuilder)
-        self.assertEqual(parse, ('24', '00', '00', None, 'time'))
+        for testtuple in testtuples:
+            with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
+                                   'build_time') as mockBuildTime:
 
-        parse = parse_time('23:21:28.512400', builder=TupleBuilder)
-        self.assertEqual(parse, ('23', '21', '28.512400', None, 'time'))
+                mockBuildTime.return_value = testtuple[1]
 
-        parse = parse_time('14:43:59.9999997', builder=TupleBuilder)
-        self.assertEqual(parse, ('14', '43', '59.9999997', None, 'time'))
+                result = parse_time(testtuple[0])
 
-        parse = parse_time('01:23', builder=TupleBuilder)
-        self.assertEqual(parse, ('01', '23', None, None, 'time'))
-
-        parse = parse_time('24:00', builder=TupleBuilder)
-        self.assertEqual(parse, ('24', '00', None, None, 'time'))
-
-        parse = parse_time('01:23.4567', builder=TupleBuilder)
-        self.assertEqual(parse, ('01', '23.4567', None, None, 'time'))
-
-        parse = parse_time('012345', builder=TupleBuilder)
-        self.assertEqual(parse, ('01', '23', '45', None, 'time'))
-
-        parse = parse_time('240000', builder=TupleBuilder)
-        self.assertEqual(parse, ('24', '00', '00', None, 'time'))
-
-        parse = parse_time('144359.9999997', builder=TupleBuilder)
-        self.assertEqual(parse, ('14', '43', '59.9999997', None, 'time'))
-
-        parse = parse_time('0123', builder=TupleBuilder)
-        self.assertEqual(parse, ('01', '23', None, None, 'time'))
-
-        parse = parse_time('2400', builder=TupleBuilder)
-        self.assertEqual(parse, ('24', '00', None, None, 'time'))
-
-        parse = parse_time('01', builder=TupleBuilder)
-        self.assertEqual(parse, ('01', None, None, None, 'time'))
-
-        parse = parse_time('24', builder=TupleBuilder)
-        self.assertEqual(parse, (None, None, None, None, 'time'))
-
-        parse = parse_time('12.5', builder=TupleBuilder)
-        self.assertEqual(parse, ('12.5', None, None, None, 'time'))
-
-        parse = parse_time('232128.512400+00:00', builder=TupleBuilder)
-        self.assertEqual(parse, ('23', '21', '28.512400', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
-
-        parse = parse_time('0123.4567+00:00', builder=TupleBuilder)
-        self.assertEqual(parse, ('01', '23.4567', None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
-
-        parse = parse_time('01.4567+00:00', builder=TupleBuilder)
-        self.assertEqual(parse, ('01.4567', None, None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
-
-        parse = parse_time('01:23:45+00:00', builder=TupleBuilder)
-        self.assertEqual(parse, ('01', '23', '45', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
-
-        parse = parse_time('24:00:00+00:00', builder=TupleBuilder)
-        self.assertEqual(parse, ('24', '00', '00', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
-
-        parse = parse_time('23:21:28.512400+00:00', builder=TupleBuilder)
-        self.assertEqual(parse, ('23', '21', '28.512400', (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
-
-        parse = parse_time('01:23+00:00', builder=TupleBuilder)
-        self.assertEqual(parse, ('01', '23', None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
-
-        parse = parse_time('24:00+00:00', builder=TupleBuilder)
-        self.assertEqual(parse, ('24', '00', None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
-
-        parse = parse_time('01:23.4567+00:00', builder=TupleBuilder)
-        self.assertEqual(parse, ('01', '23.4567', None, (False, None, '00', '00', '+00:00', 'timezone'), 'time'))
-
-        parse = parse_time('23:21:28.512400+11:15', builder=TupleBuilder)
-        self.assertEqual(parse, ('23', '21', '28.512400', (False, None, '11', '15', '+11:15', 'timezone'), 'time'))
-
-        parse = parse_time('23:21:28.512400-12:34', builder=TupleBuilder)
-        self.assertEqual(parse, ('23', '21', '28.512400', (True, None, '12', '34', '-12:34', 'timezone'), 'time'))
-
-        parse = parse_time('23:21:28.512400Z', builder=TupleBuilder)
-        self.assertEqual(parse, ('23', '21', '28.512400', (False, True, None, None, 'Z', 'timezone'), 'time'))
-
-        parse = parse_time('06:14:00.000123Z', builder=TupleBuilder)
-        self.assertEqual(parse, ('06', '14', '00.000123', (False, True, None, None, 'Z', 'timezone'), 'time'))
+                self.assertEqual(result, testtuple[1])
+                mockBuildTime.assert_called_once_with(**testtuple[1])
 
     def test_parse_datetime(self):
-        parse = parse_datetime('1981-04-05T23:21:28.512400Z', builder=TupleBuilder)
-        self.assertEqual(parse, (('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28.512400', (False, True, None, None, 'Z', 'timezone'), 'time'), 'datetime'))
+        testtuples = (('1981-04-05T23:21:28.512400Z',
+                       (('1981', '04', '05', None, None, None, 'date'),
+                        ('23', '21', '28.512400',
+                         (False, True, None, None, 'Z', 'timezone'),
+                         'time'))),
+                      ('1981095T23:21:28.512400-12:34',
+                       (('1981', None, None, None, None, '095', 'date'),
+                        ('23', '21', '28.512400',
+                         (True, None, '12', '34', '-12:34', 'timezone'),
+                         'time'))),
+                      ('19810405T23:21:28+00',
+                       (('1981', '04', '05', None, None, None, 'date'),
+                        ('23', '21', '28',
+                         (False, None, '00', None, '+00', 'timezone'),
+                         'time'))),
+                      ('19810405T23:21:28+00:00',
+                       (('1981', '04', '05', None, None, None, 'date'),
+                        ('23', '21', '28',
+                         (False, None, '00', '00', '+00:00', 'timezone'),
+                         'time'))))
 
-        parse = parse_datetime('1981095T23:21:28.512400-12:34', builder=TupleBuilder)
-        self.assertEqual(parse, (('1981', None, None, None, None, '095', 'date'), ('23', '21', '28.512400', (True, None, '12', '34', '-12:34', 'timezone'), 'time'), 'datetime'))
+        for testtuple in testtuples:
+            with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
+                                   'build_datetime') as mockBuildDateTime:
 
-        parse = parse_datetime('19810405T23:21:28+00', builder=TupleBuilder)
-        self.assertEqual(parse, (('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28', (False, None, '00', None, '+00', 'timezone'), 'time'), 'datetime'))
+                mockBuildDateTime.return_value = testtuple[1]
 
-        parse = parse_datetime('19810405T23:21:28+00:00', builder=TupleBuilder)
-        self.assertEqual(parse, (('1981', '04', '05', None, None, None, 'date'), ('23', '21', '28', (False, None, '00', '00', '+00:00', 'timezone'), 'time'), 'datetime'))
+                result = parse_datetime(testtuple[0])
+
+            self.assertEqual(result, testtuple[1])
+            mockBuildDateTime.assert_called_once_with(*testtuple[1])
 
     def test_parse_datetime_spaceseperated(self):
-        parse = parse_datetime('2004-W53-6 23:21:28.512400-12:34', delimiter=' ', builder=TupleBuilder)
-        self.assertEqual(parse, (('2004', None, None, '53', '6', None, 'date'), ('23', '21', '28.512400', (True, None, '12', '34', '-12:34', 'timezone'), 'time'), 'datetime'))
+        expectedargs = (('2004', None, None, '53', '6', None, 'date'),
+                        ('23', '21', '28.512400',
+                         (True, None, '12', '34', '-12:34', 'timezone'),
+                         'time'))
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
+                               'build_datetime') as mockBuildDateTime:
+
+            mockBuildDateTime.return_value = expectedargs
+
+            result = parse_datetime('2004-W53-6 23:21:28.512400-12:34',
+                                    delimiter=' ')
+
+        self.assertEqual(result, expectedargs)
+        mockBuildDateTime.assert_called_once_with(*expectedargs)
 
     def test_parse_hour(self):
-        parse = _parse_hour('01', None, TupleBuilder)
-        self.assertEqual(parse, ('01', None, None, None, 'time'))
+        testtuples = (('01', None, {'hh': '01', 'tz': None}),
+                      ('24', None, {'tz': None}),
+                      ('01.4567', None, {'hh': '01.4567', 'tz': None}),
+                      ('12.5', None, {'hh': '12.5', 'tz': None}),
+                      ('08', (True, None, '12', '34', '-12:34', 'timezone'),
+                       {'hh': '08', 'tz':
+                        (True, None, '12', '34', '-12:34', 'timezone')}))
 
-        parse = _parse_hour('24', None, TupleBuilder)
-        self.assertEqual(parse, (None, None, None, None, 'time'))
+        for testtuple in testtuples:
+            mockBuilder = mock.Mock()
 
-        parse = _parse_hour('01.4567', None, TupleBuilder)
-        self.assertEqual(parse, ('01.4567', None, None, None, 'time'))
+            mockBuilder.build_time.return_value = testtuple[2]
 
-        parse = _parse_hour('12.5', None, TupleBuilder)
-        self.assertEqual(parse, ('12.5', None, None, None, 'time'))
+            result = _parse_hour(testtuple[0], testtuple[1], mockBuilder)
+
+            self.assertEqual(result, testtuple[2])
+            mockBuilder.build_time.assert_called_once_with(**testtuple[2])
 
     def test_parse_minute_time(self):
-        parse = _parse_minute_time('01:23', None, TupleBuilder)
-        self.assertEqual(parse, ('01', '23', None, None, 'time'))
+        testtuples = (('01:23', None, {'hh': '01', 'mm': '23', 'tz': None}),
+                      ('24:00', None, {'hh': '24', 'mm': '00', 'tz': None}),
+                      ('01:23.4567', None, {'hh': '01', 'mm': '23.4567',
+                                            'tz': None}),
+                      ('0123', None, {'hh': '01', 'mm': '23', 'tz': None}),
+                      ('2400', None, {'hh': '24', 'mm': '00', 'tz': None}),
+                      ('0123.4567', None, {'hh': '01', 'mm': '23.4567',
+                                           'tz': None}),
+                      ('08:13', (True, None, '12', '34', '-12:34', 'timezone'),
+                       {'hh': '08', 'mm': '13',
+                        'tz': (True, None, '12', '34', '-12:34', 'timezone')}))
 
-        parse = _parse_minute_time('24:00', None, TupleBuilder)
-        self.assertEqual(parse, ('24', '00', None, None, 'time'))
+        for testtuple in testtuples:
+            mockBuilder = mock.Mock()
 
-        parse = _parse_minute_time('01:23.4567', None, TupleBuilder)
-        self.assertEqual(parse, ('01', '23.4567', None, None, 'time'))
+            mockBuilder.build_time.return_value = testtuple[2]
 
-        parse = _parse_minute_time('0123', None, TupleBuilder)
-        self.assertEqual(parse, ('01', '23', None, None, 'time'))
+            result = _parse_minute_time(testtuple[0], testtuple[1],
+                                        mockBuilder)
 
-        parse = _parse_minute_time('2400', None, TupleBuilder)
-        self.assertEqual(parse, ('24', '00', None, None, 'time'))
-
-        parse = _parse_minute_time('0123.4567', None, TupleBuilder)
-        self.assertEqual(parse, ('01', '23.4567', None, None, 'time'))
+            self.assertEqual(result, testtuple[2])
+            mockBuilder.build_time.assert_called_once_with(**testtuple[2])
 
     def test_parse_second_time(self):
-        parse = _parse_second_time('01:23:45', None, TupleBuilder)
-        self.assertEqual(parse, ('01', '23', '45', None, 'time'))
+        testtuples = (('01:23:45', None, {'hh': '01', 'mm': '23',
+                                          'ss': '45', 'tz': None}),
+                      ('24:00:00', None, {'hh': '24', 'mm': '00',
+                                          'ss': '00', 'tz': None}),
+                      ('23:21:28.512400', None, {'hh': '23', 'mm': '21',
+                                                 'ss': '28.512400',
+                                                 'tz': None}),
+                      ('14:43:59.9999997', None, {'hh': '14', 'mm': '43',
+                                                  'ss': '59.9999997',
+                                                  'tz': None}),
+                      ('012345', None, {'hh': '01', 'mm': '23',
+                                        'ss': '45', 'tz': None}),
+                      ('240000', None, {'hh': '24', 'mm': '00',
+                                        'ss': '00', 'tz': None}),
+                      ('232128.512400', None, {'hh': '23', 'mm': '21',
+                                               'ss': '28.512400', 'tz': None}),
+                      ('144359.9999997', None, {'hh': '14', 'mm': '43',
+                                                'ss': '59.9999997',
+                                                'tz': None}),
+                      ('08:22:21',
+                       (True, None, '12', '34', '-12:34', 'timezone'),
+                       {'hh': '08', 'mm': '22', 'ss': '21',
+                        'tz': (True, None, '12', '34', '-12:34', 'timezone')}))
 
-        parse = _parse_second_time('24:00:00', None, TupleBuilder)
-        self.assertEqual(parse, ('24', '00', '00', None, 'time'))
+        for testtuple in testtuples:
+            mockBuilder = mock.Mock()
 
-        parse = _parse_second_time('23:21:28.512400', None, TupleBuilder)
-        self.assertEqual(parse, ('23', '21', '28.512400', None, 'time'))
+            mockBuilder.build_time.return_value = testtuple[2]
 
-        parse = _parse_second_time('14:43:59.9999997', None, TupleBuilder)
-        self.assertEqual(parse, ('14', '43', '59.9999997', None, 'time'))
+            result = _parse_second_time(testtuple[0], testtuple[1],
+                                        mockBuilder)
 
-        parse = _parse_second_time('012345', None, TupleBuilder)
-        self.assertEqual(parse, ('01', '23', '45', None, 'time'))
-
-        parse = _parse_second_time('240000', None, TupleBuilder)
-        self.assertEqual(parse, ('24', '00', '00', None, 'time'))
-
-        parse = _parse_second_time('232128.512400', None, TupleBuilder)
-        self.assertEqual(parse, ('23', '21', '28.512400', None, 'time'))
-
-        parse = _parse_second_time('144359.9999997', None, TupleBuilder)
-        self.assertEqual(parse, ('14', '43', '59.9999997', None, 'time'))
+            self.assertEqual(result, testtuple[2])
+            mockBuilder.build_time.assert_called_once_with(**testtuple[2])
 
     def test_split_tz(self):
         self.assertEqual(_split_tz('01:23:45'), ('01:23:45', None))
 
         self.assertEqual(_split_tz('24:00:00'), ('24:00:00', None))
 
-        self.assertEqual(_split_tz('23:21:28.512400'), ('23:21:28.512400', None))
+        self.assertEqual(_split_tz('23:21:28.512400'),
+                         ('23:21:28.512400', None))
 
         self.assertEqual(_split_tz('01:23'), ('01:23', None))
 
@@ -239,7 +317,8 @@ class TestTimeParserFunctions(unittest.TestCase):
 
         self.assertEqual(_split_tz('12.5'), ('12.5', None))
 
-        self.assertEqual(_split_tz('232128.512400+00:00'), ('232128.512400', '+00:00'))
+        self.assertEqual(_split_tz('232128.512400+00:00'),
+                         ('232128.512400', '+00:00'))
 
         self.assertEqual(_split_tz('0123.4567+00:00'), ('0123.4567', '+00:00'))
 
@@ -249,18 +328,24 @@ class TestTimeParserFunctions(unittest.TestCase):
 
         self.assertEqual(_split_tz('24:00:00+00:00'), ('24:00:00', '+00:00'))
 
-        self.assertEqual(_split_tz('23:21:28.512400+00:00'), ('23:21:28.512400', '+00:00'))
+        self.assertEqual(_split_tz('23:21:28.512400+00:00'),
+                         ('23:21:28.512400', '+00:00'))
 
         self.assertEqual(_split_tz('01:23+00:00'), ('01:23', '+00:00'))
 
         self.assertEqual(_split_tz('24:00+00:00'), ('24:00', '+00:00'))
 
-        self.assertEqual(_split_tz('01:23.4567+00:00'), ('01:23.4567', '+00:00'))
+        self.assertEqual(_split_tz('01:23.4567+00:00'),
+                         ('01:23.4567', '+00:00'))
 
-        self.assertEqual(_split_tz('23:21:28.512400+11:15'), ('23:21:28.512400', '+11:15'))
+        self.assertEqual(_split_tz('23:21:28.512400+11:15'),
+                         ('23:21:28.512400', '+11:15'))
 
-        self.assertEqual(_split_tz('23:21:28.512400-12:34'), ('23:21:28.512400', '-12:34'))
+        self.assertEqual(_split_tz('23:21:28.512400-12:34'),
+                         ('23:21:28.512400', '-12:34'))
 
-        self.assertEqual(_split_tz('23:21:28.512400Z'), ('23:21:28.512400', 'Z'))
+        self.assertEqual(_split_tz('23:21:28.512400Z'),
+                         ('23:21:28.512400', 'Z'))
 
-        self.assertEqual(_split_tz('06:14:00.000123Z'), ('06:14:00.000123', 'Z'))
+        self.assertEqual(_split_tz('06:14:00.000123Z'),
+                         ('06:14:00.000123', 'Z'))
