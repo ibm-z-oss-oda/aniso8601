@@ -160,6 +160,42 @@ class TestTimeParserFunctions(unittest.TestCase):
                 self.assertEqual(result, testtuple[1])
                 mockBuildTime.assert_called_once_with(**testtuple[1])
 
+    def test_parse_time_mockbuilder(self):
+        mockBuilder = mock.Mock()
+
+        expectedargs = {'hh': '01', 'mm': '23', 'ss': '45', 'tz': None}
+
+        mockBuilder.build_time.return_value = expectedargs
+
+        result = parse_time('01:23:45', builder=mockBuilder)
+
+        self.assertEqual(result, expectedargs)
+        mockBuilder.build_time.assert_called_once_with(**expectedargs)
+
+        mockBuilder = mock.Mock()
+
+        expectedargs = {'hh': '23', 'mm': '21', 'ss': '28.512400',
+                        'tz': (False, None, '00', '00', '+00:00', 'timezone')}
+
+        mockBuilder.build_time.return_value = expectedargs
+
+        result = parse_time('232128.512400+00:00', builder=mockBuilder)
+
+        self.assertEqual(result, expectedargs)
+        mockBuilder.build_time.assert_called_once_with(**expectedargs)
+
+        mockBuilder = mock.Mock()
+
+        expectedargs = {'hh': '23', 'mm': '21', 'ss': '28.512400',
+                        'tz': (False, None, '11', '15', '+11:15', 'timezone')}
+
+        mockBuilder.build_time.return_value = expectedargs
+
+        result = parse_time('23:21:28.512400+11:15', builder=mockBuilder)
+
+        self.assertEqual(result, expectedargs)
+        mockBuilder.build_time.assert_called_once_with(**expectedargs)
+
     def test_parse_datetime(self):
         testtuples = (('1981-04-05T23:21:28.512400Z',
                        (('1981', '04', '05', None, None, None, 'date'),
@@ -209,6 +245,22 @@ class TestTimeParserFunctions(unittest.TestCase):
 
         self.assertEqual(result, expectedargs)
         mockBuildDateTime.assert_called_once_with(*expectedargs)
+
+    def test_parse_datetime_mockbuilder(self):
+        mockBuilder = mock.Mock()
+
+        expectedargs = (('1981', None, None, None, None, '095', 'date'),
+                        ('23', '21', '28.512400',
+                         (True, None, '12', '34', '-12:34', 'timezone'),
+                         'time'))
+
+        mockBuilder.build_datetime.return_value = expectedargs
+
+        result = parse_datetime('1981095T23:21:28.512400-12:34',
+                                builder=mockBuilder)
+
+        self.assertEqual(result, expectedargs)
+        mockBuilder.build_datetime.assert_called_once_with(*expectedargs)
 
     def test_parse_hour(self):
         testtuples = (('01', None, {'hh': '01', 'tz': None}),

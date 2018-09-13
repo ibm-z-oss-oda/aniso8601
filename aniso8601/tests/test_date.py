@@ -62,18 +62,24 @@ class TestDateParserFunctions(unittest.TestCase):
         for testtuple in testtuples:
             with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
                                    'build_date') as mockBuildDate:
-                parse_date(testtuple[0])
+                mockBuildDate.return_value = testtuple[1]
 
-            mockBuildDate.assert_called_once_with(**testtuple[1])
+                result = parse_date(testtuple[0])
+
+                self.assertEqual(result, testtuple[1])
+                mockBuildDate.assert_called_once_with(**testtuple[1])
 
     def test_parse_date_mockbuilder(self):
         mockBuilder = mock.Mock()
 
-        parse_date('1981-04-05', builder=mockBuilder)
+        expectedargs = {'YYYY': '1981', 'MM': '04', 'DD':'05'}
 
-        mockBuilder.build_date.assert_called_once_with(YYYY='1981',
-                                                       MM='04',
-                                                       DD='05')
+        mockBuilder.build_date.return_value = expectedargs
+
+        result = parse_date('1981-04-05', builder=mockBuilder)
+
+        self.assertEqual(result, expectedargs)
+        mockBuilder.build_date.assert_called_once_with(**expectedargs)
 
     def test_parse_year(self):
         testtuples = (('2013', {'YYYY': '2013'}),

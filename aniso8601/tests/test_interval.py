@@ -139,74 +139,82 @@ class TestIntervalParserFunctions(unittest.TestCase):
         for testtuple in testtuples:
             with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
                                    'build_interval') as mockBuildInterval:
-                parse_interval(testtuple[0])
+                mockBuildInterval.return_value = testtuple[1]
 
-            mockBuildInterval.assert_called_once_with(**testtuple[1])
+                result = parse_interval(testtuple[0])
+
+                self.assertEqual(result, testtuple[1])
+                mockBuildInterval.assert_called_once_with(**testtuple[1])
 
         #Test different separators
         with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
                                'build_interval') as mockBuildInterval:
-            parse_interval('1980-03-05T01:01:00--1981-04-05T01:01:00',
-                           intervaldelimiter='--')
+            expectedargs = {'start': (('1980', '03', '05', None, None, None,
+                                       'date'),
+                                      ('01', '01', '00', None, 'time'),
+                                      'datetime'),
+                            'end':(('1981', '04', '05', None, None, None,
+                                    'date'),
+                                   ('01', '01', '00', None, 'time'),
+                                   'datetime')}
 
-        mockBuildInterval.assert_called_once_with(start=(('1980', '03', '05',
-                                                          None, None, None,
-                                                          'date'),
-                                                         ('01', '01', '00',
-                                                          None, 'time'),
-                                                         'datetime'),
-                                                  end=(('1981', '04', '05',
-                                                        None, None, None,
-                                                        'date'),
-                                                       ('01', '01', '00',
-                                                        None, 'time'),
-                                                       'datetime'))
+            mockBuildInterval.return_value = expectedargs
+
+            result = parse_interval('1980-03-05T01:01:00--1981-04-05T01:01:00',
+                                    intervaldelimiter='--')
+
+            self.assertEqual(result, expectedargs)
+            mockBuildInterval.assert_called_once_with(**expectedargs)
 
         with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
                                'build_interval') as mockBuildInterval:
-            parse_interval('1980-03-05 01:01:00/1981-04-05 01:01:00',
-                           datetimedelimiter=' ')
+            expectedargs = {'start': (('1980', '03', '05', None, None, None,
+                                       'date'),
+                                      ('01', '01', '00', None, 'time'),
+                                      'datetime'),
+                            'end':(('1981', '04', '05', None, None, None,
+                                    'date'),
+                                   ('01', '01', '00', None, 'time'),
+                                   'datetime')}
 
-        mockBuildInterval.assert_called_once_with(start=(('1980', '03', '05',
-                                                          None, None, None,
-                                                          'date'),
-                                                         ('01', '01', '00',
-                                                          None, 'time'),
-                                                         'datetime'),
-                                                  end=(('1981', '04', '05',
-                                                        None, None, None,
-                                                        'date'),
-                                                       ('01', '01', '00',
-                                                        None, 'time'),
-                                                       'datetime'))
+            mockBuildInterval.return_value = expectedargs
+
+            result = parse_interval('1980-03-05 01:01:00/1981-04-05 01:01:00',
+                                    datetimedelimiter=' ')
+
+            self.assertEqual(result, expectedargs)
+            mockBuildInterval.assert_called_once_with(**expectedargs)
 
     def test_parse_interval_mockbuilder(self):
         mockBuilder = mock.Mock()
-
-        parse_interval('P1M/1981-04-05T01:01:00', builder=mockBuilder)
 
         expectedargs = {'end': (('1981', '04', '05', None, None, None, 'date'),
                                 ('01', '01', '00', None, 'time'), 'datetime'),
                         'duration':(None, '1', None, None, None, None, None,
                                     'duration')}
 
+        mockBuilder.build_interval.return_value = expectedargs
+
+        result = parse_interval('P1M/1981-04-05T01:01:00', builder=mockBuilder)
+
+        self.assertEqual(result, expectedargs)
         mockBuilder.build_interval.assert_called_once_with(**expectedargs)
 
         mockBuilder = mock.Mock()
-
-        parse_interval('2014-11-12/PT1H', builder=mockBuilder)
 
         expectedargs = {'start': ('2014', '11', '12', None, None, None,
                                   'date'),
                         'duration': (None, None, None, None, '1', None, None,
                                      'duration')}
 
+        mockBuilder.build_interval.return_value = expectedargs
+
+        result = parse_interval('2014-11-12/PT1H', builder=mockBuilder)
+
+        self.assertEqual(result, expectedargs)
         mockBuilder.build_interval.assert_called_once_with(**expectedargs)
 
         mockBuilder = mock.Mock()
-
-        parse_interval('1980-03-05T01:01:00/1981-04-05T01:01:00',
-                       builder=mockBuilder)
 
         expectedargs = {'start': (('1980', '03', '05', None, None, None,
                                    'date'),
@@ -217,51 +225,63 @@ class TestIntervalParserFunctions(unittest.TestCase):
                                 ('01', '01', '00', None, 'time'),
                                 'datetime')}
 
+        mockBuilder.build_interval.return_value = expectedargs
+
+        result = parse_interval('1980-03-05T01:01:00/1981-04-05T01:01:00',
+                       builder=mockBuilder)
+
+        self.assertEqual(result, expectedargs)
         mockBuilder.build_interval.assert_called_once_with(**expectedargs)
 
     def test_parse_interval_relative(self):
         with mock.patch.object(aniso8601.builder.RelativeTimeBuilder,
                                'build_interval') as mockBuildInterval:
-            parse_interval('P1M/1981-04-05T01:01:00', relative=True)
+            expectedargs = {'end': (('1981', '04', '05', None, None, None,
+                                     'date'),
+                                    ('01', '01', '00', None, 'time'),
+                                    'datetime'),
+                            'duration': (None, '1', None, None, None, None,
+                                         None, 'duration')}
 
-        mockBuildInterval.assert_called_once_with(end=(('1981', '04', '05',
-                                                        None, None, None,
-                                                        'date'),
-                                                       ('01', '01', '00',
-                                                        None, 'time'),
-                                                       'datetime'),
-                                                  duration=(None, '1', None,
-                                                            None, None, None,
-                                                            None, 'duration'))
+            mockBuildInterval.return_value = expectedargs
 
-        with mock.patch.object(aniso8601.builder.RelativeTimeBuilder,
-                               'build_interval') as mockBuildInterval:
-            parse_interval('2014-11-12/PT1H', relative=True)
+            result = parse_interval('P1M/1981-04-05T01:01:00', relative=True)
 
-        mockBuildInterval.assert_called_once_with(start=('2014', '11', '12',
-                                                         None, None, None,
-                                                         'date'),
-                                                  duration=(None, None, None,
-                                                            None, '1', None,
-                                                            None, 'duration'))
+            self.assertEqual(result, expectedargs)
+            mockBuildInterval.assert_called_once_with(**expectedargs)
 
         with mock.patch.object(aniso8601.builder.RelativeTimeBuilder,
                                'build_interval') as mockBuildInterval:
-            parse_interval('1980-03-05T01:01:00/1981-04-05T01:01:00',
-                           relative=True)
+            expectedargs = {'start': ('2014', '11', '12', None, None, None,
+                                      'date'),
+                            'duration': (None, None, None, None, '1', None,
+                                         None, 'duration')}
 
-        mockBuildInterval.assert_called_once_with(start=(('1980', '03', '05',
-                                                          None, None, None,
-                                                          'date'),
-                                                         ('01', '01', '00',
-                                                          None, 'time'),
-                                                         'datetime'),
-                                                  end=(('1981', '04', '05',
-                                                        None, None, None,
-                                                        'date'),
-                                                       ('01', '01', '00',
-                                                        None, 'time'),
-                                                       'datetime'))
+            mockBuildInterval.return_value = expectedargs
+
+            result = parse_interval('2014-11-12/PT1H', relative=True)
+
+            self.assertEqual(result, expectedargs)
+            mockBuildInterval.assert_called_once_with(**expectedargs)
+
+        with mock.patch.object(aniso8601.builder.RelativeTimeBuilder,
+                               'build_interval') as mockBuildInterval:
+            expectedargs = {'start': (('1980', '03', '05', None, None, None,
+                                       'date'),
+                                      ('01', '01', '00', None, 'time'),
+                                      'datetime'),
+                            'end': (('1981', '04', '05', None, None, None,
+                                     'date'),
+                                    ('01', '01', '00', None, 'time'),
+                                    'datetime')}
+
+            mockBuildInterval.return_value = expectedargs
+
+            result = parse_interval('1980-03-05T01:01:00/1981-04-05T01:01:00',
+                                    relative=True)
+
+            self.assertEqual(result, expectedargs)
+            mockBuildInterval.assert_called_once_with(**expectedargs)
 
     def test_parse_interval_repeating(self):
         #Parse interval can't parse repeating intervals
@@ -293,95 +313,108 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
     def test_parse_repeating_interval(self):
         with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
                                'build_repeating_interval') as mockBuilder:
-            parse_repeating_interval('R3/1981-04-05/P1D')
+            expectedargs = {'R': False, 'Rnn': '3',
+                            'interval': (('1981', '04', '05', None, None, None,
+                                          'date'),
+                                         None,
+                                         (None, None, None, '1', None, None,
+                                          None, 'duration'),
+                                         'interval')}
 
-        expectedargs = {'R': False, 'Rnn': '3',
-                        'interval': (('1981', '04', '05', None, None, None,
-                                      'date'),
-                                     None,
-                                     (None, None, None, '1', None, None,
-                                      None, 'duration'),
-                                     'interval')}
+            mockBuilder.return_value = expectedargs
 
-        mockBuilder.assert_called_once_with(**expectedargs)
+            result = parse_repeating_interval('R3/1981-04-05/P1D')
 
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
-                               'build_repeating_interval') as mockBuilder:
-            parse_repeating_interval('R11/PT1H2M/1980-03-05T01:01:00')
-
-        expectedargs = {'R': False, 'Rnn': '11',
-                        'interval': (None,
-                                     (('1980', '03', '05', None, None, None,
-                                       'date'),
-                                      ('01', '01', '00', None, 'time'),
-                                      'datetime'),
-                                     (None, None, None, None, '1', '2',
-                                      None, 'duration'),
-                                     'interval')}
-
-        mockBuilder.assert_called_once_with(**expectedargs)
+            self.assertEqual(result, expectedargs)
+            mockBuilder.assert_called_once_with(**expectedargs)
 
         with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
                                'build_repeating_interval') as mockBuilder:
-            parse_repeating_interval('R2--1980-03-05T01:01:00--'
-                                     '1981-04-05T01:01:00',
-                                     intervaldelimiter='--')
+            expectedargs = {'R': False, 'Rnn': '11',
+                            'interval': (None,
+                                         (('1980', '03', '05', None, None,
+                                           None, 'date'),
+                                          ('01', '01', '00', None, 'time'),
+                                          'datetime'),
+                                         (None, None, None, None, '1', '2',
+                                          None, 'duration'),
+                                         'interval')}
 
-        expectedargs = {'R': False, 'Rnn': '2',
-                        'interval': ((('1980', '03', '05', None, None, None,
-                                       'date'),
-                                      ('01', '01', '00', None, 'time'),
-                                      'datetime'),
-                                     (('1981', '04', '05', None, None, None,
-                                       'date'),
-                                      ('01', '01', '00', None, 'time'),
-                                      'datetime'),
-                                     None,
-                                     'interval')}
+            mockBuilder.return_value = expectedargs
 
-        mockBuilder.assert_called_once_with(**expectedargs)
+            result = parse_repeating_interval('R11/PT1H2M/1980-03-05T01:01:00')
 
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
-                               'build_repeating_interval') as mockBuilder:
-            parse_repeating_interval('R2/'
-                                     '1980-03-05 01:01:00/'
-                                     '1981-04-05 01:01:00',
-                                     datetimedelimiter=' ')
-
-        expectedargs = {'R': False, 'Rnn': '2',
-                        'interval': ((('1980', '03', '05', None, None, None,
-                                       'date'),
-                                      ('01', '01', '00', None, 'time'),
-                                      'datetime'),
-                                     (('1981', '04', '05', None, None, None,
-                                       'date'),
-                                      ('01', '01', '00', None, 'time'),
-                                      'datetime'),
-                                     None,
-                                     'interval')}
-
-        mockBuilder.assert_called_once_with(**expectedargs)
+            self.assertEqual(result, expectedargs)
+            mockBuilder.assert_called_once_with(**expectedargs)
 
         with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
                                'build_repeating_interval') as mockBuilder:
-            parse_repeating_interval('R/PT1H2M/1980-03-05T01:01:00')
+            expectedargs = {'R': False, 'Rnn': '2',
+                            'interval': ((('1980', '03', '05', None, None,
+                                           None, 'date'),
+                                          ('01', '01', '00', None, 'time'),
+                                          'datetime'),
+                                         (('1981', '04', '05', None, None,
+                                           None, 'date'),
+                                          ('01', '01', '00', None, 'time'),
+                                          'datetime'),
+                                         None,
+                                         'interval')}
 
-        expectedargs = {'R': True, 'Rnn': None,
-                        'interval': (None,
-                                     (('1980', '03', '05', None, None, None,
-                                       'date'),
-                                      ('01', '01', '00', None, 'time'),
-                                      'datetime'),
-                                     (None, None, None, None, '1', '2',
-                                      None, 'duration'),
-                                     'interval')}
+            mockBuilder.return_value = expectedargs
 
-        mockBuilder.assert_called_once_with(**expectedargs)
+            result = parse_repeating_interval('R2--1980-03-05T01:01:00--'
+                                              '1981-04-05T01:01:00',
+                                              intervaldelimiter='--')
+
+            self.assertEqual(result, expectedargs)
+            mockBuilder.assert_called_once_with(**expectedargs)
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
+                               'build_repeating_interval') as mockBuilder:
+            expectedargs = {'R': False, 'Rnn': '2',
+                            'interval': ((('1980', '03', '05', None, None,
+                                           None, 'date'),
+                                          ('01', '01', '00', None, 'time'),
+                                          'datetime'),
+                                         (('1981', '04', '05', None, None,
+                                           None, 'date'),
+                                          ('01', '01', '00', None, 'time'),
+                                          'datetime'),
+                                         None,
+                                         'interval')}
+
+            mockBuilder.return_value = expectedargs
+
+            result = parse_repeating_interval('R2/'
+                                              '1980-03-05 01:01:00/'
+                                              '1981-04-05 01:01:00',
+                                              datetimedelimiter=' ')
+
+            self.assertEqual(result, expectedargs)
+            mockBuilder.assert_called_once_with(**expectedargs)
+
+        with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
+                               'build_repeating_interval') as mockBuilder:
+            expectedargs = {'R': True, 'Rnn': None,
+                            'interval': (None,
+                                         (('1980', '03', '05', None, None,
+                                           None, 'date'),
+                                          ('01', '01', '00', None, 'time'),
+                                          'datetime'),
+                                         (None, None, None, None, '1', '2',
+                                          None, 'duration'),
+                                         'interval')}
+
+            mockBuilder.return_value = expectedargs
+
+            result = parse_repeating_interval('R/PT1H2M/1980-03-05T01:01:00')
+
+            self.assertEqual(result, expectedargs)
+            mockBuilder.assert_called_once_with(**expectedargs)
 
     def test_parse_repeating_interval_mockbuilder(self):
         mockBuilder = mock.Mock()
-
-        parse_repeating_interval('R3/1981-04-05/P1D', builder=mockBuilder)
 
         args = {'R': False, 'Rnn': '3',
                 'interval': (('1981', '04', '05', None, None, None,
@@ -391,12 +424,15 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
                               None, 'duration'),
                              'interval')}
 
+        mockBuilder.build_repeating_interval.return_value = args
+
+        result = parse_repeating_interval('R3/1981-04-05/P1D',
+                                          builder=mockBuilder)
+
+        self.assertEqual(result, args)
         mockBuilder.build_repeating_interval.assert_called_once_with(**args)
 
         mockBuilder = mock.Mock()
-
-        parse_repeating_interval('R11/PT1H2M/1980-03-05T01:01:00',
-                                 builder=mockBuilder)
 
         args = {'R': False, 'Rnn': '11',
                 'interval': (None,
@@ -408,12 +444,15 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
                               None, 'duration'),
                              'interval')}
 
+        mockBuilder.build_repeating_interval.return_value = args
+
+        result = parse_repeating_interval('R11/PT1H2M/1980-03-05T01:01:00',
+                                          builder=mockBuilder)
+
+        self.assertEqual(result, args)
         mockBuilder.build_repeating_interval.assert_called_once_with(**args)
 
         mockBuilder = mock.Mock()
-
-        parse_repeating_interval('R/PT1H2M/1980-03-05T01:01:00',
-                                 builder=mockBuilder)
 
         args = {'R': True, 'Rnn': None,
                 'interval': (None,
@@ -425,58 +464,75 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
                               None, 'duration'),
                              'interval')}
 
+        mockBuilder.build_repeating_interval.return_value = args
+
+        result = parse_repeating_interval('R/PT1H2M/1980-03-05T01:01:00',
+                                          builder=mockBuilder)
+
+        self.assertEqual(result, args)
         mockBuilder.build_repeating_interval.assert_called_once_with(**args)
 
     def test_parse_repeating_interval_relative(self):
         with mock.patch.object(aniso8601.builder.RelativeTimeBuilder,
                                'build_repeating_interval') as mockBuild:
-            parse_repeating_interval('R3/1981-04-05/P1D', relative=True)
+            expectedargs = {'R': False, 'Rnn': '3',
+                            'interval': (('1981', '04', '05', None, None, None,
+                                          'date'),
+                                         None,
+                                         (None, None, None, '1', None, None,
+                                          None, 'duration'),
+                                         'interval')}
 
-        expectedargs = {'R': False, 'Rnn': '3',
-                        'interval': (('1981', '04', '05', None, None, None,
-                                      'date'),
-                                     None,
-                                     (None, None, None, '1', None, None,
-                                      None, 'duration'),
-                                     'interval')}
+            mockBuild.return_value = expectedargs
 
-        mockBuild.assert_called_once_with(**expectedargs)
+            result = parse_repeating_interval('R3/1981-04-05/P1D', relative=True)
 
-        with mock.patch.object(aniso8601.builder.RelativeTimeBuilder,
-                               'build_repeating_interval') as mockBuild:
-            parse_repeating_interval('R11/'
-                                     'PT1H2M/'
-                                     '1980-03-05T01:01:00', relative=True)
-
-        expectedargs = {'R': False, 'Rnn': '11',
-                        'interval': (None,
-                                     (('1980', '03', '05', None, None, None,
-                                       'date'),
-                                      ('01', '01', '00', None, 'time'),
-                                      'datetime'),
-                                     (None, None, None, None, '1', '2',
-                                      None, 'duration'),
-                                     'interval')}
-
-        mockBuild.assert_called_once_with(**expectedargs)
+            self.assertEqual(result, expectedargs)
+            mockBuild.assert_called_once_with(**expectedargs)
 
         with mock.patch.object(aniso8601.builder.RelativeTimeBuilder,
                                'build_repeating_interval') as mockBuild:
-            parse_repeating_interval('R/'
-                                     'PT1H2M/'
-                                     '1980-03-05T01:01:00', relative=True)
+            expectedargs = {'R': False, 'Rnn': '11',
+                            'interval': (None,
+                                         (('1980', '03', '05', None, None,
+                                           None, 'date'),
+                                          ('01', '01', '00', None, 'time'),
+                                          'datetime'),
+                                         (None, None, None, None, '1', '2',
+                                          None, 'duration'),
+                                         'interval')}
 
-        expectedargs = {'R': True, 'Rnn': None,
-                        'interval': (None,
-                                     (('1980', '03', '05', None, None, None,
-                                       'date'),
-                                      ('01', '01', '00', None, 'time'),
-                                      'datetime'),
-                                     (None, None, None, None, '1', '2',
-                                      None, 'duration'),
-                                     'interval')}
+            mockBuild.return_value = expectedargs
 
-        mockBuild.assert_called_once_with(**expectedargs)
+            result = parse_repeating_interval('R11/'
+                                              'PT1H2M/'
+                                              '1980-03-05T01:01:00',
+                                              relative=True)
+
+            self.assertEqual(result, expectedargs)
+            mockBuild.assert_called_once_with(**expectedargs)
+
+        with mock.patch.object(aniso8601.builder.RelativeTimeBuilder,
+                               'build_repeating_interval') as mockBuild:
+            expectedargs = {'R': True, 'Rnn': None,
+                            'interval': (None,
+                                         (('1980', '03', '05', None, None,
+                                           None, 'date'),
+                                          ('01', '01', '00', None, 'time'),
+                                          'datetime'),
+                                         (None, None, None, None, '1', '2',
+                                          None, 'duration'),
+                                         'interval')}
+
+            mockBuild.return_value = expectedargs
+
+            result = parse_repeating_interval('R/'
+                                              'PT1H2M/'
+                                              '1980-03-05T01:01:00',
+                                              relative=True)
+
+            self.assertEqual(result, expectedargs)
+            mockBuild.assert_called_once_with(**expectedargs)
 
     def test_parse_repeating_interval_suffixgarbage(self):
         #Don't allow garbage after the duration

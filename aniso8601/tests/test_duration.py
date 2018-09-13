@@ -86,27 +86,38 @@ class TestDurationParserFunctions(unittest.TestCase):
         for testtuple in testtuples:
             with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
                                    'build_duration') as mockBuildDuration:
-                parse_duration(testtuple[0])
+                mockBuildDuration.return_value = testtuple[1]
 
-            mockBuildDuration.assert_called_once_with(**testtuple[1])
+                result = parse_duration(testtuple[0])
+
+                self.assertEqual(result, testtuple[1])
+                mockBuildDuration.assert_called_once_with(**testtuple[1])
 
     def test_parse_duration_mockbuilder(self):
         mockBuilder = mock.Mock()
 
-        parse_duration('P1Y2M3DT4H54M6S', builder=mockBuilder)
+        expectedargs = {'PnY': '1', 'PnM': '2', 'PnD': '3',
+                        'TnH': '4', 'TnM': '54', 'TnS': '6'}
 
-        mockBuilder.build_duration.assert_called_once_with(PnY='1', PnM='2',
-                                                           PnD='3', TnH='4',
-                                                           TnM='54', TnS='6')
+        mockBuilder.build_duration.return_value = expectedargs
+
+        result = parse_duration('P1Y2M3DT4H54M6S', builder=mockBuilder)
+
+        self.assertEqual(result, expectedargs)
+        mockBuilder.build_duration.assert_called_once_with(**expectedargs)
 
     def test_parse_duration_relative(self):
         with mock.patch.object(aniso8601.builder.RelativeTimeBuilder,
                                'build_duration') as mockBuildDuration:
-            parse_duration('P1Y2M3DT4H54M6S', relative=True)
+            expectedargs = {'PnY': '1', 'PnM': '2', 'PnD': '3',
+                            'TnH': '4', 'TnM': '54', 'TnS': '6'}
 
-        mockBuildDuration.assert_called_once_with(PnY='1', PnM='2',
-                                                  PnD='3', TnH='4',
-                                                  TnM='54', TnS='6')
+            mockBuildDuration.return_value = expectedargs
+
+            result = parse_duration('P1Y2M3DT4H54M6S', relative=True)
+
+            self.assertEqual(result, expectedargs)
+            mockBuildDuration.assert_called_once_with(**expectedargs)
 
     def test_parse_duration_nop(self):
         with self.assertRaises(ISOFormatError):
