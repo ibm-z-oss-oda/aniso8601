@@ -616,14 +616,6 @@ class TestPythonTimeBuilder(unittest.TestCase):
                         'TnH': '12', 'TnM': '30', 'TnS': '05.5'},
                        datetime.timedelta(days=1279, hours=12,
                                           minutes=30, seconds=5.5)),
-                      ({'PnY': '0003', 'PnM': '06', 'PnD': '04',
-                        'TnH': '12', 'TnM': '30', 'TnS': '05'},
-                       datetime.timedelta(days=1279, hours=12,
-                                          minutes=30, seconds=5)),
-                      ({'PnY': '0003', 'PnM': '06', 'PnD': '04',
-                        'TnH': '12', 'TnM': '30', 'TnS': '05.5'},
-                       datetime.timedelta(days=1279, hours=12,
-                                          minutes=30, seconds=5.5)),
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
                       ({'PnY': '0001', 'PnM': '02', 'PnD': '03',
