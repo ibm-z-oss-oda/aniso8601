@@ -583,12 +583,6 @@ class TestPythonTimeBuilder(unittest.TestCase):
     def test_build_duration(self):
         testtuples = (({'PnY': '1', 'PnM': '2', 'PnD': '3',
                         'TnH': '4', 'TnM': '54', 'TnS': '6'},
-                       datetime.timedelta(days=428, seconds=17646)),
-                      ({'PnY': '1', 'PnM': '2', 'PnD': '3',
-                        'TnH': '4', 'TnM': '54', 'TnS': '6.5'},
-                       datetime.timedelta(days=428, seconds=17646.5)),
-                      ({'PnY': '1', 'PnM': '2', 'PnD': '3',
-                        'TnH': '4', 'TnM': '54', 'TnS': '6'},
                        datetime.timedelta(days=428, hours=4,
                                           minutes=54, seconds=6)),
                       ({'PnY': '1', 'PnM': '2', 'PnD': '3',
