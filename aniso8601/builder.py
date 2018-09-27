@@ -59,6 +59,35 @@ class BaseTimeBuilder(object):
 
         return result
 
+    @classmethod
+    def _build_object(cls, parsetuple):
+        #Given a TupleBuilder tuple, build the correct object
+        if parsetuple[-1] == 'date':
+            return cls.build_date(YYYY=parsetuple[0], MM=parsetuple[1],
+                                  DD=parsetuple[2], Www=parsetuple[3],
+                                  D=parsetuple[4], DDD=parsetuple[5])
+        elif parsetuple[-1] == 'time':
+            return cls.build_time(hh=parsetuple[0], mm=parsetuple[1],
+                                  ss=parsetuple[2], tz=parsetuple[3])
+        elif parsetuple[-1] == 'datetime':
+            return cls.build_datetime(parsetuple[0], parsetuple[1])
+        elif parsetuple[-1] == 'duration':
+            return cls.build_duration(PnY=parsetuple[0], PnM=parsetuple[1],
+                                      PnW=parsetuple[2], PnD=parsetuple[3],
+                                      TnH=parsetuple[4], TnM=parsetuple[5],
+                                      TnS=parsetuple[6])
+        elif parsetuple[-1] == 'interval':
+            return cls.build_interval(start=parsetuple[0], end=parsetuple[1],
+                                      duration=parsetuple[2])
+        elif parsetuple[-1] == 'repeatinginterval':
+            return cls.build_repeating_interval(R=parsetuple[0],
+                                                Rnn=parsetuple[1],
+                                                interval=parsetuple[2])
+
+        return cls.build_timezone(negative=parsetuple[0], Z=parsetuple[1],
+                                  hh=parsetuple[2], mm=parsetuple[3],
+                                  name=parsetuple[4])
+
 class TupleBuilder(BaseTimeBuilder):
     #Builder used to return the arguments as a tuple, cleans up some parse methods
     @classmethod
@@ -453,35 +482,6 @@ class PythonTimeBuilder(BaseTimeBuilder):
             return UTCOffset(name=name, minutes=-(tzhour * 60 + tzminute))
 
         return UTCOffset(name=name, minutes=tzhour * 60 + tzminute)
-
-    @classmethod
-    def _build_object(cls, parsetuple):
-        #Given a TupleBuilder tuple, return a Python date, datetime, timedelta
-        if parsetuple[-1] == 'date':
-            return cls.build_date(YYYY=parsetuple[0], MM=parsetuple[1],
-                                  DD=parsetuple[2], Www=parsetuple[3],
-                                  D=parsetuple[4], DDD=parsetuple[5])
-        elif parsetuple[-1] == 'time':
-            return cls.build_time(hh=parsetuple[0], mm=parsetuple[1],
-                                  ss=parsetuple[2], tz=parsetuple[3])
-        elif parsetuple[-1] == 'datetime':
-            return cls.build_datetime(parsetuple[0], parsetuple[1])
-        elif parsetuple[-1] == 'duration':
-            return cls.build_duration(PnY=parsetuple[0], PnM=parsetuple[1],
-                                      PnW=parsetuple[2], PnD=parsetuple[3],
-                                      TnH=parsetuple[4], TnM=parsetuple[5],
-                                      TnS=parsetuple[6])
-        elif parsetuple[-1] == 'interval':
-            return cls.build_interval(start=parsetuple[0], end=parsetuple[1],
-                                      duration=parsetuple[2])
-        elif parsetuple[-1] == 'repeatinginterval':
-            return cls.build_repeating_interval(R=parsetuple[0],
-                                                Rnn=parsetuple[1],
-                                                interval=parsetuple[2])
-
-        return cls.build_timezone(negative=parsetuple[0], Z=parsetuple[1],
-                                  hh=parsetuple[2], mm=parsetuple[3],
-                                  name=parsetuple[4])
 
     @staticmethod
     def _build_week_date(isoyear, isoweek, isoday=None):
