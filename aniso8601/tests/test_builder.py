@@ -9,6 +9,8 @@
 import datetime
 import pickle
 import unittest
+import mock
+import aniso8601
 import dateutil.relativedelta
 
 from aniso8601 import compat
@@ -76,6 +78,76 @@ class TestBaseTimeBuilder(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             BaseTimeBuilder.cast('asdf', int,
                                  thrownexception=RuntimeError)
+
+    def test_build_object(self):
+        datetest = (('1', '2', '3', '4', '5', '6', 'date'), {'YYYY': '1', 'MM': '2', 'DD': '3', 'Www': '4', 'D': '5', 'DDD': '6'})
+        timetest = (('1', '2', '3', (False, False, '4', '5', 'tz name', 'timezone'), 'time'), {'hh': '1', 'mm': '2', 'ss': '3', 'tz': (False, False, '4', '5', 'tz name', 'timezone')})
+        datetimetest = ((('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', (True, False, '10', '11', 'tz name', 'timezone'), 'time'), 'datetime'), (('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', (True, False, '10', '11', 'tz name', 'timezone'), 'time')))
+        durationtest = (('1', '2', '3', '4', '5', '6', '7', 'duration'), {'PnY': '1', 'PnM': '2', 'PnW': '3', 'PnD': '4', 'TnH': '5', 'TnM': '6', 'TnS': '7'})
+        intervaltests = (((('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', '10', '11', '12', 'date'), None, 'interval'), {'start': ('1', '2', '3', '4', '5', '6', 'date'), 'end': ('7', '8', '9', '10', '11', '12', 'date'), 'duration': None}),
+                         ((('1', '2', '3', '4', '5', '6', 'date'), None, ('7', '8', '9', '10', '11', '12', '13', 'duration'), 'interval'), {'start': ('1', '2', '3', '4', '5', '6', 'date'), 'end': None, 'duration': ('7', '8', '9', '10', '11', '12', '13', 'duration')}),
+                         ((None, ('1', '2', '3', (True, False, '4', '5', 'tz name', 'timezone'), 'time'), ('6', '7', '8', '9', '10', '11', '12', 'duration'), 'interval'), {'start': None, 'end': ('1', '2', '3', (True, False, '4', '5', 'tz name', 'timezone'), 'time'), 'duration': ('6', '7', '8', '9', '10', '11', '12', 'duration')}))
+        repeatingintervaltests = (((True, None, (('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', '10', '11', '12', 'date'), None, 'interval'), 'repeatinginterval'), {'R': True, 'Rnn': None, 'interval': (('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', '10', '11', '12', 'date'), None, 'interval')}),
+                                  ((False, '1', ((('2', '3', '4', '5', '6', '7', 'date'), ('8', '9', '10', None, 'time'), 'datetime'), (('11', '12', '13', '14', '15', '16', 'date'), ('17', '18', '19', None, 'time'), 'datetime'), None, 'interval'), 'repeatinginterval'), {'R':False, 'Rnn': '1', 'interval': ((('2', '3', '4', '5', '6', '7', 'date'), ('8', '9', '10', None, 'time'), 'datetime'), (('11', '12', '13', '14', '15', '16', 'date'), ('17', '18', '19', None, 'time'), 'datetime'), None, 'interval')}))
+        timezonetest = ((False, False, '1', '2', '+01:02', 'timezone'), {'negative': False, 'Z': False, 'hh': '1', 'mm': '2', 'name': '+01:02'})
+
+        with mock.patch.object(aniso8601.builder.BaseTimeBuilder, 'build_date') as mockBuildObject:
+            mockBuildObject.return_value = datetest[0]
+
+            result = BaseTimeBuilder._build_object(datetest[0])
+
+            self.assertEqual(result, datetest[0])
+            mockBuildObject.assert_called_once_with(**datetest[1])
+
+        with mock.patch.object(aniso8601.builder.BaseTimeBuilder, 'build_time') as mockBuildObject:
+            mockBuildObject.return_value = timetest[0]
+
+            result = BaseTimeBuilder._build_object(timetest[0])
+
+            self.assertEqual(result, timetest[0])
+            mockBuildObject.assert_called_once_with(**timetest[1])
+
+        with mock.patch.object(aniso8601.builder.BaseTimeBuilder, 'build_datetime') as mockBuildObject:
+            mockBuildObject.return_value = datetimetest[0]
+
+            result = BaseTimeBuilder._build_object(datetimetest[0])
+
+            self.assertEqual(result, datetimetest[0])
+            mockBuildObject.assert_called_once_with(*datetimetest[1])
+
+        with mock.patch.object(aniso8601.builder.BaseTimeBuilder, 'build_duration') as mockBuildObject:
+            mockBuildObject.return_value = durationtest[0]
+
+            result = BaseTimeBuilder._build_object(durationtest[0])
+
+            self.assertEqual(result, durationtest[0])
+            mockBuildObject.assert_called_once_with(**durationtest[1])
+
+        for intervaltest in intervaltests:
+            with mock.patch.object(aniso8601.builder.BaseTimeBuilder, 'build_interval') as mockBuildObject:
+                mockBuildObject.return_value = intervaltest[0]
+
+                result = BaseTimeBuilder._build_object(intervaltest[0])
+
+                self.assertEqual(result, intervaltest[0])
+                mockBuildObject.assert_called_once_with(**intervaltest[1])
+
+        for repeatingintervaltest in repeatingintervaltests:
+            with mock.patch.object(aniso8601.builder.BaseTimeBuilder, 'build_repeating_interval') as mockBuildObject:
+                mockBuildObject.return_value = repeatingintervaltest[0]
+
+                result = BaseTimeBuilder._build_object(repeatingintervaltest[0])
+
+                self.assertEqual(result, repeatingintervaltest[0])
+                mockBuildObject.assert_called_once_with(**repeatingintervaltest[1])
+
+        with mock.patch.object(aniso8601.builder.BaseTimeBuilder, 'build_timezone') as mockBuildObject:
+            mockBuildObject.return_value = timezonetest[0]
+
+            result = BaseTimeBuilder._build_object(timezonetest[0])
+
+            self.assertEqual(result, timezonetest[0])
+            mockBuildObject.assert_called_once_with(**timezonetest[1])
 
 class TestTupleBuilder(unittest.TestCase):
     def test_build_date(self):
@@ -923,85 +995,6 @@ class TestPythonTimeBuilder(unittest.TestCase):
 
         for testtuple in testtuples:
             result = PythonTimeBuilder.build_timezone(**testtuple[0])
-            self.assertEqual(result.utcoffset(None), testtuple[1])
-            self.assertEqual(result.tzname(None), testtuple[2])
-
-    def test_build_object(self):
-        testtuples = ((('1234', '5', '6', None, None, None, 'date'),
-                       datetime.date(year=1234, month=5, day=6)),
-                      (('1234', None, None, '6', '7', None, 'date'),
-                       datetime.date(year=1234, month=2, day=12)),
-                      (('1234', None, None, None, None, '6', 'date'),
-                       datetime.date(year=1234, month=1, day=6)),
-                      (('1', '2', '3',
-                        (False, False, '4', '5', 'tz name', 'timezone'),
-                        'time'),
-                       datetime.time(hour=1, minute=2, second=3,
-                                     tzinfo=UTCOffset(name='tzname',
-                                                      minutes=245))),
-                      ((('1234', '5', '6', None, None, None, 'date'),
-                        ('7', '8', '9', None, 'time'), 'datetime'),
-                       datetime.datetime(year=1234, month=5, day=6,
-                                         hour=7, minute=8, second=9)),
-                      (('1', '2', '3', '4', '5', '6', '7', 'duration'),
-                       datetime.timedelta(days=450, seconds=18367)),
-                      ((('1', '2', '3', None, None, None, 'date'),
-                        ('4', '5', '6', None, None, None, 'date'),
-                        None, 'interval'),
-                       (datetime.date(1000, 2, 3), datetime.date(4000, 5, 6))),
-                      ((('1', '2', '3', None, None, None, 'date'),
-                        None,
-                        ('4', '5', None, '6', None, None, None, 'duration'),
-                        'interval'),
-                       (datetime.date(1000, 2, 3), datetime.date(1004, 7, 8))),
-                      ((None,
-                        (('1', '2', '3', None, None, None, 'date'),
-                         ('4', '5', '6', None, 'time'),
-                         'datetime'),
-                        (None, None, None, None, '7', '8', '9', 'duration'),
-                        'interval'),
-                       (datetime.datetime(year=1000, month=2, day=3,
-                                          hour=4, minute=5, second=6),
-                        datetime.datetime(year=1000, month=2, day=2,
-                                          hour=20, minute=56, second=57))))
-
-        for testtuple in testtuples:
-            result = PythonTimeBuilder._build_object(testtuple[0])
-            self.assertEqual(result, testtuple[1])
-
-        #Check the generator types
-        args = (False, '10',
-                (('1', '2', '3', None, None, None, 'date'),
-                 None,
-                 (None, None, None, '4', None, None, None, 'duration'),
-                 'interval'),
-                'repeatinginterval')
-        results = list(PythonTimeBuilder._build_object(args))
-
-        for dateindex in compat.range(0, 10):
-             self.assertEqual(results[dateindex], datetime.date(year=1000, month=2, day=3) + dateindex * datetime.timedelta(days=4))
-
-        args = (True, None,
-                (None, ('1', '2', '3', None, None, None, 'date'),
-                 (None, None, None, '4', None, None, None, 'duration'),
-                 'interval'),
-                'repeatinginterval')
-        resultgenerator = PythonTimeBuilder._build_object(args)
-
-        #Check the first 10
-        for dateindex in compat.range(0, 10):
-             self.assertEqual(next(resultgenerator), datetime.date(year=1000, month=2, day=3) - dateindex * datetime.timedelta(days=4))
-
-        #Check timezones
-        testtuples = (((False, True, None, None, 'UTC', 'timezone'),
-                       datetime.timedelta(hours=0), 'UTC'),
-                      ((False, False, '1', '2', '+01:02', 'timezone'),
-                       datetime.timedelta(hours=1, minutes=2), '+01:02'),
-                      ((True, False, '1', '2', '-01:02', 'timezone'),
-                       -datetime.timedelta(hours=1, minutes=2), '-01:02'))
-
-        for testtuple in testtuples:
-            result = PythonTimeBuilder._build_object(testtuple[0])
             self.assertEqual(result.utcoffset(None), testtuple[1])
             self.assertEqual(result.tzname(None), testtuple[2])
 
