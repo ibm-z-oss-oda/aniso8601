@@ -80,74 +80,160 @@ class TestBaseTimeBuilder(unittest.TestCase):
                                  thrownexception=RuntimeError)
 
     def test_build_object(self):
-        datetest = (('1', '2', '3', '4', '5', '6', 'date'), {'YYYY': '1', 'MM': '2', 'DD': '3', 'Www': '4', 'D': '5', 'DDD': '6'})
-        timetest = (('1', '2', '3', (False, False, '4', '5', 'tz name', 'timezone'), 'time'), {'hh': '1', 'mm': '2', 'ss': '3', 'tz': (False, False, '4', '5', 'tz name', 'timezone')})
-        datetimetest = ((('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', (True, False, '10', '11', 'tz name', 'timezone'), 'time'), 'datetime'), (('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', (True, False, '10', '11', 'tz name', 'timezone'), 'time')))
-        durationtest = (('1', '2', '3', '4', '5', '6', '7', 'duration'), {'PnY': '1', 'PnM': '2', 'PnW': '3', 'PnD': '4', 'TnH': '5', 'TnM': '6', 'TnS': '7'})
-        intervaltests = (((('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', '10', '11', '12', 'date'), None, 'interval'), {'start': ('1', '2', '3', '4', '5', '6', 'date'), 'end': ('7', '8', '9', '10', '11', '12', 'date'), 'duration': None}),
-                         ((('1', '2', '3', '4', '5', '6', 'date'), None, ('7', '8', '9', '10', '11', '12', '13', 'duration'), 'interval'), {'start': ('1', '2', '3', '4', '5', '6', 'date'), 'end': None, 'duration': ('7', '8', '9', '10', '11', '12', '13', 'duration')}),
-                         ((None, ('1', '2', '3', (True, False, '4', '5', 'tz name', 'timezone'), 'time'), ('6', '7', '8', '9', '10', '11', '12', 'duration'), 'interval'), {'start': None, 'end': ('1', '2', '3', (True, False, '4', '5', 'tz name', 'timezone'), 'time'), 'duration': ('6', '7', '8', '9', '10', '11', '12', 'duration')}))
-        repeatingintervaltests = (((True, None, (('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', '10', '11', '12', 'date'), None, 'interval'), 'repeatinginterval'), {'R': True, 'Rnn': None, 'interval': (('1', '2', '3', '4', '5', '6', 'date'), ('7', '8', '9', '10', '11', '12', 'date'), None, 'interval')}),
-                                  ((False, '1', ((('2', '3', '4', '5', '6', '7', 'date'), ('8', '9', '10', None, 'time'), 'datetime'), (('11', '12', '13', '14', '15', '16', 'date'), ('17', '18', '19', None, 'time'), 'datetime'), None, 'interval'), 'repeatinginterval'), {'R':False, 'Rnn': '1', 'interval': ((('2', '3', '4', '5', '6', '7', 'date'), ('8', '9', '10', None, 'time'), 'datetime'), (('11', '12', '13', '14', '15', '16', 'date'), ('17', '18', '19', None, 'time'), 'datetime'), None, 'interval')}))
-        timezonetest = ((False, False, '1', '2', '+01:02', 'timezone'), {'negative': False, 'Z': False, 'hh': '1', 'mm': '2', 'name': '+01:02'})
+        datetest = (('1', '2', '3', '4', '5', '6', 'date'),
+                    {'YYYY': '1', 'MM': '2', 'DD': '3',
+                     'Www': '4', 'D': '5', 'DDD': '6'})
 
-        with mock.patch.object(aniso8601.builder.BaseTimeBuilder, 'build_date') as mockBuildObject:
-            mockBuildObject.return_value = datetest[0]
+        timetest = (('1', '2', '3',
+                     (False, False, '4', '5', 'tz name', 'timezone'),
+                     'time'),
+                    {'hh': '1', 'mm': '2', 'ss': '3',
+                     'tz': (False, False, '4', '5', 'tz name', 'timezone')})
+
+        datetimetest = ((('1', '2', '3', '4', '5', '6', 'date'),
+                         ('7', '8', '9',
+                          (True, False, '10', '11', 'tz name', 'timezone'),
+                          'time'),
+                         'datetime'),
+                        (('1', '2', '3', '4', '5', '6', 'date'),
+                         ('7', '8', '9',
+                          (True, False, '10', '11', 'tz name', 'timezone'),
+                          'time')))
+
+        durationtest = (('1', '2', '3', '4', '5', '6', '7', 'duration'),
+                        {'PnY': '1', 'PnM': '2', 'PnW': '3', 'PnD': '4',
+                         'TnH': '5', 'TnM': '6', 'TnS': '7'})
+
+        intervaltests = (((('1', '2', '3', '4', '5', '6', 'date'),
+                           ('7', '8', '9', '10', '11', '12', 'date'),
+                           None, 'interval'),
+                          {'start': ('1', '2', '3', '4', '5', '6', 'date'),
+                           'end': ('7', '8', '9', '10', '11', '12', 'date'),
+                           'duration': None}),
+                         ((('1', '2', '3', '4', '5', '6', 'date'),
+                           None,
+                           ('7', '8', '9', '10', '11', '12', '13', 'duration'),
+                           'interval'),
+                          {'start': ('1', '2', '3', '4', '5', '6', 'date'),
+                           'end': None,
+                           'duration': ('7', '8', '9', '10', '11', '12', '13',
+                                        'duration')}),
+                         ((None,
+                           ('1', '2', '3',
+                            (True, False, '4', '5', 'tz name', 'timezone'),
+                            'time'),
+                           ('6', '7', '8', '9', '10', '11', '12', 'duration'),
+                           'interval'),
+                          {'start': None,
+                           'end': ('1', '2', '3',
+                                   (True, False, '4', '5', 'tz name',
+                                    'timezone'),
+                                   'time'),
+                           'duration': ('6', '7', '8', '9', '10', '11', '12',
+                                        'duration')}))
+
+        repeatingintervaltests = (((True,
+                                    None,
+                                    (('1', '2', '3', '4', '5', '6', 'date'),
+                                     ('7', '8', '9', '10', '11', '12', 'date'),
+                                     None, 'interval'), 'repeatinginterval'),
+                                   {'R': True,
+                                    'Rnn': None,
+                                    'interval': (('1', '2', '3',
+                                                  '4', '5', '6', 'date'),
+                                                 ('7', '8', '9',
+                                                  '10', '11', '12', 'date'),
+                                                 None, 'interval')}),
+                                  ((False,
+                                    '1',
+                                    ((('2', '3', '4', '5', '6', '7', 'date'),
+                                      ('8', '9', '10', None, 'time'),
+                                      'datetime'),
+                                     (('11', '12', '13', '14', '15', '16',
+                                       'date'),
+                                      ('17', '18', '19', None, 'time'),
+                                      'datetime'),
+                                     None, 'interval'), 'repeatinginterval'),
+                                   {'R':False,
+                                    'Rnn': '1',
+                                    'interval': ((('2', '3', '4',
+                                                   '5', '6', '7', 'date'),
+                                                  ('8', '9', '10', None,
+                                                   'time'), 'datetime'),
+                                                 (('11', '12', '13',
+                                                   '14', '15', '16', 'date'),
+                                                  ('17', '18', '19', None,
+                                                   'time'), 'datetime'),
+                                                 None, 'interval')}))
+
+        timezonetest = ((False, False, '1', '2', '+01:02', 'timezone'),
+                        {'negative': False, 'Z': False,
+                         'hh': '1', 'mm': '2', 'name': '+01:02'})
+
+        with mock.patch.object(aniso8601.builder.BaseTimeBuilder,
+                               'build_date') as mock_build:
+            mock_build.return_value = datetest[0]
 
             result = BaseTimeBuilder._build_object(datetest[0])
 
             self.assertEqual(result, datetest[0])
-            mockBuildObject.assert_called_once_with(**datetest[1])
+            mock_build.assert_called_once_with(**datetest[1])
 
-        with mock.patch.object(aniso8601.builder.BaseTimeBuilder, 'build_time') as mockBuildObject:
-            mockBuildObject.return_value = timetest[0]
+        with mock.patch.object(aniso8601.builder.BaseTimeBuilder,
+                               'build_time') as mock_build:
+            mock_build.return_value = timetest[0]
 
             result = BaseTimeBuilder._build_object(timetest[0])
 
             self.assertEqual(result, timetest[0])
-            mockBuildObject.assert_called_once_with(**timetest[1])
+            mock_build.assert_called_once_with(**timetest[1])
 
-        with mock.patch.object(aniso8601.builder.BaseTimeBuilder, 'build_datetime') as mockBuildObject:
-            mockBuildObject.return_value = datetimetest[0]
+        with mock.patch.object(aniso8601.builder.BaseTimeBuilder,
+                               'build_datetime') as mock_build:
+            mock_build.return_value = datetimetest[0]
 
             result = BaseTimeBuilder._build_object(datetimetest[0])
 
             self.assertEqual(result, datetimetest[0])
-            mockBuildObject.assert_called_once_with(*datetimetest[1])
+            mock_build.assert_called_once_with(*datetimetest[1])
 
-        with mock.patch.object(aniso8601.builder.BaseTimeBuilder, 'build_duration') as mockBuildObject:
-            mockBuildObject.return_value = durationtest[0]
+        with mock.patch.object(aniso8601.builder.BaseTimeBuilder,
+                               'build_duration') as mock_build:
+            mock_build.return_value = durationtest[0]
 
             result = BaseTimeBuilder._build_object(durationtest[0])
 
             self.assertEqual(result, durationtest[0])
-            mockBuildObject.assert_called_once_with(**durationtest[1])
+            mock_build.assert_called_once_with(**durationtest[1])
 
         for intervaltest in intervaltests:
-            with mock.patch.object(aniso8601.builder.BaseTimeBuilder, 'build_interval') as mockBuildObject:
-                mockBuildObject.return_value = intervaltest[0]
+            with mock.patch.object(aniso8601.builder.BaseTimeBuilder,
+                                   'build_interval') as mock_build:
+                mock_build.return_value = intervaltest[0]
 
                 result = BaseTimeBuilder._build_object(intervaltest[0])
 
                 self.assertEqual(result, intervaltest[0])
-                mockBuildObject.assert_called_once_with(**intervaltest[1])
+                mock_build.assert_called_once_with(**intervaltest[1])
 
         for repeatingintervaltest in repeatingintervaltests:
-            with mock.patch.object(aniso8601.builder.BaseTimeBuilder, 'build_repeating_interval') as mockBuildObject:
-                mockBuildObject.return_value = repeatingintervaltest[0]
+            with mock.patch.object(aniso8601.builder.BaseTimeBuilder,
+                                   'build_repeating_interval') as mock_build:
+                mock_build.return_value = repeatingintervaltest[0]
 
                 result = BaseTimeBuilder._build_object(repeatingintervaltest[0])
 
                 self.assertEqual(result, repeatingintervaltest[0])
-                mockBuildObject.assert_called_once_with(**repeatingintervaltest[1])
+                mock_build.assert_called_once_with(**repeatingintervaltest[1])
 
-        with mock.patch.object(aniso8601.builder.BaseTimeBuilder, 'build_timezone') as mockBuildObject:
-            mockBuildObject.return_value = timezonetest[0]
+        with mock.patch.object(aniso8601.builder.BaseTimeBuilder,
+                               'build_timezone') as mock_build:
+            mock_build.return_value = timezonetest[0]
 
             result = BaseTimeBuilder._build_object(timezonetest[0])
 
             self.assertEqual(result, timezonetest[0])
-            mockBuildObject.assert_called_once_with(**timezonetest[1])
+            mock_build.assert_called_once_with(**timezonetest[1])
 
 class TestTupleBuilder(unittest.TestCase):
     def test_build_date(self):
