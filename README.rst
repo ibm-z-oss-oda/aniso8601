@@ -470,7 +470,7 @@ Same as :code:`PythonTimeBuilder`.
 Durations
 ^^^^^^^^^
 
-Parse will result in a `relativedelta`::
+Parse will result in a :code:`relativedelta`::
 
   >>> import aniso8601
   >>> from aniso8601.builder import RelativeTimeBuilder
