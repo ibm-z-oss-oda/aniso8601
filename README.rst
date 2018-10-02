@@ -322,6 +322,7 @@ Fractional years and months do not make sense for relative intervals. A :code:`R
 
 If :code:`relative=True` is set without python-dateutil available, a :code:`RuntimeError` is raised::
 
+  >>> aniso8601.parse_interval('2003-01-27/P1M', relative=True)
   Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
     File "aniso8601/interval.py", line 50, in parse_interval
@@ -358,6 +359,211 @@ Similarly, for an ISO 8601 date string::
   True
   >>> aniso8601.get_date_resolution('1981') == aniso8601.resolution.DateResolution.Year
   True
+
+Builders
+========
+
+Builders can be used to change the output format of a parse operation. All parse functions have a :code:`builder` keyword argument which accepts a builder class.
+
+Three builders are included in the :code:`aniso8601.builder` module: :code:`PythonTimeBuilder` (the default), `TupleBuilder` which returns the parse result as a tuple of strings, and the :code:`RelativeTimeBuilder` which allows for calendar level accuracy of duration and interval operations.
+
+A `NumPyTimeBuilder <https://bitbucket.org/nielsenb/numpytimebuilder>`_ is available separately which supports parsing directly to `NumPy datetime64 and timedelta64 types <https://docs.scipy.org/doc/numpy/reference/arrays.datetime.html>`_.
+
+TupleBuilder
+------------
+
+The :code:`TupleBuilder` returns parse results as tuples of strings.
+
+Datetimes
+^^^^^^^^^
+
+Parsing a datetime returns a tuple containing a date tuple as a collection of strings, a time tuple as a collection of strings, and the 'datetime' string. The date tuple contains the following parse components: :code:`(YYYY, MM, DD, Www, D, DDD, 'date')`. The time tuple contains the following parse componets :code:`(hh, mm, ss, tz, 'time')`, where :code:`tz` is a tuple with the following components :code:`(negative, Z, hh, mm, name, 'timezone')` with :code:`negative` and :code:`Z` being booleans::
+
+  >>> import aniso8601
+  >>> from aniso8601.builder import TupleBuilder
+  >>> aniso8601.parse_datetime('1977-06-10T12:00:00', builder=TupleBuilder)
+  (('1977', '06', '10', None, None, None, 'date'), ('12', '00', '00', None, 'time'), 'datetime')
+  >>> aniso8601.parse_datetime('1979-06-05T08:00:00-08:00', builder=TupleBuilder)
+  (('1979', '06', '05', None, None, None, 'date'), ('08', '00', '00', (True, None, '08', '00', '-08:00', 'timezone'), 'time'), 'datetime')
+
+Dates
+^^^^^
+
+Parsing a date returns a tuple containing the following parse components: :code:`(YYYY, MM, DD, Www, D, DDD, 'date')`::
+
+  >>> import aniso8601
+  >>> from aniso8601.builder import TupleBuilder
+  >>> aniso8601.parse_date('1984-04-23', builder=TupleBuilder)
+  ('1984', '04', '23', None, None, None, 'date')
+  >>> aniso8601.parse_date('1986-W38-1', builder=TupleBuilder)
+  ('1986', None, None, '38', '1', None, 'date')
+  >>> aniso8601.parse_date('1988-132', builder=TupleBuilder)
+  ('1988', None, None, None, None, '132', 'date')
+
+Times
+^^^^^
+
+Parsing a time returns a tuple containing following parse componets: :code:`(hh, mm, ss, tz, 'time')`, where :code:`tz` is a tuple with the following components :code:`(negative, Z, hh, mm, name, 'timezone')` with :code:`negative` and :code:`Z` being booleans::
+
+  >>> import aniso8601
+  >>> from aniso8601.builder import TupleBuilder
+  >>> aniso8601.parse_time('11:31:14', builder=TupleBuilder)
+  ('11', '31', '14', None, 'time')
+  >>> aniso8601.parse_time('171819Z', builder=TupleBuilder)
+  ('17', '18', '19', (False, True, None, None, 'Z', 'timezone'), 'time')
+  >>> aniso8601.parse_time('17:18:19-02:30', builder=TupleBuilder)
+  ('17', '18', '19', (True, None, '02', '30', '-02:30', 'timezone'), 'time')
+
+Durations
+^^^^^^^^^
+
+Parsing a duration returns a tuple containing the following parse components: :code:`(PnY, PnM, PnW, PnD, TnH, TnM, TnS, 'duration')`::
+
+  >>> import aniso8601
+  >>> from aniso8601.builder import TupleBuilder
+  >>> aniso8601.parse_duration('P1Y2M3DT4H54M6S', builder=TupleBuilder)
+  ('1', '2', None, '3', '4', '54', '6', 'duration')
+  >>> aniso8601.parse_duration('P7W', builder=TupleBuilder)
+  (None, None, '7', None, None, None, None, 'duration')
+
+Intervals
+^^^^^^^^^
+
+Parsing an interval returns a tuple containing the following parse components: :code:`(start, end, duration, 'interval')`, :code:`start` and :code:`end` may both be datetime or date tuples, :code:`duration` is a duration tuple::
+
+  >>> import aniso8601
+  >>> from aniso8601.builder import TupleBuilder
+  >>> aniso8601.parse_interval('2007-03-01T13:00:00/2008-05-11T15:30:00', builder=TupleBuilder)
+  ((('2007', '03', '01', None, None, None, 'date'), ('13', '00', '00', None, 'time'), 'datetime'), (('2008', '05', '11', None, None, None, 'date'), ('15', '30', '00', None, 'time'), 'datetime'), None, 'interval')
+  >>> aniso8601.parse_interval('2007-03-01T13:00:00Z/P1Y2M10DT2H30M', builder=TupleBuilder)
+  ((('2007', '03', '01', None, None, None, 'date'), ('13', '00', '00', (False, True, None, None, 'Z', 'timezone'), 'time'), 'datetime'), None, ('1', '2', None, '10', '2', '30', None, 'duration'), 'interval')
+  >>> aniso8601.parse_interval('P1M/1981-04-05', builder=TupleBuilder)
+  (None, ('1981', '04', '05', None, None, None, 'date'), (None, '1', None, None, None, None, None, 'duration'), 'interval')
+
+A repeating interval returns a tuple containing the following parse components: :code:`(R, Rnn, interval, 'repeatinginterval')` where :code:`R` is a boolean, :code:`True` for an unbounded interval, :code:`False` otherwise.::
+
+  >>> aniso8601.parse_repeating_interval('R3/1981-04-05/P1D', builder=TupleBuilder)
+  (False, '3', (('1981', '04', '05', None, None, None, 'date'), None, (None, None, None, '1', None, None, None, 'duration'), 'interval'), 'repeatinginterval')
+  >>> aniso8601.parse_repeating_interval('R/PT1H2M/1980-03-05T01:01:00', builder=TupleBuilder)
+  (True, None, (None, (('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (None, None, None, None, '1', '2', None, 'duration'), 'interval'), 'repeatinginterval')
+
+RelativeTimeBuilder
+-------------------
+
+The :code:`RelativeTimeBuilder` uses `python-dateutil <https://pypi.python.org/pypi/python-dateutil>`_ (if installed) to add calendar level accuracy to duration and interval parses.
+
+Datetimes
+^^^^^^^^^
+
+Same as :code:`PythonTimeBuilder`.
+
+Dates
+^^^^^
+
+Same as :code:`PythonTimeBuilder`.
+
+Times
+^^^^^
+
+Same as :code:`PythonTimeBuilder`.
+
+Durations
+^^^^^^^^^
+
+Parse will result in a `relativedelta`::
+
+  >>> import aniso8601
+  >>> from aniso8601.builder import RelativeTimeBuilder
+  >>> one_month = aniso8601.parse_duration('P1M', builder=RelativeTimeBuilder)
+  >>> two_months = aniso8601.parse_duration('P2M', builder=RelativeTimeBuilder)
+  >>> print one_month
+  relativedelta(months=+1)
+  >>> print two_months
+  relativedelta(months=+2)
+  >>> date(2003,1,27) + one_month
+  datetime.date(2003, 2, 27)
+  >>> date(2003,1,31) + one_month
+  datetime.date(2003, 2, 28)
+  >>> date(2003,1,31) + two_months
+  datetime.date(2003, 3, 31)
+
+Since a relative fractional month or year is not logical, a :code:`RelativeValueError` is raised when attempting to parse a duration with :code:`relative=True` and fractional month or year::
+
+  >>> aniso8601.parse_duration('P2.1Y', builder=RelativeTimeBuilder)
+  Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "aniso8601/duration.py", line 39, in parse_duration
+      return _parse_duration_prescribed(isodurationstr, builder)
+    File "aniso8601/duration.py", line 84, in _parse_duration_prescribed
+      return _parse_duration_prescribed_notime(durationstr, builder)
+    File "aniso8601/duration.py", line 128, in _parse_duration_prescribed_notime
+      PnW=weekstr, PnD=daystr)
+    File "aniso8601/builder.py", line 564, in build_duration
+      raise RelativeValueError('Fractional months and years are not '
+  aniso8601.exceptions.RelativeValueError: Fractional months and years are not defined for relative intervals.
+
+If python-dateutil is not available, a :code:`RuntimeError` is raised::
+
+  >>> aniso8601.parse_duration('P1M', builder=RelativeTimeBuilder)
+  Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "aniso8601/duration.py", line 39, in parse_duration
+      return _parse_duration_prescribed(isodurationstr, builder)
+    File "aniso8601/duration.py", line 84, in _parse_duration_prescribed
+      return _parse_duration_prescribed_notime(durationstr, builder)
+    File "aniso8601/duration.py", line 128, in _parse_duration_prescribed_notime
+      PnW=weekstr, PnD=daystr)
+    File "aniso8601/builder.py", line 558, in build_duration
+      raise RuntimeError('dateutil must be installed for '
+  RuntimeError: dateutil must be installed for relativedelta support.
+
+Intervals
+^^^^^^^^^
+
+Interval parse results will be calculated using a :code:`relativedelta` internally, allowing for calendary level accuracy::
+
+  >>> import aniso8601
+  >>> from aniso8601.builder import RelativeTimeBuilder
+  >>> aniso8601.parse_interval('2003-01-27/P1M', builder=RelativeTimeBuilder)
+  (datetime.date(2003, 1, 27), datetime.date(2003, 2, 27))
+  >>> aniso8601.parse_interval('2003-01-31/P1M', builder=RelativeTimeBuilder)
+  (datetime.date(2003, 1, 31), datetime.date(2003, 2, 28))
+  >>> aniso8601.parse_interval('P1Y/2001-02-28', builder=RelativeTimeBuilder)
+  (datetime.date(2001, 2, 28), datetime.date(2000, 2, 28))
+
+Fractional years and months do not make sense for relative intervals. A :code:`RelativeValueError` is raised when attempting to parse an interval with :code:`relative=True` and a fractional month or year::
+
+  >>> aniso8601.parse_interval('P1.1Y/2001-02-28', builder=RelativeTimeBuilder)
+  Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "aniso8601/interval.py", line 50, in parse_interval
+      intervaldelimiter, datetimedelimiter)
+    File "aniso8601/interval.py", line 116, in _parse_interval
+      return builder.build_interval(end=enddate, duration=duration)
+    File "aniso8601/builder.py", line 393, in build_interval
+      durationobject = cls._build_object(duration)
+    File "aniso8601/builder.py", line 78, in _build_object
+      TnS=parsetuple[6])
+    File "aniso8601/builder.py", line 564, in build_duration
+      raise RelativeValueError('Fractional months and years are not '
+  aniso8601.exceptions.RelativeValueError: Fractional months and years are not defined for relative intervals.
+
+If python-dateutil is not available, a :code:`RuntimeError` is raised::
+
+  >>> aniso8601.parse_interval('2003-01-27/P1M', builder=RelativeTimeBuilder)
+  Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "aniso8601/interval.py", line 50, in parse_interval
+      intervaldelimiter, datetimedelimiter)
+    File "aniso8601/interval.py", line 135, in _parse_interval
+      duration=duration)
+    File "aniso8601/builder.py", line 409, in build_interval
+      durationobject = cls._build_object(duration)
+    File "aniso8601/builder.py", line 78, in _build_object
+      TnS=parsetuple[6])
+    File "aniso8601/builder.py", line 558, in build_duration
+      raise RuntimeError('dateutil must be installed for '
+  RuntimeError: dateutil must be installed for relativedelta support.
 
 Development
 ===========
