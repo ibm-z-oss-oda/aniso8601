@@ -365,7 +365,7 @@ Builders
 
 Builders can be used to change the output format of a parse operation. All parse functions have a :code:`builder` keyword argument which accepts a builder class.
 
-Three builders are included in the :code:`aniso8601.builder` module: :code:`PythonTimeBuilder` (the default), `TupleBuilder` which returns the parse result as a tuple of strings, and the :code:`RelativeTimeBuilder` which allows for calendar level accuracy of duration and interval operations.
+Three builders are included in the :code:`aniso8601.builder` module: :code:`PythonTimeBuilder` (the default), :code:`TupleBuilder` which returns the parse result as a tuple of strings, and the :code:`RelativeTimeBuilder` which allows for calendar level accuracy of duration and interval operations.
 
 A `NumPyTimeBuilder <https://bitbucket.org/nielsenb/numpytimebuilder>`_ is available separately which supports parsing directly to `NumPy datetime64 and timedelta64 types <https://docs.scipy.org/doc/numpy/reference/arrays.datetime.html>`_.
 
