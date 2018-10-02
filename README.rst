@@ -377,7 +377,7 @@ The :code:`TupleBuilder` returns parse results as tuples of strings.
 Datetimes
 ^^^^^^^^^
 
-Parsing a datetime returns a tuple containing a date tuple as a collection of strings, a time tuple as a collection of strings, and the 'datetime' string. The date tuple contains the following parse components: :code:`(YYYY, MM, DD, Www, D, DDD, 'date')`. The time tuple contains the following parse componets :code:`(hh, mm, ss, tz, 'time')`, where :code:`tz` is a tuple with the following components :code:`(negative, Z, hh, mm, name, 'timezone')` with :code:`negative` and :code:`Z` being booleans::
+Parsing a datetime returns a tuple containing a date tuple as a collection of strings, a time tuple as a collection of strings, and the 'datetime' string. The date tuple contains the following parse components: :code:`(YYYY, MM, DD, Www, D, DDD, 'date')`. The time tuple contains the following parse components :code:`(hh, mm, ss, tz, 'time')`, where :code:`tz` is a tuple with the following components :code:`(negative, Z, hh, mm, name, 'timezone')` with :code:`negative` and :code:`Z` being booleans::
 
   >>> import aniso8601
   >>> from aniso8601.builder import TupleBuilder
@@ -403,7 +403,7 @@ Parsing a date returns a tuple containing the following parse components: :code:
 Times
 ^^^^^
 
-Parsing a time returns a tuple containing following parse componets: :code:`(hh, mm, ss, tz, 'time')`, where :code:`tz` is a tuple with the following components :code:`(negative, Z, hh, mm, name, 'timezone')` with :code:`negative` and :code:`Z` being booleans::
+Parsing a time returns a tuple containing following parse components: :code:`(hh, mm, ss, tz, 'time')`, where :code:`tz` is a tuple with the following components :code:`(negative, Z, hh, mm, name, 'timezone')` with :code:`negative` and :code:`Z` being booleans::
 
   >>> import aniso8601
   >>> from aniso8601.builder import TupleBuilder
@@ -520,7 +520,7 @@ If python-dateutil is not available, a :code:`RuntimeError` is raised::
 Intervals
 ^^^^^^^^^
 
-Interval parse results will be calculated using a :code:`relativedelta` internally, allowing for calendary level accuracy::
+Interval parse results will be calculated using a :code:`relativedelta` internally, allowing for calendar level accuracy::
 
   >>> import aniso8601
   >>> from aniso8601.builder import RelativeTimeBuilder
