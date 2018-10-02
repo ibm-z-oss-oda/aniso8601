@@ -20,7 +20,7 @@ Features
   - Parse a repeating interval, get a date or datetime `generator <http://www.python.org/dev/peps/pep-0255/>`_
 
 * UTC offset represented as fixed-offset tzinfo
-* Optional `dateutil.relativedelta <http://dateutil.readthedocs.io/en/latest/relativedelta.html>`_ support for calendar accuracy
+* Parser separate from representation, allowing parsing to different datetime formats
 * No regular expressions
 
 Installation
@@ -66,13 +66,13 @@ Leap seconds are currently not supported and attempting to parse one raises a :c
   >>> aniso8601.parse_datetime('2018-03-06T23:59:60')
   Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
-    File "aniso8601/time.py", line 127, in parse_datetime
-      timepart = parse_time(isotimestr)
-    File "aniso8601/time.py", line 110, in parse_time
-      return _parse_time_naive(timestr)
-    File "aniso8601/time.py", line 140, in _parse_time_naive
-      return _RESOLUTION_MAP[get_time_resolution(timestr)](timestr)
-    File "aniso8601/time.py", line 214, in _parse_second_time
+    File "aniso8601/time.py", line 131, in parse_datetime
+      return builder.build_datetime(datepart, timepart)
+    File "aniso8601/builder.py", line 300, in build_datetime
+      cls._build_object(time))
+    File "aniso8601/builder.py", line 71, in _build_object
+      ss=parsetuple[2], tz=parsetuple[3])
+    File "aniso8601/builder.py", line 253, in build_time
       raise LeapSecondError('Leap seconds are not supported.')
   aniso8601.exceptions.LeapSecondError: Leap seconds are not supported.
 
@@ -140,11 +140,11 @@ Leap seconds are currently not supported and attempting to parse one raises a :c
   >>> aniso8601.parse_time('23:59:60')
   Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
-    File "aniso8601/time.py", line 110, in parse_time
-      return _parse_time_naive(timestr)
-    File "aniso8601/time.py", line 140, in _parse_time_naive
-      return _RESOLUTION_MAP[get_time_resolution(timestr)](timestr)
-    File "aniso8601/time.py", line 214, in _parse_second_time
+    File "aniso8601/time.py", line 116, in parse_time
+      return _RESOLUTION_MAP[get_time_resolution(timestr)](timestr, tz, builder)
+    File "aniso8601/time.py", line 165, in _parse_second_time
+      return builder.build_time(hh=hourstr, mm=minutestr, ss=secondstr, tz=tz)
+    File "aniso8601/builder.py", line 253, in build_time
       raise LeapSecondError('Leap seconds are not supported.')
   aniso8601.exceptions.LeapSecondError: Leap seconds are not supported.
 
@@ -177,13 +177,18 @@ Parsing a duration from a combined date and time is supported as well::
   >>> aniso8601.parse_duration('P0001-01-02T01:30:5')
   datetime.timedelta(397, 5405)
 
+**The relative kwarg is deprecated and will be removed in aniso8601 5.0.0, use builder=RelativeTimeBuilder instead.**
+
 The above treat years as 365 days and months as 30 days. If calendar level accuracy is required, the relative keyword argument can be used if `python-dateutil <https://pypi.python.org/pypi/python-dateutil>`_ is installed::
 
   >>> import aniso8601
   >>> from datetime import date
   >>> one_month = aniso8601.parse_duration('P1M', relative=True)
+  >>> two_months = aniso8601.parse_duration('P2M', relative=True)
   >>> print one_month
   relativedelta(months=+1)
+  >>> print two_months
+  relativedelta(months=+2)
   >>> date(2003,1,27) + one_month
   datetime.date(2003, 2, 27)
   >>> date(2003,1,31) + one_month
@@ -196,10 +201,14 @@ Since a relative fractional month or year is not logical, a :code:`RelativeValue
   >>> aniso8601.parse_duration('P2.1Y', relative=True)
   Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
-    File "aniso8601/duration.py", line 29, in parse_duration
-      return _parse_duration_prescribed(isodurationstr, relative)
-    File "aniso8601/duration.py", line 73, in _parse_duration_prescribed
-      raise RelativeValueError('Fractional months and years are not defined for relative intervals.')
+    File "aniso8601/duration.py", line 39, in parse_duration
+      return _parse_duration_prescribed(isodurationstr, builder)
+    File "aniso8601/duration.py", line 84, in _parse_duration_prescribed
+      return _parse_duration_prescribed_notime(durationstr, builder)
+    File "aniso8601/duration.py", line 128, in _parse_duration_prescribed_notime
+      PnW=weekstr, PnD=daystr)
+    File "aniso8601/builder.py", line 564, in build_duration
+      raise RelativeValueError('Fractional months and years are not '
   aniso8601.exceptions.RelativeValueError: Fractional months and years are not defined for relative intervals.
 
 If :code:`relative=True` is set without python-dateutil available, a :code:`RuntimeError` is raised::
@@ -207,11 +216,15 @@ If :code:`relative=True` is set without python-dateutil available, a :code:`Runt
   >>> aniso8601.parse_duration('P1M', relative=True)
   Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
-    File "aniso8601/duration.py", line 29, in parse_duration
-      return _parse_duration_prescribed(isodurationstr, relative)
-    File "aniso8601/duration.py", line 77, in _parse_duration_prescribed
-      raise RuntimeError('dateutil must be installed for relative duration support.')
-  RuntimeError: dateutil must be installed for relative duration support
+    File "aniso8601/duration.py", line 39, in parse_duration
+      return _parse_duration_prescribed(isodurationstr, builder)
+    File "aniso8601/duration.py", line 84, in _parse_duration_prescribed
+      return _parse_duration_prescribed_notime(durationstr, builder)
+    File "aniso8601/duration.py", line 128, in _parse_duration_prescribed_notime
+      PnW=weekstr, PnD=daystr)
+    File "aniso8601/builder.py", line 558, in build_duration
+      raise RuntimeError('dateutil must be installed for '
+  RuntimeError: dateutil must be installed for relativedelta support.
 
 Parsing intervals
 -----------------
@@ -245,7 +258,7 @@ The end of an interval is given as a datetime when required to maintain the reso
 Repeating intervals are supported as well, and return a generator::
 
   >>> aniso8601.parse_repeating_interval('R3/1981-04-05/P1D')
-  <generator object date_generator at 0x7f698cdefc80>
+  <generator object _date_generator at 0x7fd800d3b320>
   >>> list(aniso8601.parse_repeating_interval('R3/1981-04-05/P1D'))
   [datetime.date(1981, 4, 5), datetime.date(1981, 4, 6), datetime.date(1981, 4, 7)]
 
@@ -275,9 +288,11 @@ Note that you should never try to convert a generator produced by an unbounded i
   >>> list(aniso8601.parse_repeating_interval('R/PT1H2M/1980-03-05T01:01:00'))
   Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
-    File "aniso8601/interval.py", line 161, in _date_generator_unbounded
+    File "aniso8601/builder.py", line 548, in _date_generator_unbounded
       currentdate += timedelta
   OverflowError: date value out of range
+
+**The relative kwarg is deprecated and will be removed in aniso8601 5.0.0, use builder=RelativeTimeBuilder instead.**
 
 The above treat years as 365 days and months as 30 days. If calendar level accuracy is required, the relative keyword argument can be used if `python-dateutil <https://pypi.python.org/pypi/python-dateutil>`_ is installed::
 
@@ -293,30 +308,33 @@ Fractional years and months do not make sense for relative intervals. A :code:`R
   >>> aniso8601.parse_interval('P1.1Y/2001-02-28', relative=True)
   Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
-    File "aniso8601/interval.py", line 37, in parse_interval
-      interval_parts = _parse_interval_parts(isointervalstr, intervaldelimiter, datetimedelimiter, relative)
-    File "aniso8601/interval.py", line 89, in _parse_interval_parts
-      duration = parse_duration(firstpart, relative=relative)
-    File "aniso8601/duration.py", line 29, in parse_duration
-      return _parse_duration_prescribed(isodurationstr, relative)
-    File "aniso8601/duration.py", line 73, in _parse_duration_prescribed
-      raise RelativeValueError('Fractional months and years are not defined for relative intervals.')
+    File "aniso8601/interval.py", line 50, in parse_interval
+      intervaldelimiter, datetimedelimiter)
+    File "aniso8601/interval.py", line 116, in _parse_interval
+      return builder.build_interval(end=enddate, duration=duration)
+    File "aniso8601/builder.py", line 393, in build_interval
+      durationobject = cls._build_object(duration)
+    File "aniso8601/builder.py", line 78, in _build_object
+      TnS=parsetuple[6])
+    File "aniso8601/builder.py", line 564, in build_duration
+      raise RelativeValueError('Fractional months and years are not '
   aniso8601.exceptions.RelativeValueError: Fractional months and years are not defined for relative intervals.
 
 If :code:`relative=True` is set without python-dateutil available, a :code:`RuntimeError` is raised::
 
-  >>> aniso8601.parse_interval('2003-01-27/P1M', relative=True)
   Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
-    File "aniso8601/interval.py", line 37, in parse_interval
-      interval_parts = _parse_interval_parts(isointervalstr, intervaldelimiter, datetimedelimiter, relative)
-    File "aniso8601/interval.py", line 108, in _parse_interval_parts
-      duration = parse_duration(secondpart, relative=relative)
-    File "aniso8601/duration.py", line 29, in parse_duration
-      return _parse_duration_prescribed(isodurationstr, relative)
-    File "aniso8601/duration.py", line 77, in _parse_duration_prescribed
-      raise RuntimeError('dateutil must be installed for relative duration support.')
-  RuntimeError: dateutil must be installed for relative duration support.
+    File "aniso8601/interval.py", line 50, in parse_interval
+      intervaldelimiter, datetimedelimiter)
+    File "aniso8601/interval.py", line 135, in _parse_interval
+      duration=duration)
+    File "aniso8601/builder.py", line 409, in build_interval
+      durationobject = cls._build_object(duration)
+    File "aniso8601/builder.py", line 78, in _build_object
+      TnS=parsetuple[6])
+    File "aniso8601/builder.py", line 558, in build_duration
+      raise RuntimeError('dateutil must be installed for '
+  RuntimeError: dateutil must be installed for relativedelta support.
 
 Date and time resolution
 ------------------------
