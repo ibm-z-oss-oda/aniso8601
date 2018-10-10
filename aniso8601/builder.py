@@ -562,7 +562,7 @@ class RelativeTimeBuilder(PythonTimeBuilder):
                 or (PnM is not None and '.' in PnM)):
             #https://github.com/dateutil/dateutil/issues/40
             raise RelativeValueError('Fractional months and years are not '
-                                     'defined for relative intervals.')
+                                     'defined for relative durations.')
 
         years = 0
         months = 0
