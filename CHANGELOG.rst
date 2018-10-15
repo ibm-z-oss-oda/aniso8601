@@ -13,4 +13,4 @@ Changes
 
 Deprecation
 -----------
-* :code:`relative` keyword argument deprecated for all functions where it was available (:code:`parse_duration`, :code:`parse_interval`)
+* :code:`relative` keyword argument deprecated for all functions where it was available (:code:`parse_duration`, :code:`parse_interval`), it will be removed in aniso8601 5.0.0
