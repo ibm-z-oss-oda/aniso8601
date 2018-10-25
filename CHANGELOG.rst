@@ -1,10 +1,19 @@
 Changelog
 =========
 
-aniso8601 4.0.0dev0
+aniso8601 4.0.1
 ===================
 
-*Release date: YYYY-MM-DD*
+*Release date: 2018-10-25*
+
+Changes
+-------
+* Correct date in CHANGELOG
+
+aniso8601 4.0.0
+===================
+
+*Release date: 2018-10-25*
 
 Changes
 -------
