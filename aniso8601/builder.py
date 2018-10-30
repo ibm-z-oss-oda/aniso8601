@@ -134,28 +134,24 @@ class PythonTimeBuilder(BaseTimeBuilder):
                 #Shift 0s in from the left to form complete year
                 YYYY = YYYY.ljust(4, '0')
 
-            year = BaseTimeBuilder.cast(YYYY, int,
-                                        thrownmessage=
-                                        'Invalid year string.')
+            year = cls.cast(YYYY, int,
+                            thrownmessage='Invalid year string.')
 
         if MM is not None:
-            month = BaseTimeBuilder.cast(MM, int,
-                                         thrownmessage=
-                                         'Invalid month string.')
+            month = cls.cast(MM, int,
+                             thrownmessage='Invalid month string.')
         else:
             month = 1
 
         if DD is not None:
-            day = BaseTimeBuilder.cast(DD, int,
-                                       thrownmessage=
-                                       'Invalid day string.')
+            day = cls.cast(DD, int,
+                           thrownmessage='Invalid day string.')
         else:
             day = 1
 
         if Www is not None:
-            weeknumber = BaseTimeBuilder.cast(Www, int,
-                                              thrownmessage=
-                                              'Invalid week string.')
+            weeknumber = cls.cast(Www, int,
+                                  thrownmessage='Invalid week string.')
 
             if weeknumber == 0 or weeknumber > 53:
                 raise WeekOutOfBoundsError('Week number must be between '
@@ -164,16 +160,14 @@ class PythonTimeBuilder(BaseTimeBuilder):
             weeknumber = None
 
         if DDD is not None:
-            dayofyear = BaseTimeBuilder.cast(DDD, int,
-                                             thrownmessage=
-                                             'Invalid day string.')
+            dayofyear = cls.cast(DDD, int,
+                                 thrownmessage='Invalid day string.')
         else:
             dayofyear = None
 
         if D is not None:
-            dayofweek = BaseTimeBuilder.cast(D, int,
-                                             thrownmessage=
-                                             'Invalid day string.')
+            dayofweek = cls.cast(D, int,
+                                 thrownmessage='Invalid day string.')
 
             if dayofweek == 0 or dayofweek > 7:
                 raise DayOutOfBoundsError('Weekday number must be between '
@@ -208,43 +202,31 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
         if hh is not None:
             if '.' in hh:
-                floathours = BaseTimeBuilder.cast(hh,
-                                                  float,
-                                                  thrownmessage=
-                                                  'Invalid hour string.')
+                floathours = cls.cast(hh, float,
+                                      thrownmessage='Invalid hour string.')
                 hours = 0
             else:
-                hours = BaseTimeBuilder.cast(hh,
-                                             int,
-                                             thrownmessage=
-                                             'Invalid hour string.')
+                hours = cls.cast(hh, int,
+                                 thrownmessage='Invalid hour string.')
 
         if mm is not None:
             if '.' in mm:
-                floatminutes = BaseTimeBuilder.cast(mm,
-                                                    float,
-                                                    thrownmessage=
-                                                    'Invalid minute string.')
+                floatminutes = cls.cast(mm, float,
+                                        thrownmessage='Invalid minute string.')
                 minutes = 0
             else:
-                minutes = BaseTimeBuilder.cast(mm,
-                                               int,
-                                               thrownmessage=
-                                               'Invalid minute string.')
+                minutes = cls.cast(mm, int,
+                                   thrownmessage='Invalid minute string.')
 
         if ss is not None:
             if '.' in ss:
                 #Truncate to maximum supported precision
-                floatseconds = BaseTimeBuilder.cast(ss[0:ss.index('.') + 7],
-                                                    float,
-                                                    thrownmessage=
-                                                    'Invalid second string.')
+                floatseconds = cls.cast(ss[0:ss.index('.') + 7], float,
+                                        thrownmessage='Invalid second string.')
                 seconds = 0
             else:
-                seconds = BaseTimeBuilder.cast(ss,
-                                               int,
-                                               thrownmessage=
-                                               'Invalid second string.')
+                seconds = cls.cast(ss, int,
+                                   thrownmessage='Invalid second string.')
 
         #Range checks
         if (hours == 23 and floathours == 0 and minutes == 59
@@ -311,70 +293,49 @@ class PythonTimeBuilder(BaseTimeBuilder):
         seconds = 0
 
         if PnY is not None:
-            years = BaseTimeBuilder.cast(PnY,
-                                         float,
-                                         thrownmessage=
-                                         'Invalid year string.')
+            years = cls.cast(PnY, float,
+                             thrownmessage='Invalid year string.')
 
         if PnM is not None:
-            months = BaseTimeBuilder.cast(PnM,
-                                          float,
-                                          thrownmessage=
-                                          'Invalid month string.')
+            months = cls.cast(PnM, float,
+                              thrownmessage='Invalid month string.')
+
         if PnD is not None:
-            days = BaseTimeBuilder.cast(PnD,
-                                        float,
-                                        thrownmessage=
-                                        'Invalid day string.')
+            days = cls.cast(PnD, float,
+                            thrownmessage='Invalid day string.')
 
         if PnW is not None:
             if '.' in PnW:
-                weeks = BaseTimeBuilder.cast(PnW,
-                                             float,
-                                             thrownmessage=
-                                             'Invalid week string.')
+                weeks = cls.cast(PnW, float,
+                                 thrownmessage='Invalid week string.')
             else:
-                weeks = BaseTimeBuilder.cast(PnW,
-                                             int,
-                                             thrownmessage=
-                                             'Invalid week string.')
+                weeks = cls.cast(PnW, int,
+                                 thrownmessage='Invalid week string.')
 
         if TnH is not None:
             if '.' in TnH:
-                hours = BaseTimeBuilder.cast(TnH,
-                                             float,
-                                             thrownmessage=
-                                             'Invalid hour string.')
+                hours = cls.cast(TnH, float,
+                                 thrownmessage='Invalid hour string.')
             else:
-                hours = BaseTimeBuilder.cast(TnH,
-                                             int,
-                                             thrownmessage=
-                                             'Invalid hour string.')
+                hours = cls.cast(TnH, int,
+                                 thrownmessage='Invalid hour string.')
 
         if TnM is not None:
             if '.' in TnM:
-                minutes = BaseTimeBuilder.cast(TnM,
-                                               float,
-                                               thrownmessage=
-                                               'Invalid minute string.')
+                minutes = cls.cast(TnM, float,
+                                   thrownmessage='Invalid minute string.')
             else:
-                minutes = BaseTimeBuilder.cast(TnM,
-                                               int,
-                                               thrownmessage=
-                                               'Invalid minute string.')
+                minutes = cls.cast(TnM, int,
+                                   thrownmessage='Invalid minute string.')
 
         if TnS is not None:
             if '.' in TnS:
                 #Truncate to maximum supported precision
-                seconds = BaseTimeBuilder.cast(TnS[0:TnS.index('.') + 7],
-                                               float,
-                                               thrownmessage=
-                                               'Invalid second string.')
+                seconds = cls.cast(TnS[0:TnS.index('.') + 7], float,
+                                   thrownmessage='Invalid second string.')
             else:
-                seconds = BaseTimeBuilder.cast(TnS,
-                                               int,
-                                               thrownmessage=
-                                               'Invalid second string.')
+                seconds = cls.cast(TnS, int,
+                                   thrownmessage='Invalid second string.')
 
         #Note that weeks can be handled without conversion to days
         totaldays = years * 365 + months * 30 + days
@@ -450,8 +411,8 @@ class PythonTimeBuilder(BaseTimeBuilder):
             return cls._date_generator_unbounded(endobject,
                                                  -durationobject)
 
-        iterations = BaseTimeBuilder.cast(Rnn, int,
-                                          thrownmessage='Invalid iterations.')
+        iterations = cls.cast(Rnn, int,
+                              thrownmessage='Invalid iterations.')
 
         if startobject is not None:
             return cls._date_generator(startobject, durationobject, iterations)
@@ -465,16 +426,14 @@ class PythonTimeBuilder(BaseTimeBuilder):
             return UTCOffset(name='UTC', minutes=0)
 
         if hh is not None:
-            tzhour = BaseTimeBuilder.cast(hh, int,
-                                          thrownmessage=
-                                          'Invalid hour string.')
+            tzhour = cls.cast(hh, int,
+                              thrownmessage='Invalid hour string.')
         else:
             tzhour = 0
 
         if mm is not None:
-            tzminute = BaseTimeBuilder.cast(mm, int,
-                                            thrownmessage=
-                                            'Invalid minute string.')
+            tzminute = cls.cast(mm, int,
+                                thrownmessage='Invalid minute string.')
         else:
             tzminute = 0
 
@@ -574,79 +533,57 @@ class RelativeTimeBuilder(PythonTimeBuilder):
         microseconds = 0
 
         if PnY is not None:
-            years = BaseTimeBuilder.cast(PnY,
-                                         int,
-                                         thrownmessage=
-                                         'Invalid year string.')
+            years = cls.cast(PnY, int,
+                             thrownmessage='Invalid year string.')
 
         if PnM is not None:
-            months = BaseTimeBuilder.cast(PnM,
-                                          int,
-                                          thrownmessage=
-                                          'Invalid month string.')
+            months = cls.cast(PnM, int,
+                              thrownmessage='Invalid month string.')
 
         if PnD is not None:
-            days = BaseTimeBuilder.cast(PnD,
-                                        float,
-                                        thrownmessage=
-                                        'Invalid day string.')
+            days = cls.cast(PnD, float,
+                            thrownmessage='Invalid day string.')
 
         if PnW is not None:
             if '.' in PnW:
-                weeks = BaseTimeBuilder.cast(PnW,
-                                             float,
-                                             thrownmessage=
-                                             'Invalid week string.')
+                weeks = cls.cast(PnW, float,
+                                 thrownmessage='Invalid week string.')
             else:
-                weeks = BaseTimeBuilder.cast(PnW,
-                                             int,
-                                             thrownmessage=
-                                             'Invalid week string.')
+                weeks = cls.cast(PnW, int,
+                                 thrownmessage='Invalid week string.')
 
         if TnH is not None:
             if '.' in TnH:
-                hours = BaseTimeBuilder.cast(TnH,
-                                             float,
-                                             thrownmessage=
-                                             'Invalid hour string.')
+                hours = cls.cast(TnH, float,
+                                 thrownmessage='Invalid hour string.')
             else:
-                hours = BaseTimeBuilder.cast(TnH,
-                                             int,
-                                             thrownmessage=
-                                             'Invalid hour string.')
+                hours = cls.cast(TnH, int,
+                                 thrownmessage='Invalid hour string.')
 
         if TnM is not None:
             if '.' in TnM:
-                minutes = BaseTimeBuilder.cast(TnM,
-                                               float,
-                                               thrownmessage=
-                                               'Invalid minute string.')
+                minutes = cls.cast(TnM, float,
+                                   thrownmessage='Invalid minute string.')
             else:
-                minutes = BaseTimeBuilder.cast(TnM,
-                                               int,
-                                               thrownmessage=
-                                               'Invalid minute string.')
+                minutes = cls.cast(TnM, int,
+                                   thrownmessage='Invalid minute string.')
 
         if TnS is not None:
             if '.' in TnS:
                 #Split into seconds and microseconds
-                seconds = BaseTimeBuilder.cast(TnS[0:TnS.index('.')],
-                                               int,
-                                               thrownmessage=
-                                               'Invalid second string.')
+                seconds = cls.cast(TnS[0:TnS.index('.')], int,
+                                   thrownmessage='Invalid second string.')
 
                 #Truncate to maximum supported precision
-                microseconds = (BaseTimeBuilder.cast(TnS[TnS.index('.'):
-                                                         TnS.index('.') + 7],
-                                                     float,
-                                                     thrownmessage=
-                                                     'Invalid second string.')
+                microseconds = (cls.cast(TnS[TnS.index('.'):
+                                             TnS.index('.') + 7],
+                                         float,
+                                         thrownmessage=
+                                         'Invalid second string.')
                                 * 1e6)
             else:
-                seconds = BaseTimeBuilder.cast(TnS,
-                                               int,
-                                               thrownmessage=
-                                               'Invalid second string.')
+                seconds = cls.cast(TnS, int,
+                                   thrownmessage='Invalid second string.')
 
         return dateutil.relativedelta.relativedelta(years=years,
                                                     months=months,
