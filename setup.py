@@ -17,7 +17,7 @@ setup(
     url='https://bitbucket.org/nielsenb/aniso8601',
     extras_require={
         'dev': ['mock>=2.0.0'],
-        'relative': ['relativetimebuilder>=0.0.2']
+        'relative': ['relativetimebuilder>=0.1.0']
     },
     packages=['aniso8601'],
     classifiers=[
