@@ -8,7 +8,7 @@
 
 from aniso8601 import compat
 from aniso8601.builders import TupleBuilder
-from aniso8601.builders.pythontimebuilder import PythonTimeBuilder
+from aniso8601.builders.python import PythonTimeBuilder
 from aniso8601.date import parse_date
 from aniso8601.exceptions import ISOFormatError, NegativeDurationError
 from aniso8601.time import parse_time

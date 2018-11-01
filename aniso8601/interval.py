@@ -7,7 +7,7 @@
 # of the BSD license.  See the LICENSE file for details.
 
 from aniso8601.builders import TupleBuilder
-from aniso8601.builders.pythontimebuilder import PythonTimeBuilder
+from aniso8601.builders.python import PythonTimeBuilder
 from aniso8601.date import parse_date
 from aniso8601.duration import parse_duration
 from aniso8601.exceptions import ISOFormatError

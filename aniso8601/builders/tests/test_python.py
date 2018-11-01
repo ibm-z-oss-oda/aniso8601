@@ -18,7 +18,7 @@ from aniso8601.exceptions import (DayOutOfBoundsError, HoursOutOfBoundsError,
                                   MidnightBoundsError, MinutesOutOfBoundsError,
                                   SecondsOutOfBoundsError,
                                   WeekOutOfBoundsError, YearOutOfBoundsError)
-from aniso8601.builders.pythontimebuilder import PythonTimeBuilder
+from aniso8601.builders.python import PythonTimeBuilder
 from aniso8601.utcoffset import UTCOffset
 
 class TestPythonTimeBuilder(unittest.TestCase):

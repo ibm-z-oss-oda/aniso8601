@@ -6,7 +6,7 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-from aniso8601.builders.pythontimebuilder import PythonTimeBuilder
+from aniso8601.builders.python import PythonTimeBuilder
 from aniso8601.exceptions import ISOFormatError
 
 def parse_timezone(tzstr, builder=PythonTimeBuilder):
