@@ -175,7 +175,7 @@ Parsing a duration from a combined date and time is supported as well::
   >>> aniso8601.parse_duration('P0001-01-02T01:30:5')
   datetime.timedelta(397, 5405)
 
-**The included RelativeTimeBuilder is deprecated and will no longer be included as a dependency in aniso8601 6.0.0, install `relativetimebuilder <https://pypi.org/project/relativetimebuilder/>`_ instead.**
+**The included RelativeTimeBuilder is deprecated and will no longer be included as a dependency in aniso8601 6.0.0, install `relativetimebuilder <https://pypi.org/project/relativetimebuilder>`_ instead.**
 
 The above treat years as 365 days and months as 30 days. If calendar level accuracy is required, the provided `RelativeTimeBuilder` can be used if `dateutil <https://pypi.python.org/pypi/python-dateutil>`_ is installed::
 
@@ -291,7 +291,7 @@ Note that you should never try to convert a generator produced by an unbounded i
       currentdate += timedelta
   OverflowError: date value out of range
 
-**The included RelativeTimeBuilder is deprecated and will no longer be included as a dependency in aniso8601 6.0.0, install `relativetimebuilder <https://pypi.org/project/relativetimebuilder/>`_ instead.**
+**The included RelativeTimeBuilder is deprecated and will no longer be included as a dependency in aniso8601 6.0.0, install `relativetimebuilder <https://pypi.org/project/relativetimebuilder>`_ instead.**
 
 The above treat years as 365 days and months as 30 days. If calendar level accuracy is required, the provided `RelativeTimeBuilder` can be used if `dateutil <https://pypi.python.org/pypi/python-dateutil>`_ is installed::
 
@@ -364,7 +364,7 @@ Similarly, for an ISO 8601 date string::
 Builders
 ========
 
-**The included RelativeTimeBuilder is deprecated and will no longer be included as a dependency in aniso8601 6.0.0, install `relativetimebuilder <https://pypi.org/project/relativetimebuilder/>`_ instead.**
+**The included RelativeTimeBuilder is deprecated and will no longer be included as a dependency in aniso8601 6.0.0, install `relativetimebuilder <https://pypi.org/project/relativetimebuilder>`_ instead.**
 
 Builders can be used to change the output format of a parse operation. All parse functions have a :code:`builder` keyword argument which accepts a builder class.
 
@@ -453,7 +453,7 @@ A repeating interval returns a tuple containing the following parse components: 
 RelativeTimeBuilder
 -------------------
 
-**The included RelativeTimeBuilder is deprecated and will no longer be included as a dependency in aniso8601 6.0.0, install `relativetimebuilder <https://pypi.org/project/relativetimebuilder/>`_ instead.**
+**The included RelativeTimeBuilder is deprecated and will no longer be included as a dependency in aniso8601 6.0.0, install `relativetimebuilder <https://pypi.org/project/relativetimebuilder>`_ instead.**
 
 The :code:`RelativeTimeBuilder` uses `python-dateutil <https://pypi.python.org/pypi/python-dateutil>`_ (if installed) to add calendar level accuracy to duration and interval parses. It is located in the :code:`aniso8601.builders.relative` module.
 
