@@ -10,7 +10,7 @@ Changes
 -------
 * Previously deprecated :code:`relative` keyword removed
 * Move builders to :code:`builders` module
-   * :code:`aniso8601.builder.PythonTimeBuilder` -> :code:`aniso8601.builders.pythontimebuilder.PythonTimeBuilder`
+   * :code:`aniso8601.builder.PythonTimeBuilder` -> :code:`aniso8601.builders.python.PythonTimeBuilder`
    * :code:`aniso8601.builder.RelativeTimeBuilder` -> :code:`aniso8601.builders.relative.RelativeTimeBuilder`
    * :code:`aniso8601.builder.TupleBuilder` -> :code:`aniso8601.builders.TupleBuilder`
 * :code:`UTCOffset` moved out of :code:`builder` (:code:`aniso8601.builder.UTCOffset` -> :code:`aniso8601.utcoffset.UTCOffset`)
