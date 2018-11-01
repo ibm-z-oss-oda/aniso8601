@@ -7,7 +7,7 @@
 # of the BSD license.  See the LICENSE file for details.
 
 from aniso8601.exceptions import ISOFormatError
-from aniso8601.builder import PythonTimeBuilder
+from aniso8601.builders.pythontimebuilder import PythonTimeBuilder
 from aniso8601.resolution import DateResolution
 
 def get_date_resolution(isodatestr):

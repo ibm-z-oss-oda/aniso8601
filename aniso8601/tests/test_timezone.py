@@ -52,7 +52,7 @@ class TestTimezoneParserFunctions(unittest.TestCase):
                                'name': '-12'}))
 
         for testtuple in testtuples:
-            with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
+            with mock.patch.object(aniso8601.timezone.PythonTimeBuilder,
                                    'build_timezone') as mockBuildTimezone:
 
                 mockBuildTimezone.return_value = testtuple[1]

@@ -6,31 +6,22 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-import warnings
-
 from aniso8601 import compat
-from aniso8601.builder import (TupleBuilder, PythonTimeBuilder,
-                               RelativeTimeBuilder)
+from aniso8601.builders import TupleBuilder
+from aniso8601.builders.pythontimebuilder import PythonTimeBuilder
 from aniso8601.date import parse_date
 from aniso8601.exceptions import ISOFormatError, NegativeDurationError
 from aniso8601.time import parse_time
 
-def parse_duration(isodurationstr, relative=False, builder=PythonTimeBuilder):
+def parse_duration(isodurationstr, builder=PythonTimeBuilder):
     #Given a string representing an ISO 8601 duration, return a
-    #datetime.timedelta (or dateutil.relativedelta.relativedelta
-    #if relative=True) that matches the given duration. Valid formats are:
+    #a duration built by the given builder. Valid formats are:
     #
     #PnYnMnDTnHnMnS (or any reduced precision equivalent)
     #P<date>T<time>
 
     if isodurationstr[0] != 'P':
         raise ISOFormatError('ISO 8601 duration must start with a P.')
-
-    if relative is True:
-        warnings.warn('relative kwarg is deprecated',
-                      DeprecationWarning, stacklevel=2)
-
-        builder = RelativeTimeBuilder
 
     #If Y, M, D, H, S, or W are in the string,
     #assume it is a specified duration

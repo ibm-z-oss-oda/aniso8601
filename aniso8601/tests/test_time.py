@@ -150,7 +150,7 @@ class TestTimeParserFunctions(unittest.TestCase):
                                                    'Z', 'timezone')}))
 
         for testtuple in testtuples:
-            with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
+            with mock.patch.object(aniso8601.time.PythonTimeBuilder,
                                    'build_time') as mockBuildTime:
 
                 mockBuildTime.return_value = testtuple[1]
@@ -219,7 +219,7 @@ class TestTimeParserFunctions(unittest.TestCase):
                          'time'))))
 
         for testtuple in testtuples:
-            with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
+            with mock.patch.object(aniso8601.time.PythonTimeBuilder,
                                    'build_datetime') as mockBuildDateTime:
 
                 mockBuildDateTime.return_value = testtuple[1]
@@ -235,7 +235,7 @@ class TestTimeParserFunctions(unittest.TestCase):
                          (True, None, '12', '34', '-12:34', 'timezone'),
                          'time'))
 
-        with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
+        with mock.patch.object(aniso8601.time.PythonTimeBuilder,
                                'build_datetime') as mockBuildDateTime:
 
             mockBuildDateTime.return_value = expectedargs

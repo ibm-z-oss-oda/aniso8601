@@ -6,6 +6,20 @@ aniso8601 5.0.0dev0
 
 *Release date: YYYY-MM-DD*
 
+Changes
+-------
+* Previously deprecated :code:`relative` keyword removed
+* Move builders to :code:`builders` module
+   * :code:`aniso8601.builder.PythonTimeBuilder` -> :code:`aniso8601.builders.pythontimebuilder.PythonTimeBuilder`
+   * :code:`aniso8601.builder.RelativeTimeBuilder` -> :code:`aniso8601.builders.relative.RelativeTimeBuilder`
+   * :code:`aniso8601.builder.TupleBuilder` -> :code:`aniso8601.builders.TupleBuilder`
+* :code:`UTCOffset` moved out of :code:`builder` (:code:`aniso8601.builder.UTCOffset` -> :code:`aniso8601.utcoffset.UTCOffset`)
+* Tests are now importable, run with `python -m unittest discover aniso8601`
+
+Deprecation
+-----------
+* The built in :code:`RelativeTimeBuilder` is deprecated, it will be removed in aniso8601 6.0.0, use :code:`RelativeTimeBuilder` from `relativetimebuilder <https://pypi.org/project/relativetimebuilder/>`_ instead
+
 aniso8601 4.0.1
 ===============
 

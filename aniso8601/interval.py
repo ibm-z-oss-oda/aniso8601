@@ -6,21 +6,17 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-import warnings
-
-from aniso8601.builder import (TupleBuilder, PythonTimeBuilder,
-                               RelativeTimeBuilder)
+from aniso8601.builders import TupleBuilder
+from aniso8601.builders.pythontimebuilder import PythonTimeBuilder
 from aniso8601.date import parse_date
 from aniso8601.duration import parse_duration
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.time import parse_datetime
 
 def parse_interval(isointervalstr, intervaldelimiter='/',
-                   datetimedelimiter='T', relative=False,
-                   builder=PythonTimeBuilder):
-    #Given a string representing an ISO 8601 interval, return a
-    #tuple of datetime.date or date.datetime objects representing the beginning
-    #and end of the specified interval. Valid formats are:
+                   datetimedelimiter='T', builder=PythonTimeBuilder):
+    #Given a string representing an ISO 8601 interval, return an
+    #interval built by the given builder. Valid formats are:
     #
     #<start>/<end>
     #<start>/<duration>
@@ -40,21 +36,13 @@ def parse_interval(isointervalstr, intervaldelimiter='/',
         raise ISOFormatError('ISO 8601 repeating intervals must be parsed '
                              'with parse_repeating_interval.')
 
-    if relative is True:
-        warnings.warn('relative kwarg is deprecated',
-                      DeprecationWarning, stacklevel=2)
-
-        builder = RelativeTimeBuilder
-
     return _parse_interval(isointervalstr, builder,
                            intervaldelimiter, datetimedelimiter)
 
 def parse_repeating_interval(isointervalstr, intervaldelimiter='/',
-                             datetimedelimiter='T', relative=False,
-                             builder=PythonTimeBuilder):
-    #Given a string representing an ISO 8601 interval repeating, return a
-    #generator of datetime.date or date.datetime objects representing the
-    #dates specified by the repeating interval. Valid formats are:
+                             datetimedelimiter='T', builder=PythonTimeBuilder):
+    #Given a string representing an ISO 8601 interval repeating, return an
+    #interval built by the given builder. Valid formats are:
     #
     #Rnn/<interval>
     #R/<interval>
@@ -62,12 +50,6 @@ def parse_repeating_interval(isointervalstr, intervaldelimiter='/',
     if isointervalstr[0] != 'R':
         raise ISOFormatError('ISO 8601 repeating interval must start '
                              'with an R.')
-
-    if relative is True:
-        warnings.warn('relative kwarg is deprecated',
-                      DeprecationWarning, stacklevel=2)
-
-        builder = RelativeTimeBuilder
 
     #Parse the number of iterations
     iterationpart, intervalpart = isointervalstr.split(intervaldelimiter, 1)

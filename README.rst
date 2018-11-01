@@ -605,13 +605,9 @@ The tests require the :code:`dev` and :code:`relative` features to be enabled, i
 Tests
 -----
 
-To run the unit tests, navigate to the source directory and run the tests for the python version being worked on (python2, python3)::
+To run the unit tests, navigate to the source directory and run the tests::
 
-   $ python2 -m unittest discover aniso8601/tests/
-
-or::
-
-   $ python3 -m unittest discover aniso8601/tests/
+   $ python -m unittest discover aniso8601
 
 Contributing
 ============

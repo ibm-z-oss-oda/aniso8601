@@ -12,9 +12,6 @@ class ISOFormatError(ValueError):
 class NegativeDurationError(ValueError):
     """Raised when a duration is negative."""
 
-class RelativeValueError(ValueError):
-    """Raised when an invalid value is given for calendar level accuracy."""
-
 class YearOutOfBoundsError(ValueError):
     """Raised when year exceeds limits."""
 

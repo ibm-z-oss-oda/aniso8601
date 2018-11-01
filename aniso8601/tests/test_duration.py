@@ -84,7 +84,7 @@ class TestDurationParserFunctions(unittest.TestCase):
                                                         '59.9999997'}))
 
         for testtuple in testtuples:
-            with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
+            with mock.patch.object(aniso8601.duration.PythonTimeBuilder,
                                    'build_duration') as mockBuildDuration:
                 mockBuildDuration.return_value = testtuple[1]
 
@@ -105,19 +105,6 @@ class TestDurationParserFunctions(unittest.TestCase):
 
         self.assertEqual(result, expectedargs)
         mockBuilder.build_duration.assert_called_once_with(**expectedargs)
-
-    def test_parse_duration_relative(self):
-        with mock.patch.object(aniso8601.builder.RelativeTimeBuilder,
-                               'build_duration') as mockBuildDuration:
-            expectedargs = {'PnY': '1', 'PnM': '2', 'PnD': '3',
-                            'TnH': '4', 'TnM': '54', 'TnS': '6'}
-
-            mockBuildDuration.return_value = expectedargs
-
-            result = parse_duration('P1Y2M3DT4H54M6S', relative=True)
-
-            self.assertEqual(result, expectedargs)
-            mockBuildDuration.assert_called_once_with(**expectedargs)
 
     def test_parse_duration_nop(self):
         with self.assertRaises(ISOFormatError):

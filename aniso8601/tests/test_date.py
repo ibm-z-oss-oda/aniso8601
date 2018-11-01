@@ -60,7 +60,7 @@ class TestDateParserFunctions(unittest.TestCase):
                       ('1981095', {'YYYY': '1981', 'DDD': '095'}))
 
         for testtuple in testtuples:
-            with mock.patch.object(aniso8601.builder.PythonTimeBuilder,
+            with mock.patch.object(aniso8601.date.PythonTimeBuilder,
                                    'build_date') as mockBuildDate:
                 mockBuildDate.return_value = testtuple[1]
 
