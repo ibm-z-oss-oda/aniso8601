@@ -76,6 +76,14 @@ class TestIntervalParserFunctions(unittest.TestCase):
                                   None, None, None, 'date'),
                         'duration': (None, None, None,
                                      None, '4', '54', '6.5', 'duration')}),
+                      ('2050-03-01T13:00:00Z/PT10H',
+                       {'start': (('2050', '03', '01',
+                                   None, None, None, 'date'),
+                                  ('13', '00', '00',
+                                   (False, True, None, None,
+                                    'Z', 'timezone'), 'time'), 'datetime'),
+                        'duration': (None, None, None,
+                                     None, '10', None, None, 'duration')}),
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
                       ('2018-03-06/PT0.0000001S',
@@ -123,6 +131,17 @@ class TestIntervalParserFunctions(unittest.TestCase):
                                   None, None, None, 'date'),
                         'end': ('1980', '03', '05',
                                 None, None, None, 'date')}),
+                      ('2050-03-01T13:00:00Z/2050-05-11T15:30:00Z',
+                       {'start': (('2050', '03', '01',
+                                   None, None, None, 'date'),
+                                  ('13', '00', '00',
+                                   (False, True, None, None,
+                                    'Z', 'timezone'), 'time'), 'datetime'),
+                        'end': (('2050', '05', '11',
+                                 None, None, None, 'date'),
+                                ('15', '30', '00',
+                                 (False, True, None, None,
+                                  'Z', 'timezone'), 'time'), 'datetime')}),
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
                       ('1980-03-05T01:01:00.0000001/'
