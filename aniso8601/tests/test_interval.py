@@ -37,6 +37,14 @@ class TestIntervalParserFunctions(unittest.TestCase):
                        {'end': ('2014', '11', '12', None, None, None, 'date'),
                         'duration': (None, None, None, None, '4', '54', '6.5',
                                      'duration')}),
+                      ('PT10H/2050-03-01T13:00:00Z',
+                       {'end': (('2050', '03', '01',
+                                 None, None, None, 'date'),
+                                ('13', '00', '00',
+                                 (False, True, None, None,
+                                  'Z', 'timezone'), 'time'), 'datetime'),
+                        'duration': (None, None, None,
+                                     None, '10', None, None, 'duration')}),
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
                       ('PT0.0000001S/2018-03-06',
