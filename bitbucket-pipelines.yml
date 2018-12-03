@@ -1,0 +1,33 @@
+pipelines:
+  default:
+    - parallel:
+        - step:
+            image: python:latest
+            script:
+              - pip install .[dev,relative]
+              - python -m unittest discover aniso8601/tests/
+        - step:
+            image: python:3.7
+            script:
+              - pip install .[dev,relative]
+              - python -m unittest discover aniso8601/tests/
+        - step:
+            image: python:3.6
+            script:
+              - pip install .[dev,relative]
+              - python -m unittest discover aniso8601/tests/
+        - step:
+            image: python:3.5
+            script:
+              - pip install .[dev,relative]
+              - python -m unittest discover aniso8601/tests/
+        - step:
+            image: python:3.4
+            script:
+              - pip install .[dev,relative]
+              - python -m unittest discover aniso8601/tests/
+        - step:
+            image: python:2.7
+            script:
+              - pip install .[dev,relative]
+              - python -m unittest discover aniso8601/tests/
