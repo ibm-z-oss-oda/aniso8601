@@ -6,6 +6,10 @@ aniso8601 4.0.2dev0
 
 *Release date: YYYY-MM-DD*
 
+Changes
+-------
+* Update copyright date
+
 aniso8601 4.0.1
 ===============
 
