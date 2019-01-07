@@ -598,20 +598,16 @@ Setup
 
 It is recommended to develop using a `virtualenv <https://virtualenv.pypa.io/en/stable/>`_.
 
-The tests require the :code:`dev` and :code:`relative` features to be enabled, install the necessary dependencies using pip::
+The tests require the :code:`relative` feature to be enabled, install the necessary dependencies using pip::
 
-  $ pip install .[dev,relative]
+  $ pip install .[relative]
 
 Tests
 -----
 
-To run the unit tests, navigate to the source directory and run the tests for the python version being worked on (python2, python3)::
+Tests can be run using `setuptools <https://setuptools.readthedocs.io/en/latest/setuptools.html>`::
 
-   $ python2 -m unittest discover aniso8601/tests/
-
-or::
-
-   $ python3 -m unittest discover aniso8601/tests/
+   $ python setup.py test
 
 Contributing
 ============

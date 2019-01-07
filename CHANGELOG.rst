@@ -9,6 +9,10 @@ aniso8601 4.0.2dev0
 Changes
 -------
 * Update copyright date
+* Drop support for distutils
+* Make tests package importable
+* Add support for running tests via setuptools (:code:`python setup.py test`)
+* Explicitly exclude .pyc, __pycache__ from bundles
 
 aniso8601 4.0.1
 ===============
