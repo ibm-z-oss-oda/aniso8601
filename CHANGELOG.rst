@@ -16,7 +16,6 @@ Changes
   - :code:`aniso8601.builder.TupleBuilder` -> :code:`aniso8601.builders.TupleBuilder`
 
 * :code:`UTCOffset` moved out of :code:`builder` (:code:`aniso8601.builder.UTCOffset` -> :code:`aniso8601.utcoffset.UTCOffset`)
-* Tests are now importable, run with `python -m unittest discover aniso8601`
 
 Deprecation
 -----------
@@ -34,6 +33,7 @@ Changes
 * Make tests package importable
 * Add support for running tests via setuptools (:code:`python setup.py test`)
 * Explicitly exclude .pyc, __pycache__ from bundles
+* Use :code:`unittest.mock` with Python 3
 
 aniso8601 4.0.1
 ===============

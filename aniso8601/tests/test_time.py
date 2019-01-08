@@ -7,13 +7,13 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import unittest
-import mock
 import aniso8601
 
 from aniso8601.resolution import TimeResolution
 from aniso8601.time import (get_time_resolution, parse_datetime, parse_time,
                             _parse_hour, _parse_minute_time,
                             _parse_second_time, _split_tz)
+from aniso8601.tests.compat import mock
 
 class TestTimeParserFunctions(unittest.TestCase):
     def test_get_time_resolution(self):

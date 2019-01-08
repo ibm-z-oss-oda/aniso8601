@@ -7,7 +7,6 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import unittest
-import mock
 import aniso8601
 
 from aniso8601.exceptions import ISOFormatError, NegativeDurationError
@@ -17,6 +16,7 @@ from aniso8601.duration import (parse_duration, _parse_duration_prescribed,
                                 _parse_duration_prescribed_time,
                                 _parse_duration_element,
                                 _has_any_component, _component_order_correct)
+from aniso8601.tests.compat import mock
 
 class TestDurationParserFunctions(unittest.TestCase):
     def test_parse_duration(self):
