@@ -13,6 +13,7 @@ Changes
 * Make tests package importable
 * Add support for running tests via setuptools (:code:`python setup.py test`)
 * Explicitly exclude .pyc, __pycache__ from bundles
+* Use :code:`unittest.mock` with Python 3
 
 aniso8601 4.0.1
 ===============

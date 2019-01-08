@@ -1,4 +1,14 @@
+import sys
+
 from setuptools import setup, find_packages
+
+TESTS_REQUIRE = []
+
+#Mock is only required for Python 2
+PY2 = sys.version_info[0] == 2
+
+if PY2:
+    TESTS_REQUIRE.append('mock>=2.0.0')
 
 readme = open('README.rst', 'r')
 README_TEXT = readme.read()
@@ -17,7 +27,7 @@ setup(
     },
     packages=find_packages(),
     test_suite='aniso8601',
-    tests_require=['mock>=2.0.0'],
+    tests_require=TESTS_REQUIRE,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',

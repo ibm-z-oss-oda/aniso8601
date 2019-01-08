@@ -9,7 +9,6 @@
 import datetime
 import pickle
 import unittest
-import mock
 import aniso8601
 import dateutil.relativedelta
 
@@ -21,6 +20,7 @@ from aniso8601.exceptions import (DayOutOfBoundsError, HoursOutOfBoundsError,
                                   MidnightBoundsError, MinutesOutOfBoundsError,
                                   RelativeValueError, SecondsOutOfBoundsError,
                                   WeekOutOfBoundsError, YearOutOfBoundsError)
+from aniso8601.tests.compat import mock
 
 class TestBaseTimeBuilder(unittest.TestCase):
     def test_build_date(self):

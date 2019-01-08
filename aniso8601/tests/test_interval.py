@@ -7,12 +7,12 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import unittest
-import mock
 import aniso8601
 
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.interval import (_parse_interval, parse_interval,
                                 parse_repeating_interval)
+from aniso8601.tests.compat import mock
 
 class TestIntervalParserFunctions(unittest.TestCase):
     def test_parse_interval(self):

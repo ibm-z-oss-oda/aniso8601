@@ -7,7 +7,6 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import unittest
-import mock
 import aniso8601
 
 from aniso8601.exceptions import ISOFormatError
@@ -16,6 +15,7 @@ from aniso8601.date import (parse_date, _parse_year, _parse_calendar_day,
                             _parse_week, _parse_ordinal_date,
                             get_date_resolution)
 from aniso8601.resolution import DateResolution
+from aniso8601.tests.compat import mock
 
 class TestDateResolutionFunctions(unittest.TestCase):
     def test_get_date_resolution_year(self):

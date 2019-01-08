@@ -7,11 +7,11 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import unittest
-import mock
 import aniso8601
 
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.timezone import parse_timezone
+from aniso8601.tests.compat import mock
 
 class TestTimezoneParserFunctions(unittest.TestCase):
     def test_parse_timezone(self):
