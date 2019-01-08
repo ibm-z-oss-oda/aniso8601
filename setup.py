@@ -16,7 +16,7 @@ setup(
         'relative': ['python-dateutil>=2.7.3']
     },
     packages=find_packages(),
-    test_suite='aniso8601.tests',
+    test_suite='aniso8601',
     tests_require=['mock>=2.0.0'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
