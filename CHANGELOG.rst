@@ -22,6 +22,19 @@ Deprecation
 -----------
 * The built in :code:`RelativeTimeBuilder` is deprecated, it will be removed in aniso8601 6.0.0, use :code:`RelativeTimeBuilder` from `relativetimebuilder <https://pypi.org/project/relativetimebuilder/>`_ instead
 
+aniso8601 4.1.0dev0
+===================
+
+*Release date: YYYY-MM-DD*
+
+Changes
+-------
+* Update copyright date
+* Drop support for distutils
+* Make tests package importable
+* Add support for running tests via setuptools (:code:`python setup.py test`)
+* Explicitly exclude .pyc, __pycache__ from bundles
+
 aniso8601 4.0.1
 ===============
 

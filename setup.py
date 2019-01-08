@@ -1,7 +1,4 @@
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils import setup
+from setuptools import setup, find_packages
 
 readme = open('README.rst', 'r')
 README_TEXT = readme.read()
@@ -16,10 +13,11 @@ setup(
     author_email='nielsenb@jetfuse.net',
     url='https://bitbucket.org/nielsenb/aniso8601',
     extras_require={
-        'dev': ['mock>=2.0.0'],
         'relative': ['relativetimebuilder>=0.1.0']
     },
-    packages=['aniso8601'],
+    packages=find_packages(),
+    test_suite='aniso8601',
+    tests_require=['mock>=2.0.0'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
