@@ -45,7 +45,7 @@ setup(
     ],
     keywords='iso8601 parser',
     project_urls={
-        'Documentation': 'http://aniso8601.readthedocs.io/',
+        'Documentation': 'https://aniso8601.readthedocs.io/',
         'Source': 'https://bitbucket.org/nielsenb/aniso8601',
         'Tracker': 'https://bitbucket.org/nielsenb/aniso8601/issues'
     }
