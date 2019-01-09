@@ -21,10 +21,10 @@ Deprecation
 -----------
 * The built in :code:`RelativeTimeBuilder` is deprecated, it will be removed in aniso8601 6.0.0, use :code:`RelativeTimeBuilder` from `relativetimebuilder <https://pypi.org/project/relativetimebuilder/>`_ instead
 
-aniso8601 4.1.0dev0
-===================
+aniso8601 4.1.0
+===============
 
-*Release date: YYYY-MM-DD*
+*Release date: 2019-01-08*
 
 Changes
 -------
