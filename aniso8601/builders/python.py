@@ -100,49 +100,61 @@ class PythonTimeBuilder(BaseTimeBuilder):
             if '.' in hh:
                 floathours = cls.cast(hh, float,
                                       thrownmessage='Invalid hour string.')
-                hours = 0
+                hours, floatminutes = cls._split_and_convert(floathours, 60)
             else:
                 hours = cls.cast(hh, int,
                                  thrownmessage='Invalid hour string.')
 
         if mm is not None:
             if '.' in mm:
-                floatminutes = cls.cast(mm, float,
-                                        thrownmessage='Invalid minute string.')
-                minutes = 0
-            else:
+                floatminutes += cls.cast(mm, float,
+                                         thrownmessage='Invalid minute string.')
+                minutes, floatseconds = cls._split_and_convert(floatminutes, 60)
+            elif mm is not None:
                 minutes = cls.cast(mm, int,
                                    thrownmessage='Invalid minute string.')
+        elif floatminutes != 0:
+            minutes, floatseconds = cls._split_and_convert(floatminutes, 60)
 
         if ss is not None:
             if '.' in ss:
-                #Truncate to maximum supported precision
-                floatseconds = cls.cast(ss[0:ss.index('.') + 7], float,
-                                        thrownmessage='Invalid second string.')
-                seconds = 0
+                floatseconds += cls.cast(ss, float,
+                                         thrownmessage='Invalid second string.')
+
+                if '.' in str(floatseconds):
+                    #Truncate to maximum supported precision
+                    floatstr = str(floatseconds)
+                    floatseconds = float(floatstr[0:floatstr.index('.') + 7])
+
+                seconds = floatseconds
             else:
                 seconds = cls.cast(ss, int,
                                    thrownmessage='Invalid second string.')
+        else:
+            if '.' in str(floatseconds):
+                #Truncate to maximum supported precision
+                floatstr = str(floatseconds)
+                floatseconds = float(floatstr[0:floatstr.index('.') + 7])
+
+            seconds = floatseconds
 
         #Range checks
-        if (hours == 23 and floathours == 0 and minutes == 59
-                and floatminutes == 0 and seconds == 60 and floatseconds == 0):
+        if (hours == 23 and minutes == 59 and seconds == 60):
             #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
             raise LeapSecondError('Leap seconds are not supported.')
 
-        if (hours == 24 and floathours == 0
-                and (minutes != 0 or floatminutes != 0 or seconds != 0
-                     or floatseconds != 0)):
+        if (hours == 24
+                and (minutes != 0 or seconds != 0)):
             raise MidnightBoundsError('Hour 24 may only represent midnight.')
 
-        if hours > 24 or floathours > 24:
+        if hours > 24:
             raise HoursOutOfBoundsError('Hour must be between 0..24 with '
                                         '24 representing midnight.')
 
-        if minutes >= 60 or floatminutes >= 60:
+        if minutes >= 60:
             raise MinutesOutOfBoundsError('Minutes must be less than 60.')
 
-        if seconds >= 60 or floatseconds >= 60:
+        if seconds >= 60:
             raise SecondsOutOfBoundsError('Seconds must be less than 60.')
 
         #Fix ranges that have passed range checks
@@ -156,20 +168,14 @@ class PythonTimeBuilder(BaseTimeBuilder):
             return (datetime.datetime(1, 1, 1,
                                       hour=hours,
                                       minute=minutes,
-                                      second=seconds,
                                       tzinfo=cls._build_object(tz))
-                    + datetime.timedelta(hours=floathours,
-                                         minutes=floatminutes,
-                                         seconds=floatseconds)
+                    + datetime.timedelta(seconds=seconds)
                    ).timetz()
 
         return (datetime.datetime(1, 1, 1,
                                   hour=hours,
-                                  minute=minutes,
-                                  second=seconds)
-                + datetime.timedelta(hours=floathours,
-                                     minutes=floatminutes,
-                                     seconds=floatseconds)
+                                  minute=minutes)
+                + datetime.timedelta(seconds=seconds)
                ).time()
 
     @classmethod
@@ -401,3 +407,18 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
             #Update the value
             currentdate += timedelta
+
+    @staticmethod
+    def _split_and_convert(floatinstance, conversion):
+        #Splits a float into an integer, and a converted float portion
+        floatstr = str(floatinstance)
+
+        integerstr, floatstr = floatstr.split('.')
+
+        #Readd the decimal
+        floatstr = '.' + floatstr
+
+        integerpart = int(integerstr)
+        floatpart = float(floatstr)
+
+        return (integerpart, floatpart * conversion)
