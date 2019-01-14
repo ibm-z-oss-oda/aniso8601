@@ -117,19 +117,12 @@ class PythonTimeBuilder(BaseTimeBuilder):
             floatseconds += cls.cast(ss, float,
                                      thrownmessage='Invalid second string.')
 
-            if '.' in str(floatseconds):
-                #Truncate to maximum supported precision
-                floatstr = str(floatseconds)
-                floatseconds = float(floatstr[0:floatstr.index('.') + 7])
+        if '.' in str(floatseconds):
+            #Truncate to maximum supported precision
+            floatstr = str(floatseconds)
+            floatseconds = float(floatstr[0:floatstr.index('.') + 7])
 
-            seconds = floatseconds
-        else:
-            if '.' in str(floatseconds):
-                #Truncate to maximum supported precision
-                floatstr = str(floatseconds)
-                floatseconds = float(floatstr[0:floatstr.index('.') + 7])
-
-            seconds = floatseconds
+        seconds = floatseconds
 
         #Range checks
         if (hours == 23 and minutes == 59 and seconds == 60):
