@@ -100,6 +100,12 @@ class PythonTimeBuilder(BaseTimeBuilder):
             if '.' in hh:
                 floathours = cls.cast(hh, float,
                                       thrownmessage='Invalid hour string.')
+
+                #Inline range check for decimal hours
+                if 24 < floathours < 25:
+                    raise HoursOutOfBoundsError('Hour must be between 0..24 with '
+                                                '24 representing midnight.')
+
                 hours, floatminutes = cls._split_and_convert(floathours, 60)
             else:
                 hours = cls.cast(hh, int,
