@@ -97,45 +97,32 @@ class PythonTimeBuilder(BaseTimeBuilder):
         floatseconds = float(0)
 
         if hh is not None:
-            if '.' in hh:
-                floathours = cls.cast(hh, float,
-                                      thrownmessage='Invalid hour string.')
+            floathours = cls.cast(hh, float,
+                                  thrownmessage='Invalid hour string.')
 
-                #Inline range check for decimal hours
-                if floathours > 24:
-                    raise HoursOutOfBoundsError('Hour must be between 0..24 with '
-                                                '24 representing midnight.')
+            #Inline range check for decimal hours
+            if floathours > 24:
+                raise HoursOutOfBoundsError('Hour must be between 0..24 with '
+                                            '24 representing midnight.')
 
-                hours, floatminutes = cls._split_and_convert(floathours, 60)
-            else:
-                hours = cls.cast(hh, int,
-                                 thrownmessage='Invalid hour string.')
+            hours, floatminutes = cls._split_and_convert(floathours, 60)
 
         if mm is not None:
-            if '.' in mm:
-                floatminutes += cls.cast(mm, float,
-                                         thrownmessage='Invalid minute string.')
-                minutes, floatseconds = cls._split_and_convert(floatminutes, 60)
-            else:
-                minutes = cls.cast(mm, int,
-                                   thrownmessage='Invalid minute string.')
-        elif floatminutes != 0:
-            minutes, floatseconds = cls._split_and_convert(floatminutes, 60)
+            floatminutes += cls.cast(mm, float,
+                                     thrownmessage='Invalid minute string.')
+
+        minutes, floatseconds = cls._split_and_convert(floatminutes, 60)
 
         if ss is not None:
-            if '.' in ss:
-                floatseconds += cls.cast(ss, float,
-                                         thrownmessage='Invalid second string.')
+            floatseconds += cls.cast(ss, float,
+                                     thrownmessage='Invalid second string.')
 
-                if '.' in str(floatseconds):
-                    #Truncate to maximum supported precision
-                    floatstr = str(floatseconds)
-                    floatseconds = float(floatstr[0:floatstr.index('.') + 7])
+            if '.' in str(floatseconds):
+                #Truncate to maximum supported precision
+                floatstr = str(floatseconds)
+                floatseconds = float(floatstr[0:floatstr.index('.') + 7])
 
-                seconds = floatseconds
-            else:
-                seconds = cls.cast(ss, int,
-                                   thrownmessage='Invalid second string.')
+            seconds = floatseconds
         else:
             if '.' in str(floatseconds):
                 #Truncate to maximum supported precision
