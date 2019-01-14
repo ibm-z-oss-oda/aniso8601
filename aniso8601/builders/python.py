@@ -102,7 +102,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
                                       thrownmessage='Invalid hour string.')
 
                 #Inline range check for decimal hours
-                if 24 < floathours < 25:
+                if floathours > 24:
                     raise HoursOutOfBoundsError('Hour must be between 0..24 with '
                                                 '24 representing midnight.')
 
