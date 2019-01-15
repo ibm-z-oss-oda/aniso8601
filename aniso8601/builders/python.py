@@ -7,6 +7,7 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import datetime
+import math
 import warnings
 
 from aniso8601.builders import BaseTimeBuilder, TupleBuilder
@@ -117,12 +118,8 @@ class PythonTimeBuilder(BaseTimeBuilder):
             floatseconds += cls.cast(ss, float,
                                      thrownmessage='Invalid second string.')
 
-        if '.' in str(floatseconds):
-            #Truncate to maximum supported precision
-            floatstr = str(floatseconds)
-            floatseconds = float(floatstr[0:floatstr.index('.') + 7])
-
-        seconds = floatseconds
+        #Truncate to maximum supported precision
+        seconds = cls._truncate(floatseconds, 6)
 
         #Range checks
         if (hours == 23 and minutes == 59 and seconds == 60):
@@ -234,19 +231,8 @@ class PythonTimeBuilder(BaseTimeBuilder):
             floatseconds += cls.cast(TnS, float,
                                      thrownmessage='Invalid second string.')
 
-            if '.' in str(floatseconds):
-                #Truncate to maximum supported precision
-                floatstr = str(floatseconds)
-                floatseconds = float(floatstr[0:floatstr.index('.') + 7])
-
-            seconds = floatseconds
-        else:
-            if '.' in str(floatseconds):
-                #Truncate to maximum supported precision
-                floatstr = str(floatseconds)
-                floatseconds = float(floatstr[0:floatstr.index('.') + 7])
-
-            seconds = floatseconds
+        #Truncate to maximum supported precision
+        seconds = cls._truncate(floatseconds, 6)
 
         #Note that weeks can be handled without conversion to days
         totaldays = years * 365 + months * 30 + days
@@ -418,16 +404,26 @@ class PythonTimeBuilder(BaseTimeBuilder):
             currentdate += timedelta
 
     @staticmethod
-    def _split_and_convert(floatinstance, conversion):
+    def _split_and_convert(f, conversion):
         #Splits a float into an integer, and a converted float portion
-        floatstr = str(floatinstance)
+        floatpart, integerpart = math.modf(f)
 
-        integerstr, floatstr = floatstr.split('.')
+        return (int(integerpart), float(floatpart) * conversion)
 
-        #Readd the decimal
-        floatstr = '.' + floatstr
+    @staticmethod
+    def _truncate(f, n):
+        #Truncates/pads a float f to n decimal places without rounding
+        #https://stackoverflow.com/a/783927
+        #This differs from the given implementation in that we expand to
+        #double the desired precision, than truncate the resulting string
+        #to mitigate rounding effects
+        floatstr = '{}'.format(f)
 
-        integerpart = int(integerstr)
-        floatpart = float(floatstr)
+        if 'e' in floatstr or 'E' in floatstr:
+            expandedfloatstr = '{0:.{1}f}'.format(f, n * 2)
+        else:
+            integerpartstr, _, floatpartstr = floatstr.partition('.')
 
-        return (integerpart, floatpart * conversion)
+            expandedfloatstr = '.'.join([integerpartstr, (floatpartstr + '0' * n * 2)[:n * 2]])
+
+        return float(expandedfloatstr[:expandedfloatstr.index('.') + n + 1])

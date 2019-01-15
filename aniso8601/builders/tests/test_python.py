@@ -353,6 +353,8 @@ class TestPythonTimeBuilder(unittest.TestCase):
                        datetime.timedelta(hours=4, minutes=54, seconds=6.5)),
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+                      #https://bitbucket.org/nielsenb/aniso8601/issues/21/sub-microsecond-precision-is-lost-when
+                      ({'TnM': '0.00000000999'}, datetime.timedelta(0)),
                       ({'TnS': '0.0000001'}, datetime.timedelta(0)),
                       ({'TnS': '2.0000048'},
                        datetime.timedelta(seconds=2, microseconds=4)),
