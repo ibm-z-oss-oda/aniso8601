@@ -186,53 +186,137 @@ class PythonTimeBuilder(BaseTimeBuilder):
         floatseconds = float(0)
 
         if PnY is not None:
-            floatyears = cls.cast(PnY, float,
-                                  thrownmessage='Invalid year string.')
+            if '.' in PnY:
+                intyearstr, floatyearstr = PnY.split('.')
 
-            years, floatyeardays = cls._split_and_convert(floatyears, 365)
+                years = cls.cast(intyearstr, int,
+                                 thrownmessage='Invalid year string.')
 
-            floatdays += floatyeardays
+                floatyears = cls.cast('.' + floatyearstr, float,
+                                      thrownmessage='Invalid year string.')
+            else:
+                years = cls.cast(PnY, int,
+                                 thrownmessage='Invalid year string.')
 
         if PnM is not None:
-            floatmonths += cls.cast(PnM, float,
-                                    thrownmessage='Invalid month string.')
+            if '.' in PnM:
+                intmonthstr, floatmonthstr = PnM.split('.')
 
-        months, floatmonthdays = cls._split_and_convert(floatmonths, 30)
+                months = cls.cast(intmonthstr, int,
+                                  thrownmessage='Invalid month string.')
 
-        floatdays += floatmonthdays
+                floatmonths = cls.cast('.' + floatmonthstr, float,
+                                       thrownmessage='Invalid month string.')
+            else:
+                months = cls.cast(PnM, int,
+                                  thrownmessage='Invalid month string.')
 
         if PnW is not None:
-            floatweeks = cls.cast(PnW, float,
-                                  thrownmessage='Invalid week string.')
+            if '.' in PnW:
+                intweekstr, floatweekstr = PnW.split('.')
 
-            weeks, floatweekdays = cls._split_and_convert(floatweeks, 7)
+                weeks = cls.cast(intweekstr, int,
+                                 thrownmessage='Invalid week string.')
 
-            floatdays += floatweekdays
+                floatweeks = cls.cast('.' + floatweekstr, float,
+                                      thrownmessage='Invalid week string.')
+            else:
+                weeks = cls.cast(PnW, int,
+                                 thrownmessage='Invalid week string.')
 
         if PnD is not None:
-            floatdays += cls.cast(PnD, float,
-                                  thrownmessage='Invalid day string.')
+            if '.' in PnD:
+                intdaystr, floatdaystr = PnD.split('.')
 
-        days, floathours = cls._split_and_convert(floatdays, 24)
+                days = cls.cast(intdaystr, int,
+                                thrownmessage='Invalid day string.')
+
+                floatdays = cls.cast('.' + floatdaystr, float,
+                                     thrownmessage='Invalid day string.')
+            else:
+                days = cls.cast(PnD, int,
+                                thrownmessage='Invalid day string.')
 
         if TnH is not None:
-            floathours += cls.cast(TnH, float,
-                                   thrownmessage='Invalid hour string.')
+            if '.' in TnH:
+                inthourstr, floathourstr = TnH.split('.')
 
-        hours, floatminutes = cls._split_and_convert(floathours, 60)
+                hours = cls.cast(inthourstr, int,
+                                 thrownmessage='Invalid hour string.')
+
+                floathours = cls.cast('.' + floathourstr, float,
+                                      thrownmessage='Invalid hour string.')
+            else:
+                hours = cls.cast(TnH, int,
+                                 thrownmessage='Invalid hour string.')
 
         if TnM is not None:
-            floatminutes += cls.cast(TnM, float,
-                                     thrownmessage='Invalid minute string.')
+            if '.' in TnM:
+                intminutestr, floatminutestr = TnM.split('.')
 
-        minutes, floatseconds = cls._split_and_convert(floatminutes, 60)
+                minutes = cls.cast(intminutestr, int,
+                                   thrownmessage='Invalid minute string.')
+
+                floatminutes = cls.cast('.' + floatminutestr, float,
+                                        thrownmessage='Invalid minute string.')
+            else:
+                minutes = cls.cast(TnM, int,
+                                   thrownmessage='Invalid minute string.')
 
         if TnS is not None:
-            floatseconds += cls.cast(TnS, float,
-                                     thrownmessage='Invalid second string.')
+            if '.' in TnS:
+                intsecondstr, floatsecondstr = TnS.split('.')
 
-        #Truncate to maximum supported precision
-        seconds = cls._truncate(floatseconds, 6)
+                seconds = cls.cast(intsecondstr, int,
+                                   thrownmessage='Invalid second string.')
+
+                floatseconds = cls.cast('.' + floatsecondstr, float,
+                                        thrownmessage='Invalid second string.')
+            else:
+                seconds = cls.cast(TnS, int,
+                                   thrownmessage='Invalid second string.')
+
+        if floatyears != 0:
+            remainderyears, remainderdays = cls._split_and_convert(floatyears, 365)
+
+            years += remainderyears
+            floatdays += remainderdays
+
+        if floatmonths != 0:
+            remaindermonths, remainderdays = cls._split_and_convert(floatmonths, 30)
+
+            months += remaindermonths
+            floatdays += remainderdays
+
+        if floatweeks != 0:
+            remainderweeks, remainderdays = cls._split_and_convert(floatweeks, 7)
+
+            weeks += remainderweeks
+            floatdays += remainderdays
+
+        if floatdays != 0:
+            remainderdays, remainderhours = cls._split_and_convert(floatdays, 24)
+
+            days += remainderdays
+            floathours += remainderhours
+
+        if floathours != 0:
+            remainderhours, remainderminutes = cls._split_and_convert(floathours, 60)
+
+            hours += remainderhours
+            floatminutes += remainderminutes
+
+        if floatminutes != 0:
+            remainderminutes, remainderseconds = cls._split_and_convert(floatminutes, 60)
+
+            minutes += remainderminutes
+            floatseconds += remainderseconds
+
+        if floatseconds != 0:
+            totalseconds = float(seconds) + floatseconds
+
+            #Truncate to maximum supported precision
+            seconds = cls._truncate(totalseconds, 6)
 
         #Note that weeks can be handled without conversion to days
         totaldays = years * 365 + months * 30 + days

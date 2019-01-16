@@ -355,7 +355,7 @@ class TestPythonTimeBuilder(unittest.TestCase):
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
                       #https://bitbucket.org/nielsenb/aniso8601/issues/21/sub-microsecond-precision-is-lost-when
-                      ({'PnY': '1999.999999999997'}, datetime.timedelta(days=729999, seconds=86399, microseconds=999906)),
+                      ({'PnY': '1999.99999999999997'}, datetime.timedelta(days=729999, seconds=86399, microseconds=999999)),
                       ({'PnM': '1.99999999999997'}, datetime.timedelta(days=59, hours=23, minutes=59, seconds=59, microseconds=999999)),
                       ({'PnW': '1.9999999999997'}, datetime.timedelta(days=13, hours=23, minutes=59, seconds=59, microseconds=999999)),
                       ({'PnD': '1.999999999997'}, datetime.timedelta(days=1, hours=23, minutes=59, seconds=59, microseconds=999999)),
