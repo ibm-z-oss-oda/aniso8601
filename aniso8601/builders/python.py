@@ -187,91 +187,49 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
         if PnY is not None:
             if '.' in PnY:
-                intyearstr, floatyearstr = PnY.split('.')
-
-                years = cls.cast(intyearstr, int,
-                                 thrownmessage='Invalid year string.')
-
-                floatyears = cls.cast('.' + floatyearstr, float,
-                                      thrownmessage='Invalid year string.')
+                years, floatyears = cls._split_and_cast(PnY, 'Invalid year string.')
             else:
                 years = cls.cast(PnY, int,
                                  thrownmessage='Invalid year string.')
 
         if PnM is not None:
             if '.' in PnM:
-                intmonthstr, floatmonthstr = PnM.split('.')
-
-                months = cls.cast(intmonthstr, int,
-                                  thrownmessage='Invalid month string.')
-
-                floatmonths = cls.cast('.' + floatmonthstr, float,
-                                       thrownmessage='Invalid month string.')
+                months, floatmonths = cls._split_and_cast(PnM, 'Invalid month string.')
             else:
                 months = cls.cast(PnM, int,
                                   thrownmessage='Invalid month string.')
 
         if PnW is not None:
             if '.' in PnW:
-                intweekstr, floatweekstr = PnW.split('.')
-
-                weeks = cls.cast(intweekstr, int,
-                                 thrownmessage='Invalid week string.')
-
-                floatweeks = cls.cast('.' + floatweekstr, float,
-                                      thrownmessage='Invalid week string.')
+                weeks, floatweeks = cls._split_and_cast(PnW, 'Invalid week string.')
             else:
                 weeks = cls.cast(PnW, int,
                                  thrownmessage='Invalid week string.')
 
         if PnD is not None:
             if '.' in PnD:
-                intdaystr, floatdaystr = PnD.split('.')
-
-                days = cls.cast(intdaystr, int,
-                                thrownmessage='Invalid day string.')
-
-                floatdays = cls.cast('.' + floatdaystr, float,
-                                     thrownmessage='Invalid day string.')
+                days, floatdays = cls._split_and_cast(PnD, 'Invalid day string.')
             else:
                 days = cls.cast(PnD, int,
                                 thrownmessage='Invalid day string.')
 
         if TnH is not None:
             if '.' in TnH:
-                inthourstr, floathourstr = TnH.split('.')
-
-                hours = cls.cast(inthourstr, int,
-                                 thrownmessage='Invalid hour string.')
-
-                floathours = cls.cast('.' + floathourstr, float,
-                                      thrownmessage='Invalid hour string.')
+                hours, floathours = cls._split_and_cast(TnH, 'Invalid hour string.')
             else:
                 hours = cls.cast(TnH, int,
                                  thrownmessage='Invalid hour string.')
 
         if TnM is not None:
             if '.' in TnM:
-                intminutestr, floatminutestr = TnM.split('.')
-
-                minutes = cls.cast(intminutestr, int,
-                                   thrownmessage='Invalid minute string.')
-
-                floatminutes = cls.cast('.' + floatminutestr, float,
-                                        thrownmessage='Invalid minute string.')
+                minutes, floatminutes = cls._split_and_cast(TnM, 'Invalid minute string.')
             else:
                 minutes = cls.cast(TnM, int,
                                    thrownmessage='Invalid minute string.')
 
         if TnS is not None:
             if '.' in TnS:
-                intsecondstr, floatsecondstr = TnS.split('.')
-
-                seconds = cls.cast(intsecondstr, int,
-                                   thrownmessage='Invalid second string.')
-
-                floatseconds = cls.cast('.' + floatsecondstr, float,
-                                        thrownmessage='Invalid second string.')
+                seconds, floatseconds = cls._split_and_cast(TnS, 'Invalid second string.')
             else:
                 seconds = cls.cast(TnS, int,
                                    thrownmessage='Invalid second string.')
@@ -486,6 +444,20 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
             #Update the value
             currentdate += timedelta
+
+    @classmethod
+    def _split_and_cast(cls, floatstr, thrownmessage):
+        #Splits a string with a decimal point into int, and
+        #float portions
+        intpart, floatpart = floatstr.split('.')
+
+        intvalue = cls.cast(intpart, int,
+                            thrownmessage=thrownmessage)
+
+        floatvalue = cls.cast('.' + floatpart, float,
+                            thrownmessage=thrownmessage)
+
+        return (intvalue, floatvalue)
 
     @staticmethod
     def _split_and_convert(f, conversion):
