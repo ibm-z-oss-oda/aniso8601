@@ -470,7 +470,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
                             thrownmessage=thrownmessage)
 
         floatvalue = cls.cast('.' + floatpart, float,
-                            thrownmessage=thrownmessage)
+                              thrownmessage=thrownmessage)
 
         return (intvalue, floatvalue)
 
@@ -495,6 +495,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         else:
             integerpartstr, _, floatpartstr = floatstr.partition('.')
 
-            expandedfloatstr = '.'.join([integerpartstr, (floatpartstr + '0' * n * 2)[:n * 2]])
+            expandedfloatstr = '.'.join([integerpartstr,
+                                         (floatpartstr + '0' * n * 2)[:n * 2]])
 
         return float(expandedfloatstr[:expandedfloatstr.index('.') + n + 1])
