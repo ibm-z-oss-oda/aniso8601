@@ -242,9 +242,6 @@ class TestPythonTimeBuilder(unittest.TestCase):
         with self.assertRaises(HoursOutOfBoundsError):
             PythonTimeBuilder.build_time(hh='25')
 
-        with self.assertRaises(HoursOutOfBoundsError):
-            PythonTimeBuilder.build_time(hh='24.1')
-
         #Hour 24 can only represent midnight
         with self.assertRaises(MidnightBoundsError):
             PythonTimeBuilder.build_time(hh='24', mm='00', ss='01')
@@ -254,6 +251,9 @@ class TestPythonTimeBuilder(unittest.TestCase):
 
         with self.assertRaises(MidnightBoundsError):
             PythonTimeBuilder.build_time(hh='24', mm='01')
+
+        with self.assertRaises(MidnightBoundsError):
+            PythonTimeBuilder.build_time(hh='24.1')
 
     def test_build_datetime(self):
         testtuples = (((('1234', '2', '3', None, None, None, 'date'),

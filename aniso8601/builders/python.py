@@ -98,28 +98,43 @@ class PythonTimeBuilder(BaseTimeBuilder):
         floatseconds = float(0)
 
         if hh is not None:
-            floathours = cls.cast(hh, float,
-                                  thrownmessage='Invalid hour string.')
-
-            #Inline range check for decimal hours
-            if floathours > 24:
-                raise HoursOutOfBoundsError('Hour must be between 0..24 with '
-                                            '24 representing midnight.')
-
-            hours, floatminutes = cls._split_and_convert(floathours, 60)
+            if '.' in hh:
+                hours, floathours = cls._split_and_cast(hh, 'Invalid hour string.')
+            else:
+                hours = cls.cast(hh, int,
+                                 thrownmessage='Invalid hour string.')
 
         if mm is not None:
-            floatminutes += cls.cast(mm, float,
-                                     thrownmessage='Invalid minute string.')
-
-        minutes, floatseconds = cls._split_and_convert(floatminutes, 60)
+            if '.' in mm:
+                minutes, floatminutes = cls._split_and_cast(mm, 'Invalid minute string.')
+            else:
+                minutes = cls.cast(mm, int,
+                                   thrownmessage='Invalid minute string.')
 
         if ss is not None:
-            floatseconds += cls.cast(ss, float,
-                                     thrownmessage='Invalid second string.')
+            if '.' in ss:
+                seconds, floatseconds = cls._split_and_cast(ss, 'Invalid second string.')
+            else:
+                seconds = cls.cast(ss, int,
+                                   thrownmessage='Invalid second string.')
 
-        #Truncate to maximum supported precision
-        seconds = cls._truncate(floatseconds, 6)
+        if floathours != 0:
+            remainderhours, remainderminutes = cls._split_and_convert(floathours, 60)
+
+            hours += remainderhours
+            floatminutes += remainderminutes
+
+        if floatminutes != 0:
+            remainderminutes, remainderseconds = cls._split_and_convert(floatminutes, 60)
+
+            minutes += remainderminutes
+            floatseconds += remainderseconds
+
+        if floatseconds != 0:
+            totalseconds = float(seconds) + floatseconds
+
+            #Truncate to maximum supported precision
+            seconds = cls._truncate(totalseconds, 6)
 
         #Range checks
         if (hours == 23 and minutes == 59 and seconds == 60):
