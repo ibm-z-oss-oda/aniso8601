@@ -16,6 +16,8 @@ Changes
   - :code:`aniso8601.builder.TupleBuilder` -> :code:`aniso8601.builders.TupleBuilder`
 
 * :code:`UTCOffset` moved out of :code:`builder` (:code:`aniso8601.builder.UTCOffset` -> :code:`aniso8601.utcoffset.UTCOffset`)
+* Fractional arguments are now handled with greater precision (`discussion <https://bitbucket.org/nielsenb/aniso8601/issues/21/sub-microsecond-precision-is-lost-when>_`)
+* When :code:`build_time` is called with only :code:`hh` 24<=hh<25, a :code:`MidnightBoundsError` is raised, this used to be a :code:`HoursOutOfBoundsError`
 
 Deprecation
 -----------
