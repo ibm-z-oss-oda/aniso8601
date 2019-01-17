@@ -129,7 +129,6 @@ class TestPythonTimeBuilder(unittest.TestCase):
         testtuples = (({}, datetime.time()),
                       ({'hh': '12.5'},
                        datetime.time(hour=12, minute=30)),
-                      #TODO: This doesn't match the duration result
                       ({'hh': '14.99999999997'},
                        datetime.time(hour=14, minute=59, second=59,
                                      microsecond=999999)),
