@@ -8,7 +8,6 @@
 
 import datetime
 import math
-import warnings
 
 from aniso8601.builders import BaseTimeBuilder, TupleBuilder
 from aniso8601.exceptions import (DayOutOfBoundsError,
