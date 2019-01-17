@@ -130,9 +130,9 @@ class TestPythonTimeBuilder(unittest.TestCase):
                       ({'hh': '12.5'},
                        datetime.time(hour=12, minute=30)),
                       #TODO: This doesn't match the duration result
-                      ({'hh': '14.9999999997'},
+                      ({'hh': '14.99999999997'},
                        datetime.time(hour=14, minute=59, second=59,
-                                     microsecond=999998)),
+                                     microsecond=999999)),
                       ({'hh': '1', 'mm': '23'},
                        datetime.time(hour=1, minute=23)),
                       ({'hh': '1', 'mm': '23.4567'},
