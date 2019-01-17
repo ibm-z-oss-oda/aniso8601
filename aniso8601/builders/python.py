@@ -302,14 +302,29 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
     @classmethod
     def build_interval(cls, start=None, end=None, duration=None):
-        if end is not None and duration is not None:
+        if start is not None and end is not None:
+            #<start>/<end>
+            startobject = cls._build_object(start)
+            endobject = cls._build_object(end)
+
+            return (startobject, endobject)
+
+        durationobject = cls._build_object(duration)
+
+        #Determine if datetime promotion is required
+        if (duration[4] is not None
+            or duration[5] is not None
+            or duration[6] is not None
+            or durationobject.seconds != 0
+            or durationobject.microseconds != 0):
+            datetimerequired = True
+        else:
+            datetimerequired = False
+
+        if end is not None:
             #<duration>/<end>
             endobject = cls._build_object(end)
-            durationobject = cls._build_object(duration)
-
-            if end[-1] == 'date' and (duration[4] is not None
-                                      or duration[5] is not None
-                                      or duration[6] is not None):
+            if end[-1] == 'date' and datetimerequired is True:
                 #<end> is a date, and <duration> requires datetime resolution
                 return (endobject,
                         cls.build_datetime(end, TupleBuilder.build_time())
@@ -318,28 +333,19 @@ class PythonTimeBuilder(BaseTimeBuilder):
             return (endobject,
                     endobject
                     - durationobject)
-        elif start is not None and duration is not None:
-            #<start>/<duration>
-            startobject = cls._build_object(start)
-            durationobject = cls._build_object(duration)
 
-            if start[-1] == 'date' and (duration[4] is not None
-                                        or duration[5] is not None
-                                        or duration[6] is not None):
-                #<start> is a date, and <duration> requires datetime resolution
-                return (startobject,
-                        cls.build_datetime(start, TupleBuilder.build_time())
-                        + durationobject)
+        #<start>/<duration>
+        startobject = cls._build_object(start)
 
+        if start[-1] == 'date' and datetimerequired is True:
+            #<start> is a date, and <duration> requires datetime resolution
             return (startobject,
-                    startobject
+                    cls.build_datetime(start, TupleBuilder.build_time())
                     + durationobject)
 
-        #<start>/<end>
-        startobject = cls._build_object(start)
-        endobject = cls._build_object(end)
-
-        return (startobject, endobject)
+        return (startobject,
+                startobject
+                + durationobject)
 
     @classmethod
     def build_repeating_interval(cls, R=None, Rnn=None, interval=None):
