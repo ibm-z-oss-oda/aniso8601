@@ -871,3 +871,27 @@ class TestPythonTimeBuilder(unittest.TestCase):
             self.assertEqual(next(generator),
                              datetime.date(year=2018, month=8, day=29)
                              + dateindex * datetime.timedelta(days=5))
+
+    def test_split_and_cast(self):
+        result = PythonTimeBuilder._split_and_cast('12.34', 'asdf')
+
+        self.assertEqual(result, (12, .34))
+        self.assertIsInstance(result[0], int)
+        self.assertIsInstance(result[1], float)
+
+        result = PythonTimeBuilder._split_and_cast('-12.34', 'asdf')
+
+        self.assertEqual(result, (-12, .34))
+        self.assertIsInstance(result[0], int)
+        self.assertIsInstance(result[1], float)
+
+    def test_split_and_cast_exception(self):
+        with self.assertRaises(ISOFormatError) as e:
+            PythonTimeBuilder._split_and_cast('12.df', 'asdf')
+
+        self.assertEqual(str(e.exception), 'asdf')
+
+        with self.assertRaises(ISOFormatError) as e:
+            PythonTimeBuilder._split_and_cast('as.12', 'asdf')
+
+        self.assertEqual(str(e.exception), 'asdf')
