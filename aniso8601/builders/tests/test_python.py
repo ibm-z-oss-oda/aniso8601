@@ -895,3 +895,16 @@ class TestPythonTimeBuilder(unittest.TestCase):
             PythonTimeBuilder._split_and_cast('as.12', 'asdf')
 
         self.assertEqual(str(e.exception), 'asdf')
+
+    def test_split_and_convert(self):
+        result = PythonTimeBuilder._split_and_convert(12.5, 100)
+
+        self.assertEqual(result, (12, .5 * 100))
+        self.assertIsInstance(result[0], int)
+        self.assertIsInstance(result[1], float)
+
+        result = PythonTimeBuilder._split_and_convert(-12.5, 0.1)
+
+        self.assertEqual(result, (-12, -.5 * 0.1))
+        self.assertIsInstance(result[0], int)
+        self.assertIsInstance(result[1], float)
