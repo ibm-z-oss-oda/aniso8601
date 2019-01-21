@@ -8,10 +8,8 @@
 
 import datetime
 import unittest
-import aniso8601
 
 from aniso8601 import compat
-from aniso8601.builders import BaseTimeBuilder, TupleBuilder
 from aniso8601.exceptions import (DayOutOfBoundsError, HoursOutOfBoundsError,
                                   ISOFormatError, LeapSecondError,
                                   MidnightBoundsError, MinutesOutOfBoundsError,
