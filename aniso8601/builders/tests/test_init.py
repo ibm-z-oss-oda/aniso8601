@@ -14,11 +14,7 @@ import unittest
 import aniso8601
 
 from aniso8601.builders import BaseTimeBuilder, TupleBuilder
-from aniso8601.exceptions import (DayOutOfBoundsError, HoursOutOfBoundsError,
-                                  ISOFormatError, LeapSecondError,
-                                  MidnightBoundsError, MinutesOutOfBoundsError,
-                                  SecondsOutOfBoundsError,
-                                  WeekOutOfBoundsError, YearOutOfBoundsError)
+from aniso8601.exceptions import ISOFormatError
 from aniso8601.tests.compat import mock
 
 class TestBaseTimeBuilder(unittest.TestCase):
