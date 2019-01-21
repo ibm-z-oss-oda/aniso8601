@@ -913,3 +913,8 @@ class TestPythonTimeBuilder(unittest.TestCase):
         self.assertEqual(PythonTimeBuilder._truncate(0.01, 1), 0.0)
         self.assertEqual(PythonTimeBuilder._truncate(0.0000000001, 1), 0.0)
         self.assertEqual(PythonTimeBuilder._truncate(0.9999999999, 1), 0.9)
+        self.assertEqual(PythonTimeBuilder._truncate(0.000095, 5), 0.00009)
+        self.assertEqual(PythonTimeBuilder._truncate(0.00006, 4), 0.0000)
+        self.assertEqual(PythonTimeBuilder._truncate(0.00005, 4), 0.0000)
+        self.assertEqual(PythonTimeBuilder._truncate(0.000005, 5), 0.00000)
+        self.assertEqual(PythonTimeBuilder._truncate(0.00000051, 6), 0.000000)
