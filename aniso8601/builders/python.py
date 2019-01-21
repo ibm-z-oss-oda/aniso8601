@@ -487,17 +487,18 @@ class PythonTimeBuilder(BaseTimeBuilder):
     def _truncate(f, n):
         #Truncates/pads a float f to n decimal places without rounding
         #https://stackoverflow.com/a/783927
-        #This differs from the given implementation in that we expand to
-        #double the desired precision, than truncate the resulting string
+        #This differs from the given implementation in that we expand the string
+        #two additional characters, than truncate the resulting string
         #to mitigate rounding effects
         floatstr = '{}'.format(f)
 
         if 'e' in floatstr or 'E' in floatstr:
-            expandedfloatstr = '{0:.{1}f}'.format(f, n * 2)
+            expandedfloatstr = '{0:.{1}f}'.format(f, n + 2)
         else:
             integerpartstr, _, floatpartstr = floatstr.partition('.')
 
             expandedfloatstr = '.'.join([integerpartstr,
-                                         (floatpartstr + '0' * n * 2)[:n * 2]])
+                                         (floatpartstr
+                                          + '0' * (n + 2))[:n + 2]])
 
         return float(expandedfloatstr[:expandedfloatstr.index('.') + n + 1])
