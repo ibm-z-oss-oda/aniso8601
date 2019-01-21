@@ -8,7 +8,6 @@
 
 import datetime
 import unittest
-import mock
 import aniso8601
 import dateutil.relativedelta
 
