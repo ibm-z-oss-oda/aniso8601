@@ -136,7 +136,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
             seconds = cls._truncate(totalseconds, 6)
 
         #Range checks
-        if (hours == 23 and minutes == 59 and seconds == 60):
+        if hours == 23 and minutes == 59 and seconds == 60:
             #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
             raise LeapSecondError('Leap seconds are not supported.')
 
