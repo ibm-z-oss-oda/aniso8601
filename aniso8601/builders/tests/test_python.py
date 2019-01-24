@@ -195,7 +195,7 @@ class TestPythonTimeBuilder(unittest.TestCase):
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
                       #https://bitbucket.org/nielsenb/aniso8601/issues/21/sub-microsecond-precision-is-lost-when
-                      ({'hh': '14.9999999999999799'}, #Python2 rounding hack
+                      ({'hh': '14.9999999999999999'},
                        datetime.time(hour=14, minute=59, second=59,
                                      microsecond=999999)),
                       ({'mm': '0.00000000999'},
@@ -380,11 +380,11 @@ class TestPythonTimeBuilder(unittest.TestCase):
                        datetime.timedelta(days=13, hours=23,
                                           minutes=59, seconds=59,
                                           microseconds=999999)),
-                      ({'PnD': '1.9999999999999995'}, #Python2 rounding hack
+                      ({'PnD': '1.9999999999999999'},
                        datetime.timedelta(days=1, hours=23,
                                           minutes=59, seconds=59,
                                           microseconds=999999)),
-                      ({'TnH': '14.9999999999999799'}, #Python2 rounding hack
+                      ({'TnH': '14.9999999999999999'},
                        datetime.timedelta(hours=14, minutes=59,
                                           seconds=59, microseconds=999999)),
                       ({'TnM': '0.00000000999'}, datetime.timedelta(0)),
@@ -504,7 +504,7 @@ class TestPythonTimeBuilder(unittest.TestCase):
                       ({'end': ('1989', '03', '01',
                                 None, None, None, 'date'),
                         'duration': (None, None, None,
-                                     '1.9999999999999995', None, None, #Python2 rounding hack
+                                     '1.9999999999999999', None, None,
                                      None, 'duration')},
                        datetime.date(year=1989, month=3, day=1),
                        datetime.datetime(year=1989, month=2, day=27,
@@ -513,7 +513,7 @@ class TestPythonTimeBuilder(unittest.TestCase):
                       ({'end': ('2001', '01', '01',
                                 None, None, None, 'date'),
                         'duration': (None, None, None,
-                                     None, '14.9999999999999799', None, #Python2 rounding hack
+                                     None, '14.9999999999999999', None,
                                      None, 'duration')},
                        datetime.date(year=2001, month=1, day=1),
                        datetime.datetime(year=2000, month=12, day=31,
@@ -633,7 +633,7 @@ class TestPythonTimeBuilder(unittest.TestCase):
                       ({'start': ('1989', '03', '01',
                                   None, None, None, 'date'),
                         'duration': (None, None, None,
-                                     '1.9999999999999995', None, None, #Python2 rounding hack
+                                     '1.9999999999999999', None, None,
                                      None, 'duration')},
                        datetime.date(year=1989, month=3, day=1),
                        datetime.datetime(year=1989, month=3, day=2,
@@ -642,7 +642,7 @@ class TestPythonTimeBuilder(unittest.TestCase):
                       ({'start': ('2001', '01', '01',
                                   None, None, None, 'date'),
                         'duration': (None, None, None,
-                                     None, '14.9999999999999799', None, #Python2 rounding hack
+                                     None, '14.9999999999999999', None,
                                      None, 'duration')},
                        datetime.date(year=2001, month=1, day=1),
                        datetime.datetime(year=2001, month=1, day=1,

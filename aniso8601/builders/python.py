@@ -490,7 +490,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         #This differs from the given implementation in that we expand the string
         #two additional characters, than truncate the resulting string
         #to mitigate rounding effects
-        floatstr = '{}'.format(f)
+        floatstr = repr(f)
 
         if 'e' in floatstr or 'E' in floatstr:
             expandedfloatstr = '{0:.{1}f}'.format(f, n + 2)
