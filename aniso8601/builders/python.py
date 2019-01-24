@@ -190,6 +190,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         hours = 0
         minutes = 0
         seconds = 0
+        microseconds = 0
 
         floatyears = float(0)
         floatmonths = float(0)
@@ -285,16 +286,19 @@ class PythonTimeBuilder(BaseTimeBuilder):
             floatseconds += remainderseconds
 
         if floatseconds != 0:
-            totalseconds = float(seconds) + floatseconds
+            remainderseconds, remaindermicroseconds = cls._split_and_convert(floatseconds, 1e6)
 
-            #Truncate to maximum supported precision
-            seconds = cls._truncate(totalseconds, 6)
+            seconds += remainderseconds
+
+            _, microseconds = math.modf(remaindermicroseconds)
+            microseconds = int(microseconds)
 
         #Note that weeks can be handled without conversion to days
         totaldays = years * 365 + months * 30 + days
 
         return datetime.timedelta(days=totaldays,
                                   seconds=seconds,
+                                  microseconds=microseconds,
                                   minutes=minutes,
                                   hours=hours,
                                   weeks=weeks)
