@@ -22,6 +22,8 @@ Changes
 
   - Before promotion would only happen if the duration tuple had hour, minute, or second components
 
+* When building a duration, fractional seconds are decomposed into integer seconds and microseconds to mitigate rounding effects
+
 Deprecation
 -----------
 * The built in :code:`RelativeTimeBuilder` is deprecated, it will be removed in aniso8601 6.0.0, use :code:`RelativeTimeBuilder` from `relativetimebuilder <https://pypi.org/project/relativetimebuilder/>`_ instead
