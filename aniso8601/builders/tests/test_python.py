@@ -191,7 +191,22 @@ class TestPythonTimeBuilder(unittest.TestCase):
                        datetime.time(hour=23, minute=21, second=28,
                                      microsecond=512400,
                                      tzinfo=UTCOffset(name='UTC',
-                                                      minutes=0))))
+                                                      minutes=0))),
+                      #Make sure we truncate, not round
+                      #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+                      #https://bitbucket.org/nielsenb/aniso8601/issues/21/sub-microsecond-precision-is-lost-when
+                      ({'hh': '14.9999999999999999'},
+                       datetime.time(hour=14, minute=59, second=59,
+                                     microsecond=999999)),
+                      ({'mm': '0.00000000999'},
+                       datetime.time()),
+                      ({'mm': '0.0000000999'},
+                       datetime.time(microsecond=5)),
+                      ({'ss': '0.0000001'},
+                       datetime.time()),
+                      ({'ss': '2.0000048'},
+                       datetime.time(second=2,
+                                     microsecond=4)))
 
         for testtuple in testtuples:
             result = PythonTimeBuilder.build_time(**testtuple[0])
@@ -348,6 +363,9 @@ class TestPythonTimeBuilder(unittest.TestCase):
                        datetime.timedelta(days=428.5)),
                       ({'TnH': '4', 'TnM': '54', 'TnS': '6.5'},
                        datetime.timedelta(hours=4, minutes=54, seconds=6.5)),
+                      ({'TnH': '4', 'TnM': '54', 'TnS': '28.512400'},
+                       datetime.timedelta(hours=4, minutes=54,
+                                          seconds=28, microseconds=512400)),
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
                       #https://bitbucket.org/nielsenb/aniso8601/issues/21/sub-microsecond-precision-is-lost-when
