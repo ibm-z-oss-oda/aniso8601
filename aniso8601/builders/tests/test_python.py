@@ -362,11 +362,11 @@ class TestPythonTimeBuilder(unittest.TestCase):
                        datetime.timedelta(days=13, hours=23,
                                           minutes=59, seconds=59,
                                           microseconds=999999)),
-                      ({'PnD': '1.9999999999999999'},
+                      ({'PnD': '1.9999999999999995'}, #Python2 rounding hack
                        datetime.timedelta(days=1, hours=23,
                                           minutes=59, seconds=59,
                                           microseconds=999999)),
-                      ({'TnH': '14.9999999999999999'},
+                      ({'TnH': '14.9999999999999799'}, #Python2 rounding hack
                        datetime.timedelta(hours=14, minutes=59,
                                           seconds=59, microseconds=999999)),
                       ({'TnM': '0.00000000999'}, datetime.timedelta(0)),
