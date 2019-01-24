@@ -195,7 +195,7 @@ class TestPythonTimeBuilder(unittest.TestCase):
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
                       #https://bitbucket.org/nielsenb/aniso8601/issues/21/sub-microsecond-precision-is-lost-when
-                      ({'hh': '14.9999999999999999'},
+                      ({'hh': '14.9999999999999799'}, #Python2 rounding hack
                        datetime.time(hour=14, minute=59, second=59,
                                      microsecond=999999)),
                       ({'mm': '0.00000000999'},
