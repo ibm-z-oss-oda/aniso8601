@@ -997,3 +997,4 @@ class TestPythonTimeBuilder(unittest.TestCase):
         self.assertEqual(PythonTimeBuilder._truncate(0.00005, 4), 0.0000)
         self.assertEqual(PythonTimeBuilder._truncate(0.000005, 5), 0.00000)
         self.assertEqual(PythonTimeBuilder._truncate(0.00000051, 6), 0.000000)
+        self.assertEqual(PythonTimeBuilder._truncate(28.512400, 6), 28.512400)
