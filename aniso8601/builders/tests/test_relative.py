@@ -364,7 +364,6 @@ class TestRelativeTimeBuilder(unittest.TestCase):
                        datetime.datetime(year=2001, month=1, day=1,
                                          hour=0, minute=0, second=0,
                                          microsecond=5)),
-                      ({'start': ('2018', '03', '06',
                       #Some relativedelta examples
                       #http://dateutil.readthedocs.org/en/latest/examples.html#relativedelta-examples
                       ({'start': ('2003', '1', '27',
