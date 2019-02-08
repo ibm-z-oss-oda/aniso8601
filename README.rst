@@ -249,10 +249,12 @@ Notice that the result of the above parse is not in order from earliest to lates
   >>> sorted(aniso8601.parse_interval('P1M/1981-04-05'))
   [datetime.date(1981, 3, 6), datetime.date(1981, 4, 5)]
 
-The end of an interval is given as a datetime when required to maintain the resolution specified by a duration, even if the duration start is given as a date::
+The end of an interval is returned as a datetime when required to maintain the resolution specified by a duration, even if the duration start is given as a date::
 
   >>> aniso8601.parse_interval('2014-11-12/PT4H54M6.5S')
   (datetime.date(2014, 11, 12), datetime.datetime(2014, 11, 12, 4, 54, 6, 500000))
+  >>> aniso8601.parse_interval('2007-03-01/P1.5D')
+  (datetime.date(2007, 3, 1), datetime.datetime(2007, 3, 2, 12, 0))
 
 Repeating intervals are supported as well, and return a generator::
 
