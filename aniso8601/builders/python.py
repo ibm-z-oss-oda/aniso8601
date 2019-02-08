@@ -7,7 +7,7 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import datetime
-import warnings
+import math
 
 from aniso8601.builders import BaseTimeBuilder, TupleBuilder
 from aniso8601.exceptions import (DayOutOfBoundsError,
@@ -98,51 +98,60 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
         if hh is not None:
             if '.' in hh:
-                floathours = cls.cast(hh, float,
-                                      thrownmessage='Invalid hour string.')
-                hours = 0
+                hours, floathours = cls._split_and_cast(hh, 'Invalid hour string.')
             else:
                 hours = cls.cast(hh, int,
                                  thrownmessage='Invalid hour string.')
 
         if mm is not None:
             if '.' in mm:
-                floatminutes = cls.cast(mm, float,
-                                        thrownmessage='Invalid minute string.')
-                minutes = 0
+                minutes, floatminutes = cls._split_and_cast(mm, 'Invalid minute string.')
             else:
                 minutes = cls.cast(mm, int,
                                    thrownmessage='Invalid minute string.')
 
         if ss is not None:
             if '.' in ss:
-                #Truncate to maximum supported precision
-                floatseconds = cls.cast(ss[0:ss.index('.') + 7], float,
-                                        thrownmessage='Invalid second string.')
-                seconds = 0
+                seconds, floatseconds = cls._split_and_cast(ss, 'Invalid second string.')
             else:
                 seconds = cls.cast(ss, int,
                                    thrownmessage='Invalid second string.')
 
+        if floathours != 0:
+            remainderhours, remainderminutes = cls._split_and_convert(floathours, 60)
+
+            hours += remainderhours
+            floatminutes += remainderminutes
+
+        if floatminutes != 0:
+            remainderminutes, remainderseconds = cls._split_and_convert(floatminutes, 60)
+
+            minutes += remainderminutes
+            floatseconds += remainderseconds
+
+        if floatseconds != 0:
+            totalseconds = float(seconds) + floatseconds
+
+            #Truncate to maximum supported precision
+            seconds = cls._truncate(totalseconds, 6)
+
         #Range checks
-        if (hours == 23 and floathours == 0 and minutes == 59
-                and floatminutes == 0 and seconds == 60 and floatseconds == 0):
+        if hours == 23 and minutes == 59 and seconds == 60:
             #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
             raise LeapSecondError('Leap seconds are not supported.')
 
-        if (hours == 24 and floathours == 0
-                and (minutes != 0 or floatminutes != 0 or seconds != 0
-                     or floatseconds != 0)):
+        if (hours == 24
+                and (minutes != 0 or seconds != 0)):
             raise MidnightBoundsError('Hour 24 may only represent midnight.')
 
-        if hours > 24 or floathours > 24:
+        if hours > 24:
             raise HoursOutOfBoundsError('Hour must be between 0..24 with '
                                         '24 representing midnight.')
 
-        if minutes >= 60 or floatminutes >= 60:
+        if minutes >= 60:
             raise MinutesOutOfBoundsError('Minutes must be less than 60.')
 
-        if seconds >= 60 or floatseconds >= 60:
+        if seconds >= 60:
             raise SecondsOutOfBoundsError('Seconds must be less than 60.')
 
         #Fix ranges that have passed range checks
@@ -156,20 +165,14 @@ class PythonTimeBuilder(BaseTimeBuilder):
             return (datetime.datetime(1, 1, 1,
                                       hour=hours,
                                       minute=minutes,
-                                      second=seconds,
                                       tzinfo=cls._build_object(tz))
-                    + datetime.timedelta(hours=floathours,
-                                         minutes=floatminutes,
-                                         seconds=floatseconds)
+                    + datetime.timedelta(seconds=seconds)
                    ).timetz()
 
         return (datetime.datetime(1, 1, 1,
                                   hour=hours,
-                                  minute=minutes,
-                                  second=seconds)
-                + datetime.timedelta(hours=floathours,
-                                     minutes=floatminutes,
-                                     seconds=floatseconds)
+                                  minute=minutes)
+                + datetime.timedelta(seconds=seconds)
                ).time()
 
     @classmethod
@@ -188,50 +191,104 @@ class PythonTimeBuilder(BaseTimeBuilder):
         minutes = 0
         seconds = 0
 
+        floatyears = float(0)
+        floatmonths = float(0)
+        floatdays = float(0)
+        floatweeks = float(0)
+        floathours = float(0)
+        floatminutes = float(0)
+        floatseconds = float(0)
+
         if PnY is not None:
-            years = cls.cast(PnY, float,
-                             thrownmessage='Invalid year string.')
+            if '.' in PnY:
+                years, floatyears = cls._split_and_cast(PnY, 'Invalid year string.')
+            else:
+                years = cls.cast(PnY, int,
+                                 thrownmessage='Invalid year string.')
 
         if PnM is not None:
-            months = cls.cast(PnM, float,
-                              thrownmessage='Invalid month string.')
-
-        if PnD is not None:
-            days = cls.cast(PnD, float,
-                            thrownmessage='Invalid day string.')
+            if '.' in PnM:
+                months, floatmonths = cls._split_and_cast(PnM, 'Invalid month string.')
+            else:
+                months = cls.cast(PnM, int,
+                                  thrownmessage='Invalid month string.')
 
         if PnW is not None:
             if '.' in PnW:
-                weeks = cls.cast(PnW, float,
-                                 thrownmessage='Invalid week string.')
+                weeks, floatweeks = cls._split_and_cast(PnW, 'Invalid week string.')
             else:
                 weeks = cls.cast(PnW, int,
                                  thrownmessage='Invalid week string.')
 
+        if PnD is not None:
+            if '.' in PnD:
+                days, floatdays = cls._split_and_cast(PnD, 'Invalid day string.')
+            else:
+                days = cls.cast(PnD, int,
+                                thrownmessage='Invalid day string.')
+
         if TnH is not None:
             if '.' in TnH:
-                hours = cls.cast(TnH, float,
-                                 thrownmessage='Invalid hour string.')
+                hours, floathours = cls._split_and_cast(TnH, 'Invalid hour string.')
             else:
                 hours = cls.cast(TnH, int,
                                  thrownmessage='Invalid hour string.')
 
         if TnM is not None:
             if '.' in TnM:
-                minutes = cls.cast(TnM, float,
-                                   thrownmessage='Invalid minute string.')
+                minutes, floatminutes = cls._split_and_cast(TnM, 'Invalid minute string.')
             else:
                 minutes = cls.cast(TnM, int,
                                    thrownmessage='Invalid minute string.')
 
         if TnS is not None:
             if '.' in TnS:
-                #Truncate to maximum supported precision
-                seconds = cls.cast(TnS[0:TnS.index('.') + 7], float,
-                                   thrownmessage='Invalid second string.')
+                seconds, floatseconds = cls._split_and_cast(TnS, 'Invalid second string.')
             else:
                 seconds = cls.cast(TnS, int,
                                    thrownmessage='Invalid second string.')
+
+        if floatyears != 0:
+            remainderyears, remainderdays = cls._split_and_convert(floatyears, 365)
+
+            years += remainderyears
+            floatdays += remainderdays
+
+        if floatmonths != 0:
+            remaindermonths, remainderdays = cls._split_and_convert(floatmonths, 30)
+
+            months += remaindermonths
+            floatdays += remainderdays
+
+        if floatweeks != 0:
+            remainderweeks, remainderdays = cls._split_and_convert(floatweeks, 7)
+
+            weeks += remainderweeks
+            floatdays += remainderdays
+
+        if floatdays != 0:
+            remainderdays, remainderhours = cls._split_and_convert(floatdays, 24)
+
+            days += remainderdays
+            floathours += remainderhours
+
+        if floathours != 0:
+            remainderhours, remainderminutes = cls._split_and_convert(floathours, 60)
+
+            hours += remainderhours
+            floatminutes += remainderminutes
+
+        if floatminutes != 0:
+            remainderminutes, remainderseconds = cls._split_and_convert(floatminutes, 60)
+
+            minutes += remainderminutes
+            floatseconds += remainderseconds
+
+        if floatseconds != 0:
+            totalseconds = float(seconds) + floatseconds
+
+            #Truncate to maximum supported precision
+            seconds = cls._truncate(totalseconds, 6)
 
         #Note that weeks can be handled without conversion to days
         totaldays = years * 365 + months * 30 + days
@@ -244,14 +301,26 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
     @classmethod
     def build_interval(cls, start=None, end=None, duration=None):
-        if end is not None and duration is not None:
+        if start is not None and end is not None:
+            #<start>/<end>
+            startobject = cls._build_object(start)
+            endobject = cls._build_object(end)
+
+            return (startobject, endobject)
+
+        durationobject = cls._build_object(duration)
+
+        #Determine if datetime promotion is required
+        datetimerequired = (duration[4] is not None
+                            or duration[5] is not None
+                            or duration[6] is not None
+                            or durationobject.seconds != 0
+                            or durationobject.microseconds != 0)
+
+        if end is not None:
             #<duration>/<end>
             endobject = cls._build_object(end)
-            durationobject = cls._build_object(duration)
-
-            if end[-1] == 'date' and (duration[4] is not None
-                                      or duration[5] is not None
-                                      or duration[6] is not None):
+            if end[-1] == 'date' and datetimerequired is True:
                 #<end> is a date, and <duration> requires datetime resolution
                 return (endobject,
                         cls.build_datetime(end, TupleBuilder.build_time())
@@ -260,28 +329,19 @@ class PythonTimeBuilder(BaseTimeBuilder):
             return (endobject,
                     endobject
                     - durationobject)
-        elif start is not None and duration is not None:
-            #<start>/<duration>
-            startobject = cls._build_object(start)
-            durationobject = cls._build_object(duration)
 
-            if start[-1] == 'date' and (duration[4] is not None
-                                        or duration[5] is not None
-                                        or duration[6] is not None):
-                #<start> is a date, and <duration> requires datetime resolution
-                return (startobject,
-                        cls.build_datetime(start, TupleBuilder.build_time())
-                        + durationobject)
+        #<start>/<duration>
+        startobject = cls._build_object(start)
 
+        if start[-1] == 'date' and datetimerequired is True:
+            #<start> is a date, and <duration> requires datetime resolution
             return (startobject,
-                    startobject
+                    cls.build_datetime(start, TupleBuilder.build_time())
                     + durationobject)
 
-        #<start>/<end>
-        startobject = cls._build_object(start)
-        endobject = cls._build_object(end)
-
-        return (startobject, endobject)
+        return (startobject,
+                startobject
+                + durationobject)
 
     @classmethod
     def build_repeating_interval(cls, R=None, Rnn=None, interval=None):
@@ -401,3 +461,44 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
             #Update the value
             currentdate += timedelta
+
+    @classmethod
+    def _split_and_cast(cls, floatstr, thrownmessage):
+        #Splits a string with a decimal point into int, and
+        #float portions
+        intpart, floatpart = floatstr.split('.')
+
+        intvalue = cls.cast(intpart, int,
+                            thrownmessage=thrownmessage)
+
+        floatvalue = cls.cast('.' + floatpart, float,
+                              thrownmessage=thrownmessage)
+
+        return (intvalue, floatvalue)
+
+    @staticmethod
+    def _split_and_convert(f, conversion):
+        #Splits a float into an integer, and a converted float portion
+        floatpart, integerpart = math.modf(f)
+
+        return (int(integerpart), float(floatpart) * conversion)
+
+    @staticmethod
+    def _truncate(f, n):
+        #Truncates/pads a float f to n decimal places without rounding
+        #https://stackoverflow.com/a/783927
+        #This differs from the given implementation in that we expand the string
+        #two additional characters, than truncate the resulting string
+        #to mitigate rounding effects
+        floatstr = repr(f)
+
+        if 'e' in floatstr or 'E' in floatstr:
+            expandedfloatstr = '{0:.{1}f}'.format(f, n + 2)
+        else:
+            integerpartstr, _, floatpartstr = floatstr.partition('.')
+
+            expandedfloatstr = '.'.join([integerpartstr,
+                                         (floatpartstr
+                                          + '0' * (n + 2))[:n + 2]])
+
+        return float(expandedfloatstr[:expandedfloatstr.index('.') + n + 1])

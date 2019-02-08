@@ -8,11 +8,8 @@
 
 import datetime
 import unittest
-import mock
-import aniso8601
 
 from aniso8601 import compat
-from aniso8601.builders import BaseTimeBuilder, TupleBuilder
 from aniso8601.exceptions import (DayOutOfBoundsError, HoursOutOfBoundsError,
                                   ISOFormatError, LeapSecondError,
                                   MidnightBoundsError, MinutesOutOfBoundsError,
@@ -127,21 +124,27 @@ class TestPythonTimeBuilder(unittest.TestCase):
 
     def test_build_time(self):
         testtuples = (({}, datetime.time()),
+                      ({'hh': '12.5'},
+                       datetime.time(hour=12, minute=30)),
+                      ({'hh': '23.99999999997'},
+                       datetime.time(hour=23, minute=59, second=59,
+                                     microsecond=999999)),
                       ({'hh': '1', 'mm': '23'},
                        datetime.time(hour=1, minute=23)),
-                      ({'hh': '1', 'mm': '23', 'ss': '45'},
-                       datetime.time(hour=1, minute=23, second=45)),
                       ({'hh': '1', 'mm': '23.4567'},
                        datetime.time(hour=1, minute=23, second=27,
                                      microsecond=402000)),
+                      ({'hh': '14', 'mm': '43.999999997'},
+                       datetime.time(hour=14, minute=43, second=59,
+                                     microsecond=999999)),
+                      ({'hh': '1', 'mm': '23', 'ss': '45'},
+                       datetime.time(hour=1, minute=23, second=45)),
                       ({'hh': '23', 'mm': '21', 'ss': '28.512400'},
                        datetime.time(hour=23, minute=21, second=28,
                                      microsecond=512400)),
                       ({'hh': '14', 'mm': '43', 'ss': '59.9999997'},
                        datetime.time(hour=14, minute=43, second=59,
                                      microsecond=999999)),
-                      ({'hh': '12.5'},
-                       datetime.time(hour=12, minute=30)),
                       ({'hh': '24'}, datetime.time(hour=0)),
                       ({'hh': '24', 'mm': '00'}, datetime.time(hour=0)),
                       ({'hh': '24', 'mm': '00', 'ss': '00'},
@@ -188,7 +191,22 @@ class TestPythonTimeBuilder(unittest.TestCase):
                        datetime.time(hour=23, minute=21, second=28,
                                      microsecond=512400,
                                      tzinfo=UTCOffset(name='UTC',
-                                                      minutes=0))))
+                                                      minutes=0))),
+                      #Make sure we truncate, not round
+                      #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+                      #https://bitbucket.org/nielsenb/aniso8601/issues/21/sub-microsecond-precision-is-lost-when
+                      ({'hh': '14.9999999999999999'},
+                       datetime.time(hour=14, minute=59, second=59,
+                                     microsecond=999999)),
+                      ({'mm': '0.00000000999'},
+                       datetime.time()),
+                      ({'mm': '0.0000000999'},
+                       datetime.time(microsecond=5)),
+                      ({'ss': '0.0000001'},
+                       datetime.time()),
+                      ({'ss': '2.0000048'},
+                       datetime.time(second=2,
+                                     microsecond=4)))
 
         for testtuple in testtuples:
             result = PythonTimeBuilder.build_time(**testtuple[0])
@@ -235,9 +253,6 @@ class TestPythonTimeBuilder(unittest.TestCase):
         with self.assertRaises(HoursOutOfBoundsError):
             PythonTimeBuilder.build_time(hh='25')
 
-        with self.assertRaises(HoursOutOfBoundsError):
-            PythonTimeBuilder.build_time(hh='24.1')
-
         #Hour 24 can only represent midnight
         with self.assertRaises(MidnightBoundsError):
             PythonTimeBuilder.build_time(hh='24', mm='00', ss='01')
@@ -247,6 +262,9 @@ class TestPythonTimeBuilder(unittest.TestCase):
 
         with self.assertRaises(MidnightBoundsError):
             PythonTimeBuilder.build_time(hh='24', mm='01')
+
+        with self.assertRaises(MidnightBoundsError):
+            PythonTimeBuilder.build_time(hh='24.1')
 
     def test_build_datetime(self):
         testtuples = (((('1234', '2', '3', None, None, None, 'date'),
@@ -345,8 +363,33 @@ class TestPythonTimeBuilder(unittest.TestCase):
                        datetime.timedelta(days=428.5)),
                       ({'TnH': '4', 'TnM': '54', 'TnS': '6.5'},
                        datetime.timedelta(hours=4, minutes=54, seconds=6.5)),
+                      ({'TnH': '4', 'TnM': '54', 'TnS': '28.512400'},
+                       datetime.timedelta(hours=4, minutes=54,
+                                          seconds=28, microseconds=512400)),
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+                      #https://bitbucket.org/nielsenb/aniso8601/issues/21/sub-microsecond-precision-is-lost-when
+                      ({'PnY': '1999.9999999999999999'},
+                       datetime.timedelta(days=729999, seconds=86399,
+                                          microseconds=999999)),
+                      ({'PnM': '1.9999999999999999'},
+                       datetime.timedelta(days=59, hours=23,
+                                          minutes=59, seconds=59,
+                                          microseconds=999999)),
+                      ({'PnW': '1.9999999999999999'},
+                       datetime.timedelta(days=13, hours=23,
+                                          minutes=59, seconds=59,
+                                          microseconds=999999)),
+                      ({'PnD': '1.9999999999999999'},
+                       datetime.timedelta(days=1, hours=23,
+                                          minutes=59, seconds=59,
+                                          microseconds=999999)),
+                      ({'TnH': '14.9999999999999999'},
+                       datetime.timedelta(hours=14, minutes=59,
+                                          seconds=59, microseconds=999999)),
+                      ({'TnM': '0.00000000999'}, datetime.timedelta(0)),
+                      ({'TnM': '0.0000000999'},
+                       datetime.timedelta(microseconds=5)),
                       ({'TnS': '0.0000001'}, datetime.timedelta(0)),
                       ({'TnS': '2.0000048'},
                        datetime.timedelta(seconds=2, microseconds=4)),
@@ -398,7 +441,8 @@ class TestPythonTimeBuilder(unittest.TestCase):
                         'duration': ('1.5', None, None, None, None, None, None,
                                      'duration')},
                        datetime.date(year=2018, month=3, day=6),
-                       datetime.date(year=2016, month=9, day=5)),
+                       datetime.datetime(year=2016, month=9, day=4,
+                                         hour=12)),
                       ({'end': ('2014', '11', '12', None, None, None, 'date'),
                         'duration': (None, None, None, None, '1', None, None,
                                      'duration')},
@@ -429,6 +473,68 @@ class TestPythonTimeBuilder(unittest.TestCase):
                                                           minutes=0))),
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+                      #https://bitbucket.org/nielsenb/aniso8601/issues/21/sub-microsecond-precision-is-lost-when
+                      ({'end': ('2000', '01', '01',
+                                None, None, None, 'date'),
+                        'duration': ('1999.9999999999999999', None, None,
+                                     None, None, None,
+                                     None, 'duration')},
+                       datetime.date(year=2000, month=1, day=1),
+                       datetime.datetime(year=1, month=4, day=30,
+                                         hour=0, minute=0, second=0,
+                                         microsecond=1)),
+                      ({'end': ('1989', '03', '01',
+                                None, None, None, 'date'),
+                        'duration': (None, '1.9999999999999999', None,
+                                     None, None, None,
+                                     None, 'duration')},
+                       datetime.date(year=1989, month=3, day=1),
+                       datetime.datetime(year=1988, month=12, day=31,
+                                         hour=0, minute=0, second=0,
+                                         microsecond=1)),
+                      ({'end': ('1989', '03', '01',
+                                None, None, None, 'date'),
+                        'duration': (None, None, '1.9999999999999999',
+                                     None, None, None,
+                                     None, 'duration')},
+                       datetime.date(year=1989, month=3, day=1),
+                       datetime.datetime(year=1989, month=2, day=15,
+                                         hour=0, minute=0, second=0,
+                                         microsecond=1)),
+                      ({'end': ('1989', '03', '01',
+                                None, None, None, 'date'),
+                        'duration': (None, None, None,
+                                     '1.9999999999999999', None, None,
+                                     None, 'duration')},
+                       datetime.date(year=1989, month=3, day=1),
+                       datetime.datetime(year=1989, month=2, day=27,
+                                         hour=0, minute=0, second=0,
+                                         microsecond=1)),
+                      ({'end': ('2001', '01', '01',
+                                None, None, None, 'date'),
+                        'duration': (None, None, None,
+                                     None, '14.9999999999999999', None,
+                                     None, 'duration')},
+                       datetime.date(year=2001, month=1, day=1),
+                       datetime.datetime(year=2000, month=12, day=31,
+                                         hour=9, minute=0, second=0,
+                                         microsecond=1)),
+                      ({'end': ('2001', '01', '01',
+                                None, None, None, 'date'),
+                        'duration': (None, None, None,
+                                     None, None, '0.00000000999',
+                                     None, 'duration')},
+                       datetime.date(year=2001, month=1, day=1),
+                       datetime.datetime(year=2001, month=1, day=1)),
+                      ({'end': ('2001', '01', '01',
+                                None, None, None, 'date'),
+                        'duration': (None, None, None,
+                                     None, None, '0.0000000999',
+                                     None, 'duration')},
+                       datetime.date(year=2001, month=1, day=1),
+                       datetime.datetime(year=2000, month=12, day=31,
+                                         hour=23, minute=59, second=59,
+                                         microsecond=999995)),
                       ({'end': ('2018', '03', '06', None, None, None, 'date'),
                         'duration': (None, None, None,
                                      None, None, None,
@@ -497,6 +603,67 @@ class TestPythonTimeBuilder(unittest.TestCase):
                                                           minutes=0))),
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+                      ({'start': ('0001', '01', '01',
+                                  None, None, None, 'date'),
+                        'duration': ('1999.9999999999999999', None, None,
+                                     None, None, None,
+                                     None, 'duration')},
+                       datetime.date(year=1, month=1, day=1),
+                       datetime.datetime(year=1999, month=9, day=3,
+                                         hour=23, minute=59, second=59,
+                                         microsecond=999999)),
+                      ({'start': ('1989', '03', '01',
+                                  None, None, None, 'date'),
+                        'duration': (None, '1.9999999999999999', None,
+                                     None, None, None,
+                                     None, 'duration')},
+                       datetime.date(year=1989, month=3, day=1),
+                       datetime.datetime(year=1989, month=4, day=29,
+                                         hour=23, minute=59, second=59,
+                                         microsecond=999999)),
+                      ({'start': ('1989', '03', '01',
+                                  None, None, None, 'date'),
+                        'duration': (None, None, '1.9999999999999999',
+                                     None, None, None,
+                                     None, 'duration')},
+                       datetime.date(year=1989, month=3, day=1),
+                       datetime.datetime(year=1989, month=3, day=14,
+                                         hour=23, minute=59, second=59,
+                                         microsecond=999999)),
+                      ({'start': ('1989', '03', '01',
+                                  None, None, None, 'date'),
+                        'duration': (None, None, None,
+                                     '1.9999999999999999', None, None,
+                                     None, 'duration')},
+                       datetime.date(year=1989, month=3, day=1),
+                       datetime.datetime(year=1989, month=3, day=2,
+                                         hour=23, minute=59, second=59,
+                                         microsecond=999999)),
+                      ({'start': ('2001', '01', '01',
+                                  None, None, None, 'date'),
+                        'duration': (None, None, None,
+                                     None, '14.9999999999999999', None,
+                                     None, 'duration')},
+                       datetime.date(year=2001, month=1, day=1),
+                       datetime.datetime(year=2001, month=1, day=1,
+                                         hour=14, minute=59, second=59,
+                                         microsecond=999999)),
+                      ({'start': ('2001', '01', '01',
+                                  None, None, None, 'date'),
+                        'duration': (None, None, None,
+                                     None, None, '0.00000000999',
+                                     None, 'duration')},
+                       datetime.date(year=2001, month=1, day=1),
+                       datetime.datetime(year=2001, month=1, day=1)),
+                      ({'start': ('2001', '01', '01',
+                                  None, None, None, 'date'),
+                        'duration': (None, None, None,
+                                     None, None, '0.0000000999',
+                                     None, 'duration')},
+                       datetime.date(year=2001, month=1, day=1),
+                       datetime.datetime(year=2001, month=1, day=1,
+                                         hour=0, minute=0, second=0,
+                                         microsecond=5)),
                       ({'start': ('2018', '03', '06',
                                   None, None, None, 'date'),
                         'duration': (None, None, None,
@@ -780,3 +947,54 @@ class TestPythonTimeBuilder(unittest.TestCase):
             self.assertEqual(next(generator),
                              datetime.date(year=2018, month=8, day=29)
                              + dateindex * datetime.timedelta(days=5))
+
+    def test_split_and_cast(self):
+        result = PythonTimeBuilder._split_and_cast('12.34', 'asdf')
+
+        self.assertEqual(result, (12, .34))
+        self.assertIsInstance(result[0], int)
+        self.assertIsInstance(result[1], float)
+
+        result = PythonTimeBuilder._split_and_cast('-12.34', 'asdf')
+
+        self.assertEqual(result, (-12, .34))
+        self.assertIsInstance(result[0], int)
+        self.assertIsInstance(result[1], float)
+
+    def test_split_and_cast_exception(self):
+        with self.assertRaises(ISOFormatError) as e:
+            PythonTimeBuilder._split_and_cast('12.df', 'asdf')
+
+        self.assertEqual(str(e.exception), 'asdf')
+
+        with self.assertRaises(ISOFormatError) as e:
+            PythonTimeBuilder._split_and_cast('as.12', 'asdf')
+
+        self.assertEqual(str(e.exception), 'asdf')
+
+    def test_split_and_convert(self):
+        result = PythonTimeBuilder._split_and_convert(12.5, 100)
+
+        self.assertEqual(result, (12, .5 * 100))
+        self.assertIsInstance(result[0], int)
+        self.assertIsInstance(result[1], float)
+
+        result = PythonTimeBuilder._split_and_convert(-12.5, 0.1)
+
+        self.assertEqual(result, (-12, -.5 * 0.1))
+        self.assertIsInstance(result[0], int)
+        self.assertIsInstance(result[1], float)
+
+    def test_truncate(self):
+        self.assertEqual(PythonTimeBuilder._truncate(0, 1), 0.0)
+        self.assertEqual(PythonTimeBuilder._truncate(1.0, 1), 1.0)
+        self.assertEqual(PythonTimeBuilder._truncate(0.1, 1), 0.1)
+        self.assertEqual(PythonTimeBuilder._truncate(0.01, 1), 0.0)
+        self.assertEqual(PythonTimeBuilder._truncate(0.0000000001, 1), 0.0)
+        self.assertEqual(PythonTimeBuilder._truncate(0.9999999999, 1), 0.9)
+        self.assertEqual(PythonTimeBuilder._truncate(0.000095, 5), 0.00009)
+        self.assertEqual(PythonTimeBuilder._truncate(0.00006, 4), 0.0000)
+        self.assertEqual(PythonTimeBuilder._truncate(0.00005, 4), 0.0000)
+        self.assertEqual(PythonTimeBuilder._truncate(0.000005, 5), 0.00000)
+        self.assertEqual(PythonTimeBuilder._truncate(0.00000051, 6), 0.000000)
+        self.assertEqual(PythonTimeBuilder._truncate(28.512400, 6), 28.512400)

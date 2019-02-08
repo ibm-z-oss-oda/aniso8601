@@ -9,7 +9,6 @@
 import datetime
 import pickle
 import unittest
-import mock
 
 from aniso8601.utcoffset import UTCOffset
 

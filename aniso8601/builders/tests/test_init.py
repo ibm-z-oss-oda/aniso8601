@@ -7,15 +7,11 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import unittest
-import mock
 import aniso8601
 
 from aniso8601.builders import BaseTimeBuilder, TupleBuilder
-from aniso8601.exceptions import (DayOutOfBoundsError, HoursOutOfBoundsError,
-                                  ISOFormatError, LeapSecondError,
-                                  MidnightBoundsError, MinutesOutOfBoundsError,
-                                  SecondsOutOfBoundsError,
-                                  WeekOutOfBoundsError, YearOutOfBoundsError)
+from aniso8601.exceptions import ISOFormatError
+from aniso8601.tests.compat import mock
 
 class TestBaseTimeBuilder(unittest.TestCase):
     def test_build_date(self):
