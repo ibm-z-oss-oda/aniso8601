@@ -1,6 +1,16 @@
 Changelog
 =========
 
+aniso8601 5.0.1dev0
+===================
+
+*Release date: YYYY-MM-DD*
+
+Changes
+-------
+* Make `python-dateutil <https://pypi.python.org/pypi/python-dateutil>`_ dependency explicit
+
+
 aniso8601 5.0.0
 ===============
 

@@ -16,14 +16,17 @@ readme.close()
 
 setup(
     name='aniso8601',
-    version='5.0.0',
+    version='5.0.1dev0',
     description='A library for parsing ISO 8601 strings.',
     long_description=README_TEXT,
     author='Brandon Nielsen',
     author_email='nielsenb@jetfuse.net',
     url='https://bitbucket.org/nielsenb/aniso8601',
     extras_require={
-        'relative': ['relativetimebuilder>=0.2.0']
+        'relative': [
+            'relativetimebuilder>=0.2.0',
+            'python-dateutil>=2.7.3'
+        ]
     },
     packages=find_packages(),
     test_suite='aniso8601',
