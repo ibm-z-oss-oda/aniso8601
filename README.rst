@@ -177,7 +177,7 @@ Parsing a duration from a combined date and time is supported as well::
 
 **The included RelativeTimeBuilder is deprecated and will no longer be included as a dependency in aniso8601 6.0.0, install** `relativetimebuilder <https://pypi.org/project/relativetimebuilder>`_ **instead.**
 
-The above treat years as 365 days and months as 30 days. If calendar level accuracy is required, the provided `RelativeTimeBuilder` can be used if `dateutil <https://pypi.python.org/pypi/python-dateutil>`_ is installed::
+The above treat years as 365 days and months as 30 days. If calendar level accuracy is required, the provided :code:`RelativeTimeBuilder` can be used if `dateutil <https://pypi.python.org/pypi/python-dateutil>`_ is installed::
 
   >>> import aniso8601
   >>> from aniso8601.builders.relative import RelativeTimeBuilder
@@ -195,7 +195,7 @@ The above treat years as 365 days and months as 30 days. If calendar level accur
   >>> date(2003,1,31) + two_months
   datetime.date(2003, 3, 31)
 
-Fractional years and months do not make sense for relative durations. a :code:`RelativeValueError` is raised when attempting to construct a duration with fractional month or year with the `RelativeTimeBuilder`::
+Fractional years and months do not make sense for relative durations. a :code:`RelativeValueError` is raised when attempting to construct a duration with fractional month or year with the :code:`RelativeTimeBuilder`::
 
   >>> aniso8601.parse_duration('P2.1Y', builder=RelativeTimeBuilder)
   Traceback (most recent call last):
@@ -210,7 +210,7 @@ Fractional years and months do not make sense for relative durations. a :code:`R
       raise RelativeValueError('Fractional months and years are not '
   relativetimebuilder.RelativeValueError: Fractional months and years are not defined for relative durations.
 
-When attempting to construct a duration using a `RelativeTimeBuilder` without dateutil available, a :code:`RuntimeError` is raised::
+When attempting to construct a duration using a :code:`RelativeTimeBuilder` without dateutil available, a :code:`RuntimeError` is raised::
 
   >>> aniso8601.parse_duration('P1M', builder=RelativeTimeBuilder)
   Traceback (most recent call last):
@@ -295,7 +295,7 @@ Note that you should never try to convert a generator produced by an unbounded i
 
 **The included RelativeTimeBuilder is deprecated and will no longer be included as a dependency in aniso8601 6.0.0, install** `relativetimebuilder <https://pypi.org/project/relativetimebuilder>`_ **instead.**
 
-The above treat years as 365 days and months as 30 days. If calendar level accuracy is required, the provided `RelativeTimeBuilder` can be used if `dateutil <https://pypi.python.org/pypi/python-dateutil>`_ is installed::
+The above treat years as 365 days and months as 30 days. If calendar level accuracy is required, the provided :code:`RelativeTimeBuilder` can be used if `dateutil <https://pypi.python.org/pypi/python-dateutil>`_ is installed::
 
   >>> import aniso8601
   >>> from aniso8601.builders.relative import RelativeTimeBuilder
@@ -306,7 +306,7 @@ The above treat years as 365 days and months as 30 days. If calendar level accur
   >>> aniso8601.parse_interval('P1Y/2001-02-28', builder=RelativeTimeBuilder)
   (datetime.date(2001, 2, 28), datetime.date(2000, 2, 28))
 
-Fractional years and months do not make sense for relative intervals. A :code:`RelativeValueError` is raised when attempting to construct an interval with a fractional month or year with the `RelativeTimeBuilder`::
+Fractional years and months do not make sense for relative intervals. A :code:`RelativeValueError` is raised when attempting to construct an interval with a fractional month or year with the :code:`RelativeTimeBuilder`::
 
   >>> aniso8601.parse_interval('P1.1Y/2001-02-28', builder=RelativeTimeBuilder)
   Traceback (most recent call last):
@@ -323,7 +323,7 @@ Fractional years and months do not make sense for relative intervals. A :code:`R
       raise RelativeValueError('Fractional months and years are not '
   relativetimebuilder.RelativeValueError: Fractional months and years are not defined for relative durations.
 
-When attempting to construct an interval using a `RelativeTimeBuilder` without dateutil available, a :code:`RuntimeError` is raised::
+When attempting to construct an interval using a :code:`RelativeTimeBuilder` without dateutil available, a :code:`RuntimeError` is raised::
 
   >>> aniso8601.parse_interval('2003-01-27/P1M', builder=RelativeTimeBuilder)
   Traceback (most recent call last):
