@@ -23,7 +23,7 @@ setup(
     author_email='nielsenb@jetfuse.net',
     url='https://bitbucket.org/nielsenb/aniso8601',
     extras_require={
-        'relative': ['relativetimebuilder>=0.1.0']
+        'relative': ['relativetimebuilder>=0.2.0']
     },
     packages=find_packages(),
     test_suite='aniso8601',
