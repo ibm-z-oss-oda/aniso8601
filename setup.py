@@ -22,7 +22,7 @@ setup(
     author='Brandon Nielsen',
     author_email='nielsenb@jetfuse.net',
     url='https://bitbucket.org/nielsenb/aniso8601',
-    install_requires=['relativetimebuilder>=0.2.0']
+    install_requires=['relativetimebuilder>=0.2.0'],
     extras_require={
         'relative': ['python-dateutil>=2.7.3']
     },
