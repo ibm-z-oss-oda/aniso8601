@@ -1,10 +1,10 @@
 Changelog
 =========
 
-aniso8601 5.1.0dev0
-===================
+aniso8601 5.1.0
+===============
 
-*Release date: YYYY-MM-DD*
+*Release date: 2019-03-01*
 
 Changes
 -------
