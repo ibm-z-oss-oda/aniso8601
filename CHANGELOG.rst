@@ -1,10 +1,18 @@
 Changelog
 =========
 
-aniso8601 5.1.1dev0
+aniso8601 6.0.0dev0
 ===================
 
 *Release date: YYYY-MM-DD*
+
+Changes
+-------
+* Remove previously deprecated built in version of `relativetimebuilder <https://pypi.org/project/relativetimebuilder/>`_
+
+Deprecation
+-----------
+* Python 2 support will be removed in 7.0.0
 
 aniso8601 5.1.0
 ===============
