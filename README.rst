@@ -275,7 +275,7 @@ Two builders are included. The :code:`PythonTimeBuilder` (the default) in the  :
 
 The following builders are available as separate projects:
 
-* `RelativeTimeBuilder <https://bitbucket.org/nielsenb/relativetimebuilder>`_ supports parsing to `datetutil relativedelta types<https://dateutil.readthedocs.io/en/stable/relativedelta.html>`_ for calendar level accuracy
+* `RelativeTimeBuilder <https://bitbucket.org/nielsenb/relativetimebuilder>`_ supports parsing to `datetutil relativedelta types <https://dateutil.readthedocs.io/en/stable/relativedelta.html>`_ for calendar level accuracy
 * `AttoTimeBuilder <https://bitbucket.org/nielsenb/attotimebuilder>`_ supports parsing directly to `attotime attodatetime and attotimedelta types <https://bitbucket.org/nielsenb/attotime>`_ which support sub-nanosecond precision
 * `NumPyTimeBuilder <https://bitbucket.org/nielsenb/numpytimebuilder>`_ supports parsing directly to `NumPy datetime64 and timedelta64 types <https://docs.scipy.org/doc/numpy/reference/arrays.datetime.html>`_
 
