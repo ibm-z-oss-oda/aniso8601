@@ -431,7 +431,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         preconvertedvalue = cls.cast(floatpart, int,
                                      thrownmessage=thrownmessage)
 
-        convertedvalue = ((preconvertedvalue * conversion) /
+        convertedvalue = ((preconvertedvalue * conversion) //
                           (10 ** len(floatpart)))
 
         return (intvalue, convertedvalue)
