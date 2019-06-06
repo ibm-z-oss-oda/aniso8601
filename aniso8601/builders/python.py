@@ -18,6 +18,15 @@ from aniso8601.exceptions import (DayOutOfBoundsError,
                                   WeekOutOfBoundsError, YearOutOfBoundsError)
 from aniso8601.utcoffset import UTCOffset
 
+MICROSECONDS_PER_SECOND = int(1e6)
+
+MICROSECONDS_PER_MINUTE = 60 * MICROSECONDS_PER_SECOND
+MICROSECONDS_PER_HOUR = 60 * MICROSECONDS_PER_MINUTE
+MICROSECONDS_PER_DAY = 24 * MICROSECONDS_PER_HOUR
+MICROSECONDS_PER_WEEK = 7 * MICROSECONDS_PER_DAY
+MICROSECONDS_PER_MONTH = 30 * MICROSECONDS_PER_DAY
+MICROSECONDS_PER_YEAR = 365 * MICROSECONDS_PER_DAY
+
 class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
     def build_date(cls, YYYY=None, MM=None, DD=None, Www=None, D=None,
@@ -93,56 +102,31 @@ class PythonTimeBuilder(BaseTimeBuilder):
         seconds = 0
         microseconds = 0
 
-        floathours = float(0)
-        floatminutes = float(0)
-        floatseconds = float(0)
-
         if hh is not None:
             if '.' in hh:
-                hours, floathours = cls._split_and_cast(hh, 'Invalid hour string.')
+                hours, remainingmicroseconds = cls._split_to_microseconds(hh, MICROSECONDS_PER_HOUR, 'Invalid hour string.')
+                microseconds += remainingmicroseconds
             else:
                 hours = cls.cast(hh, int,
                                  thrownmessage='Invalid hour string.')
 
         if mm is not None:
             if '.' in mm:
-                minutes, floatminutes = cls._split_and_cast(mm, 'Invalid minute string.')
+                minutes, remainingmicroseconds = cls._split_to_microseconds(mm, MICROSECONDS_PER_MINUTE, 'Invalid minute string.')
+                microseconds += remainingmicroseconds
             else:
                 minutes = cls.cast(mm, int,
                                    thrownmessage='Invalid minute string.')
 
         if ss is not None:
             if '.' in ss:
-                secondspart, microsecondspart = ss.split('.')
-
-                seconds = cls.cast(secondspart, int,
-                                   thrownmessage='Invalid second string.')
-
-                #Shift in 0s as necessary, truncate, don't round
-                microsecondspart = microsecondspart.ljust(6, '0')
-                microseconds = cls.cast(microsecondspart[0:6], int,
-                                        thrownmessage='Invalid second string.')
+                seconds, remainingmicroseconds = cls._split_to_microseconds(ss, MICROSECONDS_PER_SECOND, 'Invalid second string.')
+                microseconds += remainingmicroseconds
             else:
                 seconds = cls.cast(ss, int,
                                    thrownmessage='Invalid second string.')
 
-        if floathours != 0:
-            remainderhours, remainderminutes = cls._split_and_convert(floathours, 60)
-
-            hours += remainderhours
-            floatminutes += remainderminutes
-
-        if floatminutes != 0:
-            remainderminutes, remainderseconds = cls._split_and_convert(floatminutes, 60)
-
-            minutes += remainderminutes
-            floatseconds += remainderseconds
-
-        if floatseconds != 0:
-            totalseconds = float(seconds) + floatseconds
-
-            #Truncate to maximum supported precision
-            seconds = cls._truncate(totalseconds, 6)
+        hours, minutes, seconds, microseconds = PythonTimeBuilder._distribute_microseconds(microseconds, (hours, minutes, seconds), (MICROSECONDS_PER_HOUR, MICROSECONDS_PER_MINUTE, MICROSECONDS_PER_SECOND))
 
         #Range checks
         if hours == 23 and minutes == 59 and seconds == 60:
@@ -203,112 +187,63 @@ class PythonTimeBuilder(BaseTimeBuilder):
         seconds = 0
         microseconds = 0
 
-        floatyears = float(0)
-        floatmonths = float(0)
-        floatdays = float(0)
-        floatweeks = float(0)
-        floathours = float(0)
-        floatminutes = float(0)
-        floatseconds = float(0)
-
         if PnY is not None:
             if '.' in PnY:
-                years, floatyears = cls._split_and_cast(PnY, 'Invalid year string.')
+                years, remainingmicroseconds = cls._split_to_microseconds(PnY, MICROSECONDS_PER_YEAR, 'Invalid year string.')
+                microseconds += remainingmicroseconds
             else:
                 years = cls.cast(PnY, int,
                                  thrownmessage='Invalid year string.')
 
         if PnM is not None:
             if '.' in PnM:
-                months, floatmonths = cls._split_and_cast(PnM, 'Invalid month string.')
+                months, remainingmicroseconds = cls._split_to_microseconds(PnM, MICROSECONDS_PER_MONTH, 'Invalid month string.')
+                microseconds += remainingmicroseconds
             else:
                 months = cls.cast(PnM, int,
                                   thrownmessage='Invalid month string.')
 
         if PnW is not None:
             if '.' in PnW:
-                weeks, floatweeks = cls._split_and_cast(PnW, 'Invalid week string.')
+                weeks, remainingmicroseconds = cls._split_to_microseconds(PnW, MICROSECONDS_PER_WEEK, 'Invalid week string.')
+                microseconds += remainingmicroseconds
             else:
                 weeks = cls.cast(PnW, int,
                                  thrownmessage='Invalid week string.')
 
         if PnD is not None:
             if '.' in PnD:
-                days, floatdays = cls._split_and_cast(PnD, 'Invalid day string.')
+                days, remainingmicroseconds = cls._split_to_microseconds(PnD, MICROSECONDS_PER_DAY, 'Invalid day string.')
+                microseconds += remainingmicroseconds
             else:
                 days = cls.cast(PnD, int,
                                 thrownmessage='Invalid day string.')
 
         if TnH is not None:
             if '.' in TnH:
-                hours, floathours = cls._split_and_cast(TnH, 'Invalid hour string.')
+                hours, remainingmicroseconds = cls._split_to_microseconds(TnH, MICROSECONDS_PER_HOUR, 'Invalid hour string.')
+                microseconds += remainingmicroseconds
             else:
                 hours = cls.cast(TnH, int,
                                  thrownmessage='Invalid hour string.')
 
         if TnM is not None:
             if '.' in TnM:
-                minutes, floatminutes = cls._split_and_cast(TnM, 'Invalid minute string.')
+                minutes, remainingmicroseconds = cls._split_to_microseconds(TnM, MICROSECONDS_PER_MINUTE, 'Invalid minute string.')
+                microseconds += remainingmicroseconds
             else:
                 minutes = cls.cast(TnM, int,
                                    thrownmessage='Invalid minute string.')
 
         if TnS is not None:
             if '.' in TnS:
-                secondspart, microsecondspart = TnS.split('.')
-
-                seconds = cls.cast(secondspart, int,
-                                   thrownmessage='Invalid second string.')
-
-                #Shift in 0s as necessary, truncate, don't round
-                microsecondspart = microsecondspart.ljust(6, '0')
-                microseconds = cls.cast(microsecondspart[0:6], int,
-                                        thrownmessage='Invalid second string.')
+                seconds, remainingmicroseconds = cls._split_to_microseconds(TnS, MICROSECONDS_PER_SECOND, 'Invalid second string.')
+                microseconds += remainingmicroseconds
             else:
                 seconds = cls.cast(TnS, int,
                                    thrownmessage='Invalid second string.')
 
-        if floatyears != 0:
-            remainderyears, remainderdays = cls._split_and_convert(floatyears, 365)
-
-            years += remainderyears
-            floatdays += remainderdays
-
-        if floatmonths != 0:
-            remaindermonths, remainderdays = cls._split_and_convert(floatmonths, 30)
-
-            months += remaindermonths
-            floatdays += remainderdays
-
-        if floatweeks != 0:
-            remainderweeks, remainderdays = cls._split_and_convert(floatweeks, 7)
-
-            weeks += remainderweeks
-            floatdays += remainderdays
-
-        if floatdays != 0:
-            remainderdays, remainderhours = cls._split_and_convert(floatdays, 24)
-
-            days += remainderdays
-            floathours += remainderhours
-
-        if floathours != 0:
-            remainderhours, remainderminutes = cls._split_and_convert(floathours, 60)
-
-            hours += remainderhours
-            floatminutes += remainderminutes
-
-        if floatminutes != 0:
-            remainderminutes, remainderseconds = cls._split_and_convert(floatminutes, 60)
-
-            minutes += remainderminutes
-            floatseconds += remainderseconds
-
-        if floatseconds != 0:
-            totalseconds = float(seconds) + floatseconds
-
-            #Truncate to maximum supported precision
-            seconds = cls._truncate(totalseconds, 6)
+        years, months, weeks, days, hours, minutes, seconds, microseconds = PythonTimeBuilder._distribute_microseconds(microseconds, (years, months, weeks, days, hours, minutes, seconds), (MICROSECONDS_PER_YEAR, MICROSECONDS_PER_MONTH, MICROSECONDS_PER_WEEK, MICROSECONDS_PER_DAY, MICROSECONDS_PER_HOUR, MICROSECONDS_PER_MINUTE, MICROSECONDS_PER_SECOND))
 
         #Note that weeks can be handled without conversion to days
         totaldays = years * 365 + months * 30 + days
@@ -484,42 +419,35 @@ class PythonTimeBuilder(BaseTimeBuilder):
             currentdate += timedelta
 
     @classmethod
-    def _split_and_cast(cls, floatstr, thrownmessage):
-        #Splits a string with a decimal point into int, and
-        #float portions
+    def _split_to_microseconds(cls, floatstr, conversion, thrownmessage):
+        #Splits a string with a decimal point into an int, and
+        #int representing the floating point remainder as a number
+        #of microseconds, determined by multiplying by conversion
         intpart, floatpart = floatstr.split('.')
 
         intvalue = cls.cast(intpart, int,
                             thrownmessage=thrownmessage)
 
-        floatvalue = cls.cast('.' + floatpart, float,
-                              thrownmessage=thrownmessage)
+        preconvertedvalue = cls.cast(floatpart, int,
+                                     thrownmessage=thrownmessage)
 
-        return (intvalue, floatvalue)
+        convertedvalue = ((preconvertedvalue * conversion) /
+                          (10 ** len(floatpart)))
 
-    @staticmethod
-    def _split_and_convert(f, conversion):
-        #Splits a float into an integer, and a converted float portion
-        floatpart, integerpart = math.modf(f)
-
-        return (int(integerpart), float(floatpart) * conversion)
+        return (intvalue, convertedvalue)
 
     @staticmethod
-    def _truncate(f, n):
-        #Truncates/pads a float f to n decimal places without rounding
-        #https://stackoverflow.com/a/783927
-        #This differs from the given implementation in that we expand the string
-        #two additional characters, than truncate the resulting string
-        #to mitigate rounding effects
-        floatstr = repr(f)
+    def _distribute_microseconds(todistribute, recipients, reductions):
+        results = []
 
-        if 'e' in floatstr or 'E' in floatstr:
-            expandedfloatstr = '{0:.{1}f}'.format(f, n + 2)
-        else:
-            integerpartstr, _, floatpartstr = floatstr.partition('.')
+        remainder = todistribute
 
-            expandedfloatstr = '.'.join([integerpartstr,
-                                         (floatpartstr
-                                          + '0' * (n + 2))[:n + 2]])
+        for index, reduction in enumerate(reductions):
+            additional, remainder = divmod(remainder, reduction)
 
-        return float(expandedfloatstr[:expandedfloatstr.index('.') + n + 1])
+            results.append(recipients[index] + additional)
+
+        #Always return the remaining microseconds
+        results.append(remainder)
+
+        return tuple(results)
