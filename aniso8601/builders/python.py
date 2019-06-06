@@ -7,7 +7,6 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import datetime
-import math
 
 from aniso8601.builders import BaseTimeBuilder, TupleBuilder
 from aniso8601.exceptions import (DayOutOfBoundsError,
