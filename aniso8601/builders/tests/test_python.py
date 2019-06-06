@@ -270,7 +270,11 @@ class TestPythonTimeBuilder(unittest.TestCase):
             PythonTimeBuilder.build_time(hh='24.1')
 
     def test_build_datetime(self):
-        testtuples = (((('1234', '2', '3', None, None, None, 'date'),
+        testtuples = (((('2019', '06', '05', None, None, None, 'date'),
+                        ('01', '03', '11.858714', None, 'time')),
+                       datetime.datetime(2019, 6, 5, hour=1, minute=3,
+                                         second=11, microsecond=858714)),
+                      ((('1234', '02', '03', None, None, None, 'date'),
                         ('23', '21', '28.512400', None, 'time')),
                        datetime.datetime(1234, 2, 3, hour=23, minute=21,
                                          second=28, microsecond=512400)),
@@ -366,6 +370,9 @@ class TestPythonTimeBuilder(unittest.TestCase):
                        datetime.timedelta(days=428.5)),
                       ({'TnH': '4', 'TnM': '54', 'TnS': '6.5'},
                        datetime.timedelta(hours=4, minutes=54, seconds=6.5)),
+                      ({'TnH': '1', 'TnM': '3', 'TnS': '11.858714'},
+                       datetime.timedelta(hours=1, minutes=3,
+                                          seconds=11, microseconds=858714)),
                       ({'TnH': '4', 'TnM': '54', 'TnS': '28.512400'},
                        datetime.timedelta(hours=4, minutes=54,
                                           seconds=28, microseconds=512400)),

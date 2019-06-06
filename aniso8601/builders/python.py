@@ -91,6 +91,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         hours = 0
         minutes = 0
         seconds = 0
+        microseconds = 0
 
         floathours = float(0)
         floatminutes = float(0)
@@ -112,7 +113,15 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
         if ss is not None:
             if '.' in ss:
-                seconds, floatseconds = cls._split_and_cast(ss, 'Invalid second string.')
+                secondspart, microsecondspart = ss.split('.')
+
+                seconds = cls.cast(secondspart, int,
+                                   thrownmessage='Invalid second string.')
+
+                #Shift in 0s as necessary, truncate, don't round
+                microsecondspart = microsecondspart.ljust(6, '0')
+                microseconds = cls.cast(microsecondspart[0:6], int,
+                                        thrownmessage='Invalid second string.')
             else:
                 seconds = cls.cast(ss, int,
                                    thrownmessage='Invalid second string.')
@@ -166,13 +175,15 @@ class PythonTimeBuilder(BaseTimeBuilder):
                                       hour=hours,
                                       minute=minutes,
                                       tzinfo=cls._build_object(tz))
-                    + datetime.timedelta(seconds=seconds)
+                    + datetime.timedelta(seconds=seconds,
+                                         microseconds=microseconds)
                    ).timetz()
 
         return (datetime.datetime(1, 1, 1,
                                   hour=hours,
                                   minute=minutes)
-                + datetime.timedelta(seconds=seconds)
+                + datetime.timedelta(seconds=seconds,
+                                     microseconds=microseconds)
                ).time()
 
     @classmethod
@@ -190,6 +201,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         hours = 0
         minutes = 0
         seconds = 0
+        microseconds = 0
 
         floatyears = float(0)
         floatmonths = float(0)
@@ -243,7 +255,15 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
         if TnS is not None:
             if '.' in TnS:
-                seconds, floatseconds = cls._split_and_cast(TnS, 'Invalid second string.')
+                secondspart, microsecondspart = TnS.split('.')
+
+                seconds = cls.cast(secondspart, int,
+                                   thrownmessage='Invalid second string.')
+
+                #Shift in 0s as necessary, truncate, don't round
+                microsecondspart = microsecondspart.ljust(6, '0')
+                microseconds = cls.cast(microsecondspart[0:6], int,
+                                        thrownmessage='Invalid second string.')
             else:
                 seconds = cls.cast(TnS, int,
                                    thrownmessage='Invalid second string.')
@@ -295,6 +315,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
         return datetime.timedelta(days=totaldays,
                                   seconds=seconds,
+                                  microseconds=microseconds,
                                   minutes=minutes,
                                   hours=hours,
                                   weeks=weeks)
