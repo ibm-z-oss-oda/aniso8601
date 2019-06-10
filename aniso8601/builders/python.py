@@ -437,6 +437,11 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
     @staticmethod
     def _distribute_microseconds(todistribute, recipients, reductions):
+        #Given a number of microseconds as int, a tuple of ints length n
+        #to distribute to, and a tuple of ints length n to divide todistribute
+        #by (from largest to smallest), returns a tuple of length n + 1, with
+        #todistribute divided across recipients using the reductions, with
+        #the final remainder returned as the final tuple member
         results = []
 
         remainder = todistribute
