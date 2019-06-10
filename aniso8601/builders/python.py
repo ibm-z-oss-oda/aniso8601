@@ -86,7 +86,8 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
         if dayofyear is not None:
             return PythonTimeBuilder._build_ordinal_date(year, dayofyear)
-        elif weeknumber is not None:
+
+        if weeknumber is not None:
             return PythonTimeBuilder._build_week_date(year, weeknumber,
                                                       isoday=dayofweek)
 
