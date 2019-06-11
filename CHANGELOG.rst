@@ -1,6 +1,11 @@
 Changelog
 =========
 
+aniso8601 7.0.1dev0
+===================
+
+*Release date: YYYY-MM-DD*
+
 aniso8601 7.0.0
 ===============
 
