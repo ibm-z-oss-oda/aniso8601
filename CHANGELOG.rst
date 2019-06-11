@@ -1,10 +1,14 @@
 Changelog
 =========
 
-aniso8601 6.0.1dev0
+aniso8601 7.0.0dev0
 ===================
 
 *Release date: YYYY-MM-DD*
+
+Changes
+-------
+* Handle all fractional components as an integer number of microseconds, eliminating rounding issues, fixes `#24 <https://bitbucket.org/nielsenb/aniso8601/issues/24/float-induced-rounding-errors-when-parsing>`_
 
 aniso8601 6.0.0
 ===============
