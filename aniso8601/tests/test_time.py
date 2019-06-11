@@ -68,6 +68,8 @@ class TestTimeParserFunctions(unittest.TestCase):
                                     'ss': '00', 'tz': None}),
                       ('23:21:28.512400', {'hh': '23', 'mm': '21',
                                            'ss': '28.512400', 'tz': None}),
+                      ('01:03:11.858714', {'hh': '01', 'mm': '03',
+                                           'ss': '11.858714', 'tz': None}),
                       ('14:43:59.9999997', {'hh': '14', 'mm': '43',
                                             'ss': '59.9999997', 'tz': None}),
                       ('01:23', {'hh': '01', 'mm': '23', 'tz': None}),
@@ -78,6 +80,10 @@ class TestTimeParserFunctions(unittest.TestCase):
                                   'ss': '45', 'tz': None}),
                       ('240000', {'hh': '24', 'mm': '00',
                                   'ss': '00', 'tz': None}),
+                      ('232128.512400', {'hh': '23', 'mm': '21',
+                                         'ss': '28.512400', 'tz': None}),
+                      ('010311.858714', {'hh': '01', 'mm': '03',
+                                         'ss': '11.858714', 'tz': None}),
                       ('144359.9999997', {'hh': '14', 'mm': '43',
                                           'ss': '59.9999997', 'tz': None}),
                       ('0123', {'hh': '01', 'mm': '23', 'tz': None}),
@@ -197,7 +203,11 @@ class TestTimeParserFunctions(unittest.TestCase):
         mockBuilder.build_time.assert_called_once_with(**expectedargs)
 
     def test_parse_datetime(self):
-        testtuples = (('1981-04-05T23:21:28.512400Z',
+        testtuples = (('2019-06-05T01:03:11.858714',
+                       (('2019', '06', '05', None, None, None, 'date'),
+                        ('01', '03', '11.858714',
+                         None, 'time'))),
+                      ('1981-04-05T23:21:28.512400Z',
                        (('1981', '04', '05', None, None, None, 'date'),
                         ('23', '21', '28.512400',
                          (False, True, None, None, 'Z', 'timezone'),
