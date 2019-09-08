@@ -10,7 +10,7 @@ from aniso8601 import compat
 from aniso8601.builders import TupleBuilder
 from aniso8601.builders.python import PythonTimeBuilder
 from aniso8601.date import parse_date
-from aniso8601.decimal_fraction import find_sign, split
+from aniso8601.decimal_fraction import find_separator, split
 from aniso8601.exceptions import ISOFormatError, NegativeDurationError
 from aniso8601.time import parse_time
 
@@ -47,9 +47,9 @@ def _parse_duration_prescribed(durationstr, builder):
                              'character.')
 
     #Make sure only the lowest order element has decimal precision
-    sign_index = find_sign(durationstr)
-    if sign_index != -1:
-        remaining_parts = split(durationstr[sign_index + 1:])
+    separator_index = find_separator(durationstr)
+    if separator_index != -1:
+        remaining_parts = split(durationstr[separator_index + 1:])
         if len(remaining_parts) > 1:
             raise ISOFormatError('ISO 8601 allows only lowest order element to '
                              'have a decimal fraction.')
