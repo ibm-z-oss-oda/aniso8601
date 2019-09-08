@@ -9,6 +9,7 @@
 from aniso8601.builders import TupleBuilder
 from aniso8601.builders.python import PythonTimeBuilder
 from aniso8601.date import parse_date
+from aniso8601.decimal_fraction import find_sign
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.resolution import TimeResolution
 from aniso8601.timezone import parse_timezone
@@ -52,16 +53,9 @@ def get_time_resolution(isotimestr):
         return TimeResolution.Minutes
 
     #Format must be hhmmss, hhmm, or hh
-    if ',' in timestr:
-        #The lowest order element is a fraction
-        timestrlen = timestr.index(',')
-    else:
-        if '.' in timestr:
-            #The lowest order element is a fraction
-            timestrlen = timestr.index('.')
-        else:
-            #No time fractions
-            timestrlen = len(timestr)
+    timestrlen = find_sign(timestr)
+    if timestrlen == -1:
+        timestrlen = len(timestr)
 
     if timestrlen == 6:
         #hhmmss
