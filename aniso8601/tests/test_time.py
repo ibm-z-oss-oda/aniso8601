@@ -21,10 +21,14 @@ class TestTimeParserFunctions(unittest.TestCase):
                          TimeResolution.Seconds)
         self.assertEqual(get_time_resolution('24:00:00'),
                          TimeResolution.Seconds)
+        self.assertEqual(get_time_resolution('23:21:28,512400'),
+                         TimeResolution.Seconds)
         self.assertEqual(get_time_resolution('23:21:28.512400'),
                          TimeResolution.Seconds)
         self.assertEqual(get_time_resolution('01:23'), TimeResolution.Minutes)
         self.assertEqual(get_time_resolution('24:00'), TimeResolution.Minutes)
+        self.assertEqual(get_time_resolution('01:23,4567'),
+                         TimeResolution.Minutes)
         self.assertEqual(get_time_resolution('01:23.4567'),
                          TimeResolution.Minutes)
         self.assertEqual(get_time_resolution('012345'), TimeResolution.Seconds)
@@ -33,6 +37,7 @@ class TestTimeParserFunctions(unittest.TestCase):
         self.assertEqual(get_time_resolution('2400'), TimeResolution.Minutes)
         self.assertEqual(get_time_resolution('01'), TimeResolution.Hours)
         self.assertEqual(get_time_resolution('24'), TimeResolution.Hours)
+        self.assertEqual(get_time_resolution('12,5'), TimeResolution.Hours)
         self.assertEqual(get_time_resolution('12.5'), TimeResolution.Hours)
         self.assertEqual(get_time_resolution('232128.512400+00:00'),
                          TimeResolution.Seconds)

@@ -52,12 +52,16 @@ def get_time_resolution(isotimestr):
         return TimeResolution.Minutes
 
     #Format must be hhmmss, hhmm, or hh
-    if timestr.find('.') == -1:
-        #No time fractions
-        timestrlen = len(timestr)
-    else:
+    if ',' in timestr:
         #The lowest order element is a fraction
-        timestrlen = len(timestr.split('.')[0])
+        timestrlen = timestr.index(',')
+    else:
+        if '.' in timestr:
+            #The lowest order element is a fraction
+            timestrlen = timestr.index('.')
+        else:
+            #No time fractions
+            timestrlen = len(timestr)
 
     if timestrlen == 6:
         #hhmmss
