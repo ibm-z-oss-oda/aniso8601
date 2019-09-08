@@ -10,6 +10,7 @@ from aniso8601 import compat
 from aniso8601.builders import TupleBuilder
 from aniso8601.builders.python import PythonTimeBuilder
 from aniso8601.date import parse_date
+from aniso8601.decimal_fraction import find_sign, split
 from aniso8601.exceptions import ISOFormatError, NegativeDurationError
 from aniso8601.time import parse_time
 
@@ -46,15 +47,19 @@ def _parse_duration_prescribed(durationstr, builder):
                              'character.')
 
     #Make sure only the lowest order element has decimal precision
-    if durationstr.count('.') > 1:
-        raise ISOFormatError('ISO 8601 allows only lowest order element to '
+    sign_index = find_sign(durationstr)
+    if sign_index != -1:
+        remaining_parts = split(durationstr[sign_index + 1:])
+        if len(remaining_parts) > 1:
+            raise ISOFormatError('ISO 8601 allows only lowest order element to '
                              'have a decimal fraction.')
-    elif durationstr.count('.') == 1:
+        remaining = remaining_parts[0]
+
         #There should only ever be 1 letter after a decimal if there is more
         #then one, the string is invalid
         lettercount = 0
 
-        for character in durationstr.split('.')[1]:
+        for character in remaining:
             if character.isalpha() is True:
                 lettercount += 1
 
@@ -213,10 +218,6 @@ def _parse_duration_element(durationstr, elementstr):
             break
 
     durationstartindex += 1
-
-    if ',' in durationstr:
-        #Replace the comma with a 'full-stop'
-        durationstr = durationstr.replace(',', '.')
 
     return durationstr[durationstartindex:durationendindex]
 
