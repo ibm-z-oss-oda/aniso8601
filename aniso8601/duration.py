@@ -10,7 +10,7 @@ from aniso8601 import compat
 from aniso8601.builders import TupleBuilder
 from aniso8601.builders.python import PythonTimeBuilder
 from aniso8601.date import parse_date
-from aniso8601.decimal_fraction import find_separator
+from aniso8601.decimal_fraction import find_separator, normalize
 from aniso8601.exceptions import ISOFormatError, NegativeDurationError
 from aniso8601.time import parse_time
 
@@ -218,11 +218,7 @@ def _parse_duration_element(durationstr, elementstr):
 
     durationstartindex += 1
 
-    if ',' in durationstr:
-        #Replace the comma with a 'full-stop'
-        durationstr = durationstr.replace(',', '.')
-
-    return durationstr[durationstartindex:durationendindex]
+    return normalize(durationstr[durationstartindex:durationendindex])
 
 def _has_any_component(durationstr, components):
     #Given a duration string, and a list of components, returns True
