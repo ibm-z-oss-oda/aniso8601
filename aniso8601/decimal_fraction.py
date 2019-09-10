@@ -19,3 +19,7 @@ def has_separator(value):
 def split(value):
     """Returns the list spearated with decimal separators."""
     return _SIGN_PATTERN.split(value)
+
+
+def normalize(value):
+    return _SIGN_PATTERN.sub('.', value)

@@ -9,7 +9,7 @@
 from aniso8601.builders import TupleBuilder
 from aniso8601.builders.python import PythonTimeBuilder
 from aniso8601.date import parse_date
-from aniso8601.decimal_fraction import find_separator
+from aniso8601.decimal_fraction import find_separator, normalize
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.resolution import TimeResolution
 from aniso8601.timezone import parse_timezone
@@ -136,7 +136,7 @@ def _parse_hour(timestr, tz, builder):
     if hourstr == '24':
         return builder.build_time(tz=tz)
 
-    return builder.build_time(hh=hourstr, tz=tz)
+    return builder.build_time(hh=normalize(hourstr), tz=tz)
 
 def _parse_minute_time(timestr, tz, builder):
     #Format must be hhmm, hhmm., hh:mm or hh:mm.
@@ -148,7 +148,7 @@ def _parse_minute_time(timestr, tz, builder):
         hourstr = timestr[0:2]
         minutestr = timestr[2:]
 
-    return builder.build_time(hh=hourstr, mm=minutestr, tz=tz)
+    return builder.build_time(hh=normalize(hourstr), mm=normalize(minutestr), tz=tz)
 
 def _parse_second_time(timestr, tz, builder):
     #Format must be hhmmss, hhmmss., hh:mm:ss or hh:mm:ss.
@@ -161,7 +161,8 @@ def _parse_second_time(timestr, tz, builder):
         minutestr = timestr[2:4]
         secondstr = timestr[4:]
 
-    return builder.build_time(hh=hourstr, mm=minutestr, ss=secondstr, tz=tz)
+    return builder.build_time(hh=normalize(hourstr), mm=normalize(minutestr),
+                              ss=normalize(secondstr), tz=tz)
 
 def _split_tz(isotimestr):
     if isotimestr.find('+') != -1:
