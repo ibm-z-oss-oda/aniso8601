@@ -9,7 +9,6 @@
 import datetime
 
 from aniso8601.builders import BaseTimeBuilder, TupleBuilder
-from aniso8601.decimal_fraction import has_separator, split
 from aniso8601.exceptions import (DayOutOfBoundsError,
                                   HoursOutOfBoundsError,
                                   LeapSecondError, MidnightBoundsError,
@@ -104,7 +103,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         microseconds = 0
 
         if hh is not None:
-            if has_separator(hh):
+            if '.' in hh:
                 hours, remainingmicroseconds = cls._split_to_microseconds(hh, MICROSECONDS_PER_HOUR, 'Invalid hour string.')
                 microseconds += remainingmicroseconds
             else:
@@ -112,7 +111,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
                                  thrownmessage='Invalid hour string.')
 
         if mm is not None:
-            if has_separator(mm):
+            if '.' in mm:
                 minutes, remainingmicroseconds = cls._split_to_microseconds(mm, MICROSECONDS_PER_MINUTE, 'Invalid minute string.')
                 microseconds += remainingmicroseconds
             else:
@@ -120,7 +119,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
                                    thrownmessage='Invalid minute string.')
 
         if ss is not None:
-            if has_separator(ss):
+            if '.' in ss:
                 seconds, remainingmicroseconds = cls._split_to_microseconds(ss, MICROSECONDS_PER_SECOND, 'Invalid second string.')
                 microseconds += remainingmicroseconds
             else:
@@ -189,7 +188,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         microseconds = 0
 
         if PnY is not None:
-            if has_separator(PnY):
+            if '.' in PnY:
                 years, remainingmicroseconds = cls._split_to_microseconds(PnY, MICROSECONDS_PER_YEAR, 'Invalid year string.')
                 microseconds += remainingmicroseconds
             else:
@@ -197,7 +196,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
                                  thrownmessage='Invalid year string.')
 
         if PnM is not None:
-            if has_separator(PnM):
+            if '.' in PnM:
                 months, remainingmicroseconds = cls._split_to_microseconds(PnM, MICROSECONDS_PER_MONTH, 'Invalid month string.')
                 microseconds += remainingmicroseconds
             else:
@@ -205,7 +204,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
                                   thrownmessage='Invalid month string.')
 
         if PnW is not None:
-            if has_separator(PnW):
+            if '.' in PnW:
                 weeks, remainingmicroseconds = cls._split_to_microseconds(PnW, MICROSECONDS_PER_WEEK, 'Invalid week string.')
                 microseconds += remainingmicroseconds
             else:
@@ -213,7 +212,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
                                  thrownmessage='Invalid week string.')
 
         if PnD is not None:
-            if has_separator(PnD):
+            if '.' in PnD:
                 days, remainingmicroseconds = cls._split_to_microseconds(PnD, MICROSECONDS_PER_DAY, 'Invalid day string.')
                 microseconds += remainingmicroseconds
             else:
@@ -221,7 +220,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
                                 thrownmessage='Invalid day string.')
 
         if TnH is not None:
-            if has_separator(TnH):
+            if '.' in TnH:
                 hours, remainingmicroseconds = cls._split_to_microseconds(TnH, MICROSECONDS_PER_HOUR, 'Invalid hour string.')
                 microseconds += remainingmicroseconds
             else:
@@ -229,7 +228,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
                                  thrownmessage='Invalid hour string.')
 
         if TnM is not None:
-            if has_separator(TnM):
+            if '.' in TnM:
                 minutes, remainingmicroseconds = cls._split_to_microseconds(TnM, MICROSECONDS_PER_MINUTE, 'Invalid minute string.')
                 microseconds += remainingmicroseconds
             else:
@@ -237,7 +236,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
                                    thrownmessage='Invalid minute string.')
 
         if TnS is not None:
-            if has_separator(TnS):
+            if '.' in TnS:
                 seconds, remainingmicroseconds = cls._split_to_microseconds(TnS, MICROSECONDS_PER_SECOND, 'Invalid second string.')
                 microseconds += remainingmicroseconds
             else:
@@ -424,7 +423,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         #Splits a string with a decimal point into an int, and
         #int representing the floating point remainder as a number
         #of microseconds, determined by multiplying by conversion
-        intpart, floatpart = split(floatstr)
+        intpart, floatpart = floatstr.split('.')
 
         intvalue = cls.cast(intpart, int,
                             thrownmessage=thrownmessage)
