@@ -12,14 +12,6 @@ def find_separator(value):
     return match.start()
 
 
-def has_separator(value):
-    return find_separator(value) != -1
-
-
-def split(value):
-    """Returns the list spearated with decimal separators."""
-    return _SIGN_PATTERN.split(value)
-
-
 def normalize(value):
+    """Returns the string that the decimal separators are normalized."""
     return _SIGN_PATTERN.sub('.', value)

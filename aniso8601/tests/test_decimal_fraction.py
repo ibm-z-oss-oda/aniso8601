@@ -1,6 +1,6 @@
 import unittest
 
-from aniso8601.decimal_fraction import find_separator, normalize, split
+from aniso8601.decimal_fraction import find_separator, normalize
 
 
 class TestDecimalFractionFunctions(unittest.TestCase):
@@ -15,8 +15,3 @@ class TestDecimalFractionFunctions(unittest.TestCase):
         self.assertEqual(normalize('12.34'), '12.34')
         self.assertEqual(normalize('123,45'), '123.45')
         self.assertEqual(normalize('123,45,67'), '123.45.67')
-
-    def test_split(self):
-        self.assertEqual(split(''), [''])
-        self.assertEqual(split('1'), ['1'])
-        self.assertEqual(split('12.34,56'), ['12', '34', '56'])
