@@ -1,10 +1,16 @@
 Changelog
 =========
 
-aniso8601 7.0.1dev0
-===================
+aniso8601 8.0.0-dev.0
+=====================
 
 *Release date: YYYY-MM-DD*
+
+Changes
+-------
+
+* Handle ',' character as a fractional separator, as required by 4.2.2.4, see `PR 12 <https://bitbucket.org/nielsenb/aniso8601/pull-requests/12/allow-commas-as-decimal-separators-on-time/>`_
+* Fix semver usage for prelease version, as required by `clause 9 <https://semver.org/#spec-item-9>`_
 
 aniso8601 7.0.0
 ===============
