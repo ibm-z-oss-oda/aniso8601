@@ -1,6 +1,6 @@
 import unittest
 
-from aniso8601.decimal_fraction import find_separator, normalize
+from aniso8601.decimalfraction import find_separator, normalize
 
 
 class TestDecimalFractionFunctions(unittest.TestCase):
