@@ -133,6 +133,13 @@ A decimal fraction is always allowed on the lowest order element of an ISO 8601 
   >>> aniso8601.parse_time('23.75')
   datetime.time(23, 45)
 
+The decimal fraction can be specified with a comma instead of a full-stop::
+
+  >>> aniso8601.parse_time('22:33,5')
+  datetime.time(22, 33, 30)
+  >>> aniso8601.parse_time('23,75')
+  datetime.time(23, 45)
+
 Leap seconds are currently not supported and attempting to parse one raises a :code:`LeapSecondError`::
 
   >>> aniso8601.parse_time('23:59:60')
