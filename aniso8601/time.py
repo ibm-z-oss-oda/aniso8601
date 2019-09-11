@@ -121,7 +121,7 @@ def parse_datetime(isodatetimestr, delimiter='T', builder=PythonTimeBuilder):
     #date and time (<date>T<time>). Fixed offset tzdata will be included
     #if UTC offset is given in the input string.
 
-    isodatestr, isotimestr = isodatetimestr.split(delimiter)
+    isodatestr, isotimestr = isodatetimestr.split(delimiter, 1)
 
     datepart = parse_date(isodatestr, builder=TupleBuilder)
 

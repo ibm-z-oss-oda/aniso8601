@@ -281,6 +281,23 @@ class TestTimeParserFunctions(unittest.TestCase):
         self.assertEqual(result, expectedargs)
         mockBuildDateTime.assert_called_once_with(*expectedargs)
 
+    def test_parse_datetime_commaseparated(self):
+        expectedargs = (('1981', '04', '05', None, None, None, 'date'),
+                        ('23', '21', '28.512400',
+                         (False, True, None, None, 'Z', 'timezone'),
+                         'time'))
+
+        with mock.patch.object(aniso8601.time.PythonTimeBuilder,
+                               'build_datetime') as mockBuildDateTime:
+
+            mockBuildDateTime.return_value = expectedargs
+
+            result = parse_datetime('1981-04-05,23:21:28,512400Z',
+                                    delimiter=',')
+
+        self.assertEqual(result, expectedargs)
+        mockBuildDateTime.assert_called_once_with(*expectedargs)
+
     def test_parse_datetime_mockbuilder(self):
         mockBuilder = mock.Mock()
 
