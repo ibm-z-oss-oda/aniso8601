@@ -268,7 +268,7 @@ class TestTimeParserFunctions(unittest.TestCase):
             self.assertEqual(result, testtuple[1])
             mockBuildDateTime.assert_called_once_with(*testtuple[1])
 
-    def test_parse_datetime_spaceseperated(self):
+    def test_parse_datetime_spacedelimited(self):
         expectedargs = (('2004', None, None, '53', '6', None, 'date'),
                         ('23', '21', '28.512400',
                          (True, None, '12', '34', '-12:34', 'timezone'),
@@ -285,7 +285,7 @@ class TestTimeParserFunctions(unittest.TestCase):
         self.assertEqual(result, expectedargs)
         mockBuildDateTime.assert_called_once_with(*expectedargs)
 
-    def test_parse_datetime_commaseparated(self):
+    def test_parse_datetime_commadelimited(self):
         expectedargs = (('1981', '04', '05', None, None, None, 'date'),
                         ('23', '21', '28.512400',
                          (False, True, None, None, 'Z', 'timezone'),
