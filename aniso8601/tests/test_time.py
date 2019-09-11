@@ -228,7 +228,11 @@ class TestTimeParserFunctions(unittest.TestCase):
         mockBuilder.build_time.assert_called_once_with(**expectedargs)
 
     def test_parse_datetime(self):
-        testtuples = (('2019-06-05T01:03:11.858714',
+        testtuples = (('2019-06-05T01:03:11,858714',
+                       (('2019', '06', '05', None, None, None, 'date'),
+                        ('01', '03', '11.858714',
+                         None, 'time'))),
+                      ('2019-06-05T01:03:11.858714',
                        (('2019', '06', '05', None, None, None, 'date'),
                         ('01', '03', '11.858714',
                          None, 'time'))),
