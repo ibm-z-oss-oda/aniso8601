@@ -1,17 +1,15 @@
-import re
+# -*- coding: utf-8 -*-
 
-
-_SIGN_PATTERN = re.compile(r'[,\.]')
-
+# Copyright (c) 2019, Brandon Nielsen
+# All rights reserved.
+#
+# This software may be modified and distributed under the terms
+# of the BSD license.  See the LICENSE file for details.
 
 def find_separator(value):
     """Returns the decimal separator index if found else -1."""
-    match = _SIGN_PATTERN.search(value)
-    if not match:
-        return -1
-    return match.start()
-
+    return normalize(value).find('.')
 
 def normalize(value):
     """Returns the string that the decimal separators are normalized."""
-    return _SIGN_PATTERN.sub('.', value)
+    return value.replace(',', '.')
