@@ -1,6 +1,11 @@
 Changelog
 =========
 
+aniso8601 8.0.1-dev.0
+=====================
+
+*Release date: YYYY-MM-DD*
+
 aniso8601 8.0.0
 ===============
 
