@@ -106,6 +106,13 @@ class TestDurationParserFunctions(unittest.TestCase):
         self.assertEqual(result, expectedargs)
         mockBuilder.build_duration.assert_called_once_with(**expectedargs)
 
+    def test_parse_duration_empty(self):
+        testtuples = (None, '')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                parse_duration(testtuple, None)
+
     def test_parse_duration_nop(self):
         with self.assertRaises(ISOFormatError):
             #Duration must start with a P

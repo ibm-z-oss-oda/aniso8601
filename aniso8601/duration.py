@@ -21,6 +21,13 @@ def parse_duration(isodurationstr, builder=PythonTimeBuilder):
     #PnYnMnDTnHnMnS (or any reduced precision equivalent)
     #P<date>T<time>
 
+    if isodurationstr is None:
+        raise ISOFormatError('Duration string is None.')
+
+    if len(isodurationstr) == 0:
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
+                .format(isodurationstr))
+
     if isodurationstr[0] != 'P':
         raise ISOFormatError('ISO 8601 duration must start with a P.')
 
