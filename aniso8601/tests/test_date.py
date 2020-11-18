@@ -43,6 +43,13 @@ class TestDateResolutionFunctions(unittest.TestCase):
         self.assertEqual(get_date_resolution('1981095'),
                          DateResolution.Ordinal)
 
+    def test_get_date_resolution_empty(self):
+        testtuples = (None, '')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                get_date_resolution(testtuple)
+
 class TestDateParserFunctions(unittest.TestCase):
     def test_parse_date(self):
         testtuples = (('2013', {'YYYY': '2013'}),
@@ -68,6 +75,13 @@ class TestDateParserFunctions(unittest.TestCase):
 
                 self.assertEqual(result, testtuple[1])
                 mockBuildDate.assert_called_once_with(**testtuple[1])
+
+    def test_parse_date_empty(self):
+        testtuples = (None, '')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                parse_date(testtuple, None)
 
     def test_parse_date_mockbuilder(self):
         mockBuilder = mock.Mock()

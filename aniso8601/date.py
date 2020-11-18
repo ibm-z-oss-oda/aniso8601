@@ -23,13 +23,18 @@ def get_date_resolution(isodatestr):
     #YYYYWwwD
     #YYYY-DDD
     #YYYYDDD
+    if isodatestr is None:
+        raise ISOFormatError('Datestring is None.')
+
     if isodatestr.startswith('+') or isodatestr.startswith('-'):
         raise NotImplementedError('ISO 8601 extended year representation '
                                   'not supported.')
 
-    if isodatestr[0].isdigit() is False or isodatestr[-1].isdigit() is False:
+    if (len(isodatestr) == 0 or
+            isodatestr[0].isdigit() is False
+            or isodatestr[-1].isdigit() is False):
         raise ISOFormatError('"{0}" is not a valid ISO 8601 date.'
-                             .format(isodatestr))
+                .format(isodatestr))
 
     if isodatestr.find('W') != -1:
         #Handle ISO 8601 week date format
