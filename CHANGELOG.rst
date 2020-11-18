@@ -6,6 +6,11 @@ aniso8601 8.0.1-dev.0
 
 *Release date: YYYY-MM-DD*
 
+Changes
+-------
+
+* Empty and None date strings now raise :code:`ISOFormatError`, fixes `26 <https://bitbucket.org/nielsenb/aniso8601/issues/26/parse_date-parse_time-parse_datetime-fails>`_
+
 aniso8601 8.0.0
 ===============
 
