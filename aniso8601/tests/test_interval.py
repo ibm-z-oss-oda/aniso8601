@@ -269,6 +269,13 @@ class TestIntervalParserFunctions(unittest.TestCase):
         self.assertEqual(result, expectedargs)
         mockBuilder.build_interval.assert_called_once_with(**expectedargs)
 
+    def test_parse_interval_empty(self):
+        testtuples = (None, '')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                parse_interval(testtuple, builder=None)
+
     def test_parse_interval_repeating(self):
         #Parse interval can't parse repeating intervals
         with self.assertRaises(ISOFormatError):
@@ -457,6 +464,13 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
 
         self.assertEqual(result, args)
         mockBuilder.build_repeating_interval.assert_called_once_with(**args)
+
+    def test_parse_repeating_interval_empty(self):
+        testtuples = (None, '')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                parse_repeating_interval(testtuple, builder=None)
 
     def test_parse_repeating_interval_suffixgarbage(self):
         #Don't allow garbage after the duration
