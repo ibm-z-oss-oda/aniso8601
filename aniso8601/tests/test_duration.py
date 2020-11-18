@@ -111,7 +111,7 @@ class TestDurationParserFunctions(unittest.TestCase):
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
-                parse_duration(testtuple, None)
+                parse_duration(testtuple, builder=None)
 
     def test_parse_duration_nop(self):
         with self.assertRaises(ISOFormatError):
