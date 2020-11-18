@@ -24,7 +24,7 @@ def get_date_resolution(isodatestr):
     #YYYY-DDD
     #YYYYDDD
     if isodatestr is None:
-        raise ISOFormatError('Datestring is None.')
+        raise ISOFormatError('Date string is None.')
 
     if isodatestr.startswith('+') or isodatestr.startswith('-'):
         raise NotImplementedError('ISO 8601 extended year representation '
