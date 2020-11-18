@@ -283,16 +283,16 @@ class TestIntervalParserFunctions(unittest.TestCase):
     def test_parse_interval_suffixgarbage(self):
         #Don't allow garbage after the duration
         #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             parse_interval('2001/P1Dasdf', builder=None)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             parse_interval('P1Dasdf/2001', builder=None)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             parse_interval('2001/P0003-06-04T12:30:05.5asdfasdf', builder=None)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ISOFormatError):
             parse_interval('P0003-06-04T12:30:05.5asdfasdf/2001', builder=None)
 
 class TestRepeatingIntervalParserFunctions(unittest.TestCase):
