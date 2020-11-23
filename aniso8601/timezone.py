@@ -11,6 +11,9 @@ from aniso8601.exceptions import ISOFormatError
 
 def parse_timezone(tzstr, builder=PythonTimeBuilder):
     #tzstr can be Z, ±hh:mm, ±hhmm, ±hh
+    if tzstr is None:
+        raise ISOFormatError('Time zone string is None.')
+
     if 'Z' in tzstr:
         if len(tzstr) != 1:
             raise ISOFormatError('"{0}" is not a valid ISO 8601 time offset.'

@@ -13,6 +13,7 @@ Changes
 * Empty and None duration strings now raise :code:`ISOFormatError`
 * Empty and None interval strings now raise :code:`ISOFormatError`
 * Empty and None time strings now raise :code:`ISOFormatError`
+* None time zone strings now raise :code:`ISOFormatError`
 
 aniso8601 8.0.0
 ===============
