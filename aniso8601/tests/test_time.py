@@ -310,6 +310,13 @@ class TestTimeParserFunctions(unittest.TestCase):
         self.assertEqual(result, expectedargs)
         mockBuildDateTime.assert_called_once_with(*expectedargs)
 
+    def test_parse_datetime_empty(self):
+        testtuples = (None, '')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                parse_datetime(testtuple, builder=None)
+
     def test_parse_datetime_mockbuilder(self):
         mockBuilder = mock.Mock()
 

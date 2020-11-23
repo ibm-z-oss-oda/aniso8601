@@ -14,6 +14,8 @@ Changes
 * Empty and None interval strings now raise :code:`ISOFormatError`
 * Empty and None time strings now raise :code:`ISOFormatError`
 * None time zone strings now raise :code:`ISOFormatError`
+* Empty and None datetime strings now raise :code:`ISOFormatError`
+* Missing delimiter in datetime strings now raises :code:`ISOFormatError`
 
 aniso8601 8.0.0
 ===============
