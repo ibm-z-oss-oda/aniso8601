@@ -57,8 +57,22 @@ class TestDateResolutionFunctions(unittest.TestCase):
             with self.assertRaises(NotImplementedError):
                 get_date_resolution(testtuple)
 
+    def test_get_date_resolution_badweek(self):
+        testtuples = ('2004-W1', '2004W1')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                get_date_resolution(testtuple)
+
+    def test_get_date_resolution_badweekday(self):
+        testtuples = ('2004-W53-67', '2004W5367')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                get_date_resolution(testtuple)
+
     def test_get_date_resolution_badstr(self):
-        testtuples = ('W53', '2004-W')
+        testtuples = ('W53', '2004-W', '2014-01-230', '2014-012-23', '201-01-23', '201401230', '201401')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
