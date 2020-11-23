@@ -50,6 +50,20 @@ class TestDateResolutionFunctions(unittest.TestCase):
             with self.assertRaises(ISOFormatError):
                 get_date_resolution(testtuple)
 
+    def test_get_date_resolution_extended_year(self):
+        testtuples = ('+2000', '+30000')
+
+        for testtuple in testtuples:
+            with self.assertRaises(NotImplementedError):
+                get_date_resolution(testtuple)
+
+    def test_get_date_resolution_badstr(self):
+        testtuples = ('W53', '2004-W')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                get_date_resolution(testtuple)
+
 class TestDateParserFunctions(unittest.TestCase):
     def test_parse_date(self):
         testtuples = (('2013', {'YYYY': '2013'}),
