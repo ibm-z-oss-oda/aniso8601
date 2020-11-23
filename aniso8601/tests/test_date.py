@@ -81,7 +81,7 @@ class TestDateParserFunctions(unittest.TestCase):
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
-                parse_date(testtuple, None)
+                parse_date(testtuple, builder=None)
 
     def test_parse_date_mockbuilder(self):
         mockBuilder = mock.Mock()
