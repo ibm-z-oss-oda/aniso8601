@@ -69,6 +69,13 @@ class TestTimezoneParserFunctions(unittest.TestCase):
             with self.assertRaises(ISOFormatError):
                 parse_timezone(testtuple, builder=None)
 
+    def test_parse_timezone_badstr(self):
+        testtuples = ('+1', '-00', '-0000', '-00:00', '01', '0123')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                parse_timezone(testtuple, builder=None)
+
     def test_parse_timezone_mockbuilder(self):
         mockBuilder = mock.Mock()
 
