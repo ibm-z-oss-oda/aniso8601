@@ -42,7 +42,6 @@ def get_time_resolution(isotimestr):
     #hh:mm±hh
     #hhmm±hh
     #hh±hh
-
     if isotimestr is None:
         raise ISOFormatError('Time string is None.')
 
@@ -103,7 +102,6 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
     #hh:mm±hh
     #hhmm±hh
     #hh±hh
-
     timeresolution = get_time_resolution(isotimestr)
 
     (timestr, tzstr) = _split_tz(isotimestr)
@@ -125,7 +123,6 @@ def parse_datetime(isodatetimestr, delimiter='T', builder=PythonTimeBuilder):
     #By default, the ISO 8601 specified T delimiter is used to split the
     #date and time (<date>T<time>). Fixed offset tzdata will be included
     #if UTC offset is given in the input string.
-
     isodatestr, isotimestr = isodatetimestr.split(delimiter, 1)
 
     datepart = parse_date(isodatestr, builder=TupleBuilder)
