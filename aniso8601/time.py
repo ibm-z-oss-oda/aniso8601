@@ -45,14 +45,7 @@ def get_time_resolution(isotimestr):
     if isotimestr is None:
         raise ISOFormatError('Time string is None.')
 
-    timestr = _split_tz(isotimestr)[0]
-
-    if timestr.count(':') == 2:
-        #hh:mm:ss
-        return TimeResolution.Seconds
-    elif timestr.count(':') == 1:
-        #hh:mm
-        return TimeResolution.Minutes
+    timestr = _split_tz(isotimestr)[0].replace(':', '')
 
     #Format must be hhmmss, hhmm, or hh
     timestrlen = find_separator(timestr)

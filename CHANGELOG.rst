@@ -17,6 +17,7 @@ Changes
 * Empty and None datetime strings now raise :code:`ISOFormatError`
 * Missing delimiter in datetime strings now raises :code:`ISOFormatError`
 * Missing delimiter in regular and repeating interval strings now raises :code:`ISOFormatError`
+* :code:`get_time_resolution` now correctly throws :code:`ISOFormatError` when a time component is too large in a time using ":" as a separator
 
 aniso8601 8.0.0
 ===============

@@ -16,7 +16,7 @@ from aniso8601.time import (get_time_resolution, parse_datetime, parse_time,
                             _parse_second_time, _split_tz)
 from aniso8601.tests.compat import mock
 
-class TestTimeParserFunctions(unittest.TestCase):
+class TestTimeResolutionFunctions(unittest.TestCase):
     def test_get_time_resolution(self):
         self.assertEqual(get_time_resolution('01:23:45'),
                          TimeResolution.Seconds)
@@ -67,6 +67,21 @@ class TestTimeParserFunctions(unittest.TestCase):
         self.assertEqual(get_time_resolution('06:14:00.000123Z'),
                          TimeResolution.Seconds)
 
+    def test_get_time_resolution_empty(self):
+        testtuples = (None, '')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                get_time_resolution(testtuple)
+
+    def test_get_time_resolution_badstr(self):
+        testtuples = ('0614200.0001', '06:142:00.000123', '5:06:14:00.000123Z')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                get_time_resolution(testtuple)
+
+class TestTimeParserFunctions(unittest.TestCase):
     def test_parse_time(self):
         testtuples = (('01:23:45', {'hh': '01', 'mm': '23',
                                     'ss': '45', 'tz': None}),
@@ -194,6 +209,13 @@ class TestTimeParserFunctions(unittest.TestCase):
 
     def test_parse_time_empty(self):
         testtuples = (None, '')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                parse_time(testtuple, builder=None)
+
+    def test_parse_time_badstr(self):
+        testtuples = ('A6:14:00.000123Z', '06:14:0B')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
