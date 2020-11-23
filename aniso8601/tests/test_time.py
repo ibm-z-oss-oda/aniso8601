@@ -310,6 +310,15 @@ class TestTimeParserFunctions(unittest.TestCase):
         self.assertEqual(result, expectedargs)
         mockBuildDateTime.assert_called_once_with(*expectedargs)
 
+    def test_parse_datetime_baddelimiter(self):
+        testtuples = ('1981-04-05,23:21:28,512400Z',
+                      '2004-W53-6 23:21:28.512400-12:3',
+                      '1981040523:21:28')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                parse_datetime(testtuple, builder=None)
+
     def test_parse_datetime_empty(self):
         testtuples = (None, '')
 
