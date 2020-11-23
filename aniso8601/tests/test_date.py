@@ -72,7 +72,8 @@ class TestDateResolutionFunctions(unittest.TestCase):
                 get_date_resolution(testtuple)
 
     def test_get_date_resolution_badstr(self):
-        testtuples = ('W53', '2004-W', '2014-01-230', '2014-012-23', '201-01-23', '201401230', '201401')
+        testtuples = ('W53', '2004-W', '2014-01-230', '2014-012-23',
+                      '201-01-23', '201401230', '201401')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
