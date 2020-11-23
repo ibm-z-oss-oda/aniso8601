@@ -9,6 +9,7 @@
 import unittest
 import aniso8601
 
+from aniso8601.exceptions import ISOFormatError
 from aniso8601.resolution import TimeResolution
 from aniso8601.time import (get_time_resolution, parse_datetime, parse_time,
                             _parse_hour, _parse_minute_time,
@@ -190,6 +191,13 @@ class TestTimeParserFunctions(unittest.TestCase):
 
                 self.assertEqual(result, testtuple[1])
                 mockBuildTime.assert_called_once_with(**testtuple[1])
+
+    def test_parse_time_empty(self):
+        testtuples = (None, '')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                parse_time(testtuple, builder=None)
 
     def test_parse_time_mockbuilder(self):
         mockBuilder = mock.Mock()

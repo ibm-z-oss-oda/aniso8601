@@ -43,6 +43,9 @@ def get_time_resolution(isotimestr):
     #hhmm±hh
     #hh±hh
 
+    if isotimestr is None:
+        raise ISOFormatError('Time string is None.')
+
     timestr = _split_tz(isotimestr)[0]
 
     if timestr.count(':') == 2:
@@ -101,6 +104,8 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
     #hhmm±hh
     #hh±hh
 
+    timeresolution = get_time_resolution(isotimestr)
+
     (timestr, tzstr) = _split_tz(isotimestr)
 
     if timestr[0].isdigit() is False or timestr[-1].isdigit() is False:
@@ -112,7 +117,7 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
     else:
         tz = parse_timezone(tzstr, builder=TupleBuilder)
 
-    return _RESOLUTION_MAP[get_time_resolution(timestr)](timestr, tz, builder)
+    return _RESOLUTION_MAP[timeresolution](timestr, tz, builder)
 
 def parse_datetime(isodatetimestr, delimiter='T', builder=PythonTimeBuilder):
     #Given a string in ISO 8601 date time format, return a datetime.datetime
