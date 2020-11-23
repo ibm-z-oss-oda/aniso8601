@@ -276,6 +276,14 @@ class TestIntervalParserFunctions(unittest.TestCase):
             with self.assertRaises(ISOFormatError):
                 parse_interval(testtuple, builder=None)
 
+    def test_parse_interval_baddelimiter(self):
+        testtuples = ('1980-03-05T01:01:00,1981-04-05T01:01:00',
+                      'P1M 1981-04-05T01:01:00')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                parse_interval(testtuple, builder=None)
+
     def test_parse_interval_repeating(self):
         #Parse interval can't parse repeating intervals
         with self.assertRaises(ISOFormatError):
@@ -467,6 +475,13 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
 
     def test_parse_repeating_interval_empty(self):
         testtuples = (None, '')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                parse_repeating_interval(testtuple, builder=None)
+
+    def test_parse_repeating_interval_baddelimiter(self):
+        testtuples = ('R,PT1H2M,1980-03-05T01:01:00', 'R3 1981-04-05 P1D')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
