@@ -64,13 +64,13 @@ Leap seconds are currently not supported and attempting to parse one raises a :c
   >>> aniso8601.parse_datetime('2018-03-06T23:59:60')
   Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
-    File "aniso8601/time.py", line 131, in parse_datetime
+    File "aniso8601/time.py", line 135, in parse_datetime
       return builder.build_datetime(datepart, timepart)
-    File "aniso8601/builder.py", line 300, in build_datetime
+    File "aniso8601/builders/python.py", line 176, in build_datetime
       cls._build_object(time))
-    File "aniso8601/builder.py", line 71, in _build_object
-      ss=parsetuple[2], tz=parsetuple[3])
-    File "aniso8601/builder.py", line 253, in build_time
+    File "aniso8601/builders/__init__.py", line 63, in _build_object
+      return cls.build_time(hh=parsetuple[0], mm=parsetuple[1],
+    File "aniso8601/builders/python.py", line 134, in build_time
       raise LeapSecondError('Leap seconds are not supported.')
   aniso8601.exceptions.LeapSecondError: Leap seconds are not supported.
 
@@ -145,11 +145,11 @@ Leap seconds are currently not supported and attempting to parse one raises a :c
   >>> aniso8601.parse_time('23:59:60')
   Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
-    File "aniso8601/time.py", line 116, in parse_time
-      return _RESOLUTION_MAP[get_time_resolution(timestr)](timestr, tz, builder)
-    File "aniso8601/time.py", line 165, in _parse_second_time
-      return builder.build_time(hh=hourstr, mm=minutestr, ss=secondstr, tz=tz)
-    File "aniso8601/builder.py", line 253, in build_time
+    File "aniso8601/time.py", line 113, in parse_time
+      return _RESOLUTION_MAP[timeresolution](timestr, tz, builder)
+    File "aniso8601/time.py", line 169, in _parse_second_time
+      return builder.build_time(hh=normalize(hourstr), mm=normalize(minutestr),
+    File "aniso8601/builders/python.py", line 134, in build_time
       raise LeapSecondError('Leap seconds are not supported.')
   aniso8601.exceptions.LeapSecondError: Leap seconds are not supported.
 
@@ -246,7 +246,7 @@ Note that you should never try to convert a generator produced by an unbounded i
   >>> list(aniso8601.parse_repeating_interval('R/PT1H2M/1980-03-05T01:01:00'))
   Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
-    File "aniso8601/builders/python.py", line 463, in _date_generator_unbounded
+    File "aniso8601/builders/python.py", line 419, in _date_generator_unbounded
       currentdate += timedelta
   OverflowError: date value out of range
 
