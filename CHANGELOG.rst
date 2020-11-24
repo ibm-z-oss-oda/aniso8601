@@ -9,20 +9,20 @@ aniso8601 8.1.0-dev.0
 Changes
 -------
 
-* Empty date string arguments to :code:`get_date_resolution` and :code:`parse_date` now raise :code:`ISOFormatError`, fixes `26 <https://bitbucket.org/nielsenb/aniso8601/issues/26/parse_date-parse_time-parse_datetime-fails>`_
-* None and non-string date string arguments to :code:`get_date_resolution` and :code:`parse_date` now raise :code:`ValueError`
-* Empty and string arguments to :code:`parse_duration` now raise :code:`ISOFormatError`
-* None and non-string duration string arguments to :code:`parse_duration` now raise :code:`ISOFormatError`
+* Empty string arguments to :code:`get_date_resolution` and :code:`parse_date` now raise :code:`ISOFormatError`, fixes `26 <https://bitbucket.org/nielsenb/aniso8601/issues/26/parse_date-parse_time-parse_datetime-fails>`_
+* None and non-string arguments to :code:`get_date_resolution` and :code:`parse_date` now raise :code:`ValueError`
+* Empty string arguments to :code:`parse_duration` now raise :code:`ISOFormatError`
+* None and non-string arguments to :code:`parse_duration` now raise :code:`ISOFormatError`
 * Empty string arguments to :code:`parse_interval` and :code:`parse_repeating_internval` now raise :code:`ISOFormatError`
 * None and non-string arguments to :code:`parse_interval` and :code:`parse_repeating_internval` now raise :code:`ValueError`
-* Empty time string arguments to :code:`get_time_resolution` and :code:`parse_time` now raise :code:`ISOFormatError`
-* None and non-string time string arguments to :code:`parse_time` now raise :code:`ValueError`
-* None and non-string time zone arguments to :code:`parse_timezone` now raise :code:`ValueError`
-* Empty datetime string arguments to :code:`parse_datetime` now raise :code:`ISOFormatError`
-* None and non-string datetime string arguments to :code:`parse_datetime` now raise :code:`ValueError`
-* Missing delimiter in datetime strings now raises :code:`ISOFormatError`
-* Missing delimiter in regular and repeating interval strings now raises :code:`ISOFormatError`
-* :code:`get_time_resolution` now correctly throws :code:`ISOFormatError` when a time component is too large in a time using ":" as a separator
+* Empty string arguments to :code:`get_time_resolution` and :code:`parse_time` now raise :code:`ISOFormatError`
+* None and non-string arguments to :code:`parse_time` now raise :code:`ValueError`
+* None and non-string arguments to :code:`parse_timezone` now raise :code:`ValueError`
+* Empty string arguments to :code:`parse_datetime` now raise :code:`ISOFormatError`
+* None and non-string arguments to :code:`parse_datetime` now raise :code:`ValueError`
+* Missing delimiter in datetime strings when calling :code:`parse_datetime` now raises :code:`ISOFormatError`
+* Missing delimiter in regular and repeating interval strings when calling :code:`parse_interval` and :code:`parse_repeating_interval` now raises :code:`ISOFormatError`
+* :code:`get_time_resolution` now correctly throws :code:`ISOFormatError` when a time component has too many characters in a time using ":" as a separator
 
 aniso8601 8.0.0
 ===============
