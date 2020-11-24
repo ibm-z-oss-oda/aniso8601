@@ -13,7 +13,7 @@ Changes
 * None and non-string arguments to :code:`get_date_resolution` and :code:`parse_date` now raise :code:`ValueError`
 * Empty string arguments to :code:`parse_duration` now raise :code:`ISOFormatError`
 * None and non-string arguments to :code:`parse_duration` now raise :code:`ValueError`
-* Empty string arguments to :code:`parse_interval` and :code:`parse_repeating_internval` now raise :code:`ISOFormatError`
+* Empty string arguments to :code:`parse_interval` and :code:`parse_repeating_interval` now raise :code:`ISOFormatError`
 * None and non-string arguments to :code:`parse_interval` and :code:`parse_repeating_internval` now raise :code:`ValueError`
 * Empty string arguments to :code:`get_time_resolution` and :code:`parse_time` now raise :code:`ISOFormatError`
 * None and non-string arguments to :code:`parse_time` now raise :code:`ValueError`
