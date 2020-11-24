@@ -207,14 +207,14 @@ class TestTimeParserFunctions(unittest.TestCase):
                 self.assertEqual(result, testtuple[1])
                 mockBuildTime.assert_called_once_with(**testtuple[1])
 
-    def test_get_time_resolution_badtype(self):
+    def test_parse_time_badtype(self):
         testtuples = (None, 1, False, 1.234)
 
         for testtuple in testtuples:
             with self.assertRaises(ValueError):
                 parse_time(testtuple, builder=None)
 
-    def test_get_time_resolution_badstr(self):
+    def test_parse_time_badstr(self):
         testtuples = ('A6:14:00.000123Z', '06:14:0B', 'bad', '')
 
         for testtuple in testtuples:
