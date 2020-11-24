@@ -269,16 +269,23 @@ class TestIntervalParserFunctions(unittest.TestCase):
         self.assertEqual(result, expectedargs)
         mockBuilder.build_interval.assert_called_once_with(**expectedargs)
 
-    def test_parse_interval_empty(self):
-        testtuples = (None, '')
+    def test_parse_interval_badtype(self):
+        testtuples = (None, 1, False, 1.234)
 
         for testtuple in testtuples:
-            with self.assertRaises(ISOFormatError):
+            with self.assertRaises(ValueError):
                 parse_interval(testtuple, builder=None)
 
     def test_parse_interval_baddelimiter(self):
         testtuples = ('1980-03-05T01:01:00,1981-04-05T01:01:00',
                       'P1M 1981-04-05T01:01:00')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                parse_interval(testtuple, builder=None)
+
+    def test_parse_interval_badstr(self):
+        testtuples = ('bad', '')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
@@ -473,11 +480,11 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
         self.assertEqual(result, args)
         mockBuilder.build_repeating_interval.assert_called_once_with(**args)
 
-    def test_parse_repeating_interval_empty(self):
-        testtuples = (None, '')
+    def test_parse_repeating_interval_badtype(self):
+        testtuples = (None, 1, False, 1.234)
 
         for testtuple in testtuples:
-            with self.assertRaises(ISOFormatError):
+            with self.assertRaises(ValueError):
                 parse_repeating_interval(testtuple, builder=None)
 
     def test_parse_repeating_interval_baddelimiter(self):
@@ -498,6 +505,13 @@ class TestRepeatingIntervalParserFunctions(unittest.TestCase):
                                      '1981-04-05/'
                                      'P0003-06-04T12:30:05.5asdfasdf',
                                      builder=None)
+
+    def test_parse_repeating_interval_badstr(self):
+        testtuples = ('bad', '')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ISOFormatError):
+                parse_repeating_interval(testtuple, builder=None)
 
     def test_parse_interval_internal(self):
         #Test the internal _parse_interval function

@@ -32,8 +32,8 @@ def parse_interval(isointervalstr, intervaldelimiter='/',
     #Is expressly not supported as there is no way to provide the additional
     #required context.
 
-    if isointervalstr is None:
-        raise ISOFormatError('Interval string is None.')
+    if not isinstance(isointervalstr, str):
+        raise ValueError('Interval must be string.')
 
     if len(isointervalstr) == 0:
         raise ISOFormatError('Interval string is empty.')
@@ -58,8 +58,8 @@ def parse_repeating_interval(isointervalstr, intervaldelimiter='/',
     #Rnn/<interval>
     #R/<interval>
 
-    if isointervalstr is None:
-        raise ISOFormatError('Interval string is None.')
+    if not isinstance(isointervalstr, str):
+        raise ValueError('Interval must be string.')
 
     if len(isointervalstr) == 0:
         raise ISOFormatError('Repeating interval string is empty.')
