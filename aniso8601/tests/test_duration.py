@@ -106,11 +106,11 @@ class TestDurationParserFunctions(unittest.TestCase):
         self.assertEqual(result, expectedargs)
         mockBuilder.build_duration.assert_called_once_with(**expectedargs)
 
-    def test_parse_duration_empty(self):
-        testtuples = (None, '')
+    def test_parse_duration_badtype(self):
+        testtuples = (None, 1, False, 1.234)
 
         for testtuple in testtuples:
-            with self.assertRaises(ISOFormatError):
+            with self.assertRaises(ValueError):
                 parse_duration(testtuple, builder=None)
 
     def test_parse_duration_nop(self):
@@ -179,6 +179,13 @@ class TestDurationParserFunctions(unittest.TestCase):
 
         with self.assertRaises(ISOFormatError):
             parse_duration('PT1S1H', builder=None)
+
+    def test_parse_duration_badstr(self):
+        testtuples = ('bad', '')
+
+        for testtuple in testtuples:
+            with self.assertRaises(ValueError):
+                parse_duration(testtuple, builder=None)
 
     def test_parse_duration_prescribed(self):
         testtuples = (('P1Y2M3DT4H54M6S', {'PnY': '1', 'PnM': '2',
