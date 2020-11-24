@@ -9,7 +9,8 @@ aniso8601 8.1.0-dev.0
 Changes
 -------
 
-* Empty and None date strings now raise :code:`ISOFormatError`, fixes `26 <https://bitbucket.org/nielsenb/aniso8601/issues/26/parse_date-parse_time-parse_datetime-fails>`_
+* Empty date string arguments to :code:`get_date_resolution` and :code:`parse_date` now raise :code:`ISOFormatError`, fixes `26 <https://bitbucket.org/nielsenb/aniso8601/issues/26/parse_date-parse_time-parse_datetime-fails>`_
+* None and non-string date string arguments to :code:`get_date_resolution` and :code:`parse_date` now raise :code:`ValueError`
 * Empty and None duration strings now raise :code:`ISOFormatError`
 * Empty and None interval strings now raise :code:`ISOFormatError`
 * Empty time string arguments to :code:`get_time_resolution` and :code:`parse_time` now raise :code:`ISOFormatError`

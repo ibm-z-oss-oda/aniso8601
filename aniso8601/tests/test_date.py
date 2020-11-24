@@ -43,11 +43,11 @@ class TestDateResolutionFunctions(unittest.TestCase):
         self.assertEqual(get_date_resolution('1981095'),
                          DateResolution.Ordinal)
 
-    def test_get_date_resolution_empty(self):
-        testtuples = (None, '')
+    def test_get_date_resolution_badtype(self):
+        testtuples = (None, 1, False, 1.234)
 
         for testtuple in testtuples:
-            with self.assertRaises(ISOFormatError):
+            with self.assertRaises(ValueError):
                 get_date_resolution(testtuple)
 
     def test_get_date_resolution_extended_year(self):
@@ -73,7 +73,7 @@ class TestDateResolutionFunctions(unittest.TestCase):
 
     def test_get_date_resolution_badstr(self):
         testtuples = ('W53', '2004-W', '2014-01-230', '2014-012-23',
-                      '201-01-23', '201401230', '201401')
+                      '201-01-23', '201401230', '201401', 'bad', '')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
@@ -105,8 +105,16 @@ class TestDateParserFunctions(unittest.TestCase):
                 self.assertEqual(result, testtuple[1])
                 mockBuildDate.assert_called_once_with(**testtuple[1])
 
-    def test_parse_date_empty(self):
-        testtuples = (None, '')
+    def test_parse_date_badtype(self):
+        testtuples = (None, 1, False, 1.234)
+
+        for testtuple in testtuples:
+            with self.assertRaises(ValueError):
+                parse_date(testtuple, builder=None)
+
+    def test_parse_date_badstr(self):
+        testtuples = ('W53', '2004-W', '2014-01-230', '2014-012-23',
+                      '201-01-23', '201401230', '201401', 'bad', '')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
