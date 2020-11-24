@@ -118,9 +118,8 @@ def parse_datetime(isodatetimestr, delimiter='T', builder=PythonTimeBuilder):
     #By default, the ISO 8601 specified T delimiter is used to split the
     #date and time (<date>T<time>). Fixed offset tzdata will be included
     #if UTC offset is given in the input string.
-    if isodatetimestr is None:
-        raise ISOFormatError('Combined date time string is None.')
-
+    if not isinstance(isodatetimestr, str):
+        raise ValueError('Date time must be string.')
 
     if delimiter not in isodatetimestr:
         raise ISOFormatError('Delimiter "{0}" is not in combined date time '

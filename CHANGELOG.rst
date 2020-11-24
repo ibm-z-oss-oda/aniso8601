@@ -15,7 +15,8 @@ Changes
 * Empty time string arguments to :code:`get_time_resolution` and :code:`parse_time` now raise :code:`ISOFormatError`
 * None and non-string time string arguments to :code:`parse_time` now raise :code:`ValueError`
 * None time zone strings now raise :code:`ISOFormatError`
-* Empty and None datetime strings now raise :code:`ISOFormatError`
+* Empty datetime string arguments to :code:`parse_datetime` now raise :code:`ISOFormatError`
+* None and non-string datetime string arguments to :code:`parse_datetime` now raise :code:`ValueError`
 * Missing delimiter in datetime strings now raises :code:`ISOFormatError`
 * Missing delimiter in regular and repeating interval strings now raises :code:`ISOFormatError`
 * :code:`get_time_resolution` now correctly throws :code:`ISOFormatError` when a time component is too large in a time using ":" as a separator

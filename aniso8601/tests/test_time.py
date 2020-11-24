@@ -341,12 +341,24 @@ class TestTimeParserFunctions(unittest.TestCase):
             with self.assertRaises(ISOFormatError):
                 parse_datetime(testtuple, builder=None)
 
-    def test_parse_datetime_empty(self):
-        testtuples = (None, '')
+    def test_parse_datetime_badtype(self):
+        testtuples = (None, 1, False, 1.234)
+
+        for testtuple in testtuples:
+            with self.assertRaises(ValueError):
+                parse_datetime(testtuple, builder=None)
+
+    def test_parse_datetime_badstr(self):
+        testtuples = ('1981-04-05TA6:14:00.000123Z',
+                      '2004-W53-6T06:14:0B',
+                      '2014-01-230T23:21:28+00',
+                      '201401230T01:03:11.858714',
+                      'bad',
+                      '')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
-                parse_datetime(testtuple, builder=None)
+                parse_time(testtuple, builder=None)
 
     def test_parse_datetime_mockbuilder(self):
         mockBuilder = mock.Mock()
