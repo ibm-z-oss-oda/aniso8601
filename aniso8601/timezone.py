@@ -11,8 +11,8 @@ from aniso8601.exceptions import ISOFormatError
 
 def parse_timezone(tzstr, builder=PythonTimeBuilder):
     #tzstr can be Z, ±hh:mm, ±hhmm, ±hh
-    if tzstr is None:
-        raise ISOFormatError('Time zone string is None.')
+    if not isinstance(tzstr, str):
+        raise ValueError('Time zone must be string.')
 
     if 'Z' in tzstr:
         if len(tzstr) != 1:

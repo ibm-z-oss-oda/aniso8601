@@ -17,7 +17,7 @@ Changes
 * None and non-string arguments to :code:`parse_interval` and :code:`parse_repeating_internval` now raise :code:`ValueError`
 * Empty time string arguments to :code:`get_time_resolution` and :code:`parse_time` now raise :code:`ISOFormatError`
 * None and non-string time string arguments to :code:`parse_time` now raise :code:`ValueError`
-* None time zone strings now raise :code:`ISOFormatError`
+* None and non-string time zone arguments to :code:`parse_timezone` now raise :code:`ValueError`
 * Empty datetime string arguments to :code:`parse_datetime` now raise :code:`ISOFormatError`
 * None and non-string datetime string arguments to :code:`parse_datetime` now raise :code:`ValueError`
 * Missing delimiter in datetime strings now raises :code:`ISOFormatError`

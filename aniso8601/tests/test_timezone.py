@@ -62,15 +62,15 @@ class TestTimezoneParserFunctions(unittest.TestCase):
                 self.assertEqual(result, testtuple[1])
                 mockBuildTimezone.assert_called_once_with(**testtuple[1])
 
-    def test_parse_timezone_empty(self):
-        testtuples = (None, '')
+    def test_parse_timezone_badtype(self):
+        testtuples = (None, 1, False, 1.234)
 
         for testtuple in testtuples:
-            with self.assertRaises(ISOFormatError):
+            with self.assertRaises(ValueError):
                 parse_timezone(testtuple, builder=None)
 
     def test_parse_timezone_badstr(self):
-        testtuples = ('+1', '-00', '-0000', '-00:00', '01', '0123')
+        testtuples = ('+1', '-00', '-0000', '-00:00', '01', '0123', 'bad', '')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
