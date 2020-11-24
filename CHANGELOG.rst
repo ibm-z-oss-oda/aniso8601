@@ -12,7 +12,8 @@ Changes
 * Empty and None date strings now raise :code:`ISOFormatError`, fixes `26 <https://bitbucket.org/nielsenb/aniso8601/issues/26/parse_date-parse_time-parse_datetime-fails>`_
 * Empty and None duration strings now raise :code:`ISOFormatError`
 * Empty and None interval strings now raise :code:`ISOFormatError`
-* Empty and None time strings now raise :code:`ISOFormatError`
+* Empty time string arguments to :code:`get_time_resolution` and :code:`parse_time` now raise :code:`ISOFormatError`
+* None and non-string time string arguments to :code:`parse_time` now raise :code:`ValueError`
 * None time zone strings now raise :code:`ISOFormatError`
 * Empty and None datetime strings now raise :code:`ISOFormatError`
 * Missing delimiter in datetime strings now raises :code:`ISOFormatError`

@@ -67,15 +67,15 @@ class TestTimeResolutionFunctions(unittest.TestCase):
         self.assertEqual(get_time_resolution('06:14:00.000123Z'),
                          TimeResolution.Seconds)
 
-    def test_get_time_resolution_empty(self):
-        testtuples = (None, '')
+    def test_get_time_resolution_badtype(self):
+        testtuples = (None, 1, False, 1.234)
 
         for testtuple in testtuples:
-            with self.assertRaises(ISOFormatError):
+            with self.assertRaises(ValueError):
                 get_time_resolution(testtuple)
 
     def test_get_time_resolution_badstr(self):
-        testtuples = ('0614200.0001', '06:142:00.000123', '5:06:14:00.000123Z')
+        testtuples = ('A6:14:00.000123Z', '06:14:0B', 'bad', '')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
@@ -207,15 +207,23 @@ class TestTimeParserFunctions(unittest.TestCase):
                 self.assertEqual(result, testtuple[1])
                 mockBuildTime.assert_called_once_with(**testtuple[1])
 
-    def test_parse_time_empty(self):
-        testtuples = (None, '')
+    def test_parse_time_None(self):
+        with self.assertRaises(ValueError):
+            parse_time(None, builder=None)
+
+    def test_parse_time_badtype(self):
+        testtuples = (1, False, 1.234)
 
         for testtuple in testtuples:
-            with self.assertRaises(ISOFormatError):
+            with self.assertRaises(ValueError):
                 parse_time(testtuple, builder=None)
 
+    def test_parse_time_empty(self):
+        with self.assertRaises(ISOFormatError):
+            parse_time('', builder=None)
+
     def test_parse_time_badstr(self):
-        testtuples = ('A6:14:00.000123Z', '06:14:0B')
+        testtuples = ('A6:14:00.000123Z', '06:14:0B', 'bad')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):

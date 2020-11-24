@@ -42,10 +42,16 @@ def get_time_resolution(isotimestr):
     #hh:mm±hh
     #hhmm±hh
     #hh±hh
-    if isotimestr is None:
-        raise ISOFormatError('Time string is None.')
+    if not isinstance(isotimestr, str):
+        raise ValueError('Time must be string.')
 
     timestr = _split_tz(isotimestr)[0].replace(':', '')
+
+    if (len(timestr) == 0 or
+            timestr[0].isdigit() is False or
+            timestr[-1].isdigit() is False):
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
+                             .format(timestr))
 
     #Format must be hhmmss, hhmm, or hh
     timestrlen = find_separator(timestr)
@@ -98,10 +104,6 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
     timeresolution = get_time_resolution(isotimestr)
 
     (timestr, tzstr) = _split_tz(isotimestr)
-
-    if timestr[0].isdigit() is False or timestr[-1].isdigit() is False:
-        raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
-                             .format(timestr))
 
     if tzstr is None:
         tz = None
