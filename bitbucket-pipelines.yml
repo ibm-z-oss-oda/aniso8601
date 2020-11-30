@@ -7,6 +7,16 @@ pipelines:
               - pip install .[relative]
               - python setup.py test
         - step:
+            image: python:3.9
+            script:
+              - pip install .[relative]
+              - python setup.py test
+        - step:
+            image: python:3.8
+            script:
+              - pip install .[relative]
+              - python setup.py test
+        - step:
             image: python:3.7
             script:
               - pip install .[relative]
