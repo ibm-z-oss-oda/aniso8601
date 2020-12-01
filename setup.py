@@ -1,6 +1,7 @@
 import sys
 
 from aniso8601 import __version__
+from os import path
 from setuptools import setup, find_packages
 
 TESTS_REQUIRE = []
@@ -11,9 +12,9 @@ PY2 = sys.version_info[0] == 2
 if PY2:
     TESTS_REQUIRE.append('mock>=2.0.0')
 
-readme = open('README.rst', 'r')
-README_TEXT = readme.read()
-readme.close()
+THIS_DIRECTORY = path.abspath(path.dirname(__file__))
+with open(path.join(THIS_DIRECTORY, 'README.rst'), encoding='utf-8') as f:
+    README_TEXT = f.read()
 
 setup(
     name='aniso8601',
