@@ -375,7 +375,7 @@ It is recommended to develop using a `virtualenv <https://virtualenv.pypa.io/en/
 Tests
 -----
 
-Tests can be run using the `unittest testing framework <https://docs.python.org/3/library/unittest.html>`::
+Tests can be run using the `unittest testing framework <https://docs.python.org/3/library/unittest.html>`_::
 
    $ python -m unittest discover aniso8601
 
