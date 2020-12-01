@@ -1,5 +1,6 @@
 import sys
 
+from aniso8601 import __version__
 from setuptools import setup, find_packages
 
 TESTS_REQUIRE = []
@@ -16,7 +17,7 @@ readme.close()
 
 setup(
     name='aniso8601',
-    version='8.1.1-dev.0',
+    version=__version__,
     description='A library for parsing ISO 8601 strings.',
     long_description=README_TEXT,
     author='Brandon Nielsen',

@@ -11,3 +11,5 @@ from aniso8601.time import parse_datetime, parse_time, get_time_resolution
 from aniso8601.date import parse_date, get_date_resolution
 from aniso8601.duration import parse_duration
 from aniso8601.interval import parse_interval, parse_repeating_interval
+
+__version__ = "8.1.1-dev.0"

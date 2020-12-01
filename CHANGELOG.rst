@@ -10,6 +10,7 @@ Changes
 -------
 
 * Deprecate running tests with :code:`python setup.py tests` as the test suite support in Setuptools is `deprecated <https://github.com/pypa/setuptools/issues/1684>`_
+* Add version to :code:`__init__.py`
 
 aniso8601 8.1.0
 ===============
