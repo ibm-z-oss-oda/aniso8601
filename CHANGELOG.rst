@@ -13,6 +13,7 @@ Changes
 * Add version to :code:`__init__.py`
 * Cleaner reading of `README.rst` into the :code:`long_description` field of `setup.py`
 * Define :code:`long_description_content_type` as :code:`text/x-rst`
+* Simplify Sphinx configuration
 
 aniso8601 8.1.0
 ===============
