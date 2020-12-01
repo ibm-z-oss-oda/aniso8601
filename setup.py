@@ -21,6 +21,7 @@ setup(
     version=__version__,
     description='A library for parsing ISO 8601 strings.',
     long_description=README_TEXT,
+    long_description_content_type='text/x-rst',
     author='Brandon Nielsen',
     author_email='nielsenb@jetfuse.net',
     url='https://bitbucket.org/nielsenb/aniso8601',
