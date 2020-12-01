@@ -13,7 +13,7 @@ if PY2:
     TESTS_REQUIRE.append('mock>=2.0.0')
 
 THIS_DIRECTORY = path.abspath(path.dirname(__file__))
-with open(path.join(THIS_DIRECTORY, 'README.rst'), encoding='utf-8') as f:
+with open(path.join(THIS_DIRECTORY, 'README.rst')) as f:
     README_TEXT = f.read()
 
 setup(
