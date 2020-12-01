@@ -375,9 +375,9 @@ It is recommended to develop using a `virtualenv <https://virtualenv.pypa.io/en/
 Tests
 -----
 
-Tests can be run using `setuptools <https://setuptools.readthedocs.io/en/latest/setuptools.html>`::
+Tests can be run using the `unittest testing framework <https://docs.python.org/3/library/unittest.html>`::
 
-   $ python setup.py test
+   $ python -m unittest discover aniso8601
 
 Contributing
 ============

@@ -4,32 +4,33 @@ pipelines:
         - step:
             image: python:latest
             script:
-              - python setup.py test
+              - python -m unittest discover aniso8601
         - step:
             image: python:3.9
             script:
-              - python setup.py test
+              - python -m unittest discover aniso8601
         - step:
             image: python:3.8
             script:
-              - python setup.py test
+              - python -m unittest discover aniso8601
         - step:
             image: python:3.7
             script:
-              - python setup.py test
+              - python -m unittest discover aniso8601
         - step:
             image: python:3.6
             script:
-              - python setup.py test
+              - python -m unittest discover aniso8601
         - step:
             image: python:3.5
             script:
-              - python setup.py test
+              - python -m unittest discover aniso8601
         - step:
             image: python:3.4
             script:
-              - python setup.py test
+              - python -m unittest discover aniso8601
         - step:
             image: python:2.7
             script:
-              - python setup.py test
+              - pip install mock
+              - python -m unittest discover aniso8601

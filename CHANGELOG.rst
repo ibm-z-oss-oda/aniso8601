@@ -9,6 +9,8 @@ aniso8601 8.1.1-dev.0
 Changes
 -------
 
+* Deprecate running tests with :code:`python setup.py tests` as the test suite support in Setuptools is `deprecated <https://github.com/pypa/setuptools/issues/1684>`_
+
 aniso8601 8.1.0
 ===============
 
