@@ -6,6 +6,7 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
+from aniso8601.exceptions import DayOutOfBoundsError, ISOFormatError
 from aniso8601.builders.python import PythonTimeBuilder
 from aniso8601.compat import is_string
 from aniso8601.exceptions import ISOFormatError
@@ -202,6 +203,10 @@ def _parse_ordinal_date(datestr, builder):
     else:
         #YYYYDDD
         daystr = datestr[4:]
+
+    if int(daystr) == 0 or int(daystr) > 366:
+        raise DayOutOfBoundsError('"{0}" is not a valid ISO 8601 calendar day.'
+                                  .format(daystr))
 
     return builder.build_date(YYYY=yearstr, DDD=daystr)
 

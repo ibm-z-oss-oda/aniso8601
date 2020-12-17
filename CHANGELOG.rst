@@ -1,10 +1,15 @@
 Changelog
 =========
 
-aniso8601 8.1.2-dev.0
+aniso8601 8.2.0-dev.0
 =====================
 
 *Release date: YYYY-MM-DD*
+
+Changes
+-------
+
+* Add explicit bounds of [000, 366] to day of year component :code:`_parse_ordinal_date`, this adds the same limits to dates of the format YYYYDDD or YYYY-DDD when using :code:`parse_date`
 
 aniso8601 8.1.1
 ===============

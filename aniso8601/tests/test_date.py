@@ -9,7 +9,7 @@
 import unittest
 import aniso8601
 
-from aniso8601.exceptions import ISOFormatError
+from aniso8601.exceptions import DayOutOfBoundsError, ISOFormatError
 from aniso8601.date import (parse_date, _parse_year, _parse_calendar_day,
                             _parse_calendar_month, _parse_week_day,
                             _parse_week, _parse_ordinal_date,
@@ -229,3 +229,11 @@ class TestDateParserFunctions(unittest.TestCase):
 
             self.assertEqual(result, testtuple[1])
             mockBuilder.build_date.assert_called_once_with(**testtuple[1])
+
+    def test_parse_ordinal_date_bounds_checking(self):
+        #No day 000, no day 367
+        testtuples = ('0001000', '1981367')
+
+        for testtuple in testtuples:
+            with self.assertRaises(DayOutOfBoundsError):
+                _parse_ordinal_date(testtuple, builder=None)
