@@ -116,7 +116,7 @@ class TestTimeParserFunctions(unittest.TestCase):
                       ('0123', {'hh': '01', 'mm': '23', 'tz': None}),
                       ('2400', {'hh': '24', 'mm': '00', 'tz': None}),
                       ('01', {'hh': '01', 'tz': None}),
-                      ('24', {'tz': None}),
+                      ('24', {'hh': '24', 'tz': None}),
                       ('12,5', {'hh': '12.5', 'tz': None}),
                       ('12.5', {'hh': '12.5', 'tz': None}),
                       ('232128,512400+00:00', {'hh': '23', 'mm': '21',
@@ -378,7 +378,7 @@ class TestTimeParserFunctions(unittest.TestCase):
 
     def test_parse_hour(self):
         testtuples = (('01', None, {'hh': '01', 'tz': None}),
-                      ('24', None, {'tz': None}),
+                      ('24', None, {'hh': '24', 'tz': None}),
                       ('01.4567', None, {'hh': '01.4567', 'tz': None}),
                       ('12.5', None, {'hh': '12.5', 'tz': None}),
                       ('08', (True, None, '12', '34', '-12:34', 'timezone'),

@@ -1,15 +1,20 @@
 Changelog
 =========
 
-aniso8601 8.2.0-dev.0
+aniso8601 9.0.0-dev.0
 =====================
 
 *Release date: YYYY-MM-DD*
 
 Changes
 -------
-
 * Add explicit bounds of [000, 366] to day of year component :code:`_parse_ordinal_date`, this adds the same limits to dates of the format YYYYDDD or YYYY-DDD when using :code:`parse_date`
+* Add explicit :code:`range_check` to :code:`BaseTimeBuilder`, call it explicitly before every build, this breaks compatibility with builders which have not been updated
+
+Deprecation
+-----------
+* Update on Python 2 support, Python 2 support was slated to be removed in 7.0.0, it will remain until a test fails on Python 2 but not Python 3
+* Using Setuptools to run tests (:code:`python setup.py tests`) will be removed in the next major or minor version (either 9.1.0, 10.0.0)
 
 aniso8601 8.1.1
 ===============

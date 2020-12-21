@@ -15,6 +15,9 @@ class NegativeDurationError(ValueError):
 class YearOutOfBoundsError(ValueError):
     """Raised when year exceeds limits."""
 
+class MonthOutOfBoundsError(ValueError):
+    """Raised when month is outside of 1..12."""
+
 class WeekOutOfBoundsError(ValueError):
     """Raised when week exceeds a year."""
 

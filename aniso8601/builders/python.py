@@ -57,9 +57,6 @@ class PythonTimeBuilder(BaseTimeBuilder):
             weeknumber = cls.cast(Www, int,
                                   thrownmessage='Invalid week string.')
 
-            if weeknumber == 0 or weeknumber > 53:
-                raise WeekOutOfBoundsError('Week number must be between '
-                                           '1..53.')
         else:
             weeknumber = None
 
@@ -128,30 +125,9 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
         hours, minutes, seconds, microseconds = PythonTimeBuilder._distribute_microseconds(microseconds, (hours, minutes, seconds), (MICROSECONDS_PER_HOUR, MICROSECONDS_PER_MINUTE, MICROSECONDS_PER_SECOND))
 
-        #Range checks
-        if hours == 23 and minutes == 59 and seconds == 60:
-            #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
-            raise LeapSecondError('Leap seconds are not supported.')
-
-        if (hours == 24
-                and (minutes != 0 or seconds != 0)):
-            raise MidnightBoundsError('Hour 24 may only represent midnight.')
-
-        if hours > 24:
-            raise HoursOutOfBoundsError('Hour must be between 0..24 with '
-                                        '24 representing midnight.')
-
-        if minutes >= 60:
-            raise MinutesOutOfBoundsError('Minutes must be less than 60.')
-
-        if seconds >= 60:
-            raise SecondsOutOfBoundsError('Seconds must be less than 60.')
-
-        #Fix ranges that have passed range checks
+        #Move midnight into range
         if hours == 24:
             hours = 0
-            minutes = 0
-            seconds = 0
 
         #Datetimes don't handle fractional components, so we use a timedelta
         if tz is not None:

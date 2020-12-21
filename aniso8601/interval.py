@@ -87,6 +87,8 @@ def parse_repeating_interval(isointervalstr, intervaldelimiter='/',
     interval = _parse_interval(intervalpart, TupleBuilder,
                                intervaldelimiter, datetimedelimiter)
 
+    builder.range_check(Rnn=Rnn)
+
     return builder.build_repeating_interval(R=R, Rnn=Rnn, interval=interval)
 
 def _parse_interval(isointervalstr, builder, intervaldelimiter='/',
