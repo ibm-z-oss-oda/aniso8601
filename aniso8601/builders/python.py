@@ -30,6 +30,11 @@ MICROSECONDS_PER_MONTH = 30 * MICROSECONDS_PER_DAY
 MICROSECONDS_PER_YEAR = 365 * MICROSECONDS_PER_DAY
 
 class PythonTimeBuilder(BaseTimeBuilder):
+    #0000 (1 BC) is not representable as a Python date
+    DATE_YYYY_LIMITS = ((int,), 'Invalid year string.',
+                        1, 9999, YearOutOfBoundsError,
+                        'Year must be between 1..9999.')
+
     @classmethod
     @range_check_date
     def build_date(cls, YYYY=None, MM=None, DD=None, Www=None, D=None,
@@ -73,17 +78,8 @@ class PythonTimeBuilder(BaseTimeBuilder):
         if D is not None:
             dayofweek = cls.cast(D, int,
                                  thrownmessage='Invalid day string.')
-
-            if dayofweek == 0 or dayofweek > 7:
-                raise DayOutOfBoundsError('Weekday number must be between '
-                                          '1..7.')
         else:
             dayofweek = None
-
-        #0000 (1 BC) is not representable as a Python date so a ValueError is
-        #raised
-        if year == 0:
-            raise YearOutOfBoundsError('Year must be between 1..9999.')
 
         if dayofyear is not None:
             return PythonTimeBuilder._build_ordinal_date(year, dayofyear)
