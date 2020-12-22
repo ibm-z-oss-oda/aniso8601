@@ -24,65 +24,65 @@ class BaseTimeBuilder(object):
 
     #Limit tuple format cast function, cast error string,
     #lower limit, upper limit, limit error string
-    YYYY_LIMITS = ((int,), 'Invalid year string.',
-                   0000, 9999, YearOutOfBoundsError,
-                   'Year must be between 1..9999.')
-    MM_LIMITS = ((int,), 'Invalid month string.',
-                 1, 12, MonthOutOfBoundsError,
-                 'Month must be between 1..12.')
-    DD_LIMITS = ((int,), 'Invalid day string.',
-                 1, 31, DayOutOfBoundsError,
-                 'Day must be between 1..31.')
-    WWW_LIMITS = ((int,), 'Invalid week string.',
-                  1, 53, WeekOutOfBoundsError,
-                  'Week number must be between 1..53.')
-    D_LIMITS = ((int,), 'Invalid weekday string.',
-                1, 7, DayOutOfBoundsError,
-                'Weekday number must be between 1..7.')
-    DDD_LIMITS = ((int,), 'Invalid ordinal day string.',
-                  1, 366, DayOutOfBoundsError,
-                  'Ordinal day must be between 1..366.')
-    HH_LIMITS = ((float, int), 'Invalid hour string.',
-                 0, 24, HoursOutOfBoundsError,
-                 'Hour must be between 0..24 with '
-                 '24 representing midnight.')
-    MM_LIMITS = ((float, int), 'Invalid minute string.',
-                 0, 59, MinutesOutOfBoundsError,
-                 'Minute must be between 0..59.')
-    SS_LIMITS = ((float, int), 'Invalid second string.',
-                 0, 60, SecondsOutOfBoundsError,
-                 'Second must be between 0..60 with '
-                 '60 representing a leap second.')
+    DATE_YYYY_LIMITS = ((int,), 'Invalid year string.',
+                        0000, 9999, YearOutOfBoundsError,
+                        'Year must be between 1..9999.')
+    DATE_MM_LIMITS = ((int,), 'Invalid month string.',
+                      1, 12, MonthOutOfBoundsError,
+                      'Month must be between 1..12.')
+    DATE_DD_LIMITS = ((int,), 'Invalid day string.',
+                      1, 31, DayOutOfBoundsError,
+                      'Day must be between 1..31.')
+    DATE_WWW_LIMITS = ((int,), 'Invalid week string.',
+                       1, 53, WeekOutOfBoundsError,
+                       'Week number must be between 1..53.')
+    DATE_D_LIMITS = ((int,), 'Invalid weekday string.',
+                     1, 7, DayOutOfBoundsError,
+                     'Weekday number must be between 1..7.')
+    DATE_DDD_LIMITS = ((int,), 'Invalid ordinal day string.',
+                       1, 366, DayOutOfBoundsError,
+                       'Ordinal day must be between 1..366.')
+    TIME_HH_LIMITS = ((float, int), 'Invalid hour string.',
+                      0, 24, HoursOutOfBoundsError,
+                      'Hour must be between 0..24 with '
+                      '24 representing midnight.')
+    TIME_MM_LIMITS = ((float, int), 'Invalid minute string.',
+                      0, 59, MinutesOutOfBoundsError,
+                      'Minute must be between 0..59.')
+    TIME_SS_LIMITS = ((float, int), 'Invalid second string.',
+                      0, 60, SecondsOutOfBoundsError,
+                      'Second must be between 0..60 with '
+                      '60 representing a leap second.')
     TZ_HH_LIMITS = ((int,), 'Invalid timezone hour string.',
                     0, 23, HoursOutOfBoundsError,
                     'Hour must be between 0..23.')
     TZ_MM_LIMITS = ((int,), 'Invalid timezone minute string.',
                     0, 59, MinutesOutOfBoundsError,
                     'Minute must be between 0..59.')
-    PNY_LIMITS = ((float, int), 'Invalid year duration string.',
-                  None, None, None,
-                  None)
-    PNM_LIMITS = ((float, int), 'Invalid month duration string.',
-                  None, None, None,
-                  None)
-    PNW_LIMITS = ((float, int), 'Invalid week duration string.',
-                  None, None, None,
-                  None)
-    PND_LIMITS = ((float, int), 'Invalid day duration string.',
-                  None, None, None,
-                  None)
-    TNH_LIMITS = ((float, int), 'Invalid hour duration string.',
-                  None, None, None,
-                  None)
-    TNM_LIMITS = ((float, int), 'Invalid minute duration string.',
-                  None, None, None,
-                  None)
-    TNS_LIMITS = ((float, int), 'Invalid second duration string.',
-                  None, None, None,
-                  None)
-    RNN_LIMITS = ((int,), 'Invalid duration repetition string.',
-                  0, None, NegativeDurationError,
-                  'Duration repetition count must be positive.')
+    DURATION_PNY_LIMITS = ((float, int), 'Invalid year duration string.',
+                           None, None, None,
+                           None)
+    DURATION_PNM_LIMITS = ((float, int), 'Invalid month duration string.',
+                           None, None, None,
+                           None)
+    DURATION_PNW_LIMITS = ((float, int), 'Invalid week duration string.',
+                           None, None, None,
+                           None)
+    DURATION_PND_LIMITS = ((float, int), 'Invalid day duration string.',
+                           None, None, None,
+                           None)
+    DURATION_TNH_LIMITS = ((float, int), 'Invalid hour duration string.',
+                           None, None, None,
+                           None)
+    DURATION_TNM_LIMITS = ((float, int), 'Invalid minute duration string.',
+                           None, None, None,
+                           None)
+    DURATION_TNS_LIMITS = ((float, int), 'Invalid second duration string.',
+                           None, None, None,
+                           None)
+    INTERVAL_RNN_LIMITS = ((int,), 'Invalid duration repetition string.',
+                           0, None, NegativeDurationError,
+                           'Duration repetition count must be positive.')
 
     LEAP_SECONDS_SUPPORTED = False
 
@@ -138,22 +138,22 @@ class BaseTimeBuilder(object):
         fractionalcomponent = False #Only one fractional component allowed
 
         if YYYY is not None:
-            cls._range_check(YYYY, cls.YYYY_LIMITS)
+            cls._range_check(YYYY, cls.DATE_YYYY_LIMITS)
 
         if MM is not None:
-            cls._range_check(MM, cls.MM_LIMITS)
+            cls._range_check(MM, cls.DATE_MM_LIMITS)
 
         if DD is not None:
-            cls._range_check(DD, cls.DD_LIMITS)
+            cls._range_check(DD, cls.DATE_DD_LIMITS)
 
         if Www is not None:
-            cls._range_check(Www, cls.WWW_LIMITS)
+            cls._range_check(Www, cls.DATE_WWW_LIMITS)
 
         if D is not None:
-            cls._range_check(D, cls.D_LIMITS)
+            cls._range_check(D, cls.DATE_D_LIMITS)
 
         if DDD is not None:
-            cls._range_check(DDD, cls.DDD_LIMITS)
+            cls._range_check(DDD, cls.DATE_DDD_LIMITS)
 
         if hh is not None:
             if hh[0:2] == '24':
@@ -162,12 +162,12 @@ class BaseTimeBuilder(object):
 
                 midnight = True
 
-            hhvalue = cls._range_check(hh, cls.HH_LIMITS)
+            hhvalue = cls._range_check(hh, cls.TIME_HH_LIMITS)
 
             fractionalcomponent = hhvalue is float
 
         if mm is not None:
-            mmvalue = cls._range_check(mm, cls.MM_LIMITS)
+            mmvalue = cls._range_check(mm, cls.TIME_MM_LIMITS)
 
             if fractionalcomponent is True and mmvalue is float:
                 raise ISOFormatError('Only one fractional component allowed.')
@@ -175,7 +175,7 @@ class BaseTimeBuilder(object):
             fractionalcomponent = mmvalue is float
 
         if ss is not None:
-            ssvalue = cls._range_check(ss, cls.SS_LIMITS)
+            ssvalue = cls._range_check(ss, cls.TIME_SS_LIMITS)
 
             if fractionalcomponent is True and ssvalue is float:
                 raise ISOFormatError('Only one fractional component allowed.')
@@ -201,7 +201,7 @@ class BaseTimeBuilder(object):
                                          'be 0.')
 
         if PnY is not None:
-            result = cls._range_check(PnY, cls.PNY_LIMITS)
+            result = cls._range_check(PnY, cls.DURATION_PNY_LIMITS)
 
             if fractionalcomponent is True and result is float:
                 raise ISOFormatError('Only one fractional component allowed.')
@@ -209,7 +209,7 @@ class BaseTimeBuilder(object):
             fractionalcomponent = result is float
 
         if PnM is not None:
-            result = cls._range_check(PnM, cls.PNM_LIMITS)
+            result = cls._range_check(PnM, cls.DURATION_PNM_LIMITS)
 
             if fractionalcomponent is True and result is float:
                 raise ISOFormatError('Only one fractional component allowed.')
@@ -217,7 +217,7 @@ class BaseTimeBuilder(object):
             fractionalcomponent = result is float
 
         if PnW is not None:
-            result = cls._range_check(PnW, cls.PNW_LIMITS)
+            result = cls._range_check(PnW, cls.DURATION_PNW_LIMITS)
 
             if fractionalcomponent is True and result is float:
                 raise ISOFormatError('Only one fractional component allowed.')
@@ -225,7 +225,7 @@ class BaseTimeBuilder(object):
             fractionalcomponent = result is float
 
         if PnD is not None:
-            result = cls._range_check(PnD, cls.PND_LIMITS)
+            result = cls._range_check(PnD, cls.DURATION_PND_LIMITS)
 
             if fractionalcomponent is True and result is float:
                 raise ISOFormatError('Only one fractional component allowed.')
@@ -233,7 +233,7 @@ class BaseTimeBuilder(object):
             fractionalcomponent = result is float
 
         if TnH is not None:
-            result = cls._range_check(TnH, cls.TNH_LIMITS)
+            result = cls._range_check(TnH, cls.DURATION_TNH_LIMITS)
 
             if fractionalcomponent is True and result is float:
                 raise ISOFormatError('Only one fractional component allowed.')
@@ -241,7 +241,7 @@ class BaseTimeBuilder(object):
             fractionalcomponent = result is float
 
         if TnM is not None:
-            result = cls._range_check(TnM, cls.TNM_LIMITS)
+            result = cls._range_check(TnM, cls.DURATION_TNM_LIMITS)
 
             if fractionalcomponent is True and result is float:
                 raise ISOFormatError('Only one fractional component allowed.')
@@ -249,13 +249,13 @@ class BaseTimeBuilder(object):
             fractionalcomponent = result is float
 
         if TnS is not None:
-            result = cls._range_check(TnS, cls.TNS_LIMITS)
+            result = cls._range_check(TnS, cls.DURATION_TNS_LIMITS)
 
             if fractionalcomponent is True and result is float:
                 raise ISOFormatError('Only one fractional component allowed.')
 
         if Rnn is not None:
-            cls._range_check(Rnn, cls.RNN_LIMITS)
+            cls._range_check(Rnn, cls.INTERVAL_RNN_LIMITS)
 
         #Handle midnight range
         if midnight is True and ((mmvalue is not None and mmvalue != 0) or (ssvalue is not None and ssvalue != 0)):
@@ -263,14 +263,14 @@ class BaseTimeBuilder(object):
 
         if cls.LEAP_SECONDS_SUPPORTED is True:
             if hhvalue != 23 and mmvalue != 59 and ssvalue == 60:
-                raise cls.SS_LIMITS[cls.OUT_OF_RANGE_EXCEPTION_IDX](cls.SS_LIMITS[cls.OUT_OF_RANGE_ERROR_STRING_IDX])
+                raise cls.TIME_SS_LIMITS[cls.OUT_OF_RANGE_EXCEPTION_IDX](cls.TIME_SS_LIMITS[cls.OUT_OF_RANGE_ERROR_STRING_IDX])
         else:
             if hhvalue == 23 and mmvalue == 59 and ssvalue == 60:
                 #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
                 raise LeapSecondError('Leap seconds are not supported.')
 
             if ssvalue == 60:
-                raise cls.SS_LIMITS[cls.OUT_OF_RANGE_EXCEPTION_IDX](cls.SS_LIMITS[cls.OUT_OF_RANGE_ERROR_STRING_IDX])
+                raise cls.TIME_SS_LIMITS[cls.OUT_OF_RANGE_EXCEPTION_IDX](cls.TIME_SS_LIMITS[cls.OUT_OF_RANGE_ERROR_STRING_IDX])
 
     @classmethod
     def _range_check(cls, valuestr, rangetuple):

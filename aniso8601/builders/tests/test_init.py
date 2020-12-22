@@ -10,7 +10,12 @@ import unittest
 import aniso8601
 
 from aniso8601.builders import BaseTimeBuilder, TupleBuilder
-from aniso8601.exceptions import DayOutOfBoundsError, HoursOutOfBoundsError, ISOFormatError, LeapSecondError, MidnightBoundsError, MinutesOutOfBoundsError, SecondsOutOfBoundsError, WeekOutOfBoundsError
+from aniso8601.exceptions import (DayOutOfBoundsError, HoursOutOfBoundsError,
+                                  ISOFormatError, LeapSecondError,
+                                  MidnightBoundsError, MinutesOutOfBoundsError,
+                                  MonthOutOfBoundsError,
+                                  SecondsOutOfBoundsError,
+                                  WeekOutOfBoundsError)
 from aniso8601.tests.compat import mock
 
 class TestBaseTimeBuilder(unittest.TestCase):
@@ -43,6 +48,9 @@ class TestBaseTimeBuilder(unittest.TestCase):
             BaseTimeBuilder.build_timezone()
 
     def test_range_check_date(self):
+        with self.assertRaises(MonthOutOfBoundsError):
+            BaseTimeBuilder.range_check(YYYY='4333', MM='30', DD='30')
+
         #0 isn't a valid week number
         with self.assertRaises(WeekOutOfBoundsError):
             BaseTimeBuilder.range_check(YYYY='2003', Www='00')
