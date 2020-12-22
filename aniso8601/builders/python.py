@@ -8,7 +8,10 @@
 
 import datetime
 
-from aniso8601.builders import BaseTimeBuilder, TupleBuilder
+from aniso8601.builders import (BaseTimeBuilder, TupleBuilder,
+                                range_check_date, range_check_duration,
+                                range_check_repeating_interval,
+                                range_check_time, range_check_timezone)
 from aniso8601.exceptions import (DayOutOfBoundsError,
                                   HoursOutOfBoundsError,
                                   LeapSecondError, MidnightBoundsError,
@@ -28,6 +31,7 @@ MICROSECONDS_PER_YEAR = 365 * MICROSECONDS_PER_DAY
 
 class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
+    @range_check_date
     def build_date(cls, YYYY=None, MM=None, DD=None, Www=None, D=None,
                    DDD=None):
 
@@ -91,6 +95,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         return datetime.date(year, month, day)
 
     @classmethod
+    @range_check_time
     def build_time(cls, hh=None, mm=None, ss=None, tz=None):
         #Builds a time from the given parts, handling fractional arguments
         #where necessary
@@ -152,6 +157,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
                                          cls._build_object(time))
 
     @classmethod
+    @range_check_duration
     def build_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None, TnH=None,
                        TnM=None, TnS=None):
         years = 0
@@ -276,6 +282,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
                 + durationobject)
 
     @classmethod
+    @range_check_repeating_interval
     def build_repeating_interval(cls, R=None, Rnn=None, interval=None):
         startobject = None
         endobject = None
@@ -308,6 +315,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         return cls._date_generator(endobject, -durationobject, iterations)
 
     @classmethod
+    @range_check_timezone
     def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
         if Z is True:
             #Z -> UTC

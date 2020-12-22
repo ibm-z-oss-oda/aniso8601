@@ -9,7 +9,8 @@ aniso8601 9.0.0-dev.0
 Changes
 -------
 * Add explicit bounds of [000, 366] to day of year component :code:`_parse_ordinal_date`, this adds the same limits to dates of the format YYYYDDD or YYYY-DDD when using :code:`parse_date`
-* Add explicit :code:`range_check_date`, :code:`range_check_time`, :code:`range_check_duration`, :code:`range_check_interval`, and :code:`range_check_timezone` to :code:`BaseTimeBuilder`, call them explicitly before every related build, this breaks compatibility with builders which have not been updated
+* Add explicit :code:`range_check_date`, :code:`range_check_time`, :code:`range_check_duration`, :code:`range_check_repeating_interval`, and :code:`range_check_timezone` to :code:`BaseTimeBuilder`, there are no datetime or non-repeating interval check function as they are made of already checked parts
+* :code:`PythonTimeBuilder` now calls the appropriate range check functions using the :code:`range_check_date`, :code:`range_check_time`, :code:`range_check_duration`, :code:`range_check_repeating_interval`, and :code:`range_check_timezone` decorators defined in :code:`aniso8601.builders`
 * Raise :code:`DayOutOfBoundsError` if calendar day exceeds number of days in calendar month
 * Raise :code:`DayOutOfBoundsError` if ordinal day exceeds number of days in calendar year (366 now raises :code:`DayOutOfBoundsError` in non-leap year)
 

@@ -137,8 +137,6 @@ def _parse_calendar_day(datestr, builder):
         raise ISOFormatError('"{0}" is not a valid ISO 8601 calendar day.'
                              .format(datestr))
 
-    builder.range_check_date(YYYY=yearstr, MM=monthstr, DD=daystr)
-
     return builder.build_date(YYYY=yearstr, MM=monthstr, DD=daystr)
 
 def _parse_calendar_month(datestr, builder):
@@ -149,8 +147,6 @@ def _parse_calendar_month(datestr, builder):
 
     yearstr = datestr[0:4]
     monthstr = datestr[5:]
-
-    builder.range_check_date(YYYY=yearstr, MM=monthstr)
 
     return builder.build_date(YYYY=yearstr, MM=monthstr)
 
@@ -179,8 +175,6 @@ def _parse_week_day(datestr, builder):
         raise ISOFormatError('"{0}" is not a valid ISO 8601 week date.'
                              .format(datestr))
 
-    builder.range_check_date(YYYY=yearstr, Www=weekstr, D=daystr)
-
     return builder.build_date(YYYY=yearstr, Www=weekstr, D=daystr)
 
 def _parse_week(datestr, builder):
@@ -194,8 +188,6 @@ def _parse_week(datestr, builder):
     #Week number will be the two characters after the W
     windex = datestr.find('W')
     weekstr = datestr[windex + 1:windex + 3]
-
-    builder.range_check_date(YYYY=yearstr, Www=weekstr)
 
     return builder.build_date(YYYY=yearstr, Www=weekstr)
 
@@ -211,8 +203,6 @@ def _parse_ordinal_date(datestr, builder):
     else:
         #YYYYDDD
         daystr = datestr[4:]
-
-    builder.range_check_date(YYYY=yearstr, DDD=daystr)
 
     return builder.build_date(YYYY=yearstr, DDD=daystr)
 

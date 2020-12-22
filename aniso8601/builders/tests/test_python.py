@@ -98,7 +98,7 @@ class TestPythonTimeBuilder(unittest.TestCase):
         #Leap year
         #https://bitbucket.org/nielsenb/aniso8601/issues/14/parsing-ordinal-dates-should-only-allow
         with self.assertRaises(DayOutOfBoundsError):
-            PythonTimeBuilder.build_date(YYYY='1981', DDD=366)
+            PythonTimeBuilder.build_date(YYYY='1981', DDD='366')
 
     def test_build_time(self):
         testtuples = (({}, datetime.time()),

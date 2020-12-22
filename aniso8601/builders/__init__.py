@@ -258,7 +258,7 @@ class BaseTimeBuilder(object):
                 raise ISOFormatError('Only one fractional component allowed.')
 
     @classmethod
-    def range_check_interval(cls, Rnn=None):
+    def range_check_repeating_interval(cls, Rnn=None):
         if Rnn is not None:
             cls._range_check(Rnn, cls.INTERVAL_RNN_LIMITS)
 
@@ -381,3 +381,69 @@ class TupleBuilder(BaseTimeBuilder):
     @classmethod
     def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
         return (negative, Z, hh, mm, name, 'timezone')
+
+def range_check_date(build_method):
+    """
+    Range check decorator for build_date
+    """
+    def peform_range_check(cls, *args, **kwargs):
+        cls.range_check_date(**kwargs)
+        return build_method(cls, *args, **kwargs)
+
+    return peform_range_check
+
+def range_check_time(build_method):
+    """
+    Range check decorator for build_time
+    """
+    def peform_range_check(cls, *args, **kwargs):
+        #Filter out timezone, it's checked separate
+        filteredkwargs = _filter_kwargs(kwargs, ['tz'])
+
+        cls.range_check_time(**filteredkwargs)
+        return build_method(cls, *args, **kwargs)
+
+    return peform_range_check
+
+def range_check_duration(build_method):
+    """
+    Range check decorator for build_duration
+    """
+    def peform_range_check(cls, *args, **kwargs):
+        cls.range_check_duration(**kwargs)
+        return build_method(cls, *args, **kwargs)
+
+    return peform_range_check
+
+def range_check_repeating_interval(build_method):
+    """
+    Range check decorator for build_repeating_interval
+    """
+    def peform_range_check(cls, *args, **kwargs):
+        filteredkwargs = _filter_kwargs(kwargs, ['R', 'interval'])
+
+        cls.range_check_repeating_interval(**filteredkwargs)
+        return build_method(cls, *args, **kwargs)
+
+    return peform_range_check
+
+def range_check_timezone(build_method):
+    """
+    Range check decorator for build_timezone
+    """
+    def peform_range_check(cls, *args, **kwargs):
+        filteredkwargs = _filter_kwargs(kwargs, ['Z', 'name'])
+
+        cls.range_check_timezone(**filteredkwargs)
+        return build_method(cls, *args, **kwargs)
+
+    return peform_range_check
+
+def _filter_kwargs(tofilter, excludedkeys):
+    filteredkwargs = {}
+
+    for key in tofilter:
+        if key not in excludedkeys:
+            filteredkwargs[key] = tofilter[key]
+
+    return filteredkwargs
