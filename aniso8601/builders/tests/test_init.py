@@ -48,6 +48,10 @@ class TestBaseTimeBuilder(unittest.TestCase):
             BaseTimeBuilder.build_timezone()
 
     def test_range_check_date(self):
+        #Check the calendar for day ranges
+        with self.assertRaises(DayOutOfBoundsError):
+            BaseTimeBuilder.range_check(YYYY='0007', MM='02', DD='30')
+
         with self.assertRaises(MonthOutOfBoundsError):
             BaseTimeBuilder.range_check(YYYY='4333', MM='30', DD='30')
 

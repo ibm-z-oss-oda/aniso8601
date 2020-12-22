@@ -6,6 +6,8 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
+import calendar
+
 from aniso8601.exceptions import (DayOutOfBoundsError, MidnightBoundsError,
                                   MinutesOutOfBoundsError, MonthOutOfBoundsError,
                                   NegativeDurationError, HoursOutOfBoundsError,
@@ -138,13 +140,17 @@ class BaseTimeBuilder(object):
         fractionalcomponent = False #Only one fractional component allowed
 
         if YYYY is not None:
-            cls._range_check(YYYY, cls.DATE_YYYY_LIMITS)
+            YYYYvalue = cls._range_check(YYYY, cls.DATE_YYYY_LIMITS)
 
         if MM is not None:
-            cls._range_check(MM, cls.DATE_MM_LIMITS)
+            MMvalue = cls._range_check(MM, cls.DATE_MM_LIMITS)
 
         if DD is not None:
-            cls._range_check(DD, cls.DATE_DD_LIMITS)
+            DDvalue = cls._range_check(DD, cls.DATE_DD_LIMITS)
+
+            #Check calendar
+            if DDvalue > calendar.monthrange(YYYYvalue, MMvalue)[1]:
+                raise DayOutOfBoundsError('{0} is out of range for {1}-{2}'.format(DD, YYYY, MM))
 
         if Www is not None:
             cls._range_check(Www, cls.DATE_WWW_LIMITS)
