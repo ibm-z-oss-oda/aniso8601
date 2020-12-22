@@ -15,7 +15,7 @@ Changes
 
 Deprecation
 -----------
-* Update on Python 2 support, Python 2 support was slated to be removed in 7.0.0, it will remain until a test fails on Python 2 but not Python 3
+* **Update on Python 2 support**: Python 2 support was slated to be removed in 7.0.0, it will remain until a test fails on Python 2 but not Python 3
 * Using Setuptools to run tests (:code:`python setup.py tests`) will be removed in the next major or minor version (either 9.1.0, 10.0.0)
 
 aniso8601 8.1.1
