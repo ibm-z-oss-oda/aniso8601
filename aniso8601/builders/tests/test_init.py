@@ -52,6 +52,9 @@ class TestBaseTimeBuilder(unittest.TestCase):
         with self.assertRaises(DayOutOfBoundsError):
             BaseTimeBuilder.range_check(YYYY='0007', MM='02', DD='30')
 
+        with self.assertRaises(DayOutOfBoundsError):
+            BaseTimeBuilder.range_check(YYYY='0007', DDD='366')
+
         with self.assertRaises(MonthOutOfBoundsError):
             BaseTimeBuilder.range_check(YYYY='4333', MM='30', DD='30')
 

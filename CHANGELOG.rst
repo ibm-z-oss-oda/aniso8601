@@ -10,7 +10,8 @@ Changes
 -------
 * Add explicit bounds of [000, 366] to day of year component :code:`_parse_ordinal_date`, this adds the same limits to dates of the format YYYYDDD or YYYY-DDD when using :code:`parse_date`
 * Add explicit :code:`range_check` to :code:`BaseTimeBuilder`, call it explicitly before every build, this breaks compatibility with builders which have not been updated
-* Raise :code:`DayOutOfBoundsError` if calendary day exceeds number of days in calendar month
+* Raise :code:`DayOutOfBoundsError` if calendar day exceeds number of days in calendar month
+* Raise :code:`DayOutOfBoundsError` if ordinal day exceeds number of days in calendar year (366 now raises :code:`DayOutOfBoundsError` in non-leap year)
 
 Deprecation
 -----------

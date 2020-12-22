@@ -159,7 +159,10 @@ class BaseTimeBuilder(object):
             cls._range_check(D, cls.DATE_D_LIMITS)
 
         if DDD is not None:
-            cls._range_check(DDD, cls.DATE_DDD_LIMITS)
+            DDDvalue = cls._range_check(DDD, cls.DATE_DDD_LIMITS)
+
+            if calendar.isleap(YYYYvalue) is False and DDDvalue >= 366:
+                raise DayOutOfBoundsError('{0} is only valid for leap year.'.format(DDD))
 
         if hh is not None:
             if hh[0:2] == '24':
