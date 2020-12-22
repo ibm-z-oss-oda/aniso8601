@@ -50,147 +50,83 @@ class TestBaseTimeBuilder(unittest.TestCase):
     def test_range_check_date(self):
         #Check the calendar for day ranges
         with self.assertRaises(DayOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='0007', MM='02', DD='30')
+            BaseTimeBuilder.range_check_date(YYYY='0007', MM='02', DD='30')
 
         with self.assertRaises(DayOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='0007', DDD='366')
+            BaseTimeBuilder.range_check_date(YYYY='0007', DDD='366')
 
         with self.assertRaises(MonthOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='4333', MM='30', DD='30')
+            BaseTimeBuilder.range_check_date(YYYY='4333', MM='30', DD='30')
 
         #0 isn't a valid week number
         with self.assertRaises(WeekOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='2003', Www='00')
+            BaseTimeBuilder.range_check_date(YYYY='2003', Www='00')
 
         #Week must not be larger than 53
         with self.assertRaises(WeekOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='2004', Www='54')
+            BaseTimeBuilder.range_check_date(YYYY='2004', Www='54')
 
         #0 isn't a valid day number
         with self.assertRaises(DayOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='2001', Www='02', D='0')
+            BaseTimeBuilder.range_check_date(YYYY='2001', Www='02', D='0')
 
         #Day must not be larger than 7
         with self.assertRaises(DayOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='2001', Www='02', D='8')
+            BaseTimeBuilder.range_check_date(YYYY='2001', Www='02', D='8')
 
         with self.assertRaises(DayOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='1981', DDD='000')
+            BaseTimeBuilder.range_check_date(YYYY='1981', DDD='000')
 
         #Day must be 365, or 366, not larger
         with self.assertRaises(DayOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='1234', DDD='000')
+            BaseTimeBuilder.range_check_date(YYYY='1234', DDD='000')
 
         with self.assertRaises(DayOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='1234', DDD='367')
+            BaseTimeBuilder.range_check_date(YYYY='1234', DDD='367')
 
     def test_range_check_time(self):
         #Leap seconds not supported
         #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
         #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
         with self.assertRaises(LeapSecondError):
-            BaseTimeBuilder.range_check(hh='23', mm='59', ss='60')
-
-        with self.assertRaises(LeapSecondError):
-            BaseTimeBuilder.range_check(hh='23', mm='59', ss='60',
-                                        tz=(None, None, '00', '00', 'UTC', 'timezone'))
+            BaseTimeBuilder.range_check_time(hh='23', mm='59', ss='60')
 
         with self.assertRaises(SecondsOutOfBoundsError):
-            BaseTimeBuilder.range_check(hh='00', mm='00', ss='60')
+            BaseTimeBuilder.range_check_time(hh='00', mm='00', ss='60')
 
         with self.assertRaises(SecondsOutOfBoundsError):
-            BaseTimeBuilder.range_check(hh='00', mm='00', ss='60',
-                                        tz=(None, None, '00', '00', 'UTC', 'timezone'))
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            BaseTimeBuilder.range_check(hh='00', mm='00', ss='61')
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            BaseTimeBuilder.range_check(hh='00', mm='00', ss='61',
-                                        tz=(None, None, '00', '00', 'UTC', 'timezone'))
+            BaseTimeBuilder.range_check_time(hh='00', mm='00', ss='61')
 
         with self.assertRaises(MinutesOutOfBoundsError):
-            BaseTimeBuilder.range_check(hh='00', mm='61')
+            BaseTimeBuilder.range_check_time(hh='00', mm='61')
 
         with self.assertRaises(MinutesOutOfBoundsError):
-            BaseTimeBuilder.range_check(hh='00', mm='61',
-                                        tz=(None, None, '00', '00', 'UTC', 'timezone'))
+            BaseTimeBuilder.range_check_time(hh='00', mm='60')
 
         with self.assertRaises(MinutesOutOfBoundsError):
-            BaseTimeBuilder.range_check(hh='00', mm='60')
-
-        with self.assertRaises(MinutesOutOfBoundsError):
-            BaseTimeBuilder.range_check(hh='00', mm='60.1')
+            BaseTimeBuilder.range_check_time(hh='00', mm='60.1')
 
         with self.assertRaises(HoursOutOfBoundsError):
-            BaseTimeBuilder.range_check(hh='25')
+            BaseTimeBuilder.range_check_time(hh='25')
 
         #Hour 24 can only represent midnight
         with self.assertRaises(MidnightBoundsError):
-            BaseTimeBuilder.range_check(hh='24', mm='00', ss='01')
+            BaseTimeBuilder.range_check_time(hh='24', mm='00', ss='01')
 
         with self.assertRaises(MidnightBoundsError):
-            BaseTimeBuilder.range_check(hh='24', mm='00.1')
+            BaseTimeBuilder.range_check_time(hh='24', mm='00.1')
 
         with self.assertRaises(MidnightBoundsError):
-            BaseTimeBuilder.range_check(hh='24', mm='01')
+            BaseTimeBuilder.range_check_time(hh='24', mm='01')
 
         with self.assertRaises(MidnightBoundsError):
-            BaseTimeBuilder.range_check(hh='24.1')
+            BaseTimeBuilder.range_check_time(hh='24.1')
 
-    def test_range_check_datetime(self):
         #Leap seconds not supported
         #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
         #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
         with self.assertRaises(LeapSecondError):
-            BaseTimeBuilder.range_check(YYYY='2016', MM='12', DD='31',
-                                        hh='23', mm='59', ss='60')
-
-        with self.assertRaises(LeapSecondError):
-            BaseTimeBuilder.range_check(YYYY='2016', MM='12', DD='31',
-                                        hh='23', mm='59', ss='60',
-                                        tz=(False, None, '00', '00',
-                                            '+00:00', 'timezone'))
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='1981', MM='04', DD='05',
-                                        hh='00', mm='00', ss='60')
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='1981', MM='04', DD='05',
-                                        hh='00', mm='00', ss='60',
-                                        tz=(False, None, '00', '00',
-                                            '+00:00', 'timezone'))
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='1981', MM='04', DD='05',
-                                        hh='00', mm='00', ss='61')
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='1981', MM='04', DD='05',
-                                        hh='00', mm='00', ss='61',
-                                        tz=(False, None, '00', '00',
-                                            '+00:00', 'timezone'))
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='1981', MM='04', DD='05',
-                                        hh='00', mm='59', ss='61')
-
-        with self.assertRaises(SecondsOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='1981', MM='04', DD='05',
-                                        hh='00', mm='59', ss='61',
-                                        tz=(False, None, '00', '00',
-                                            '+00:00', 'timezone'))
-
-        with self.assertRaises(MinutesOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='1981', MM='04', DD='05',
-                                        hh='00', mm='61')
-
-        with self.assertRaises(MinutesOutOfBoundsError):
-            BaseTimeBuilder.range_check(YYYY='1981', MM='04', DD='05',
-                                        hh='00', mm='61',
-                                        tz=(False, None, '00', '00',
-                                            '+00:00', 'timezone'))
+            BaseTimeBuilder.range_check_time(hh='23', mm='59', ss='60')
 
     def test_cast(self):
         self.assertEqual(BaseTimeBuilder.cast('1', int), 1)

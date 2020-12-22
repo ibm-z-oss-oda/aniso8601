@@ -126,8 +126,8 @@ def _parse_duration_prescribed_notime(durationstr, builder):
     else:
         daystr = None
 
-    builder.range_check(PnY=yearstr, PnM=monthstr,
-                        PnW=weekstr, PnD=daystr)
+    builder.range_check_duration(PnY=yearstr, PnM=monthstr,
+                                 PnW=weekstr, PnD=daystr)
 
     return builder.build_duration(PnY=yearstr, PnM=monthstr,
                                   PnW=weekstr, PnD=daystr)
@@ -192,8 +192,8 @@ def _parse_duration_prescribed_time(durationstr, builder):
     else:
         secondstr = None
 
-    builder.range_check(PnY=yearstr, PnM=monthstr, PnD=daystr,
-                        TnH=hourstr, TnM=minutestr, TnS=secondstr)
+    builder.range_check_duration(PnY=yearstr, PnM=monthstr, PnD=daystr,
+                                 TnH=hourstr, TnM=minutestr, TnS=secondstr)
 
     return builder.build_duration(PnY=yearstr, PnM=monthstr, PnD=daystr,
                                   TnH=hourstr, TnM=minutestr, TnS=secondstr)
@@ -207,9 +207,9 @@ def _parse_duration_combined(durationstr, builder):
     datevalue = parse_date(datepart, builder=TupleBuilder)
     timevalue = parse_time(timepart, builder=TupleBuilder)
 
-    builder.range_check(PnY=datevalue[0], PnM=datevalue[1],
-                        PnD=datevalue[2], TnH=timevalue[0],
-                        TnM=timevalue[1], TnS=timevalue[2])
+    builder.range_check_duration(PnY=datevalue[0], PnM=datevalue[1],
+                                 PnD=datevalue[2], TnH=timevalue[0],
+                                 TnM=timevalue[1], TnS=timevalue[2])
 
     return builder.build_duration(PnY=datevalue[0], PnM=datevalue[1],
                                   PnD=datevalue[2], TnH=timevalue[0],

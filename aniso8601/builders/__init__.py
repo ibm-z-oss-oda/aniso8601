@@ -121,23 +121,8 @@ class BaseTimeBuilder(object):
         raise NotImplementedError
 
     @classmethod
-    def range_check(cls, YYYY=None, MM=None, DD=None, Www=None, D=None, DDD=None,
-                    hh=None, mm=None, ss=None,
-                    PnY=None, PnM=None, PnW=None, PnD=None,
-                    TnH=None, TnM=None, TnS=None, Rnn=None,
-                    tz=None, tznegative=None, tzhh=None, tzmm=None):
-
-        TZ_NEGATIVE_IDX = 0
-        TZ_HH_IDX = 2
-        TZ_MM_IDX = 3
-
-        #Used for leap second handling
-        hhvalue = None
-        mmvalue = None
-        ssvalue = None
-
-        midnight = False #Handle hh = '24' specially
-        fractionalcomponent = False #Only one fractional component allowed
+    def range_check_date(cls, YYYY=None, MM=None, DD=None,
+                         Www=None, D=None, DDD=None):
 
         if YYYY is not None:
             YYYYvalue = cls._range_check(YYYY, cls.DATE_YYYY_LIMITS)
@@ -163,6 +148,16 @@ class BaseTimeBuilder(object):
 
             if calendar.isleap(YYYYvalue) is False and DDDvalue >= 366:
                 raise DayOutOfBoundsError('{0} is only valid for leap year.'.format(DDD))
+
+    @classmethod
+    def range_check_time(cls, hh=None, mm=None, ss=None):
+        #Used for leap second handling
+        hhvalue = None
+        mmvalue = None
+        ssvalue = None
+
+        midnight = False #Handle hh = '24' specially
+        fractionalcomponent = False #Only one fractional component allowed
 
         if hh is not None:
             if hh[0:2] == '24':
@@ -191,29 +186,28 @@ class BaseTimeBuilder(object):
 
             fractionalcomponent = ssvalue is float
 
-        if tz is not None:
-            tznegative = tz[TZ_NEGATIVE_IDX]
-            tzhh = tz[TZ_HH_IDX]
-            tzmm = tz[TZ_MM_IDX]
+        #Handle midnight range
+        if midnight is True and ((mmvalue is not None and mmvalue != 0) or (ssvalue is not None and ssvalue != 0)):
+            raise MidnightBoundsError('Hour 24 may only represent midnight.')
 
-        if tzhh is not None:
-            tzhhvalue = cls._range_check(tzhh, cls.TZ_HH_LIMITS)
+        if cls.LEAP_SECONDS_SUPPORTED is True:
+            if hhvalue != 23 and mmvalue != 59 and ssvalue == 60:
+                raise cls.TIME_SS_LIMITS[cls.OUT_OF_RANGE_EXCEPTION_IDX](cls.TIME_SS_LIMITS[cls.OUT_OF_RANGE_ERROR_STRING_IDX])
+        else:
+            if hhvalue == 23 and mmvalue == 59 and ssvalue == 60:
+                #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
+                raise LeapSecondError('Leap seconds are not supported.')
 
-            if tzmm is not None:
-                tzmmvalue = cls._range_check(tzmm, cls.TZ_MM_LIMITS)
-            else:
-                tzmmvalue = 0
+            if ssvalue == 60:
+                raise cls.TIME_SS_LIMITS[cls.OUT_OF_RANGE_EXCEPTION_IDX](cls.TIME_SS_LIMITS[cls.OUT_OF_RANGE_ERROR_STRING_IDX])
 
-            if tznegative is True:
-                if tzhhvalue == 0 and tzmmvalue == 0:
-                    raise ISOFormatError('Negative ISO 8601 time offset must not '
-                                         'be 0.')
+    @classmethod
+    def range_check_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None,
+                             TnH=None, TnM=None, TnS=None, Rnn=None):
+        fractionalcomponent = False #Only one fractional component allowed
 
         if PnY is not None:
             result = cls._range_check(PnY, cls.DURATION_PNY_LIMITS)
-
-            if fractionalcomponent is True and result is float:
-                raise ISOFormatError('Only one fractional component allowed.')
 
             fractionalcomponent = result is float
 
@@ -263,23 +257,25 @@ class BaseTimeBuilder(object):
             if fractionalcomponent is True and result is float:
                 raise ISOFormatError('Only one fractional component allowed.')
 
+    @classmethod
+    def range_check_interval(cls, Rnn=None):
         if Rnn is not None:
             cls._range_check(Rnn, cls.INTERVAL_RNN_LIMITS)
 
-        #Handle midnight range
-        if midnight is True and ((mmvalue is not None and mmvalue != 0) or (ssvalue is not None and ssvalue != 0)):
-            raise MidnightBoundsError('Hour 24 may only represent midnight.')
+    @classmethod
+    def range_check_timezone(cls, negative=None, hh=None, mm=None,):
+        if hh is not None:
+            hhvalue = cls._range_check(hh, cls.TZ_HH_LIMITS)
 
-        if cls.LEAP_SECONDS_SUPPORTED is True:
-            if hhvalue != 23 and mmvalue != 59 and ssvalue == 60:
-                raise cls.TIME_SS_LIMITS[cls.OUT_OF_RANGE_EXCEPTION_IDX](cls.TIME_SS_LIMITS[cls.OUT_OF_RANGE_ERROR_STRING_IDX])
-        else:
-            if hhvalue == 23 and mmvalue == 59 and ssvalue == 60:
-                #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
-                raise LeapSecondError('Leap seconds are not supported.')
+            if mm is not None:
+                mmvalue = cls._range_check(mm, cls.TZ_MM_LIMITS)
+            else:
+                mmvalue = 0
 
-            if ssvalue == 60:
-                raise cls.TIME_SS_LIMITS[cls.OUT_OF_RANGE_EXCEPTION_IDX](cls.TIME_SS_LIMITS[cls.OUT_OF_RANGE_ERROR_STRING_IDX])
+            if negative is True:
+                if hhvalue == 0 and mmvalue == 0:
+                    raise ISOFormatError('Negative ISO 8601 time offset must not '
+                                         'be 0.')
 
     @classmethod
     def _range_check(cls, valuestr, rangetuple):

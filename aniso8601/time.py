@@ -139,7 +139,7 @@ def _parse_hour(timestr, tz, builder):
     #Format must be hh or hh.
     hourstr = normalize(timestr)
 
-    builder.range_check(hh=hourstr)
+    builder.range_check_time(hh=hourstr)
 
     return builder.build_time(hh=hourstr, tz=tz)
 
@@ -156,7 +156,7 @@ def _parse_minute_time(timestr, tz, builder):
     hourstr = normalize(hourstr)
     minutestr = normalize(minutestr)
 
-    builder.range_check(hh=hourstr, mm=minutestr, tz=tz)
+    builder.range_check_time(hh=hourstr, mm=minutestr)
 
     return builder.build_time(hh=hourstr, mm=minutestr, tz=tz)
 
@@ -175,7 +175,7 @@ def _parse_second_time(timestr, tz, builder):
     minutestr = normalize(minutestr)
     secondstr = normalize(secondstr)
 
-    builder.range_check(hh=hourstr, mm=minutestr, ss=secondstr, tz=tz)
+    builder.range_check_time(hh=hourstr, mm=minutestr, ss=secondstr)
 
     return builder.build_time(hh=hourstr, mm=minutestr, ss=secondstr, tz=tz)
 

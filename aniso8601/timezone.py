@@ -50,12 +50,12 @@ def parse_timezone(tzstr, builder=PythonTimeBuilder):
                              .format(tzstr))
 
     if tzstr[0] == '+':
-        builder.range_check(tznegative=False, tzhh=hourstr, tzmm=minutestr)
+        builder.range_check_timezone(negative=False, hh=hourstr, mm=minutestr)
 
         return builder.build_timezone(negative=False, hh=hourstr,
                                       mm=minutestr, name=tzstr)
     elif tzstr[0] == '-':
-        builder.range_check(tznegative=True, tzhh=hourstr, tzmm=minutestr)
+        builder.range_check_timezone(negative=True, hh=hourstr, mm=minutestr)
 
         return builder.build_timezone(negative=True, hh=hourstr,
                                       mm=minutestr, name=tzstr)
