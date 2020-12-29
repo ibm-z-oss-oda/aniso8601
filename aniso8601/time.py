@@ -43,37 +43,9 @@ def get_time_resolution(isotimestr):
     #hh:mm±hh
     #hhmm±hh
     #hh±hh
-    if is_string(isotimestr) is False:
-        raise ValueError('Time must be string.')
+    timestr = _process_timestr(isotimestr)[0]
 
-    timestr = _split_tz(isotimestr)[0].replace(':', '')
-
-    if (len(timestr) == 0 or
-        timestr[0].isdigit() is False or
-        timestr[-1].isdigit() is False or
-        timestr.count('.') > 1 or
-        len(timestr.split()) != 1):
-        raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
-                             .format(timestr))
-
-    #Format must be hhmmss, hhmm, or hh
-    timestrlen = find_separator(timestr) #Length of string without decimal
-
-    if timestrlen == -1:
-        timestrlen = len(timestr)
-
-    if timestrlen == 6:
-        #hhmmss
-        return TimeResolution.Seconds
-    elif timestrlen == 4:
-        #hhmm
-        return TimeResolution.Minutes
-    elif timestrlen == 2:
-        #hh
-        return TimeResolution.Hours
-
-    raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
-                         .format(isotimestr))
+    return _get_time_resolution(timestr)
 
 def parse_time(isotimestr, builder=PythonTimeBuilder):
     #Given a string in any ISO 8601 time format, return a datetime.time object
@@ -105,14 +77,9 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
     #hh:mm±hh
     #hhmm±hh
     #hh±hh
-    if not isinstance(isotimestr, str):
-        raise ValueError('Time must be string.')
+    timestr, tzstr = _process_timestr(isotimestr)
 
-    normalizedtimestr = normalize(isotimestr)
-
-    timeresolution = get_time_resolution(normalizedtimestr)
-
-    (timestr, tzstr) = _split_tz(normalizedtimestr)
+    timeresolution = _get_time_resolution(timestr)
 
     if tzstr is None:
         tz = None
@@ -120,6 +87,51 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
         tz = parse_timezone(tzstr, builder=TupleBuilder)
 
     return _RESOLUTION_MAP[timeresolution](timestr, tz, builder)
+
+def _process_timestr(isotimestr):
+    #Return a normalized, "valid" (timestr, tzstr) tuple,
+    #or raise an appropriate exception
+    if is_string(isotimestr) is False:
+        raise ValueError('Time must be string.')
+
+    normalizedtimestr = normalize(isotimestr)
+
+    timestr, tzstr = _split_tz(normalizedtimestr)
+
+    timestr = timestr.replace(':', '')
+
+    if (len(timestr) == 0 or
+        timestr[0].isdigit() is False or
+        timestr[-1].isdigit() is False or
+        timestr.count('.') > 1 or
+        len(timestr.split()) != 1):
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
+                             .format(timestr))
+
+    return (timestr, tzstr)
+
+def _get_time_resolution(timestr):
+    #Given a normalized, validated time string, return the resolution
+    #or raise an appropriate exception
+    timestrlen = find_separator(timestr) #Length of string without decimal
+
+    if timestrlen == -1:
+        timestrlen = len(timestr)
+
+    if timestrlen == 6:
+        #hhmmss
+        return TimeResolution.Seconds
+
+    if timestrlen == 4:
+        #hhmm
+        return TimeResolution.Minutes
+
+    if timestrlen == 2:
+        #hh
+        return TimeResolution.Hours
+
+    raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
+                         .format(timestr))
 
 def parse_datetime(isodatetimestr, delimiter='T', builder=PythonTimeBuilder):
     #Given a string in ISO 8601 date time format, return a datetime.datetime
@@ -132,7 +144,7 @@ def parse_datetime(isodatetimestr, delimiter='T', builder=PythonTimeBuilder):
 
     if delimiter not in isodatetimestr:
         raise ISOFormatError('Delimiter "{0}" is not in combined date time '
-                              'string "{1}".'
+                             'string "{1}".'
                              .format(delimiter, isodatetimestr))
 
     isodatestr, isotimestr = isodatetimestr.split(delimiter, 1)
