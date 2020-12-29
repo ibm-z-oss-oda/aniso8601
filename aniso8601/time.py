@@ -111,7 +111,7 @@ def _process_timestr(isotimestr):
     return (timestr, tzstr)
 
 def _get_time_resolution(timestr):
-    #Given a normalized, validated time string, return the resolution
+    #Given a normalized, processed time string, return the resolution
     #or raise an appropriate exception
     timestrlen = find_separator(timestr) #Length of string without decimal
 
