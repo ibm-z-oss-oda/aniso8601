@@ -58,6 +58,7 @@ def get_time_resolution(isotimestr):
 
     #Format must be hhmmss, hhmm, or hh
     timestrlen = find_separator(timestr) #Length of string without decimal
+
     if timestrlen == -1:
         timestrlen = len(timestr)
 
