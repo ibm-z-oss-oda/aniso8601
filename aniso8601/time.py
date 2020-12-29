@@ -51,12 +51,13 @@ def get_time_resolution(isotimestr):
     if (len(timestr) == 0 or
         timestr[0].isdigit() is False or
         timestr[-1].isdigit() is False or
+        timestr.count('.') > 1 or
         len(timestr.split()) != 1):
         raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
                              .format(timestr))
 
     #Format must be hhmmss, hhmm, or hh
-    timestrlen = find_separator(timestr)
+    timestrlen = find_separator(timestr) #Length of string without decimal
     if timestrlen == -1:
         timestrlen = len(timestr)
 
@@ -103,9 +104,14 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
     #hh:mm±hh
     #hhmm±hh
     #hh±hh
-    timeresolution = get_time_resolution(isotimestr)
+    if not isinstance(isotimestr, str):
+        raise ValueError('Time must be string.')
 
-    (timestr, tzstr) = _split_tz(isotimestr)
+    normalizedtimestr = normalize(isotimestr)
+
+    timeresolution = get_time_resolution(normalizedtimestr)
+
+    (timestr, tzstr) = _split_tz(normalizedtimestr)
 
     if tzstr is None:
         tz = None
@@ -138,9 +144,7 @@ def parse_datetime(isodatetimestr, delimiter='T', builder=PythonTimeBuilder):
 
 def _parse_hour(timestr, tz, builder):
     #Format must be hh or hh.
-    hourstr = normalize(timestr)
-
-    return builder.build_time(hh=hourstr, tz=tz)
+    return builder.build_time(hh=timestr, tz=tz)
 
 def _parse_minute_time(timestr, tz, builder):
     #Format must be hhmm, hhmm., hh:mm or hh:mm.
@@ -151,9 +155,6 @@ def _parse_minute_time(timestr, tz, builder):
         #hhmm or hhmm.
         hourstr = timestr[0:2]
         minutestr = timestr[2:]
-
-    hourstr = normalize(hourstr)
-    minutestr = normalize(minutestr)
 
     return builder.build_time(hh=hourstr, mm=minutestr, tz=tz)
 
@@ -167,10 +168,6 @@ def _parse_second_time(timestr, tz, builder):
         hourstr = timestr[0:2]
         minutestr = timestr[2:4]
         secondstr = timestr[4:]
-
-    hourstr = normalize(hourstr)
-    minutestr = normalize(minutestr)
-    secondstr = normalize(secondstr)
 
     return builder.build_time(hh=hourstr, mm=minutestr, ss=secondstr, tz=tz)
 
