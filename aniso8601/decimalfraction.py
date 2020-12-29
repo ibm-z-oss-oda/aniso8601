@@ -11,5 +11,5 @@ def find_separator(value):
     return normalize(value).find('.')
 
 def normalize(value):
-    """Returns the string that the decimal separators are normalized."""
+    """Returns the string with decimal separators normalized."""
     return value.replace(',', '.')
