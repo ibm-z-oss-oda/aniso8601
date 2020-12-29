@@ -33,10 +33,11 @@ def get_date_resolution(isodatestr):
                                   'not supported.')
 
     if (len(isodatestr) == 0 or
-            isodatestr[0].isdigit() is False
-            or isodatestr[-1].isdigit() is False):
+            isodatestr[0].isdigit() is False or
+            isodatestr[-1].isdigit() is False or
+            len(isodatestr.split()) != 1):
         raise ISOFormatError('"{0}" is not a valid ISO 8601 date.'
-                .format(isodatestr))
+                             .format(isodatestr))
 
     if isodatestr.find('W') != -1:
         #Handle ISO 8601 week date format

@@ -13,6 +13,7 @@ Changes
 * :code:`PythonTimeBuilder` now calls the appropriate range check functions using the :code:`range_check_date`, :code:`range_check_time`, :code:`range_check_duration`, :code:`range_check_repeating_interval`, and :code:`range_check_timezone` decorators defined in :code:`aniso8601.builders`
 * Raise :code:`DayOutOfBoundsError` if calendar day exceeds number of days in calendar month
 * Raise :code:`DayOutOfBoundsError` if ordinal day exceeds number of days in calendar year (366 now raises :code:`DayOutOfBoundsError` in non-leap year)
+* Raise :code:`ISOFormatError` when date or time string contains extra whitespace
 
 Deprecation
 -----------

@@ -215,7 +215,7 @@ class TestTimeParserFunctions(unittest.TestCase):
                 parse_time(testtuple, builder=None)
 
     def test_parse_time_badstr(self):
-        testtuples = ('A6:14:00.000123Z', '06:14:0B', 'bad', '')
+        testtuples = ('A6:14:00.000123Z', '06:14:0B', '06:1 :02', 'bad', '')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
@@ -353,12 +353,13 @@ class TestTimeParserFunctions(unittest.TestCase):
                       '2004-W53-6T06:14:0B',
                       '2014-01-230T23:21:28+00',
                       '201401230T01:03:11.858714',
+                      '9999 W53T49',
                       'bad',
                       '')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
-                parse_time(testtuple, builder=None)
+                parse_datetime(testtuple, builder=None)
 
     def test_parse_datetime_mockbuilder(self):
         mockBuilder = mock.Mock()

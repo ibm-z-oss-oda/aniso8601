@@ -49,8 +49,9 @@ def get_time_resolution(isotimestr):
     timestr = _split_tz(isotimestr)[0].replace(':', '')
 
     if (len(timestr) == 0 or
-            timestr[0].isdigit() is False or
-            timestr[-1].isdigit() is False):
+        timestr[0].isdigit() is False or
+        timestr[-1].isdigit() is False or
+        len(timestr.split()) != 1):
         raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
                              .format(timestr))
 
