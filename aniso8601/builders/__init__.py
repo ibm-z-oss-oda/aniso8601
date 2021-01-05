@@ -7,6 +7,7 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import calendar
+import sys
 
 from aniso8601.exceptions import (DayOutOfBoundsError, MidnightBoundsError,
                                   MinutesOutOfBoundsError, MonthOutOfBoundsError,
@@ -17,72 +18,71 @@ from aniso8601.exceptions import (DayOutOfBoundsError, MidnightBoundsError,
 
 class BaseTimeBuilder(object):
     #Constants
-    CAST_FUNCTION_IDX = 0
-    CAST_ERROR_STRING_IDX = 1
-    RANGE_MIN_IDX = 2
-    RANGE_MAX_IDX = 3
-    OUT_OF_RANGE_EXCEPTION_IDX = 4
-    OUT_OF_RANGE_ERROR_STRING_IDX = 5
+    CAST_ERROR_STRING_IDX = 0
+    RANGE_MIN_IDX = 1
+    RANGE_MAX_IDX = 2
+    OUT_OF_RANGE_EXCEPTION_IDX = 3
+    OUT_OF_RANGE_ERROR_STRING_IDX = 4
 
     #Limit tuple format cast function, cast error string,
     #lower limit, upper limit, limit error string
-    DATE_YYYY_LIMITS = ((int,), 'Invalid year string.',
+    DATE_YYYY_LIMITS = ('Invalid year string.',
                         0000, 9999, YearOutOfBoundsError,
                         'Year must be between 1..9999.')
-    DATE_MM_LIMITS = ((int,), 'Invalid month string.',
+    DATE_MM_LIMITS = ('Invalid month string.',
                       1, 12, MonthOutOfBoundsError,
                       'Month must be between 1..12.')
-    DATE_DD_LIMITS = ((int,), 'Invalid day string.',
+    DATE_DD_LIMITS = ('Invalid day string.',
                       1, 31, DayOutOfBoundsError,
                       'Day must be between 1..31.')
-    DATE_WWW_LIMITS = ((int,), 'Invalid week string.',
+    DATE_WWW_LIMITS = ('Invalid week string.',
                        1, 53, WeekOutOfBoundsError,
                        'Week number must be between 1..53.')
-    DATE_D_LIMITS = ((int,), 'Invalid weekday string.',
+    DATE_D_LIMITS = ('Invalid weekday string.',
                      1, 7, DayOutOfBoundsError,
                      'Weekday number must be between 1..7.')
-    DATE_DDD_LIMITS = ((int,), 'Invalid ordinal day string.',
+    DATE_DDD_LIMITS = ('Invalid ordinal day string.',
                        1, 366, DayOutOfBoundsError,
                        'Ordinal day must be between 1..366.')
-    TIME_HH_LIMITS = ((float, int), 'Invalid hour string.',
+    TIME_HH_LIMITS = ('Invalid hour string.',
                       0, 24, HoursOutOfBoundsError,
                       'Hour must be between 0..24 with '
                       '24 representing midnight.')
-    TIME_MM_LIMITS = ((float, int), 'Invalid minute string.',
+    TIME_MM_LIMITS = ('Invalid minute string.',
                       0, 59, MinutesOutOfBoundsError,
                       'Minute must be between 0..59.')
-    TIME_SS_LIMITS = ((float, int), 'Invalid second string.',
+    TIME_SS_LIMITS = ('Invalid second string.',
                       0, 60, SecondsOutOfBoundsError,
                       'Second must be between 0..60 with '
                       '60 representing a leap second.')
-    TZ_HH_LIMITS = ((int,), 'Invalid timezone hour string.',
+    TZ_HH_LIMITS = ('Invalid timezone hour string.',
                     0, 23, HoursOutOfBoundsError,
                     'Hour must be between 0..23.')
-    TZ_MM_LIMITS = ((int,), 'Invalid timezone minute string.',
+    TZ_MM_LIMITS = ('Invalid timezone minute string.',
                     0, 59, MinutesOutOfBoundsError,
                     'Minute must be between 0..59.')
-    DURATION_PNY_LIMITS = ((float, int), 'Invalid year duration string.',
-                           None, None, None,
+    DURATION_PNY_LIMITS = ('Invalid year duration string.',
+                           None, None, YearOutOfBoundsError,
                            None)
-    DURATION_PNM_LIMITS = ((float, int), 'Invalid month duration string.',
-                           None, None, None,
+    DURATION_PNM_LIMITS = ('Invalid month duration string.',
+                           None, None, MonthOutOfBoundsError,
                            None)
-    DURATION_PNW_LIMITS = ((float, int), 'Invalid week duration string.',
-                           None, None, None,
+    DURATION_PNW_LIMITS = ('Invalid week duration string.',
+                           None, None, WeekOutOfBoundsError,
                            None)
-    DURATION_PND_LIMITS = ((float, int), 'Invalid day duration string.',
-                           None, None, None,
+    DURATION_PND_LIMITS = ('Invalid day duration string.',
+                           None, None, DayOutOfBoundsError,
                            None)
-    DURATION_TNH_LIMITS = ((float, int), 'Invalid hour duration string.',
-                           None, None, None,
+    DURATION_TNH_LIMITS = ('Invalid hour duration string.',
+                           None, None, HoursOutOfBoundsError,
                            None)
-    DURATION_TNM_LIMITS = ((float, int), 'Invalid minute duration string.',
-                           None, None, None,
+    DURATION_TNM_LIMITS = ('Invalid minute duration string.',
+                           None, None, MinutesOutOfBoundsError,
                            None)
-    DURATION_TNS_LIMITS = ((float, int), 'Invalid second duration string.',
-                           None, None, None,
+    DURATION_TNS_LIMITS = ('Invalid second duration string.',
+                           None, None, SecondsOutOfBoundsError,
                            None)
-    INTERVAL_RNN_LIMITS = ((int,), 'Invalid duration repetition string.',
+    INTERVAL_RNN_LIMITS = ('Invalid duration repetition string.',
                            0, None, NegativeDurationError,
                            'Duration repetition count must be positive.')
 
@@ -280,7 +280,6 @@ class BaseTimeBuilder(object):
     @classmethod
     def _range_check(cls, valuestr, rangetuple):
         #Returns casted value if in range, raises defined exceptions on failure
-        castfuncs = rangetuple[cls.CAST_FUNCTION_IDX]
         casterrorstring = rangetuple[cls.CAST_ERROR_STRING_IDX]
         rangemin = rangetuple[cls.RANGE_MIN_IDX]
         rangemax = rangetuple[cls.RANGE_MAX_IDX]
@@ -288,23 +287,30 @@ class BaseTimeBuilder(object):
         rangeerrorstring = rangetuple[cls.OUT_OF_RANGE_ERROR_STRING_IDX]
 
         if '.' in valuestr:
-            if float not in castfuncs:
-                raise ISOFormatError(casterrorstring)
-
             castfunc = float
-            fractionalcomponent = True
+
+            if rangemin is None:
+                rangemin = sys.float_info.min
+
+            if rangemax is None:
+                rangemax = sys.float_info.max
         else:
             castfunc = int
 
+            if rangemin is None:
+                rangemin = -sys.maxsize
+
+            if rangemax is None:
+                rangemax = sys.maxsize
+
         value = BaseTimeBuilder.cast(valuestr, castfunc, thrownmessage=casterrorstring)
 
-        if rangemin is not None:
-            if value < rangemin:
-                raise rangeexception(rangeerrorstring)
+        if value < rangemin:
+            raise rangeexception(rangeerrorstring)
 
-        if rangemax is not None:
-            if value > rangemax:
-                raise rangeexception(rangeerrorstring)
+
+        if value > rangemax:
+            raise rangeexception(rangeerrorstring)
 
         return value
 

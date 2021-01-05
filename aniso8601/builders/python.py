@@ -31,7 +31,7 @@ MICROSECONDS_PER_YEAR = 365 * MICROSECONDS_PER_DAY
 
 class PythonTimeBuilder(BaseTimeBuilder):
     #0000 (1 BC) is not representable as a Python date
-    DATE_YYYY_LIMITS = ((int,), 'Invalid year string.',
+    DATE_YYYY_LIMITS = ('Invalid year string.',
                         1, 9999, YearOutOfBoundsError,
                         'Year must be between 1..9999.')
 
