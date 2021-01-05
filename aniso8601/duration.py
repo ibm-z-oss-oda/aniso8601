@@ -37,7 +37,11 @@ def parse_duration(isodurationstr, builder=PythonTimeBuilder):
                           ['Y', 'M', 'D', 'H', 'S', 'W']) is True:
         return _parse_duration_prescribed(isodurationstr, builder)
 
-    return _parse_duration_combined(isodurationstr, builder)
+    if isodurationstr.find('T') != -1:
+        return _parse_duration_combined(isodurationstr, builder)
+
+    raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
+                          .format(isodurationstr))
 
 def _parse_duration_prescribed(durationstr, builder):
     #durationstr can be of the form PnYnMnDTnHnMnS or PnW
@@ -196,7 +200,7 @@ def _parse_duration_combined(durationstr, builder):
     #Period of the form P<date>T<time>
 
     #Split the string in to its component parts
-    datepart, timepart = durationstr[1:].split('T') #We skip the 'P'
+    datepart, timepart = durationstr[1:].split('T', maxsplit=1) #We skip the 'P'
 
     datevalue = parse_date(datepart, builder=TupleBuilder)
     timevalue = parse_time(timepart, builder=TupleBuilder)

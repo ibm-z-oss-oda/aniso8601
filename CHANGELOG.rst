@@ -15,6 +15,7 @@ Changes
 * Raise :code:`DayOutOfBoundsError` if ordinal day exceeds number of days in calendar year (366 now raises :code:`DayOutOfBoundsError` in non-leap year)
 * Raise :code:`ISOFormatError` when date or time string contains extra whitespace
 * Raise :code:`ISOFormatError` on multiple fraction separators (comma, full-stop) in a time string
+* Raise :code:`ISOFormatError` when duration contains multiple duration designators ("P"), or time designators ("T")
 
 Deprecation
 -----------
