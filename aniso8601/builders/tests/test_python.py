@@ -90,16 +90,6 @@ class TestPythonTimeBuilder(unittest.TestCase):
             self.assertEqual(result, testtuple[1])
             self.assertEqual(result.weekday(), testtuple[2])
 
-    def test_build_date_bounds_checking(self):
-        #0 isn't a valid year for a Python builder
-        with self.assertRaises(YearOutOfBoundsError):
-            PythonTimeBuilder.build_date(YYYY='0000')
-
-        #Leap year
-        #https://bitbucket.org/nielsenb/aniso8601/issues/14/parsing-ordinal-dates-should-only-allow
-        with self.assertRaises(DayOutOfBoundsError):
-            PythonTimeBuilder.build_date(YYYY='1981', DDD='366')
-
     def test_build_time(self):
         testtuples = (({}, datetime.time()),
                       ({'hh': '12.5'},
@@ -760,6 +750,16 @@ class TestPythonTimeBuilder(unittest.TestCase):
             result = PythonTimeBuilder.build_timezone(**testtuple[0])
             self.assertEqual(result.utcoffset(None), testtuple[1])
             self.assertEqual(result.tzname(None), testtuple[2])
+
+    def test_range_check_date(self):
+        #0 isn't a valid year for a Python builder
+        with self.assertRaises(YearOutOfBoundsError):
+            PythonTimeBuilder.build_date(YYYY='0000')
+
+        #Leap year
+        #https://bitbucket.org/nielsenb/aniso8601/issues/14/parsing-ordinal-dates-should-only-allow
+        with self.assertRaises(DayOutOfBoundsError):
+            PythonTimeBuilder.build_date(YYYY='1981', DDD='366')
 
     def test_build_week_date(self):
         weekdate = PythonTimeBuilder._build_week_date(2009, 1)
