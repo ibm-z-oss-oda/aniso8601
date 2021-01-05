@@ -761,6 +761,10 @@ class TestPythonTimeBuilder(unittest.TestCase):
         with self.assertRaises(DayOutOfBoundsError):
             PythonTimeBuilder.build_date(YYYY='1981', DDD='366')
 
+    def test_range_check_duration(self):
+        with self.assertRaises(WeekOutOfBoundsError):
+            PythonTimeBuilder.build_duration(PnW='9999999999999999999999')
+
     def test_build_week_date(self):
         weekdate = PythonTimeBuilder._build_week_date(2009, 1)
         self.assertEqual(weekdate, datetime.date(year=2008, month=12, day=29))
