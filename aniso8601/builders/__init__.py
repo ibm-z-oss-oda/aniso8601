@@ -263,7 +263,7 @@ class BaseTimeBuilder(object):
             cls._range_check(Rnn, cls.INTERVAL_RNN_LIMITS)
 
     @classmethod
-    def range_check_timezone(cls, negative=None, hh=None, mm=None,):
+    def range_check_timezone(cls, negative=None, hh=None, mm=None):
         if hh is not None:
             hhvalue = cls._range_check(hh, cls.TZ_HH_LIMITS)
 
