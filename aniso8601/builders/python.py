@@ -47,8 +47,9 @@ TIMEDELTA_MAX_DAYS = datetime.timedelta.max.days
 class PythonTimeBuilder(BaseTimeBuilder):
     #0000 (1 BC) is not representable as a Python date
     DATE_YYYY_LIMITS = ('Invalid year string.',
-                        1, 9999, YearOutOfBoundsError,
-                        'Year must be between 1..9999.')
+                        datetime.MINYEAR, datetime.MAXYEAR, YearOutOfBoundsError,
+                        'Year must be between {0}..{1}.'
+                        .format(datetime.MINYEAR, datetime.MAXYEAR))
 
     @classmethod
     @range_check_date
@@ -320,6 +321,11 @@ class PythonTimeBuilder(BaseTimeBuilder):
         if end is not None:
             #<duration>/<end>
             endobject = cls._build_object(end)
+
+            #Range check
+            if endobject.year - (durationobject.days // DAYS_PER_YEAR) < datetime.MINYEAR:
+                raise YearOutOfBoundsError('Interval end less than minimium date.')
+
             if end[-1] == 'date' and datetimerequired is True:
                 #<end> is a date, and <duration> requires datetime resolution
                 return (endobject,
@@ -332,6 +338,9 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
         #<start>/<duration>
         startobject = cls._build_object(start)
+
+        if startobject.year + (durationobject.days // DAYS_PER_YEAR) > datetime.MAXYEAR:
+            raise YearOutOfBoundsError('Interval end greater than maximum date.')
 
         if start[-1] == 'date' and datetimerequired is True:
             #<start> is a date, and <duration> requires datetime resolution

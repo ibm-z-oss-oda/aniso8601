@@ -17,6 +17,9 @@ Changes
 * Raise :code:`ISOFormatError` on multiple fraction separators (comma, full-stop) in a time string
 * Raise :code:`ISOFormatError` when duration contains multiple duration designators ("P"), or time designators ("T")
 * :code:`PythonTimeBuilder.build_duration` raises :code:`YearOutOfBoundsError`, :code:`MonthOutOfBoundsError`, :code:`WeekOutOfBoundsError`, :code:`HoursOutOfBoundsError`, :code:`MinutesOutOfBoundsError`, or :code:`SecondsOutOfBoundsError` when a given duration component would result in a :code:`timedelta` that would exceed the maximum size
+* Raise :code:`ISOFormatError` if number of delimiters is not exactly 1 in :code:`parse_interval`
+* Raise :code:`ISOFormatError` when either part of an interval string before of after the delimiter is empty
+* Raise :code:`YearOutOfBoundsError` in :code:`PythonTimeBuilder.build_interval` if an interval with a duration would exceed the maximum or minimum years for Python date objects
 
 Deprecation
 -----------

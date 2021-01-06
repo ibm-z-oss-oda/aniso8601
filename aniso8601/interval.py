@@ -39,10 +39,16 @@ def parse_interval(isointervalstr, intervaldelimiter='/',
     if len(isointervalstr) == 0:
         raise ISOFormatError('Interval string is empty.')
 
-    if intervaldelimiter not in isointervalstr:
+    intervaldelimitercount = isointervalstr.count(intervaldelimiter)
+
+    if intervaldelimitercount == 0:
         raise ISOFormatError('Interval delimiter "{0}" is not in interval '
                               'string "{1}".'
                              .format(intervaldelimiter, isointervalstr))
+
+    if intervaldelimitercount > 1:
+        raise ISOFormatError('{0} is not a valid ISO 8601 interval'
+                             .format(isointervalstr))
 
     if isointervalstr[0] == 'R':
         raise ISOFormatError('ISO 8601 repeating intervals must be parsed '
@@ -95,6 +101,10 @@ def _parse_interval(isointervalstr, builder, intervaldelimiter='/',
     #interval, and or the interval duration
 
     firstpart, secondpart = isointervalstr.split(intervaldelimiter)
+
+    if len(firstpart) == 0 or len(secondpart) == 0:
+        raise ISOFormatError('{0} is not a valid ISO 8601 interval'
+                             .format(isointervalstr))
 
     if firstpart[0] == 'P':
         #<duration>/<end>

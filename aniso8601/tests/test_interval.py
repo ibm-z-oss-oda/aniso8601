@@ -285,7 +285,7 @@ class TestIntervalParserFunctions(unittest.TestCase):
                 parse_interval(testtuple, builder=None)
 
     def test_parse_interval_badstr(self):
-        testtuples = ('bad', '')
+        testtuples = ('bad', '/', '0/0/0', '')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
