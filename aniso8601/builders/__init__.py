@@ -7,7 +7,6 @@
 # of the BSD license.  See the LICENSE file for details.
 
 import calendar
-import sys
 
 from aniso8601.exceptions import (DayOutOfBoundsError, MidnightBoundsError,
                                   MinutesOutOfBoundsError, MonthOutOfBoundsError,
@@ -288,28 +287,15 @@ class BaseTimeBuilder(object):
 
         if '.' in valuestr:
             castfunc = float
-
-            if rangemin is None:
-                rangemin = sys.float_info.min
-
-            if rangemax is None:
-                rangemax = sys.float_info.max
         else:
             castfunc = int
 
-            if rangemin is None:
-                rangemin = -sys.maxsize
-
-            if rangemax is None:
-                rangemax = sys.maxsize
-
         value = BaseTimeBuilder.cast(valuestr, castfunc, thrownmessage=casterrorstring)
 
-        if value < rangemin:
+        if rangemin is not None and value < rangemin:
             raise rangeexception(rangeerrorstring)
 
-
-        if value > rangemax:
+        if rangemax is not None and value > rangemax:
             raise rangeexception(rangeerrorstring)
 
         return value

@@ -15,7 +15,7 @@ from aniso8601.duration import (parse_duration, _parse_duration_prescribed,
                                 _parse_duration_prescribed_notime,
                                 _parse_duration_prescribed_time,
                                 _parse_duration_element,
-                                _has_any_component, _component_order_correct)
+                                _has_any_component)
 from aniso8601.tests.compat import mock
 
 class TestDurationParserFunctions(unittest.TestCase):
@@ -181,7 +181,10 @@ class TestDurationParserFunctions(unittest.TestCase):
             parse_duration('PT1S1H', builder=None)
 
     def test_parse_duration_badstr(self):
-        testtuples = ('PPPPPPPPPPPPPPPPPPPPPPPPPPPP', 'PTT', 'bad', '')
+        testtuples = ('PPPPPPPPPPPPPPPPPPPPPPPPPPPP', 'PTT',
+                      'PX7DDDTX8888UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU'
+                      'UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU8888888888888888H$H',
+                      'bad', '')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
@@ -498,13 +501,3 @@ class TestDurationParserFunctions(unittest.TestCase):
     def test_has_any_component(self):
         self.assertTrue(_has_any_component('P1Y', ['Y', 'M']))
         self.assertFalse(_has_any_component('P1Y', ['M', 'D']))
-
-    def test_component_order_correct(self):
-        self.assertTrue(_component_order_correct('P1Y1M1D',
-                                                 ['P', 'Y', 'M', 'D']))
-        self.assertTrue(_component_order_correct('P1Y1M',
-                                                 ['P', 'Y', 'M', 'D']))
-        self.assertFalse(_component_order_correct('P1D1Y1M',
-                                                  ['P', 'Y', 'M', 'D']))
-        self.assertFalse(_component_order_correct('PT1S1H',
-                                                  ['T', 'H', 'M', 'S']))

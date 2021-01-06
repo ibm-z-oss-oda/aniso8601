@@ -13,6 +13,7 @@ from aniso8601 import compat
 from aniso8601.exceptions import (DayOutOfBoundsError, HoursOutOfBoundsError,
                                   ISOFormatError, LeapSecondError,
                                   MidnightBoundsError, MinutesOutOfBoundsError,
+                                  MonthOutOfBoundsError,
                                   SecondsOutOfBoundsError,
                                   WeekOutOfBoundsError, YearOutOfBoundsError)
 from aniso8601.builders.python import PythonTimeBuilder
@@ -762,8 +763,23 @@ class TestPythonTimeBuilder(unittest.TestCase):
             PythonTimeBuilder.build_date(YYYY='1981', DDD='366')
 
     def test_range_check_duration(self):
+        with self.assertRaises(YearOutOfBoundsError):
+            PythonTimeBuilder.build_duration(PnY='3333333')
+
+        with self.assertRaises(MonthOutOfBoundsError):
+            PythonTimeBuilder.build_duration(PnM='2000000000000000')
+
+        with self.assertRaises(MonthOutOfBoundsError):
+            PythonTimeBuilder.build_duration(PnM='33333333.9')
+
         with self.assertRaises(WeekOutOfBoundsError):
             PythonTimeBuilder.build_duration(PnW='9999999999999999999999')
+
+        with self.assertRaises(DayOutOfBoundsError):
+            PythonTimeBuilder.build_duration(TnH='5511111511', TnM='1111177111777')
+
+        with self.assertRaises(MinutesOutOfBoundsError):
+            PythonTimeBuilder.build_duration(PnM='666', TnM='66666666666666666666666666666')
 
     def test_build_week_date(self):
         weekdate = PythonTimeBuilder._build_week_date(2009, 1)

@@ -16,7 +16,7 @@ Changes
 * Raise :code:`ISOFormatError` when date or time string contains extra whitespace
 * Raise :code:`ISOFormatError` on multiple fraction separators (comma, full-stop) in a time string
 * Raise :code:`ISOFormatError` when duration contains multiple duration designators ("P"), or time designators ("T")
-* Raise correct OutOfBounds errors when a cast would exceed the maximum int or float size
+* :code:`PythonTimeBuilder.build_duration` raises :code:`YearOutOfBoundsError`, :code:`MonthOutOfBoundsError`, :code:`WeekOutOfBoundsError`, :code:`HoursOutOfBoundsError`, :code:`MinutesOutOfBoundsError`, or :code:`SecondsOutOfBoundsError` when a given duration component would result in a :code:`timedelta` that would exceed the maximum size
 
 Deprecation
 -----------

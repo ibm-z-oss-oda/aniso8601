@@ -16,9 +16,22 @@ from aniso8601.exceptions import (DayOutOfBoundsError,
                                   HoursOutOfBoundsError,
                                   LeapSecondError, MidnightBoundsError,
                                   MinutesOutOfBoundsError,
+                                  MonthOutOfBoundsError,
                                   SecondsOutOfBoundsError,
                                   WeekOutOfBoundsError, YearOutOfBoundsError)
 from aniso8601.utcoffset import UTCOffset
+
+DAYS_PER_YEAR = 365
+DAYS_PER_MONTH = 30
+DAYS_PER_WEEK = 7
+
+HOURS_PER_DAY = 24
+
+MINUTES_PER_HOUR = 60
+MINUTES_PER_DAY = MINUTES_PER_HOUR * HOURS_PER_DAY
+
+SECONDS_PER_MINUTE = 60
+SECONDS_PER_DAY = MINUTES_PER_DAY * SECONDS_PER_MINUTE
 
 MICROSECONDS_PER_SECOND = int(1e6)
 
@@ -26,8 +39,10 @@ MICROSECONDS_PER_MINUTE = 60 * MICROSECONDS_PER_SECOND
 MICROSECONDS_PER_HOUR = 60 * MICROSECONDS_PER_MINUTE
 MICROSECONDS_PER_DAY = 24 * MICROSECONDS_PER_HOUR
 MICROSECONDS_PER_WEEK = 7 * MICROSECONDS_PER_DAY
-MICROSECONDS_PER_MONTH = 30 * MICROSECONDS_PER_DAY
-MICROSECONDS_PER_YEAR = 365 * MICROSECONDS_PER_DAY
+MICROSECONDS_PER_MONTH = DAYS_PER_MONTH * MICROSECONDS_PER_DAY
+MICROSECONDS_PER_YEAR = DAYS_PER_YEAR * MICROSECONDS_PER_DAY
+
+TIMEDELTA_MAX_DAYS = datetime.timedelta.max.days
 
 class PythonTimeBuilder(BaseTimeBuilder):
     #0000 (1 BC) is not representable as a Python date
@@ -165,29 +180,52 @@ class PythonTimeBuilder(BaseTimeBuilder):
         seconds = 0
         microseconds = 0
 
+        normalizeddays = 0 #Used in final range check
+
         if PnY is not None:
             if '.' in PnY:
                 years, remainingmicroseconds = cls._split_to_microseconds(PnY, MICROSECONDS_PER_YEAR, 'Invalid year string.')
+
+                if years * DAYS_PER_YEAR + remainingmicroseconds // MICROSECONDS_PER_YEAR > TIMEDELTA_MAX_DAYS:
+                    raise YearOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
                 microseconds += remainingmicroseconds
             else:
                 years = cls.cast(PnY, int,
                                  thrownmessage='Invalid year string.')
 
+                if years * DAYS_PER_YEAR > TIMEDELTA_MAX_DAYS:
+                    raise YearOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
         if PnM is not None:
             if '.' in PnM:
                 months, remainingmicroseconds = cls._split_to_microseconds(PnM, MICROSECONDS_PER_MONTH, 'Invalid month string.')
+
+                if months * DAYS_PER_MONTH + remainingmicroseconds // MICROSECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
+                    raise MonthOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
                 microseconds += remainingmicroseconds
             else:
                 months = cls.cast(PnM, int,
                                   thrownmessage='Invalid month string.')
 
+                if months * DAYS_PER_MONTH > TIMEDELTA_MAX_DAYS:
+                    raise MonthOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
         if PnW is not None:
             if '.' in PnW:
                 weeks, remainingmicroseconds = cls._split_to_microseconds(PnW, MICROSECONDS_PER_WEEK, 'Invalid week string.')
+
+                if weeks * DAYS_PER_WEEK + remainingmicroseconds // MICROSECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
+                    raise WeekOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
                 microseconds += remainingmicroseconds
             else:
                 weeks = cls.cast(PnW, int,
                                  thrownmessage='Invalid week string.')
+
+                if weeks * DAYS_PER_WEEK > TIMEDELTA_MAX_DAYS:
+                    raise WeekOutOfBoundsError('Duration exceeds maximum timedelta size.')
 
         if PnD is not None:
             if '.' in PnD:
@@ -205,6 +243,14 @@ class PythonTimeBuilder(BaseTimeBuilder):
                 hours = cls.cast(TnH, int,
                                  thrownmessage='Invalid hour string.')
 
+            #Range check into timedelta limits
+            extradays = hours // HOURS_PER_DAY
+
+            if (extradays) > TIMEDELTA_MAX_DAYS:
+                raise HoursOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
+            normalizeddays += extradays
+
         if TnM is not None:
             if '.' in TnM:
                 minutes, remainingmicroseconds = cls._split_to_microseconds(TnM, MICROSECONDS_PER_MINUTE, 'Invalid minute string.')
@@ -212,6 +258,14 @@ class PythonTimeBuilder(BaseTimeBuilder):
             else:
                 minutes = cls.cast(TnM, int,
                                    thrownmessage='Invalid minute string.')
+
+            #Range check into timedelta limits
+            extradays = minutes // MINUTES_PER_DAY
+
+            if (extradays) > TIMEDELTA_MAX_DAYS:
+                raise MinutesOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
+            normalizeddays += extradays
 
         if TnS is not None:
             if '.' in TnS:
@@ -221,10 +275,22 @@ class PythonTimeBuilder(BaseTimeBuilder):
                 seconds = cls.cast(TnS, int,
                                    thrownmessage='Invalid second string.')
 
+            #Range check into timedelta limits
+            extradays = seconds // SECONDS_PER_DAY
+
+            if (extradays) > TIMEDELTA_MAX_DAYS:
+                raise SecondsOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
+            normalizeddays += extradays
+
         years, months, weeks, days, hours, minutes, seconds, microseconds = PythonTimeBuilder._distribute_microseconds(microseconds, (years, months, weeks, days, hours, minutes, seconds), (MICROSECONDS_PER_YEAR, MICROSECONDS_PER_MONTH, MICROSECONDS_PER_WEEK, MICROSECONDS_PER_DAY, MICROSECONDS_PER_HOUR, MICROSECONDS_PER_MINUTE, MICROSECONDS_PER_SECOND))
 
         #Note that weeks can be handled without conversion to days
-        totaldays = years * 365 + months * 30 + days
+        totaldays = years * DAYS_PER_YEAR + months * DAYS_PER_MONTH + days
+
+        #Check against timedelta limits
+        if totaldays + normalizeddays > TIMEDELTA_MAX_DAYS:
+            raise DayOutOfBoundsError('Duration exceeds maximum timedelta size.')
 
         return datetime.timedelta(days=totaldays,
                                   seconds=seconds,
