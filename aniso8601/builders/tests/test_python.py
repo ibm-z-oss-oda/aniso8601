@@ -270,6 +270,10 @@ class TestPythonTimeBuilder(unittest.TestCase):
                         'TnH': '12', 'TnM': '30', 'TnS': '05.5'},
                        datetime.timedelta(days=1279, hours=12,
                                           minutes=30, seconds=5.5)),
+                      #Test timedelta limit
+                      ({'PnD': '999999999', 'TnH': '23', 'TnM': '59',
+                        'TnS': '59.999999'},
+                       datetime.timedelta.max),
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
                       ({'PnY': '0001', 'PnM': '02', 'PnD': '03',
