@@ -20,6 +20,8 @@ Changes
 * Raise :code:`ISOFormatError` if number of delimiters is not exactly 1 in :code:`parse_interval`
 * Raise :code:`ISOFormatError` when either part of an interval string before of after the delimiter is empty
 * Raise :code:`YearOutOfBoundsError` in :code:`PythonTimeBuilder.build_interval` if an interval with a duration would exceed the maximum or minimum years for Python date objects
+* Simplify :code:`parse_date` to build date parts while looping through the ISO 8601 string once, :code:`build_date` function will not be called with explicit :code:`None` arguments instead of date components not in the parsed string not being included in the call
+* Change :code:`get_date_resolution` to call :code:`parse_date` and return the resolution based on the smallest parsed component
 
 Deprecation
 -----------
