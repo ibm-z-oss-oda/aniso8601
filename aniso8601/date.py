@@ -115,7 +115,7 @@ def parse_date(isodatestr, builder=PythonTimeBuilder):
                 weekstr = componentstr[1:]
                 componentstr = ''
         elif yearstr is not None and monthstr is None and weekstr is None:
-            if len(componentstr) == 2 and (len(isodatestr[charidx + 1:]) >= 2 or (isodatestr[charidx - 2] == '-' and charidx == len(isodatestr) - 1)):
+            if len(componentstr) == 2 and (len(isodatestr[charidx + 1:]) in [2, 3] or (isodatestr[charidx - 2] == '-' and charidx == len(isodatestr) - 1)):
                 #YYYY-MM-DD
                 #YYYY-MM
                 monthstr = componentstr
