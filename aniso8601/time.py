@@ -15,6 +15,8 @@ from aniso8601.exceptions import ISOFormatError
 from aniso8601.resolution import TimeResolution
 from aniso8601.timezone import parse_timezone
 
+TIMEZONE_DELIMITERS = ['Z', '+', '-']
+
 def get_time_resolution(isotimestr):
     #Valid time formats are:
     #
@@ -43,9 +45,15 @@ def get_time_resolution(isotimestr):
     #hh:mm±hh
     #hhmm±hh
     #hh±hh
-    timestr = _process_timestr(isotimestr)[0]
+    isotimetuple = parse_time(isotimestr, builder=TupleBuilder)
 
-    return _get_time_resolution(timestr)
+    if isotimetuple[2] is not None:
+        return TimeResolution.Seconds
+
+    if isotimetuple[1] is not None:
+        return TimeResolution.Minutes
+
+    return TimeResolution.Hours
 
 def parse_time(isotimestr, builder=PythonTimeBuilder):
     #Given a string in any ISO 8601 time format, return a datetime.time object
@@ -77,61 +85,100 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
     #hh:mm±hh
     #hhmm±hh
     #hh±hh
-    timestr, tzstr = _process_timestr(isotimestr)
+    if is_string(isotimestr) is False:
+        raise ValueError('Time must be string.')
 
-    timeresolution = _get_time_resolution(timestr)
+    if len(isotimestr) == 0:
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
+                             .format(isotimestr))
+
+    timestr = normalize(isotimestr)
+
+    hourstr = None
+    minutestr = None
+    secondstr = None
+    tzstr = None
+
+    hasfractionalcomponent = False
+    parsingtz = False
+
+    #Consume the time components
+    componentstr = ''
+
+    for charidx, timechar in enumerate(timestr):
+        if timechar.isdigit():
+            componentstr += timechar
+        elif timechar == '.' and hasfractionalcomponent is False:
+            componentstr += timechar
+            hasfractionalcomponent = True
+        elif parsingtz is True and timechar == ':':
+            componentstr += timechar
+        elif timechar == ':' or timechar in TIMEZONE_DELIMITERS:
+            pass
+        else:
+            raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
+                                 .format(isotimestr))
+
+        parsecomponent = False
+
+        if parsingtz is False:
+            if len(componentstr) == 2 and charidx < len(isotimestr) - 1 and timestr[charidx + 1].isdigit():
+                #Lookahead, if we have two characters, and the next is a number, parse
+                parsecomponent = True
+            elif componentstr != '' and (timechar == ':' or timechar in TIMEZONE_DELIMITERS):
+                #If we've consumed characaters, and we hit a colon or TZ, parse
+                parsecomponent = True
+            elif charidx == len(timestr) - 1:
+                #We're at the end of the string, parse
+                parsecomponent = True
+
+        if parsecomponent is True and hasfractionalcomponent is True and '.' not in componentstr:
+            #Only parse a single fractional component
+            raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
+                                 .format(isotimestr))
+
+        if hourstr is None:
+            if parsecomponent is True:
+                hourstr = componentstr
+                componentstr = ''
+        elif hourstr is not None and minutestr is None and parsingtz is False:
+            if parsecomponent is True:
+                minutestr = componentstr
+                componentstr = ''
+        elif hourstr is not None and minutestr is not None and secondstr is None and parsingtz is False:
+            if parsecomponent is True:
+                secondstr = componentstr
+                componentstr = ''
+        elif hourstr is not None and tzstr is None and timechar in TIMEZONE_DELIMITERS:
+            #Avoid an error parsing 'Z' before parsingtz is set
+            pass
+        elif hourstr is not None and tzstr is None and parsingtz is True:
+            if charidx == len(timestr) - 1:
+                tzstr = componentstr
+                componentstr = ''
+                parsingtz = False
+        else:
+            raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
+                                 .format(isotimestr))
+
+        if timechar in TIMEZONE_DELIMITERS and parsingtz is False:
+            if timechar == 'Z':
+                tzstr = 'Z'
+                componentstr = ''
+            else:
+                parsingtz = True
+                componentstr = timechar
+
+    if componentstr != '':
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
+                             .format(isotimestr))
 
     if tzstr is None:
         tz = None
     else:
         tz = parse_timezone(tzstr, builder=TupleBuilder)
 
-    return _RESOLUTION_MAP[timeresolution](timestr, tz, builder)
-
-def _process_timestr(isotimestr):
-    #Return a normalized, "valid" (timestr, tzstr) tuple,
-    #or raise an appropriate exception
-    if is_string(isotimestr) is False:
-        raise ValueError('Time must be string.')
-
-    normalizedtimestr = normalize(isotimestr)
-
-    timestr, tzstr = _split_tz(normalizedtimestr)
-
-    timestr = timestr.replace(':', '')
-
-    if (len(timestr) == 0 or
-        timestr[0].isdigit() is False or
-        timestr[-1].isdigit() is False or
-        timestr.count('.') > 1 or
-        len(timestr.split()) != 1):
-        raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
-                             .format(timestr))
-
-    return (timestr, tzstr)
-
-def _get_time_resolution(timestr):
-    #Given a normalized, processed time string, return the resolution
-    #or raise an appropriate exception
-    timestrlen = find_separator(timestr) #Length of string without decimal
-
-    if timestrlen == -1:
-        timestrlen = len(timestr)
-
-    if timestrlen == 6:
-        #hhmmss
-        return TimeResolution.Seconds
-
-    if timestrlen == 4:
-        #hhmm
-        return TimeResolution.Minutes
-
-    if timestrlen == 2:
-        #hh
-        return TimeResolution.Hours
-
-    raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
-                         .format(timestr))
+    return builder.build_time(hh=hourstr, mm=minutestr, ss=secondstr, tz=tz)
 
 def parse_datetime(isodatetimestr, delimiter='T', builder=PythonTimeBuilder):
     #Given a string in ISO 8601 date time format, return a datetime.datetime
@@ -154,54 +201,3 @@ def parse_datetime(isodatetimestr, delimiter='T', builder=PythonTimeBuilder):
     timepart = parse_time(isotimestr, builder=TupleBuilder)
 
     return builder.build_datetime(datepart, timepart)
-
-def _parse_hour(timestr, tz, builder):
-    #Format must be hh or hh.
-    return builder.build_time(hh=timestr, tz=tz)
-
-def _parse_minute_time(timestr, tz, builder):
-    #Format must be hhmm, hhmm., hh:mm or hh:mm.
-    if timestr.count(':') == 1:
-        #hh:mm or hh:mm.
-        hourstr, minutestr = timestr.split(':')
-    else:
-        #hhmm or hhmm.
-        hourstr = timestr[0:2]
-        minutestr = timestr[2:]
-
-    return builder.build_time(hh=hourstr, mm=minutestr, tz=tz)
-
-def _parse_second_time(timestr, tz, builder):
-    #Format must be hhmmss, hhmmss., hh:mm:ss or hh:mm:ss.
-    if timestr.count(':') == 2:
-        #hh:mm:ss or hh:mm:ss.
-        hourstr, minutestr, secondstr = timestr.split(':')
-    else:
-        #hhmmss or hhmmss.
-        hourstr = timestr[0:2]
-        minutestr = timestr[2:4]
-        secondstr = timestr[4:]
-
-    return builder.build_time(hh=hourstr, mm=minutestr, ss=secondstr, tz=tz)
-
-def _split_tz(isotimestr):
-    if isotimestr.find('+') != -1:
-        timestr = isotimestr[0:isotimestr.find('+')]
-        tzstr = isotimestr[isotimestr.find('+'):]
-    elif isotimestr.find('-') != -1:
-        timestr = isotimestr[0:isotimestr.find('-')]
-        tzstr = isotimestr[isotimestr.find('-'):]
-    elif isotimestr.endswith('Z'):
-        timestr = isotimestr[:-1]
-        tzstr = 'Z'
-    else:
-        timestr = isotimestr
-        tzstr = None
-
-    return (timestr, tzstr)
-
-_RESOLUTION_MAP = {
-    TimeResolution.Hours: _parse_hour,
-    TimeResolution.Minutes: _parse_minute_time,
-    TimeResolution.Seconds: _parse_second_time
-}

@@ -11,9 +11,7 @@ import aniso8601
 
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.resolution import TimeResolution
-from aniso8601.time import (get_time_resolution, parse_datetime, parse_time,
-                            _parse_hour, _parse_minute_time,
-                            _parse_second_time, _split_tz)
+from aniso8601.time import get_time_resolution, parse_datetime, parse_time
 from aniso8601.tests.compat import mock
 
 class TestTimeResolutionFunctions(unittest.TestCase):
@@ -95,12 +93,14 @@ class TestTimeParserFunctions(unittest.TestCase):
                                            'ss': '11.858714', 'tz': None}),
                       ('14:43:59.9999997', {'hh': '14', 'mm': '43',
                                             'ss': '59.9999997', 'tz': None}),
-                      ('01:23', {'hh': '01', 'mm': '23', 'tz': None}),
-                      ('24:00', {'hh': '24', 'mm': '00', 'tz': None}),
+                      ('01:23', {'hh': '01', 'mm': '23',
+                                 'ss': None, 'tz': None}),
+                      ('24:00', {'hh': '24', 'mm': '00',
+                                 'ss': None, 'tz': None}),
                       ('01:23,4567', {'hh': '01', 'mm': '23.4567',
-                                      'tz': None}),
+                                      'ss': None, 'tz': None}),
                       ('01:23.4567', {'hh': '01', 'mm': '23.4567',
-                                      'tz': None}),
+                                      'ss': None, 'tz': None}),
                       ('012345', {'hh': '01', 'mm': '23',
                                   'ss': '45', 'tz': None}),
                       ('240000', {'hh': '24', 'mm': '00',
@@ -113,12 +113,18 @@ class TestTimeParserFunctions(unittest.TestCase):
                                          'ss': '11.858714', 'tz': None}),
                       ('144359.9999997', {'hh': '14', 'mm': '43',
                                           'ss': '59.9999997', 'tz': None}),
-                      ('0123', {'hh': '01', 'mm': '23', 'tz': None}),
-                      ('2400', {'hh': '24', 'mm': '00', 'tz': None}),
-                      ('01', {'hh': '01', 'tz': None}),
-                      ('24', {'hh': '24', 'tz': None}),
-                      ('12,5', {'hh': '12.5', 'tz': None}),
-                      ('12.5', {'hh': '12.5', 'tz': None}),
+                      ('0123', {'hh': '01', 'mm': '23',
+                                'ss': None, 'tz': None}),
+                      ('2400', {'hh': '24', 'mm': '00',
+                                'ss': None, 'tz': None}),
+                      ('01', {'hh': '01', 'mm': None,
+                              'ss': None, 'tz': None}),
+                      ('24', {'hh': '24', 'mm': None,
+                              'ss': None, 'tz': None}),
+                      ('12,5', {'hh': '12.5', 'mm': None,
+                                'ss': None, 'tz': None}),
+                      ('12.5', {'hh': '12.5', 'mm': None,
+                                'ss': None, 'tz': None}),
                       ('232128,512400+00:00', {'hh': '23', 'mm': '21',
                                                'ss': '28.512400',
                                                'tz': (False, None,
@@ -130,18 +136,22 @@ class TestTimeParserFunctions(unittest.TestCase):
                                                       '00', '00',
                                                       '+00:00', 'timezone')}),
                       ('0123,4567+00:00', {'hh': '01', 'mm': '23.4567',
+                                           'ss': None,
                                            'tz': (False, None,
                                                   '00', '00',
                                                   '+00:00', 'timezone')}),
                       ('0123.4567+00:00', {'hh': '01', 'mm': '23.4567',
+                                           'ss': None,
                                            'tz': (False, None,
                                                   '00', '00',
                                                   '+00:00', 'timezone')}),
-                      ('01,4567+00:00', {'hh': '01.4567',
+                      ('01,4567+00:00', {'hh': '01.4567', 'mm': None,
+                                         'ss': None,
                                          'tz': (False, None,
                                                 '00', '00',
                                                 '+00:00', 'timezone')}),
-                      ('01.4567+00:00', {'hh': '01.4567',
+                      ('01.4567+00:00', {'hh': '01.4567', 'mm': None,
+                                         'ss': None,
                                          'tz': (False, None,
                                                 '00', '00',
                                                 '+00:00', 'timezone')}),
@@ -162,14 +172,17 @@ class TestTimeParserFunctions(unittest.TestCase):
                                                         '+00:00',
                                                         'timezone')}),
                       ('01:23+00:00', {'hh': '01', 'mm': '23',
+                                       'ss': None,
                                        'tz': (False, None,
                                               '00', '00',
                                               '+00:00', 'timezone')}),
                       ('24:00+00:00', {'hh': '24', 'mm': '00',
+                                       'ss': None,
                                        'tz': (False, None,
                                               '00', '00',
                                               '+00:00', 'timezone')}),
                       ('01:23.4567+00:00', {'hh': '01', 'mm': '23.4567',
+                                            'ss': None,
                                             'tz': (False, None,
                                                    '00', '00',
                                                    '+00:00', 'timezone')}),
@@ -216,7 +229,7 @@ class TestTimeParserFunctions(unittest.TestCase):
 
     def test_parse_time_badstr(self):
         testtuples = ('A6:14:00.000123Z', '06:14:0B', '06:1 :02',
-                      '0000,70:24,9', 'bad', '')
+                      '0000,70:24,9', '00.27:5332', 'bad', '')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
@@ -378,143 +391,3 @@ class TestTimeParserFunctions(unittest.TestCase):
 
         self.assertEqual(result, expectedargs)
         mockBuilder.build_datetime.assert_called_once_with(*expectedargs)
-
-    def test_parse_hour(self):
-        testtuples = (('01', None, {'hh': '01', 'tz': None}),
-                      ('24', None, {'hh': '24', 'tz': None}),
-                      ('01.4567', None, {'hh': '01.4567', 'tz': None}),
-                      ('12.5', None, {'hh': '12.5', 'tz': None}),
-                      ('08', (True, None, '12', '34', '-12:34', 'timezone'),
-                       {'hh': '08', 'tz':
-                        (True, None, '12', '34', '-12:34', 'timezone')}))
-
-        for testtuple in testtuples:
-            mockBuilder = mock.Mock()
-
-            mockBuilder.build_time.return_value = testtuple[2]
-
-            result = _parse_hour(testtuple[0], testtuple[1], mockBuilder)
-
-            self.assertEqual(result, testtuple[2])
-            mockBuilder.build_time.assert_called_once_with(**testtuple[2])
-
-    def test_parse_minute_time(self):
-        testtuples = (('01:23', None, {'hh': '01', 'mm': '23', 'tz': None}),
-                      ('24:00', None, {'hh': '24', 'mm': '00', 'tz': None}),
-                      ('01:23.4567', None, {'hh': '01', 'mm': '23.4567',
-                                            'tz': None}),
-                      ('0123', None, {'hh': '01', 'mm': '23', 'tz': None}),
-                      ('2400', None, {'hh': '24', 'mm': '00', 'tz': None}),
-                      ('0123.4567', None, {'hh': '01', 'mm': '23.4567',
-                                           'tz': None}),
-                      ('08:13', (True, None, '12', '34', '-12:34', 'timezone'),
-                       {'hh': '08', 'mm': '13',
-                        'tz': (True, None, '12', '34', '-12:34', 'timezone')}))
-
-        for testtuple in testtuples:
-            mockBuilder = mock.Mock()
-
-            mockBuilder.build_time.return_value = testtuple[2]
-
-            result = _parse_minute_time(testtuple[0], testtuple[1],
-                                        mockBuilder)
-
-            self.assertEqual(result, testtuple[2])
-            mockBuilder.build_time.assert_called_once_with(**testtuple[2])
-
-    def test_parse_second_time(self):
-        testtuples = (('01:23:45', None, {'hh': '01', 'mm': '23',
-                                          'ss': '45', 'tz': None}),
-                      ('24:00:00', None, {'hh': '24', 'mm': '00',
-                                          'ss': '00', 'tz': None}),
-                      ('23:21:28.512400', None, {'hh': '23', 'mm': '21',
-                                                 'ss': '28.512400',
-                                                 'tz': None}),
-                      ('14:43:59.9999997', None, {'hh': '14', 'mm': '43',
-                                                  'ss': '59.9999997',
-                                                  'tz': None}),
-                      ('012345', None, {'hh': '01', 'mm': '23',
-                                        'ss': '45', 'tz': None}),
-                      ('240000', None, {'hh': '24', 'mm': '00',
-                                        'ss': '00', 'tz': None}),
-                      ('232128.512400', None, {'hh': '23', 'mm': '21',
-                                               'ss': '28.512400', 'tz': None}),
-                      ('144359.9999997', None, {'hh': '14', 'mm': '43',
-                                                'ss': '59.9999997',
-                                                'tz': None}),
-                      ('08:22:21',
-                       (True, None, '12', '34', '-12:34', 'timezone'),
-                       {'hh': '08', 'mm': '22', 'ss': '21',
-                        'tz': (True, None, '12', '34', '-12:34', 'timezone')}))
-
-        for testtuple in testtuples:
-            mockBuilder = mock.Mock()
-
-            mockBuilder.build_time.return_value = testtuple[2]
-
-            result = _parse_second_time(testtuple[0], testtuple[1],
-                                        mockBuilder)
-
-            self.assertEqual(result, testtuple[2])
-            mockBuilder.build_time.assert_called_once_with(**testtuple[2])
-
-    def test_split_tz(self):
-        self.assertEqual(_split_tz('01:23:45'), ('01:23:45', None))
-
-        self.assertEqual(_split_tz('24:00:00'), ('24:00:00', None))
-
-        self.assertEqual(_split_tz('23:21:28.512400'),
-                         ('23:21:28.512400', None))
-
-        self.assertEqual(_split_tz('01:23'), ('01:23', None))
-
-        self.assertEqual(_split_tz('24:00'), ('24:00', None))
-
-        self.assertEqual(_split_tz('01:23.4567'), ('01:23.4567', None))
-
-        self.assertEqual(_split_tz('012345'), ('012345', None))
-
-        self.assertEqual(_split_tz('240000'), ('240000', None))
-
-        self.assertEqual(_split_tz('0123'), ('0123', None))
-
-        self.assertEqual(_split_tz('2400'), ('2400', None))
-
-        self.assertEqual(_split_tz('01'), ('01', None))
-
-        self.assertEqual(_split_tz('24'), ('24', None))
-
-        self.assertEqual(_split_tz('12.5'), ('12.5', None))
-
-        self.assertEqual(_split_tz('232128.512400+00:00'),
-                         ('232128.512400', '+00:00'))
-
-        self.assertEqual(_split_tz('0123.4567+00:00'), ('0123.4567', '+00:00'))
-
-        self.assertEqual(_split_tz('01.4567+00:00'), ('01.4567', '+00:00'))
-
-        self.assertEqual(_split_tz('01:23:45+00:00'), ('01:23:45', '+00:00'))
-
-        self.assertEqual(_split_tz('24:00:00+00:00'), ('24:00:00', '+00:00'))
-
-        self.assertEqual(_split_tz('23:21:28.512400+00:00'),
-                         ('23:21:28.512400', '+00:00'))
-
-        self.assertEqual(_split_tz('01:23+00:00'), ('01:23', '+00:00'))
-
-        self.assertEqual(_split_tz('24:00+00:00'), ('24:00', '+00:00'))
-
-        self.assertEqual(_split_tz('01:23.4567+00:00'),
-                         ('01:23.4567', '+00:00'))
-
-        self.assertEqual(_split_tz('23:21:28.512400+11:15'),
-                         ('23:21:28.512400', '+11:15'))
-
-        self.assertEqual(_split_tz('23:21:28.512400-12:34'),
-                         ('23:21:28.512400', '-12:34'))
-
-        self.assertEqual(_split_tz('23:21:28.512400Z'),
-                         ('23:21:28.512400', 'Z'))
-
-        self.assertEqual(_split_tz('06:14:00.000123Z'),
-                         ('06:14:00.000123', 'Z'))
