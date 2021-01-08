@@ -8,7 +8,7 @@
 
 import datetime
 
-from aniso8601.builders import (BaseTimeBuilder, TupleBuilder,
+from aniso8601.builders import (BaseTimeBuilder, Limit, TupleBuilder,
                                 range_check_date, range_check_duration,
                                 range_check_repeating_interval,
                                 range_check_time, range_check_timezone)
@@ -46,10 +46,10 @@ TIMEDELTA_MAX_DAYS = datetime.timedelta.max.days
 
 class PythonTimeBuilder(BaseTimeBuilder):
     #0000 (1 BC) is not representable as a Python date
-    DATE_YYYY_LIMITS = ('Invalid year string.',
-                        datetime.MINYEAR, datetime.MAXYEAR, YearOutOfBoundsError,
-                        'Year must be between {0}..{1}.'
-                        .format(datetime.MINYEAR, datetime.MAXYEAR))
+    DATE_YYYY_LIMIT = Limit('Invalid year string.',
+                            datetime.MINYEAR, datetime.MAXYEAR, YearOutOfBoundsError,
+                            'Year must be between {0}..{1}.'
+                            .format(datetime.MINYEAR, datetime.MAXYEAR))
 
     @classmethod
     @range_check_date
