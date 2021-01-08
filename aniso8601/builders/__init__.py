@@ -16,7 +16,8 @@ from aniso8601.exceptions import (DayOutOfBoundsError, MidnightBoundsError,
                                   YearOutOfBoundsError)
 from collections import namedtuple
 
-Limit = namedtuple('Limit', ['casterrorstring', 'min', 'max', 'rangeexception', 'rangeerrorstring'])
+Limit = namedtuple('Limit', ['casterrorstring', 'min', 'max',
+                             'rangeexception', 'rangeerrorstring'])
 
 class BaseTimeBuilder(object):
     #Limit tuple format cast function, cast error string,
