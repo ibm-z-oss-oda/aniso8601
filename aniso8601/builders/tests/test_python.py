@@ -789,6 +789,9 @@ class TestPythonTimeBuilder(unittest.TestCase):
         with self.assertRaises(YearOutOfBoundsError):
             PythonTimeBuilder.build_interval(start=('7', None, None, None, None, None, 'date'), duration=(None, None, None, '3000010', None, None, None, 'duration'))
 
+        with self.assertRaises(YearOutOfBoundsError):
+            PythonTimeBuilder.build_interval(end=('1', None, None, None, None, None, 'date'), duration=(None, None, None, None, None, None, '31525376629', 'duration'))
+
     def test_build_week_date(self):
         weekdate = PythonTimeBuilder._build_week_date(2009, 1)
         self.assertEqual(weekdate, datetime.date(year=2008, month=12, day=29))

@@ -323,14 +323,25 @@ class PythonTimeBuilder(BaseTimeBuilder):
             endobject = cls._build_object(end)
 
             #Range check
-            if endobject.year - (durationobject.days // DAYS_PER_YEAR) < datetime.MINYEAR:
-                raise YearOutOfBoundsError('Interval end less than minimium date.')
+            if end[-1] == 'date':
+                enddatetime = cls.build_datetime(end, TupleBuilder.build_time())
 
-            if end[-1] == 'date' and datetimerequired is True:
-                #<end> is a date, and <duration> requires datetime resolution
-                return (endobject,
-                        cls.build_datetime(end, TupleBuilder.build_time())
-                        - durationobject)
+                if enddatetime - datetime.datetime.min < durationobject:
+                    raise YearOutOfBoundsError('Interval end less than minimium date.')
+
+                if datetimerequired is True:
+                    #<end> is a date, and <duration> requires datetime resolution
+                    return (endobject,
+                            cls.build_datetime(end, TupleBuilder.build_time())
+                            - durationobject)
+            else:
+                mindatetime = datetime.datetime.min
+
+                if end[1][3] is not None:
+                    mindatetime = mindatetime.replace(tzinfo=endobject.tzinfo)
+
+                if endobject - mindatetime < durationobject:
+                    raise YearOutOfBoundsError('Interval end less than minimium date.')
 
             return (endobject,
                     endobject
@@ -339,14 +350,26 @@ class PythonTimeBuilder(BaseTimeBuilder):
         #<start>/<duration>
         startobject = cls._build_object(start)
 
-        if startobject.year + (durationobject.days // DAYS_PER_YEAR) > datetime.MAXYEAR:
-            raise YearOutOfBoundsError('Interval end greater than maximum date.')
+        #Range check
+        if start[-1] == 'date':
+            startdatetime = cls.build_datetime(start, TupleBuilder.build_time())
 
-        if start[-1] == 'date' and datetimerequired is True:
-            #<start> is a date, and <duration> requires datetime resolution
-            return (startobject,
-                    cls.build_datetime(start, TupleBuilder.build_time())
-                    + durationobject)
+            if datetime.datetime.max - startdatetime < durationobject:
+                raise YearOutOfBoundsError('Interval end greater than maximum date.')
+
+            if datetimerequired is True:
+                #<start> is a date, and <duration> requires datetime resolution
+                return (startobject,
+                        cls.build_datetime(start, TupleBuilder.build_time())
+                        + durationobject)
+        else:
+            maxdatetime = datetime.datetime.max
+
+            if start[1][3] is not None:
+                maxdatetime = maxdatetime.replace(tzinfo=startobject.tzinfo)
+
+            if maxdatetime - startobject < durationobject:
+                raise YearOutOfBoundsError('Interval end greater than maximum date.')
 
         return (startobject,
                 startobject
