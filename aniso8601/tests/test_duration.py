@@ -14,7 +14,6 @@ from aniso8601.duration import (parse_duration, _parse_duration_prescribed,
                                 _parse_duration_combined,
                                 _parse_duration_prescribed_notime,
                                 _parse_duration_prescribed_time,
-                                _parse_duration_element,
                                 _has_any_component)
 from aniso8601.tests.compat import mock
 
@@ -481,22 +480,6 @@ class TestDurationParserFunctions(unittest.TestCase):
         #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
         with self.assertRaises(ISOFormatError):
             _parse_duration_combined('P0003-06-04T12:30:05.5asdfasdf', None)
-
-    def test_parse_duration_element(self):
-        testtuples = (('P1Y2M3D', 'Y', '1'),
-                      ('P1Y2M3D', 'M', '2'),
-                      ('P1Y2M3D', 'D', '3'),
-                      ('PT4H54M6,5S', 'H', '4'),
-                      ('PT4H54M6,5S', 'M', '54'),
-                      ('PT4H54M6,5S', 'S', '6.5'),
-                      ('T4H5M6.1234S', 'H', '4'),
-                      ('T4H5M6.1234S', 'M', '5'),
-                      ('T4H5M6.1234S', 'S', '6.1234'))
-
-        for testtuple in testtuples:
-            self.assertEqual(_parse_duration_element(testtuple[0],
-                                                     testtuple[1]),
-                             testtuple[2])
 
     def test_has_any_component(self):
         self.assertTrue(_has_any_component('P1Y', ['Y', 'M']))

@@ -219,28 +219,6 @@ def _parse_duration_combined(durationstr, builder):
                                   PnD=datevalue[2], TnH=timevalue[0],
                                   TnM=timevalue[1], TnS=timevalue[2])
 
-def _parse_duration_element(durationstr, elementstr):
-    #Extracts the specified portion of a duration, for instance, given:
-    #durationstr = 'T4H5M6.1234S'
-    #elementstr = 'H'
-    #
-    #returns 4
-    #
-    #Note that the string must start with a character, so its assumed the
-    #full duration string would be split at the 'T'
-
-    durationstartindex = 0
-    durationendindex = durationstr.find(elementstr)
-
-    for characterindex in compat.range(durationendindex - 1, 0, -1):
-        if durationstr[characterindex].isalpha() is True:
-            durationstartindex = characterindex
-            break
-
-    durationstartindex += 1
-
-    return normalize(durationstr[durationstartindex:durationendindex])
-
 def _has_any_component(durationstr, components):
     #Given a duration string, and a list of components, returns True
     #if any of the listed components are present, False otherwise.
