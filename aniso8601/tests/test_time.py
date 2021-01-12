@@ -9,6 +9,8 @@
 import unittest
 import aniso8601
 
+from aniso8601.builders import (DateTuple, DatetimeTuple, TimeTuple,
+                                TimezoneTuple)
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.resolution import TimeResolution
 from aniso8601.time import get_time_resolution, parse_datetime, parse_time
@@ -127,87 +129,84 @@ class TestTimeParserFunctions(unittest.TestCase):
                                 'ss': None, 'tz': None}),
                       ('232128,512400+00:00', {'hh': '23', 'mm': '21',
                                                'ss': '28.512400',
-                                               'tz': (False, None,
-                                                      '00', '00',
-                                                      '+00:00', 'timezone')}),
+                                               'tz': TimezoneTuple(False, None,
+                                                                   '00', '00',
+                                                                   '+00:00')}),
                       ('232128.512400+00:00', {'hh': '23', 'mm': '21',
                                                'ss': '28.512400',
-                                               'tz': (False, None,
-                                                      '00', '00',
-                                                      '+00:00', 'timezone')}),
+                                               'tz': TimezoneTuple(False, None,
+                                                                   '00', '00',
+                                                                   '+00:00')}),
                       ('0123,4567+00:00', {'hh': '01', 'mm': '23.4567',
                                            'ss': None,
-                                           'tz': (False, None,
-                                                  '00', '00',
-                                                  '+00:00', 'timezone')}),
+                                           'tz': TimezoneTuple(False, None,
+                                                               '00', '00',
+                                                               '+00:00')}),
                       ('0123.4567+00:00', {'hh': '01', 'mm': '23.4567',
                                            'ss': None,
-                                           'tz': (False, None,
-                                                  '00', '00',
-                                                  '+00:00', 'timezone')}),
+                                           'tz': TimezoneTuple(False, None,
+                                                               '00', '00',
+                                                               '+00:00')}),
                       ('01,4567+00:00', {'hh': '01.4567', 'mm': None,
                                          'ss': None,
-                                         'tz': (False, None,
-                                                '00', '00',
-                                                '+00:00', 'timezone')}),
+                                         'tz': TimezoneTuple(False, None,
+                                                             '00', '00',
+                                                             '+00:00')}),
                       ('01.4567+00:00', {'hh': '01.4567', 'mm': None,
                                          'ss': None,
-                                         'tz': (False, None,
-                                                '00', '00',
-                                                '+00:00', 'timezone')}),
+                                         'tz': TimezoneTuple(False, None,
+                                                             '00', '00',
+                                                             '+00:00')}),
                       ('01:23:45+00:00', {'hh': '01', 'mm': '23',
                                           'ss': '45',
-                                          'tz': (False, None,
-                                                 '00', '00',
-                                                 '+00:00', 'timezone')}),
+                                          'tz': TimezoneTuple(False, None,
+                                                              '00', '00',
+                                                              '+00:00')}),
                       ('24:00:00+00:00', {'hh': '24', 'mm': '00',
                                           'ss': '00',
-                                          'tz': (False, None,
-                                                 '00', '00',
-                                                 '+00:00', 'timezone')}),
+                                          'tz': TimezoneTuple(False, None,
+                                                              '00', '00',
+                                                              '+00:00')}),
                       ('23:21:28.512400+00:00', {'hh': '23', 'mm': '21',
                                                  'ss': '28.512400',
-                                                 'tz': (False, None,
-                                                        '00', '00',
-                                                        '+00:00',
-                                                        'timezone')}),
+                                                 'tz': TimezoneTuple(False, None,
+                                                                    '00', '00',
+                                                                    '+00:00')}),
                       ('01:23+00:00', {'hh': '01', 'mm': '23',
                                        'ss': None,
-                                       'tz': (False, None,
-                                              '00', '00',
-                                              '+00:00', 'timezone')}),
+                                       'tz': TimezoneTuple(False, None,
+                                                           '00', '00',
+                                                           '+00:00')}),
                       ('24:00+00:00', {'hh': '24', 'mm': '00',
                                        'ss': None,
-                                       'tz': (False, None,
-                                              '00', '00',
-                                              '+00:00', 'timezone')}),
+                                       'tz': TimezoneTuple(False, None,
+                                                           '00', '00',
+                                                           '+00:00')}),
                       ('01:23.4567+00:00', {'hh': '01', 'mm': '23.4567',
                                             'ss': None,
-                                            'tz': (False, None,
-                                                   '00', '00',
-                                                   '+00:00', 'timezone')}),
+                                            'tz': TimezoneTuple(False, None,
+                                                                '00', '00',
+                                                                '+00:00')}),
                       ('23:21:28.512400+11:15', {'hh': '23', 'mm': '21',
                                                  'ss': '28.512400',
-                                                 'tz': (False, None,
-                                                        '11', '15',
-                                                        '+11:15',
-                                                        'timezone')}),
+                                                 'tz': TimezoneTuple(False, None,
+                                                                     '11', '15',
+                                                                     '+11:15')}),
                       ('23:21:28.512400-12:34', {'hh': '23', 'mm': '21',
                                                  'ss': '28.512400',
-                                                 'tz': (True, None,
-                                                        '12', '34',
-                                                        '-12:34',
-                                                        'timezone')}),
+                                                 'tz': TimezoneTuple(True, None,
+                                                                     '12', '34',
+                                                                     '-12:34')}),
                       ('23:21:28.512400Z', {'hh': '23', 'mm': '21',
                                             'ss': '28.512400',
-                                            'tz': (False, True,
-                                                   None, None,
-                                                   'Z', 'timezone')}),
+                                            'tz': TimezoneTuple(False, True,
+                                                                None, None,
+                                                                'Z')}),
                       ('06:14:00.000123Z', {'hh': '06', 'mm': '14',
                                             'ss': '00.000123',
-                                            'tz': (False, True,
-                                                   None, None,
-                                                   'Z', 'timezone')}))
+                                            'tz': TimezoneTuple(False, True,
+                                                                None, None,
+                                                                'Z')}))
 
         for testtuple in testtuples:
             with mock.patch.object(aniso8601.time.PythonTimeBuilder,
@@ -250,7 +249,7 @@ class TestTimeParserFunctions(unittest.TestCase):
         mockBuilder = mock.Mock()
 
         expectedargs = {'hh': '23', 'mm': '21', 'ss': '28.512400',
-                        'tz': (False, None, '00', '00', '+00:00', 'timezone')}
+                        'tz': TimezoneTuple(False, None, '00', '00', '+00:00')}
 
         mockBuilder.build_time.return_value = expectedargs
 
@@ -262,7 +261,7 @@ class TestTimeParserFunctions(unittest.TestCase):
         mockBuilder = mock.Mock()
 
         expectedargs = {'hh': '23', 'mm': '21', 'ss': '28.512400',
-                        'tz': (False, None, '11', '15', '+11:15', 'timezone')}
+                        'tz': TimezoneTuple(False, None, '11', '15', '+11:15')}
 
         mockBuilder.build_time.return_value = expectedargs
 
@@ -273,33 +272,32 @@ class TestTimeParserFunctions(unittest.TestCase):
 
     def test_parse_datetime(self):
         testtuples = (('2019-06-05T01:03:11,858714',
-                       (('2019', '06', '05', None, None, None, 'date'),
-                        ('01', '03', '11.858714',
-                         None, 'time'))),
+                       (DateTuple('2019', '06', '05', None, None, None),
+                        TimeTuple('01', '03', '11.858714',
+                                  None))),
                       ('2019-06-05T01:03:11.858714',
-                       (('2019', '06', '05', None, None, None, 'date'),
-                        ('01', '03', '11.858714',
-                         None, 'time'))),
+                       (DateTuple('2019', '06', '05', None, None, None),
+                        TimeTuple('01', '03', '11.858714', None))),
                       ('1981-04-05T23:21:28.512400Z',
-                       (('1981', '04', '05', None, None, None, 'date'),
-                        ('23', '21', '28.512400',
-                         (False, True, None, None, 'Z', 'timezone'),
-                         'time'))),
+                       (DateTuple('1981', '04', '05', None, None, None),
+                        TimeTuple('23', '21', '28.512400',
+                                  TimezoneTuple(False, True, None,
+                                                None, 'Z')))),
                       ('1981095T23:21:28.512400-12:34',
-                       (('1981', None, None, None, None, '095', 'date'),
-                        ('23', '21', '28.512400',
-                         (True, None, '12', '34', '-12:34', 'timezone'),
-                         'time'))),
+                       (DateTuple('1981', None, None, None, None, '095'),
+                        TimeTuple('23', '21', '28.512400',
+                                  TimezoneTuple(True, None, '12',
+                                                '34', '-12:34')))),
                       ('19810405T23:21:28+00',
-                       (('1981', '04', '05', None, None, None, 'date'),
-                        ('23', '21', '28',
-                         (False, None, '00', None, '+00', 'timezone'),
-                         'time'))),
+                       (DateTuple('1981', '04', '05', None, None, None),
+                        TimeTuple('23', '21', '28',
+                                  TimezoneTuple(False, None, '00',
+                                                None, '+00')))),
                       ('19810405T23:21:28+00:00',
-                       (('1981', '04', '05', None, None, None, 'date'),
-                        ('23', '21', '28',
-                         (False, None, '00', '00', '+00:00', 'timezone'),
-                         'time'))))
+                       (DateTuple('1981', '04', '05', None, None, None),
+                        TimeTuple('23', '21', '28',
+                                  TimezoneTuple(False, None, '00',
+                                                '00', '+00:00')))))
 
         for testtuple in testtuples:
             with mock.patch.object(aniso8601.time.PythonTimeBuilder,
@@ -313,10 +311,10 @@ class TestTimeParserFunctions(unittest.TestCase):
             mockBuildDateTime.assert_called_once_with(*testtuple[1])
 
     def test_parse_datetime_spacedelimited(self):
-        expectedargs = (('2004', None, None, '53', '6', None, 'date'),
-                        ('23', '21', '28.512400',
-                         (True, None, '12', '34', '-12:34', 'timezone'),
-                         'time'))
+        expectedargs = (DateTuple('2004', None, None, '53', '6', None),
+                        TimeTuple('23', '21', '28.512400',
+                                  TimezoneTuple(True, None, '12',
+                                                '34', '-12:34')))
 
         with mock.patch.object(aniso8601.time.PythonTimeBuilder,
                                'build_datetime') as mockBuildDateTime:
@@ -330,10 +328,9 @@ class TestTimeParserFunctions(unittest.TestCase):
         mockBuildDateTime.assert_called_once_with(*expectedargs)
 
     def test_parse_datetime_commadelimited(self):
-        expectedargs = (('1981', '04', '05', None, None, None, 'date'),
-                        ('23', '21', '28.512400',
-                         (False, True, None, None, 'Z', 'timezone'),
-                         'time'))
+        expectedargs = (DateTuple('1981', '04', '05', None, None, None),
+                        TimeTuple('23', '21', '28.512400',
+                                  TimezoneTuple(False, True, None, None, 'Z')))
 
         with mock.patch.object(aniso8601.time.PythonTimeBuilder,
                                'build_datetime') as mockBuildDateTime:
@@ -379,10 +376,10 @@ class TestTimeParserFunctions(unittest.TestCase):
     def test_parse_datetime_mockbuilder(self):
         mockBuilder = mock.Mock()
 
-        expectedargs = (('1981', None, None, None, None, '095', 'date'),
-                        ('23', '21', '28.512400',
-                         (True, None, '12', '34', '-12:34', 'timezone'),
-                         'time'))
+        expectedargs = (DateTuple('1981', None, None, None, None, '095'),
+                        TimeTuple('23', '21', '28.512400',
+                                  TimezoneTuple(True, None, '12', '34',
+                                                '-12:34')))
 
         mockBuilder.build_datetime.return_value = expectedargs
 

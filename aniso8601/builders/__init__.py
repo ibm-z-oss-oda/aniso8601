@@ -16,6 +16,16 @@ from aniso8601.exceptions import (DayOutOfBoundsError, MidnightBoundsError,
                                   YearOutOfBoundsError)
 from collections import namedtuple
 
+DateTuple = namedtuple('Date', ['YYYY', 'MM', 'DD', 'Www', 'D', 'DDD'])
+TimeTuple = namedtuple('Time', ['hh', 'mm', 'ss', 'tz'])
+DatetimeTuple = namedtuple('Datetime', ['date', 'time'])
+DurationTuple = namedtuple('Duration', ['PnY', 'PnM', 'PnW', 'PnD',
+                                        'TnH', 'TnM', 'TnS'])
+IntervalTuple = namedtuple('Interval', ['start', 'end', 'duration'])
+RepeatingIntervalTuple = namedtuple('RepeatingInterval', ['R', 'Rnn',
+                                                          'interval'])
+TimezoneTuple = namedtuple('Timezone', ['negative', 'Z', 'hh', 'mm', 'name'])
+
 Limit = namedtuple('Limit', ['casterrorstring', 'min', 'max',
                              'rangeexception', 'rangeerrorstring'])
 
@@ -306,31 +316,36 @@ class BaseTimeBuilder(object):
     @classmethod
     def _build_object(cls, parsetuple):
         #Given a TupleBuilder tuple, build the correct object
-        if parsetuple[-1] == 'date':
-            return cls.build_date(YYYY=parsetuple[0], MM=parsetuple[1],
-                                  DD=parsetuple[2], Www=parsetuple[3],
-                                  D=parsetuple[4], DDD=parsetuple[5])
-        elif parsetuple[-1] == 'time':
-            return cls.build_time(hh=parsetuple[0], mm=parsetuple[1],
-                                  ss=parsetuple[2], tz=parsetuple[3])
-        elif parsetuple[-1] == 'datetime':
-            return cls.build_datetime(parsetuple[0], parsetuple[1])
-        elif parsetuple[-1] == 'duration':
-            return cls.build_duration(PnY=parsetuple[0], PnM=parsetuple[1],
-                                      PnW=parsetuple[2], PnD=parsetuple[3],
-                                      TnH=parsetuple[4], TnM=parsetuple[5],
-                                      TnS=parsetuple[6])
-        elif parsetuple[-1] == 'interval':
-            return cls.build_interval(start=parsetuple[0], end=parsetuple[1],
-                                      duration=parsetuple[2])
-        elif parsetuple[-1] == 'repeatinginterval':
-            return cls.build_repeating_interval(R=parsetuple[0],
-                                                Rnn=parsetuple[1],
-                                                interval=parsetuple[2])
+        if type(parsetuple) is DateTuple:
+            return cls.build_date(YYYY=parsetuple.YYYY, MM=parsetuple.MM,
+                                  DD=parsetuple.DD, Www=parsetuple.Www,
+                                  D=parsetuple.D, DDD=parsetuple.DDD)
 
-        return cls.build_timezone(negative=parsetuple[0], Z=parsetuple[1],
-                                  hh=parsetuple[2], mm=parsetuple[3],
-                                  name=parsetuple[4])
+        if type(parsetuple) is TimeTuple:
+            return cls.build_time(hh=parsetuple.hh, mm=parsetuple.mm,
+                                  ss=parsetuple.ss, tz=parsetuple.tz)
+
+        if type(parsetuple) is DatetimeTuple:
+            return cls.build_datetime(parsetuple.date, parsetuple.time)
+
+        if type(parsetuple) is DurationTuple:
+            return cls.build_duration(PnY=parsetuple.PnY, PnM=parsetuple.PnM,
+                                      PnW=parsetuple.PnW, PnD=parsetuple.PnD,
+                                      TnH=parsetuple.TnH, TnM=parsetuple.TnM,
+                                      TnS=parsetuple.TnS)
+
+        if type(parsetuple) is IntervalTuple:
+            return cls.build_interval(start=parsetuple.start, end=parsetuple.end,
+                                      duration=parsetuple.duration)
+
+        if type(parsetuple) is RepeatingIntervalTuple:
+            return cls.build_repeating_interval(R=parsetuple.R,
+                                                Rnn=parsetuple.Rnn,
+                                                interval=parsetuple.interval)
+
+        return cls.build_timezone(negative=parsetuple.negative, Z=parsetuple.Z,
+                                  hh=parsetuple.hh, mm=parsetuple.mm,
+                                  name=parsetuple.name)
 
 class TupleBuilder(BaseTimeBuilder):
     #Builder used to return the arguments as a tuple, cleans up some parse methods
@@ -338,33 +353,33 @@ class TupleBuilder(BaseTimeBuilder):
     def build_date(cls, YYYY=None, MM=None, DD=None, Www=None, D=None,
                    DDD=None):
 
-        return (YYYY, MM, DD, Www, D, DDD, 'date')
+        return DateTuple(YYYY, MM, DD, Www, D, DDD)
 
     @classmethod
     def build_time(cls, hh=None, mm=None, ss=None, tz=None):
-        return (hh, mm, ss, tz, 'time')
+        return TimeTuple(hh, mm, ss, tz)
 
     @classmethod
     def build_datetime(cls, date, time):
-        return (date, time, 'datetime')
+        return DatetimeTuple(date, time)
 
     @classmethod
     def build_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None, TnH=None,
                        TnM=None, TnS=None):
 
-        return (PnY, PnM, PnW, PnD, TnH, TnM, TnS, 'duration')
+        return DurationTuple(PnY, PnM, PnW, PnD, TnH, TnM, TnS)
 
     @classmethod
     def build_interval(cls, start=None, end=None, duration=None):
-        return (start, end, duration, 'interval')
+        return IntervalTuple(start, end, duration)
 
     @classmethod
     def build_repeating_interval(cls, R=None, Rnn=None, interval=None):
-        return (R, Rnn, interval, 'repeatinginterval')
+        return RepeatingIntervalTuple(R, Rnn, interval)
 
     @classmethod
     def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
-        return (negative, Z, hh, mm, name, 'timezone')
+        return TimezoneTuple(negative, Z, hh, mm, name)
 
 def range_check_date(build_method):
     """

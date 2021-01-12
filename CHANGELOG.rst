@@ -24,6 +24,7 @@ Changes
 * Change :code:`get_date_resolution` to call :code:`parse_date` and return the resolution based on the smallest parsed component
 * Simplify :code:`parse_time` to build date parts while looping through the ISO 8601 string once, :code:`build_time` function will now be called with explicit :code:`None` arguments instead of date components not in the parsed string excluded from the call
 * Change :code:`get_time_resolution` to call :code:`parse_time` and return the resolution based on the smallest parsed component
+* :code:`TupleBuilder` now builds :code:`DateTuple`, :code:`TimeTuple`, :code:`DatetimeTuple`, :code:`DurationTuple`, :code:`IntervalTuple`, :code:`RepeatingIntervalTuple` and :code:`TimezoneTuple` namedtuples
 
 Deprecation
 -----------

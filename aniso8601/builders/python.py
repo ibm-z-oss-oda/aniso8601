@@ -8,8 +8,9 @@
 
 import datetime
 
-from aniso8601.builders import (BaseTimeBuilder, Limit, TupleBuilder,
-                                range_check_date, range_check_duration,
+from aniso8601.builders import (BaseTimeBuilder, DateTuple, Limit,
+                                TupleBuilder, range_check_date,
+                                range_check_duration,
                                 range_check_repeating_interval,
                                 range_check_time, range_check_timezone)
 from aniso8601.exceptions import (DayOutOfBoundsError,
@@ -323,7 +324,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
             endobject = cls._build_object(end)
 
             #Range check
-            if end[-1] == 'date':
+            if type(end) is DateTuple:
                 enddatetime = cls.build_datetime(end, TupleBuilder.build_time())
 
                 if enddatetime - datetime.datetime.min < durationobject:
@@ -337,7 +338,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
             else:
                 mindatetime = datetime.datetime.min
 
-                if end[1][3] is not None:
+                if end.time.tz is not None:
                     mindatetime = mindatetime.replace(tzinfo=endobject.tzinfo)
 
                 if endobject - mindatetime < durationobject:
@@ -351,7 +352,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         startobject = cls._build_object(start)
 
         #Range check
-        if start[-1] == 'date':
+        if type(start) is DateTuple:
             startdatetime = cls.build_datetime(start, TupleBuilder.build_time())
 
             if datetime.datetime.max - startdatetime < durationobject:
@@ -365,7 +366,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         else:
             maxdatetime = datetime.datetime.max
 
-            if start[1][3] is not None:
+            if start.time.tz is not None:
                 maxdatetime = maxdatetime.replace(tzinfo=startobject.tzinfo)
 
             if maxdatetime - startobject < durationobject:
