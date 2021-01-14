@@ -64,37 +64,31 @@ class PythonTimeBuilder(BaseTimeBuilder):
                 #Shift 0s in from the left to form complete year
                 YYYY = YYYY.ljust(4, '0')
 
-            year = cls.cast(YYYY, int,
-                            thrownmessage='Invalid year string.')
+            year = int(YYYY)
 
         if MM is not None:
-            month = cls.cast(MM, int,
-                             thrownmessage='Invalid month string.')
+            month = int(MM)
         else:
             month = 1
 
         if DD is not None:
-            day = cls.cast(DD, int,
-                           thrownmessage='Invalid day string.')
+            day = int(DD)
         else:
             day = 1
 
         if Www is not None:
-            weeknumber = cls.cast(Www, int,
-                                  thrownmessage='Invalid week string.')
+            weeknumber = int(Www)
 
         else:
             weeknumber = None
 
         if DDD is not None:
-            dayofyear = cls.cast(DDD, int,
-                                 thrownmessage='Invalid day string.')
+            dayofyear = int(DDD)
         else:
             dayofyear = None
 
         if D is not None:
-            dayofweek = cls.cast(D, int,
-                                 thrownmessage='Invalid day string.')
+            dayofweek = int(D)
         else:
             dayofweek = None
 
@@ -122,24 +116,21 @@ class PythonTimeBuilder(BaseTimeBuilder):
                 hours, remainingmicroseconds = cls._split_to_microseconds(hh, MICROSECONDS_PER_HOUR, 'Invalid hour string.')
                 microseconds += remainingmicroseconds
             else:
-                hours = cls.cast(hh, int,
-                                 thrownmessage='Invalid hour string.')
+                hours = int(hh)
 
         if mm is not None:
             if '.' in mm:
                 minutes, remainingmicroseconds = cls._split_to_microseconds(mm, MICROSECONDS_PER_MINUTE, 'Invalid minute string.')
                 microseconds += remainingmicroseconds
             else:
-                minutes = cls.cast(mm, int,
-                                   thrownmessage='Invalid minute string.')
+                minutes = int(mm)
 
         if ss is not None:
             if '.' in ss:
                 seconds, remainingmicroseconds = cls._split_to_microseconds(ss, MICROSECONDS_PER_SECOND, 'Invalid second string.')
                 microseconds += remainingmicroseconds
             else:
-                seconds = cls.cast(ss, int,
-                                   thrownmessage='Invalid second string.')
+                seconds = int(ss)
 
         hours, minutes, seconds, microseconds = PythonTimeBuilder._distribute_microseconds(microseconds, (hours, minutes, seconds), (MICROSECONDS_PER_HOUR, MICROSECONDS_PER_MINUTE, MICROSECONDS_PER_SECOND))
 
@@ -193,8 +184,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
                 microseconds += remainingmicroseconds
             else:
-                years = cls.cast(PnY, int,
-                                 thrownmessage='Invalid year string.')
+                years = int(PnY)
 
                 if years * DAYS_PER_YEAR > TIMEDELTA_MAX_DAYS:
                     raise YearOutOfBoundsError('Duration exceeds maximum timedelta size.')
@@ -208,8 +198,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
                 microseconds += remainingmicroseconds
             else:
-                months = cls.cast(PnM, int,
-                                  thrownmessage='Invalid month string.')
+                months = int(PnM)
 
                 if months * DAYS_PER_MONTH > TIMEDELTA_MAX_DAYS:
                     raise MonthOutOfBoundsError('Duration exceeds maximum timedelta size.')
@@ -223,8 +212,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
                 microseconds += remainingmicroseconds
             else:
-                weeks = cls.cast(PnW, int,
-                                 thrownmessage='Invalid week string.')
+                weeks = int(PnW)
 
                 if weeks * DAYS_PER_WEEK > TIMEDELTA_MAX_DAYS:
                     raise WeekOutOfBoundsError('Duration exceeds maximum timedelta size.')
@@ -234,16 +222,14 @@ class PythonTimeBuilder(BaseTimeBuilder):
                 days, remainingmicroseconds = cls._split_to_microseconds(PnD, MICROSECONDS_PER_DAY, 'Invalid day string.')
                 microseconds += remainingmicroseconds
             else:
-                days = cls.cast(PnD, int,
-                                thrownmessage='Invalid day string.')
+                days = int(PnD)
 
         if TnH is not None:
             if '.' in TnH:
                 hours, remainingmicroseconds = cls._split_to_microseconds(TnH, MICROSECONDS_PER_HOUR, 'Invalid hour string.')
                 microseconds += remainingmicroseconds
             else:
-                hours = cls.cast(TnH, int,
-                                 thrownmessage='Invalid hour string.')
+                hours = int(TnH)
 
             #Range check into timedelta limits
             extradays = hours // HOURS_PER_DAY
@@ -258,8 +244,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
                 minutes, remainingmicroseconds = cls._split_to_microseconds(TnM, MICROSECONDS_PER_MINUTE, 'Invalid minute string.')
                 microseconds += remainingmicroseconds
             else:
-                minutes = cls.cast(TnM, int,
-                                   thrownmessage='Invalid minute string.')
+                minutes = int(TnM)
 
             #Range check into timedelta limits
             extradays = minutes // MINUTES_PER_DAY
@@ -274,8 +259,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
                 seconds, remainingmicroseconds = cls._split_to_microseconds(TnS, MICROSECONDS_PER_SECOND, 'Invalid second string.')
                 microseconds += remainingmicroseconds
             else:
-                seconds = cls.cast(TnS, int,
-                                   thrownmessage='Invalid second string.')
+                seconds = int(TnS)
 
             #Range check into timedelta limits
             extradays = seconds // SECONDS_PER_DAY
@@ -401,8 +385,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
             return cls._date_generator_unbounded(endobject,
                                                  -durationobject)
 
-        iterations = cls.cast(Rnn, int,
-                              thrownmessage='Invalid iterations.')
+        iterations = int(Rnn)
 
         if startobject is not None:
             return cls._date_generator(startobject, durationobject, iterations)
@@ -417,14 +400,12 @@ class PythonTimeBuilder(BaseTimeBuilder):
             return UTCOffset(name='UTC', minutes=0)
 
         if hh is not None:
-            tzhour = cls.cast(hh, int,
-                              thrownmessage='Invalid hour string.')
+            tzhour = int(hh)
         else:
             tzhour = 0
 
         if mm is not None:
-            tzminute = cls.cast(mm, int,
-                                thrownmessage='Invalid minute string.')
+            tzminute = int(mm)
         else:
             tzminute = 0
 
