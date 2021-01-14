@@ -163,7 +163,6 @@ class BaseTimeBuilder(object):
         ssvalue = None
 
         midnight = False #Handle hh = '24' specially
-        fractionalcomponent = False #Only one fractional component allowed
 
         if hh is not None:
             if hh[0:2] == '24':
@@ -174,23 +173,11 @@ class BaseTimeBuilder(object):
 
             hhvalue = cls._range_check(hh, cls.TIME_HH_LIMIT)
 
-            fractionalcomponent = hhvalue is float
-
         if mm is not None:
             mmvalue = cls._range_check(mm, cls.TIME_MM_LIMIT)
 
-            if fractionalcomponent is True and mmvalue is float:
-                raise ISOFormatError('Only one fractional component allowed.')
-
-            fractionalcomponent = mmvalue is float
-
         if ss is not None:
             ssvalue = cls._range_check(ss, cls.TIME_SS_LIMIT)
-
-            if fractionalcomponent is True and ssvalue is float:
-                raise ISOFormatError('Only one fractional component allowed.')
-
-            fractionalcomponent = ssvalue is float
 
         #Handle midnight range
         if midnight is True and ((mmvalue is not None and mmvalue != 0) or (ssvalue is not None and ssvalue != 0)):
@@ -209,59 +196,27 @@ class BaseTimeBuilder(object):
 
     @classmethod
     def range_check_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None,
-                             TnH=None, TnM=None, TnS=None, Rnn=None):
-        fractionalcomponent = False #Only one fractional component allowed
-
+                             TnH=None, TnM=None, TnS=None):
         if PnY is not None:
-            result = cls._range_check(PnY, cls.DURATION_PNY_LIMIT)
-
-            fractionalcomponent = result is float
+            cls._range_check(PnY, cls.DURATION_PNY_LIMIT)
 
         if PnM is not None:
-            result = cls._range_check(PnM, cls.DURATION_PNM_LIMIT)
-
-            if fractionalcomponent is True and result is float:
-                raise ISOFormatError('Only one fractional component allowed.')
-
-            fractionalcomponent = result is float
+            cls._range_check(PnM, cls.DURATION_PNM_LIMIT)
 
         if PnW is not None:
-            result = cls._range_check(PnW, cls.DURATION_PNW_LIMIT)
-
-            if fractionalcomponent is True and result is float:
-                raise ISOFormatError('Only one fractional component allowed.')
-
-            fractionalcomponent = result is float
+            cls._range_check(PnW, cls.DURATION_PNW_LIMIT)
 
         if PnD is not None:
-            result = cls._range_check(PnD, cls.DURATION_PND_LIMIT)
-
-            if fractionalcomponent is True and result is float:
-                raise ISOFormatError('Only one fractional component allowed.')
-
-            fractionalcomponent = result is float
+            cls._range_check(PnD, cls.DURATION_PND_LIMIT)
 
         if TnH is not None:
-            result = cls._range_check(TnH, cls.DURATION_TNH_LIMIT)
-
-            if fractionalcomponent is True and result is float:
-                raise ISOFormatError('Only one fractional component allowed.')
-
-            fractionalcomponent = result is float
+            cls._range_check(TnH, cls.DURATION_TNH_LIMIT)
 
         if TnM is not None:
-            result = cls._range_check(TnM, cls.DURATION_TNM_LIMIT)
-
-            if fractionalcomponent is True and result is float:
-                raise ISOFormatError('Only one fractional component allowed.')
-
-            fractionalcomponent = result is float
+            cls._range_check(TnM, cls.DURATION_TNM_LIMIT)
 
         if TnS is not None:
-            result = cls._range_check(TnS, cls.DURATION_TNS_LIMIT)
-
-            if fractionalcomponent is True and result is float:
-                raise ISOFormatError('Only one fractional component allowed.')
+            cls._range_check(TnS, cls.DURATION_TNS_LIMIT)
 
     @classmethod
     def range_check_repeating_interval(cls, Rnn=None):
