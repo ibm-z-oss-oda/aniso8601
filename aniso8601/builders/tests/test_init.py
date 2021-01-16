@@ -12,7 +12,7 @@ import aniso8601
 from aniso8601.builders import (BaseTimeBuilder, DateTuple, DatetimeTuple,
                                 DurationTuple, IntervalTuple,
                                 RepeatingIntervalTuple, TimeTuple,
-                                TimezoneTuple, TupleBuilder)
+                                TimezoneTuple, TupleBuilder, cast)
 from aniso8601.exceptions import (DayOutOfBoundsError, HoursOutOfBoundsError,
                                   ISOFormatError, LeapSecondError,
                                   MidnightBoundsError, MinutesOutOfBoundsError,
@@ -20,6 +20,33 @@ from aniso8601.exceptions import (DayOutOfBoundsError, HoursOutOfBoundsError,
                                   SecondsOutOfBoundsError,
                                   WeekOutOfBoundsError)
 from aniso8601.tests.compat import mock
+
+class TestBuilderFunctions(unittest.TestCase):
+    def test_cast(self):
+        self.assertEqual(cast('1', int), 1)
+        self.assertEqual(cast('-2', int), -2)
+        self.assertEqual(cast('3', float), float(3))
+        self.assertEqual(cast('-4', float), float(-4))
+        self.assertEqual(cast('5.6', float), 5.6)
+        self.assertEqual(cast('-7.8', float), -7.8)
+
+    def test_cast_exception(self):
+        with self.assertRaises(ISOFormatError):
+            cast('asdf', int)
+
+        with self.assertRaises(ISOFormatError):
+            cast('asdf', float)
+
+    def test_cast_caughtexception(self):
+        def tester(value):
+            raise RuntimeError
+
+        with self.assertRaises(ISOFormatError):
+            cast('asdf', tester, caughtexceptions=(RuntimeError,))
+
+    def test_cast_thrownexception(self):
+        with self.assertRaises(RuntimeError):
+            cast('asdf', int, thrownexception=RuntimeError)
 
 class TestBaseTimeBuilder(unittest.TestCase):
     def test_build_date(self):
@@ -112,6 +139,9 @@ class TestBaseTimeBuilder(unittest.TestCase):
         with self.assertRaises(HoursOutOfBoundsError):
             BaseTimeBuilder.range_check_time(hh='25')
 
+        with self.assertRaises(HoursOutOfBoundsError):
+            BaseTimeBuilder.range_check_time(hh='24.1')
+
         #Hour 24 can only represent midnight
         with self.assertRaises(MidnightBoundsError):
             BaseTimeBuilder.range_check_time(hh='24', mm='00', ss='01')
@@ -122,42 +152,11 @@ class TestBaseTimeBuilder(unittest.TestCase):
         with self.assertRaises(MidnightBoundsError):
             BaseTimeBuilder.range_check_time(hh='24', mm='01')
 
-        with self.assertRaises(MidnightBoundsError):
-            BaseTimeBuilder.range_check_time(hh='24.1')
-
         #Leap seconds not supported
         #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
         #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
         with self.assertRaises(LeapSecondError):
             BaseTimeBuilder.range_check_time(hh='23', mm='59', ss='60')
-
-    def test_cast(self):
-        self.assertEqual(BaseTimeBuilder.cast('1', int), 1)
-        self.assertEqual(BaseTimeBuilder.cast('-2', int), -2)
-        self.assertEqual(BaseTimeBuilder.cast('3', float), float(3))
-        self.assertEqual(BaseTimeBuilder.cast('-4', float), float(-4))
-        self.assertEqual(BaseTimeBuilder.cast('5.6', float), 5.6)
-        self.assertEqual(BaseTimeBuilder.cast('-7.8', float), -7.8)
-
-    def test_cast_exception(self):
-        with self.assertRaises(ISOFormatError):
-            BaseTimeBuilder.cast('asdf', int)
-
-        with self.assertRaises(ISOFormatError):
-            BaseTimeBuilder.cast('asdf', float)
-
-    def test_cast_caughtexception(self):
-        def tester(value):
-            raise RuntimeError
-
-        with self.assertRaises(ISOFormatError):
-            BaseTimeBuilder.cast('asdf', tester,
-                                 caughtexceptions=(RuntimeError,))
-
-    def test_cast_thrownexception(self):
-        with self.assertRaises(RuntimeError):
-            BaseTimeBuilder.cast('asdf', int,
-                                 thrownexception=RuntimeError)
 
     def test_build_object(self):
         datetest = (DateTuple('1', '2', '3', '4', '5', '6'),

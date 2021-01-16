@@ -776,6 +776,20 @@ class TestPythonTimeBuilder(unittest.TestCase):
         with self.assertRaises(DayOutOfBoundsError):
             PythonTimeBuilder.build_date(YYYY='1981', DDD='366')
 
+    def test_range_check_time(self):
+        with self.assertRaises(HoursOutOfBoundsError):
+            PythonTimeBuilder.build_time(hh='24.1')
+
+        #Hour 24 can only represent midnight
+        with self.assertRaises(MidnightBoundsError):
+            PythonTimeBuilder.build_time(hh='24', mm='00', ss='01')
+
+        with self.assertRaises(MidnightBoundsError):
+            PythonTimeBuilder.build_time(hh='24', mm='00.1')
+
+        with self.assertRaises(MidnightBoundsError):
+            PythonTimeBuilder.build_time(hh='24', mm='01')
+
     def test_range_check_duration(self):
         with self.assertRaises(YearOutOfBoundsError):
             PythonTimeBuilder.build_duration(PnY='3333333')

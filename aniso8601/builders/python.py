@@ -9,18 +9,17 @@
 import datetime
 
 from aniso8601.builders import (BaseTimeBuilder, DateTuple, Limit,
-                                TupleBuilder, range_check_date,
-                                range_check_duration,
-                                range_check_repeating_interval,
-                                range_check_time, range_check_timezone)
+                                TupleBuilder, cast, range_check)
 from aniso8601.exceptions import (DayOutOfBoundsError,
-                                  HoursOutOfBoundsError,
+                                  HoursOutOfBoundsError, ISOFormatError,
                                   LeapSecondError, MidnightBoundsError,
                                   MinutesOutOfBoundsError,
                                   MonthOutOfBoundsError,
                                   SecondsOutOfBoundsError,
                                   WeekOutOfBoundsError, YearOutOfBoundsError)
 from aniso8601.utcoffset import UTCOffset
+from collections import namedtuple
+from functools import partial
 
 DAYS_PER_YEAR = 365
 DAYS_PER_MONTH = 30
@@ -45,64 +44,145 @@ MICROSECONDS_PER_YEAR = DAYS_PER_YEAR * MICROSECONDS_PER_DAY
 
 TIMEDELTA_MAX_DAYS = datetime.timedelta.max.days
 
+class FractionalComponent(namedtuple('FractionalComponent', ['principal', 'microsecondremainder'])):
+    __slots__ = ()
+
+    def __int__(self):
+        return self.principal
+
+def year_range_check(valuestr, limit):
+    YYYYstr = valuestr
+
+    #Truncated dates, like '19', refer to 1900-1999 inclusive,
+    #we simply parse to 1900
+    if len(valuestr) < 4:
+        #Shift 0s in from the left to form complete year
+        YYYYstr = valuestr.ljust(4, '0')
+
+    return range_check(YYYYstr, limit)
+
+def fractional_range_check(conversion, valuestr, limit):
+    if valuestr is None:
+        return None
+
+    if '.' in valuestr:
+        castfunc = partial(_cast_to_fractional_component, conversion)
+    else:
+        castfunc = int
+
+    value = cast(valuestr, castfunc, thrownmessage=limit.casterrorstring)
+
+    if type(value) is FractionalComponent:
+        tocheck = float(valuestr)
+    else:
+        tocheck = int(valuestr)
+
+    if limit.min is not None and tocheck < limit.min:
+        raise limit.rangeexception(limit.rangeerrorstring)
+
+    if limit.max is not None and tocheck > limit.max:
+        raise limit.rangeexception(limit.rangeerrorstring)
+
+    return value
+
+def _cast_to_fractional_component(conversion, floatstr):
+    #Splits a string with a decimal point into an int, and
+    #int representing the floating point remainder as a number
+    #of microseconds, determined by multiplying by conversion
+    intpart, floatpart = floatstr.split('.')
+
+    intvalue = int(intpart)
+    preconvertedvalue = int(floatpart)
+
+    convertedvalue = ((preconvertedvalue * conversion) //
+                      (10 ** len(floatpart)))
+
+    return FractionalComponent(intvalue, convertedvalue)
+
 class PythonTimeBuilder(BaseTimeBuilder):
     #0000 (1 BC) is not representable as a Python date
     DATE_YYYY_LIMIT = Limit('Invalid year string.',
                             datetime.MINYEAR, datetime.MAXYEAR, YearOutOfBoundsError,
                             'Year must be between {0}..{1}.'
-                            .format(datetime.MINYEAR, datetime.MAXYEAR))
+                            .format(datetime.MINYEAR, datetime.MAXYEAR),
+                            year_range_check)
+    TIME_HH_LIMIT = Limit('Invalid hour string.',
+                          0, 24, HoursOutOfBoundsError,
+                          'Hour must be between 0..24 with '
+                          '24 representing midnight.',
+                          partial(fractional_range_check, MICROSECONDS_PER_HOUR))
+    TIME_MM_LIMIT = Limit('Invalid minute string.',
+                          0, 59, MinutesOutOfBoundsError,
+                          'Minute must be between 0..59.',
+                          partial(fractional_range_check, MICROSECONDS_PER_MINUTE))
+    TIME_SS_LIMIT = Limit('Invalid second string.',
+                          0, 60, SecondsOutOfBoundsError,
+                          'Second must be between 0..60 with '
+                          '60 representing a leap second.',
+                          partial(fractional_range_check, MICROSECONDS_PER_SECOND))
+    DURATION_PNY_LIMIT = Limit('Invalid year duration string.',
+                               None, None, YearOutOfBoundsError,
+                               None,
+                               partial(fractional_range_check, MICROSECONDS_PER_YEAR))
+    DURATION_PNM_LIMIT = Limit('Invalid month duration string.',
+                               None, None, MonthOutOfBoundsError,
+                               None,
+                               partial(fractional_range_check, MICROSECONDS_PER_MONTH))
+    DURATION_PNW_LIMIT = Limit('Invalid week duration string.',
+                               None, None, WeekOutOfBoundsError,
+                               None,
+                               partial(fractional_range_check, MICROSECONDS_PER_WEEK))
+    DURATION_PND_LIMIT = Limit('Invalid day duration string.',
+                               None, None, DayOutOfBoundsError,
+                               None,
+                               partial(fractional_range_check, MICROSECONDS_PER_DAY))
+    DURATION_TNH_LIMIT = Limit('Invalid hour duration string.',
+                               None, None, HoursOutOfBoundsError,
+                               None,
+                               partial(fractional_range_check, MICROSECONDS_PER_HOUR))
+    DURATION_TNM_LIMIT = Limit('Invalid minute duration string.',
+                               None, None, MinutesOutOfBoundsError,
+                               None,
+                               partial(fractional_range_check, MICROSECONDS_PER_MINUTE))
+    DURATION_TNS_LIMIT = Limit('Invalid second duration string.',
+                               None, None, SecondsOutOfBoundsError,
+                               None,
+                               partial(fractional_range_check, MICROSECONDS_PER_SECOND))
+
+    DATE_RANGE_DICT = BaseTimeBuilder.DATE_RANGE_DICT
+    DATE_RANGE_DICT['YYYY'] = DATE_YYYY_LIMIT
+
+    TIME_RANGE_DICT = {'hh': TIME_HH_LIMIT, 'mm': TIME_MM_LIMIT, 'ss': TIME_SS_LIMIT}
+
+    DURATION_RANGE_DICT = {'PnY': DURATION_PNY_LIMIT,
+                           'PnM': DURATION_PNM_LIMIT,
+                           'PnW': DURATION_PNW_LIMIT,
+                           'PnD': DURATION_PND_LIMIT,
+                           'TnH': DURATION_TNH_LIMIT,
+                           'TnM': DURATION_TNM_LIMIT,
+                           'TnS': DURATION_TNS_LIMIT}
 
     @classmethod
-    @range_check_date
     def build_date(cls, YYYY=None, MM=None, DD=None, Www=None, D=None,
                    DDD=None):
+        YYYY, MM, DD, Www, D, DDD = cls.range_check_date(YYYY, MM, DD, Www, D, DDD, rangedict=cls.DATE_RANGE_DICT)
 
-        if YYYY is not None:
-            #Truncated dates, like '19', refer to 1900-1999 inclusive,
-            #we simply parse to 1900
-            if len(YYYY) < 4:
-                #Shift 0s in from the left to form complete year
-                YYYY = YYYY.ljust(4, '0')
+        if MM is None:
+            MM = 1
 
-            year = int(YYYY)
-
-        if MM is not None:
-            month = int(MM)
-        else:
-            month = 1
-
-        if DD is not None:
-            day = int(DD)
-        else:
-            day = 1
-
-        if Www is not None:
-            weeknumber = int(Www)
-
-        else:
-            weeknumber = None
+        if DD is None:
+            DD = 1
 
         if DDD is not None:
-            dayofyear = int(DDD)
-        else:
-            dayofyear = None
+            return PythonTimeBuilder._build_ordinal_date(YYYY, DDD)
 
-        if D is not None:
-            dayofweek = int(D)
-        else:
-            dayofweek = None
+        if Www is not None:
+            return PythonTimeBuilder._build_week_date(YYYY, Www,
+                                                      isoday=D)
 
-        if dayofyear is not None:
-            return PythonTimeBuilder._build_ordinal_date(year, dayofyear)
-
-        if weeknumber is not None:
-            return PythonTimeBuilder._build_week_date(year, weeknumber,
-                                                      isoday=dayofweek)
-
-        return datetime.date(year, month, day)
+        return datetime.date(YYYY, MM, DD)
 
     @classmethod
-    @range_check_time
     def build_time(cls, hh=None, mm=None, ss=None, tz=None):
         #Builds a time from the given parts, handling fractional arguments
         #where necessary
@@ -111,26 +191,25 @@ class PythonTimeBuilder(BaseTimeBuilder):
         seconds = 0
         microseconds = 0
 
-        if hh is not None:
-            if '.' in hh:
-                hours, remainingmicroseconds = cls._split_to_microseconds(hh, MICROSECONDS_PER_HOUR, 'Invalid hour string.')
-                microseconds += remainingmicroseconds
-            else:
-                hours = int(hh)
+        hh, mm, ss, tz = cls.range_check_time(hh, mm, ss, tz, rangedict=cls.TIME_RANGE_DICT)
 
-        if mm is not None:
-            if '.' in mm:
-                minutes, remainingmicroseconds = cls._split_to_microseconds(mm, MICROSECONDS_PER_MINUTE, 'Invalid minute string.')
-                microseconds += remainingmicroseconds
-            else:
-                minutes = int(mm)
+        if type(hh) is FractionalComponent:
+            hours = hh.principal
+            microseconds = hh.microsecondremainder
+        elif hh is not None:
+            hours = hh
 
-        if ss is not None:
-            if '.' in ss:
-                seconds, remainingmicroseconds = cls._split_to_microseconds(ss, MICROSECONDS_PER_SECOND, 'Invalid second string.')
-                microseconds += remainingmicroseconds
-            else:
-                seconds = int(ss)
+        if type(mm) is FractionalComponent:
+            minutes = mm.principal
+            microseconds = mm.microsecondremainder
+        elif mm is not None:
+            minutes = mm
+
+        if type(ss) is FractionalComponent:
+            seconds = ss.principal
+            microseconds = ss.microsecondremainder
+        elif ss is not None:
+            seconds = ss
 
         hours, minutes, seconds, microseconds = PythonTimeBuilder._distribute_microseconds(microseconds, (hours, minutes, seconds), (MICROSECONDS_PER_HOUR, MICROSECONDS_PER_MINUTE, MICROSECONDS_PER_SECOND))
 
@@ -161,7 +240,6 @@ class PythonTimeBuilder(BaseTimeBuilder):
                                          cls._build_object(time))
 
     @classmethod
-    @range_check_duration
     def build_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None, TnH=None,
                        TnM=None, TnS=None):
         years = 0
@@ -173,101 +251,77 @@ class PythonTimeBuilder(BaseTimeBuilder):
         seconds = 0
         microseconds = 0
 
-        normalizeddays = 0 #Used in final range check
+        PnY, PnM, PnW, PnD, TnH, TnM, TnS = cls.range_check_duration(PnY, PnM, PnW, PnD, TnH, TnM, TnS, rangedict=cls.DURATION_RANGE_DICT)
 
         if PnY is not None:
-            if '.' in PnY:
-                years, remainingmicroseconds = cls._split_to_microseconds(PnY, MICROSECONDS_PER_YEAR, 'Invalid year string.')
-
-                if years * DAYS_PER_YEAR + remainingmicroseconds // MICROSECONDS_PER_YEAR > TIMEDELTA_MAX_DAYS:
-                    raise YearOutOfBoundsError('Duration exceeds maximum timedelta size.')
-
-                microseconds += remainingmicroseconds
+            if type(PnY) is FractionalComponent:
+                years = PnY.principal
+                microseconds = PnY.microsecondremainder
             else:
-                years = int(PnY)
+                years = PnY
 
-                if years * DAYS_PER_YEAR > TIMEDELTA_MAX_DAYS:
-                    raise YearOutOfBoundsError('Duration exceeds maximum timedelta size.')
+            if years * DAYS_PER_YEAR + microseconds // MICROSECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
+                raise YearOutOfBoundsError('Duration exceeds maximum timedelta size.')
 
         if PnM is not None:
-            if '.' in PnM:
-                months, remainingmicroseconds = cls._split_to_microseconds(PnM, MICROSECONDS_PER_MONTH, 'Invalid month string.')
-
-                if months * DAYS_PER_MONTH + remainingmicroseconds // MICROSECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
-                    raise MonthOutOfBoundsError('Duration exceeds maximum timedelta size.')
-
-                microseconds += remainingmicroseconds
+            if type(PnM) is FractionalComponent:
+                months = PnM.principal
+                microseconds = PnM.microsecondremainder
             else:
-                months = int(PnM)
+                months = PnM
 
-                if months * DAYS_PER_MONTH > TIMEDELTA_MAX_DAYS:
-                    raise MonthOutOfBoundsError('Duration exceeds maximum timedelta size.')
+            if months * DAYS_PER_MONTH + microseconds // MICROSECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
+                raise MonthOutOfBoundsError('Duration exceeds maximum timedelta size.')
 
         if PnW is not None:
-            if '.' in PnW:
-                weeks, remainingmicroseconds = cls._split_to_microseconds(PnW, MICROSECONDS_PER_WEEK, 'Invalid week string.')
-
-                if weeks * DAYS_PER_WEEK + remainingmicroseconds // MICROSECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
-                    raise WeekOutOfBoundsError('Duration exceeds maximum timedelta size.')
-
-                microseconds += remainingmicroseconds
+            if type(PnW) is FractionalComponent:
+                weeks = PnW.principal
+                microseconds = PnW.microsecondremainder
             else:
-                weeks = int(PnW)
+                weeks = PnW
 
-                if weeks * DAYS_PER_WEEK > TIMEDELTA_MAX_DAYS:
-                    raise WeekOutOfBoundsError('Duration exceeds maximum timedelta size.')
+            if weeks * DAYS_PER_WEEK + microseconds // MICROSECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
+                raise WeekOutOfBoundsError('Duration exceeds maximum timedelta size.')
 
         if PnD is not None:
-            if '.' in PnD:
-                days, remainingmicroseconds = cls._split_to_microseconds(PnD, MICROSECONDS_PER_DAY, 'Invalid day string.')
-                microseconds += remainingmicroseconds
+            if type(PnD) is FractionalComponent:
+                days = PnD.principal
+                microseconds = PnD.microsecondremainder
             else:
-                days = int(PnD)
+                days = PnD
+
+            if days > TIMEDELTA_MAX_DAYS:
+                raise DayOutOfBoundsError('Duration exceeds maximum timedelta size.')
 
         if TnH is not None:
-            if '.' in TnH:
-                hours, remainingmicroseconds = cls._split_to_microseconds(TnH, MICROSECONDS_PER_HOUR, 'Invalid hour string.')
-                microseconds += remainingmicroseconds
+            if type(TnH) is FractionalComponent:
+                hours = TnH.principal
+                microseconds = TnH.microsecondremainder
             else:
-                hours = int(TnH)
+                hours = TnH
 
-            #Range check into timedelta limits
-            extradays = hours // HOURS_PER_DAY
-
-            if (extradays) > TIMEDELTA_MAX_DAYS:
+            if hours // HOURS_PER_DAY > TIMEDELTA_MAX_DAYS:
                 raise HoursOutOfBoundsError('Duration exceeds maximum timedelta size.')
 
-            normalizeddays += extradays
-
         if TnM is not None:
-            if '.' in TnM:
-                minutes, remainingmicroseconds = cls._split_to_microseconds(TnM, MICROSECONDS_PER_MINUTE, 'Invalid minute string.')
-                microseconds += remainingmicroseconds
+            if type(TnM) is FractionalComponent:
+                minutes = TnM.principal
+                microseconds = TnM.microsecondremainder
             else:
-                minutes = int(TnM)
+                minutes = TnM
 
-            #Range check into timedelta limits
-            extradays = minutes // MINUTES_PER_DAY
-
-            if (extradays) > TIMEDELTA_MAX_DAYS:
+            if minutes // MINUTES_PER_DAY > TIMEDELTA_MAX_DAYS:
                 raise MinutesOutOfBoundsError('Duration exceeds maximum timedelta size.')
 
-            normalizeddays += extradays
-
         if TnS is not None:
-            if '.' in TnS:
-                seconds, remainingmicroseconds = cls._split_to_microseconds(TnS, MICROSECONDS_PER_SECOND, 'Invalid second string.')
-                microseconds += remainingmicroseconds
+            if type(TnS) is FractionalComponent:
+                seconds = TnS.principal
+                microseconds = TnS.microsecondremainder
             else:
-                seconds = int(TnS)
+                seconds = TnS
 
-            #Range check into timedelta limits
-            extradays = seconds // SECONDS_PER_DAY
-
-            if (extradays) > TIMEDELTA_MAX_DAYS:
+            if seconds // SECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
                 raise SecondsOutOfBoundsError('Duration exceeds maximum timedelta size.')
-
-            normalizeddays += extradays
 
         years, months, weeks, days, hours, minutes, seconds, microseconds = PythonTimeBuilder._distribute_microseconds(microseconds, (years, months, weeks, days, hours, minutes, seconds), (MICROSECONDS_PER_YEAR, MICROSECONDS_PER_MONTH, MICROSECONDS_PER_WEEK, MICROSECONDS_PER_DAY, MICROSECONDS_PER_HOUR, MICROSECONDS_PER_MINUTE, MICROSECONDS_PER_SECOND))
 
@@ -275,7 +329,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         totaldays = years * DAYS_PER_YEAR + months * DAYS_PER_MONTH + days
 
         #Check against timedelta limits
-        if totaldays + normalizeddays > TIMEDELTA_MAX_DAYS:
+        if totaldays + weeks * DAYS_PER_WEEK + hours // HOURS_PER_DAY + minutes // MINUTES_PER_DAY + seconds // SECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
             raise DayOutOfBoundsError('Duration exceeds maximum timedelta size.')
 
         return datetime.timedelta(days=totaldays,
@@ -361,10 +415,11 @@ class PythonTimeBuilder(BaseTimeBuilder):
                 + durationobject)
 
     @classmethod
-    @range_check_repeating_interval
     def build_repeating_interval(cls, R=None, Rnn=None, interval=None):
         startobject = None
         endobject = None
+
+        R, Rnn, interval = cls.range_check_repeating_interval(R, Rnn, interval, rangedict=cls.REPEATING_INTERVAL_RANGE_DICT)
 
         if interval[0] is not None:
             startobject = cls._build_object(interval[0])
@@ -393,8 +448,9 @@ class PythonTimeBuilder(BaseTimeBuilder):
         return cls._date_generator(endobject, -durationobject, iterations)
 
     @classmethod
-    @range_check_timezone
     def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
+        negative, Z, hh, mm, name = cls.range_check_timezone(negative, Z, hh, mm, name, rangedict=cls.TIMEZONE_RANGE_DICT)
+
         if Z is True:
             #Z -> UTC
             return UTCOffset(name='UTC', minutes=0)
@@ -485,11 +541,15 @@ class PythonTimeBuilder(BaseTimeBuilder):
         #of microseconds, determined by multiplying by conversion
         intpart, floatpart = floatstr.split('.')
 
-        intvalue = cls.cast(intpart, int,
-                            thrownmessage=thrownmessage)
+        try:
+            intvalue = int(intpart)
+        except:
+            raise ISOFormatError(thrownmessage)
 
-        preconvertedvalue = cls.cast(floatpart, int,
-                                     thrownmessage=thrownmessage)
+        try:
+            preconvertedvalue = int(floatpart)
+        except:
+            raise ISOFormatError(thrownmessage)
 
         convertedvalue = ((preconvertedvalue * conversion) //
                           (10 ** len(floatpart)))

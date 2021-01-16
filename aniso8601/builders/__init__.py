@@ -27,70 +27,137 @@ RepeatingIntervalTuple = namedtuple('RepeatingInterval', ['R', 'Rnn',
 TimezoneTuple = namedtuple('Timezone', ['negative', 'Z', 'hh', 'mm', 'name'])
 
 Limit = namedtuple('Limit', ['casterrorstring', 'min', 'max',
-                             'rangeexception', 'rangeerrorstring'])
+                             'rangeexception', 'rangeerrorstring',
+                             'rangefunc'])
+
+def cast(value, castfunction, caughtexceptions=(ValueError,),
+         thrownexception=ISOFormatError, thrownmessage=None):
+    try:
+        result = castfunction(value)
+    except caughtexceptions:
+        raise thrownexception(thrownmessage)
+
+    return result
+
+def range_check(valuestr, limit):
+    #Returns cast value if in range, raises defined exceptions on failure
+    if valuestr is None:
+        return None
+
+    if '.' in valuestr:
+        castfunc = float
+    else:
+        castfunc = int
+
+    value = cast(valuestr, castfunc, thrownmessage=limit.casterrorstring)
+
+    if limit.min is not None and value < limit.min:
+        raise limit.rangeexception(limit.rangeerrorstring)
+
+    if limit.max is not None and value > limit.max:
+        raise limit.rangeexception(limit.rangeerrorstring)
+
+    return value
 
 class BaseTimeBuilder(object):
     #Limit tuple format cast function, cast error string,
     #lower limit, upper limit, limit error string
     DATE_YYYY_LIMIT = Limit('Invalid year string.',
                             0000, 9999, YearOutOfBoundsError,
-                            'Year must be between 1..9999.')
+                            'Year must be between 1..9999.',
+                            range_check)
     DATE_MM_LIMIT = Limit('Invalid month string.',
                           1, 12, MonthOutOfBoundsError,
-                          'Month must be between 1..12.')
+                          'Month must be between 1..12.',
+                          range_check)
     DATE_DD_LIMIT = Limit('Invalid day string.',
                           1, 31, DayOutOfBoundsError,
-                          'Day must be between 1..31.')
+                          'Day must be between 1..31.',
+                          range_check)
     DATE_WWW_LIMIT = Limit('Invalid week string.',
                            1, 53, WeekOutOfBoundsError,
-                           'Week number must be between 1..53.')
+                           'Week number must be between 1..53.',
+                           range_check)
     DATE_D_LIMIT = Limit('Invalid weekday string.',
                          1, 7, DayOutOfBoundsError,
-                         'Weekday number must be between 1..7.')
+                         'Weekday number must be between 1..7.',
+                         range_check)
     DATE_DDD_LIMIT = Limit('Invalid ordinal day string.',
                            1, 366, DayOutOfBoundsError,
-                           'Ordinal day must be between 1..366.')
+                           'Ordinal day must be between 1..366.',
+                           range_check)
     TIME_HH_LIMIT = Limit('Invalid hour string.',
                           0, 24, HoursOutOfBoundsError,
                           'Hour must be between 0..24 with '
-                          '24 representing midnight.')
+                          '24 representing midnight.',
+                          range_check)
     TIME_MM_LIMIT = Limit('Invalid minute string.',
                           0, 59, MinutesOutOfBoundsError,
-                          'Minute must be between 0..59.')
+                          'Minute must be between 0..59.',
+                          range_check)
     TIME_SS_LIMIT = Limit('Invalid second string.',
                           0, 60, SecondsOutOfBoundsError,
                           'Second must be between 0..60 with '
-                          '60 representing a leap second.')
+                          '60 representing a leap second.',
+                          range_check)
     TZ_HH_LIMIT = Limit('Invalid timezone hour string.',
                         0, 23, HoursOutOfBoundsError,
-                        'Hour must be between 0..23.')
+                        'Hour must be between 0..23.',
+                        range_check)
     TZ_MM_LIMIT = Limit('Invalid timezone minute string.',
                         0, 59, MinutesOutOfBoundsError,
-                        'Minute must be between 0..59.')
+                        'Minute must be between 0..59.',
+                        range_check)
     DURATION_PNY_LIMIT = Limit('Invalid year duration string.',
                                None, None, YearOutOfBoundsError,
-                               None)
+                               None,
+                               range_check)
     DURATION_PNM_LIMIT = Limit('Invalid month duration string.',
                                None, None, MonthOutOfBoundsError,
-                               None)
+                               None,
+                               range_check)
     DURATION_PNW_LIMIT = Limit('Invalid week duration string.',
                                None, None, WeekOutOfBoundsError,
-                               None)
+                               None,
+                               range_check)
     DURATION_PND_LIMIT = Limit('Invalid day duration string.',
                                None, None, DayOutOfBoundsError,
-                               None)
+                               None,
+                               range_check)
     DURATION_TNH_LIMIT = Limit('Invalid hour duration string.',
                                None, None, HoursOutOfBoundsError,
-                               None)
+                               None,
+                               range_check)
     DURATION_TNM_LIMIT = Limit('Invalid minute duration string.',
                                None, None, MinutesOutOfBoundsError,
-                               None)
+                               None,
+                               range_check)
     DURATION_TNS_LIMIT = Limit('Invalid second duration string.',
                                None, None, SecondsOutOfBoundsError,
-                               None)
+                               None,
+                               range_check)
     INTERVAL_RNN_LIMIT = Limit('Invalid duration repetition string.',
                                0, None, NegativeDurationError,
-                               'Duration repetition count must be positive.')
+                               'Duration repetition count must be positive.',
+                               range_check)
+
+    DATE_RANGE_DICT = {'YYYY': DATE_YYYY_LIMIT, 'MM': DATE_MM_LIMIT,
+                       'DD': DATE_DD_LIMIT, 'Www': DATE_WWW_LIMIT,
+                       'D': DATE_D_LIMIT, 'DDD': DATE_DDD_LIMIT}
+
+    TIME_RANGE_DICT = {'hh': TIME_HH_LIMIT, 'mm': TIME_MM_LIMIT, 'ss': TIME_SS_LIMIT}
+
+    DURATION_RANGE_DICT = {'PnY': DURATION_PNY_LIMIT,
+                           'PnM': DURATION_PNM_LIMIT,
+                           'PnW': DURATION_PNW_LIMIT,
+                           'PnD': DURATION_PND_LIMIT,
+                           'TnH': DURATION_TNH_LIMIT,
+                           'TnM': DURATION_TNM_LIMIT,
+                           'TnS': DURATION_TNS_LIMIT}
+
+    REPEATING_INTERVAL_RANGE_DICT = {'Rnn': INTERVAL_RNN_LIMIT}
+
+    TIMEZONE_RANGE_DICT = {'hh': TZ_HH_LIMIT, 'mm': TZ_MM_LIMIT}
 
     LEAP_SECONDS_SUPPORTED = False
 
@@ -128,145 +195,141 @@ class BaseTimeBuilder(object):
 
     @classmethod
     def range_check_date(cls, YYYY=None, MM=None, DD=None,
-                         Www=None, D=None, DDD=None):
+                         Www=None, D=None, DDD=None, rangedict=None):
+        if rangedict is None:
+            rangedict = cls.DATE_RANGE_DICT
 
-        if YYYY is not None:
-            YYYYvalue = cls._range_check(YYYY, cls.DATE_YYYY_LIMIT)
+        if 'YYYY' in rangedict:
+            YYYY = rangedict['YYYY'].rangefunc(YYYY, rangedict['YYYY'])
 
-        if MM is not None:
-            MMvalue = cls._range_check(MM, cls.DATE_MM_LIMIT)
+        if 'MM' in rangedict:
+            MM = rangedict['MM'].rangefunc(MM, rangedict['MM'])
+
+        if 'DD' in rangedict:
+            DD = rangedict['DD'].rangefunc(DD, rangedict['DD'])
+
+        if 'Www' in rangedict:
+            Www = rangedict['Www'].rangefunc(Www, rangedict['Www'])
+
+        if 'D' in rangedict:
+            D = rangedict['D'].rangefunc(D, rangedict['D'])
+
+        if 'DDD' in rangedict:
+            DDD = rangedict['DDD'].rangefunc(DDD, rangedict['DDD'])
 
         if DD is not None:
-            DDvalue = cls._range_check(DD, cls.DATE_DD_LIMIT)
-
             #Check calendar
-            if DDvalue > calendar.monthrange(YYYYvalue, MMvalue)[1]:
+            if DD > calendar.monthrange(YYYY, MM)[1]:
                 raise DayOutOfBoundsError('{0} is out of range for {1}-{2}'.format(DD, YYYY, MM))
 
-        if Www is not None:
-            cls._range_check(Www, cls.DATE_WWW_LIMIT)
-
-        if D is not None:
-            cls._range_check(D, cls.DATE_D_LIMIT)
-
         if DDD is not None:
-            DDDvalue = cls._range_check(DDD, cls.DATE_DDD_LIMIT)
-
-            if calendar.isleap(YYYYvalue) is False and DDDvalue >= 366:
+            if calendar.isleap(YYYY) is False and DDD >= 366:
                 raise DayOutOfBoundsError('{0} is only valid for leap year.'.format(DDD))
 
-    @classmethod
-    def range_check_time(cls, hh=None, mm=None, ss=None):
-        #Used for leap second handling
-        hhvalue = None
-        mmvalue = None
-        ssvalue = None
+        return (YYYY, MM, DD, Www, D, DDD)
 
+    @classmethod
+    def range_check_time(cls, hh=None, mm=None, ss=None, tz=None, rangedict=None):
+        #Used for midnight and leap second handling
         midnight = False #Handle hh = '24' specially
 
+        if rangedict is None:
+            rangedict = cls.TIME_RANGE_DICT
+
+        if 'hh' in rangedict:
+            hh = rangedict['hh'].rangefunc(hh, rangedict['hh'])
+
+        if 'mm' in rangedict:
+            mm = rangedict['mm'].rangefunc(mm, rangedict['mm'])
+
+        if 'ss' in rangedict:
+            ss = rangedict['ss'].rangefunc(ss, rangedict['ss'])
+
         if hh is not None:
-            if hh[0:2] == '24':
-                if '.' in hh[2:]:
+            if int(hh) == 24:
+                if type(hh) is float:
                     raise MidnightBoundsError('Hour 24 may only represent midnight.')
 
                 midnight = True
 
-            hhvalue = cls._range_check(hh, cls.TIME_HH_LIMIT)
-
-        if mm is not None:
-            mmvalue = cls._range_check(mm, cls.TIME_MM_LIMIT)
-
-        if ss is not None:
-            ssvalue = cls._range_check(ss, cls.TIME_SS_LIMIT)
-
         #Handle midnight range
-        if midnight is True and ((mmvalue is not None and mmvalue != 0) or (ssvalue is not None and ssvalue != 0)):
+        if midnight is True and ((mm is not None and mm != 0) or (ss is not None and ss != 0)):
             raise MidnightBoundsError('Hour 24 may only represent midnight.')
 
         if cls.LEAP_SECONDS_SUPPORTED is True:
-            if hhvalue != 23 and mmvalue != 59 and ssvalue == 60:
+            if hh != 23 and mm != 59 and ss == 60:
                 raise cls.TIME_SS_LIMIT.rangeexception(cls.TIME_SS_LIMIT.rangeerrorstring)
         else:
-            if hhvalue == 23 and mmvalue == 59 and ssvalue == 60:
+            if hh == 23 and mm == 59 and ss == 60:
                 #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
                 raise LeapSecondError('Leap seconds are not supported.')
 
-            if ssvalue == 60:
+            if ss == 60:
                 raise cls.TIME_SS_LIMIT.rangeexception(cls.TIME_SS_LIMIT.rangeerrorstring)
+
+        return (hh, mm, ss, tz)
 
     @classmethod
     def range_check_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None,
-                             TnH=None, TnM=None, TnS=None):
-        if PnY is not None:
-            cls._range_check(PnY, cls.DURATION_PNY_LIMIT)
+                             TnH=None, TnM=None, TnS=None, rangedict=None):
+        if rangedict is None:
+            rangedict = cls.DURATION_RANGE_DICT
 
-        if PnM is not None:
-            cls._range_check(PnM, cls.DURATION_PNM_LIMIT)
+        if 'PnY' in rangedict:
+            PnY = rangedict['PnY'].rangefunc(PnY, rangedict['PnY'])
 
-        if PnW is not None:
-            cls._range_check(PnW, cls.DURATION_PNW_LIMIT)
+        if 'PnM' in rangedict:
+            PnM = rangedict['PnM'].rangefunc(PnM, rangedict['PnM'])
 
-        if PnD is not None:
-            cls._range_check(PnD, cls.DURATION_PND_LIMIT)
+        if 'PnW' in rangedict:
+            PnW = rangedict['PnW'].rangefunc(PnW, rangedict['PnW'])
 
-        if TnH is not None:
-            cls._range_check(TnH, cls.DURATION_TNH_LIMIT)
+        if 'PnD' in rangedict:
+            PnD = rangedict['PnD'].rangefunc(PnD, rangedict['PnD'])
 
-        if TnM is not None:
-            cls._range_check(TnM, cls.DURATION_TNM_LIMIT)
+        if 'TnH' in rangedict:
+            TnH = rangedict['TnH'].rangefunc(TnH, rangedict['TnH'])
 
-        if TnS is not None:
-            cls._range_check(TnS, cls.DURATION_TNS_LIMIT)
+        if 'TnM' in rangedict:
+            TnM = rangedict['TnM'].rangefunc(TnM, rangedict['TnM'])
+
+        if 'TnS' in rangedict:
+            TnS = rangedict['TnS'].rangefunc(TnS, rangedict['TnS'])
+
+        return (PnY, PnM, PnW, PnD, TnH, TnM, TnS)
 
     @classmethod
-    def range_check_repeating_interval(cls, Rnn=None):
-        if Rnn is not None:
-            cls._range_check(Rnn, cls.INTERVAL_RNN_LIMIT)
+    def range_check_repeating_interval(cls, R=None, Rnn=None, interval=None,
+                                       rangedict=None):
+        if rangedict is None:
+            rangedict = cls.REPEATING_INTERVAL_RANGE_DICT
+
+        if 'R' in rangedict:
+            R = rangedict['R'].rangefunc(R, rangedict['R'])
+
+        if 'Rnn' in rangedict:
+            Rnn = rangedict['Rnn'].rangefunc(Rnn, rangedict['Rnn'])
+
+        return (R, Rnn, interval)
 
     @classmethod
-    def range_check_timezone(cls, negative=None, hh=None, mm=None):
+    def range_check_timezone(cls, negative=None, Z=None, hh=None, mm=None,
+                             name='', rangedict=None):
+        if rangedict is None:
+            rangedict = cls.TIMEZONE_RANGE_DICT
+
+        if 'hh' in rangedict:
+            hh = rangedict['hh'].rangefunc(hh, rangedict['hh'])
+
+        if 'mm' in rangedict:
+            mm = rangedict['mm'].rangefunc(mm, rangedict['mm'])
+
         if hh is not None:
-            hhvalue = cls._range_check(hh, cls.TZ_HH_LIMIT)
+            if negative is True and hh == 0 and (mm is None or mm == 0):
+                raise ISOFormatError('Negative ISO 8601 time offset must not '
+                                     'be 0.')
 
-            if mm is not None:
-                mmvalue = cls._range_check(mm, cls.TZ_MM_LIMIT)
-            else:
-                mmvalue = 0
-
-            if negative is True:
-                if hhvalue == 0 and mmvalue == 0:
-                    raise ISOFormatError('Negative ISO 8601 time offset must not '
-                                         'be 0.')
-
-    @classmethod
-    def _range_check(cls, valuestr, limit):
-        #Returns casted value if in range, raises defined exceptions on failure
-
-        if '.' in valuestr:
-            castfunc = float
-        else:
-            castfunc = int
-
-        value = BaseTimeBuilder.cast(valuestr, castfunc, thrownmessage=limit.casterrorstring)
-
-        if limit.min is not None and value < limit.min:
-            raise limit.rangeexception(limit.rangeerrorstring)
-
-        if limit.max is not None and value > limit.max:
-            raise limit.rangeexception(limit.rangeerrorstring)
-
-        return value
-
-    @staticmethod
-    def cast(value, castfunction, caughtexceptions=(ValueError,),
-             thrownexception=ISOFormatError, thrownmessage=None):
-
-        try:
-            result = castfunction(value)
-        except caughtexceptions:
-            raise thrownexception(thrownmessage)
-
-        return result
+        return (negative, Z, hh, mm, name)
 
     @classmethod
     def _build_object(cls, parsetuple):
@@ -335,69 +398,3 @@ class TupleBuilder(BaseTimeBuilder):
     @classmethod
     def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
         return TimezoneTuple(negative, Z, hh, mm, name)
-
-def range_check_date(build_method):
-    """
-    Range check decorator for build_date
-    """
-    def peform_range_check(cls, *args, **kwargs):
-        cls.range_check_date(**kwargs)
-        return build_method(cls, *args, **kwargs)
-
-    return peform_range_check
-
-def range_check_time(build_method):
-    """
-    Range check decorator for build_time
-    """
-    def peform_range_check(cls, *args, **kwargs):
-        #Filter out timezone, it's checked separate
-        filteredkwargs = _filter_kwargs(kwargs, ['tz'])
-
-        cls.range_check_time(**filteredkwargs)
-        return build_method(cls, *args, **kwargs)
-
-    return peform_range_check
-
-def range_check_duration(build_method):
-    """
-    Range check decorator for build_duration
-    """
-    def peform_range_check(cls, *args, **kwargs):
-        cls.range_check_duration(**kwargs)
-        return build_method(cls, *args, **kwargs)
-
-    return peform_range_check
-
-def range_check_repeating_interval(build_method):
-    """
-    Range check decorator for build_repeating_interval
-    """
-    def peform_range_check(cls, *args, **kwargs):
-        filteredkwargs = _filter_kwargs(kwargs, ['R', 'interval'])
-
-        cls.range_check_repeating_interval(**filteredkwargs)
-        return build_method(cls, *args, **kwargs)
-
-    return peform_range_check
-
-def range_check_timezone(build_method):
-    """
-    Range check decorator for build_timezone
-    """
-    def peform_range_check(cls, *args, **kwargs):
-        filteredkwargs = _filter_kwargs(kwargs, ['Z', 'name'])
-
-        cls.range_check_timezone(**filteredkwargs)
-        return build_method(cls, *args, **kwargs)
-
-    return peform_range_check
-
-def _filter_kwargs(tofilter, excludedkeys):
-    filteredkwargs = {}
-
-    for key in tofilter:
-        if key not in excludedkeys:
-            filteredkwargs[key] = tofilter[key]
-
-    return filteredkwargs
