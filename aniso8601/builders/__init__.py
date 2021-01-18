@@ -237,7 +237,13 @@ class BaseTimeBuilder(object):
             rangedict = cls.TIME_RANGE_DICT
 
         if 'hh' in rangedict:
-            hh = rangedict['hh'].rangefunc(hh, rangedict['hh'])
+            try:
+                hh = rangedict['hh'].rangefunc(hh, rangedict['hh'])
+            except HoursOutOfBoundsError as e:
+                if float(hh) > 24 and float(hh) < 25:
+                    raise MidnightBoundsError('Hour 24 may only represent midnight.')
+
+                raise e
 
         if 'mm' in rangedict:
             mm = rangedict['mm'].rangefunc(mm, rangedict['mm'])
@@ -245,12 +251,8 @@ class BaseTimeBuilder(object):
         if 'ss' in rangedict:
             ss = rangedict['ss'].rangefunc(ss, rangedict['ss'])
 
-        if hh is not None:
-            if int(hh) == 24:
-                if type(hh) is float:
-                    raise MidnightBoundsError('Hour 24 may only represent midnight.')
-
-                midnight = True
+        if hh is not None and hh == 24:
+            midnight = True
 
         #Handle midnight range
         if midnight is True and ((mm is not None and mm != 0) or (ss is not None and ss != 0)):

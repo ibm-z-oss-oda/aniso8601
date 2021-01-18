@@ -139,9 +139,6 @@ class TestBaseTimeBuilder(unittest.TestCase):
         with self.assertRaises(HoursOutOfBoundsError):
             BaseTimeBuilder.range_check_time(hh='25')
 
-        with self.assertRaises(HoursOutOfBoundsError):
-            BaseTimeBuilder.range_check_time(hh='24.1')
-
         #Hour 24 can only represent midnight
         with self.assertRaises(MidnightBoundsError):
             BaseTimeBuilder.range_check_time(hh='24', mm='00', ss='01')
@@ -151,6 +148,9 @@ class TestBaseTimeBuilder(unittest.TestCase):
 
         with self.assertRaises(MidnightBoundsError):
             BaseTimeBuilder.range_check_time(hh='24', mm='01')
+
+        with self.assertRaises(MidnightBoundsError):
+            BaseTimeBuilder.range_check_time(hh='24.1')
 
         #Leap seconds not supported
         #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
