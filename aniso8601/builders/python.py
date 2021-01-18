@@ -44,11 +44,7 @@ MICROSECONDS_PER_YEAR = DAYS_PER_YEAR * MICROSECONDS_PER_DAY
 
 TIMEDELTA_MAX_DAYS = datetime.timedelta.max.days
 
-class FractionalComponent(namedtuple('FractionalComponent', ['principal', 'microsecondremainder'])):
-    __slots__ = ()
-
-    def __int__(self):
-        return self.principal
+FractionalComponent = namedtuple('FractionalComponent', ['principal', 'microsecondremainder'])
 
 def year_range_check(valuestr, limit):
     YYYYstr = valuestr
