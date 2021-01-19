@@ -127,7 +127,7 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
         #hh:mm
         #hhmm
         if timestr.count(':') == 1:
-            hourstr, minutestr = timestr.split(':')
+            hourstr, minutestr = timestr.split(':', 1)
         else:
             hourstr = timestr[0:2]
             minutestr = timestr[2:]
@@ -135,7 +135,7 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
         #hh:mm:ss
         #hhmmss
         if timestr.count(':') == 2:
-            hourstr, minutestr, secondstr = timestr.split(':')
+            hourstr, minutestr, secondstr = timestr.split(':', 2)
         else:
             hourstr = timestr[0:2]
             minutestr = timestr[2:4]
