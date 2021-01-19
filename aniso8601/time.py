@@ -99,79 +99,70 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
     secondstr = None
     tzstr = None
 
-    hasfractionalcomponent = False
-    parsingtz = False
+    fractionalstr = None
 
-    #Consume the time components
-    componentstr = ''
+    #Split out the timezone
+    for delimiter in TIMEZONE_DELIMITERS:
+        delimiteridx = timestr.find(delimiter)
 
-    for charidx, timechar in enumerate(timestr):
-        if timechar.isdigit():
-            componentstr += timechar
-        elif timechar == '.' and hasfractionalcomponent is False:
-            componentstr += timechar
-            hasfractionalcomponent = True
-        elif parsingtz is True and timechar == ':':
-            componentstr += timechar
-        elif timechar == ':' or timechar in TIMEZONE_DELIMITERS:
-            pass
+        if delimiteridx != -1:
+            tzstr = timestr[delimiteridx:]
+            timestr = timestr[0:delimiteridx]
+
+    stopidx = timestr.find('.')
+
+    if stopidx != -1:
+        timestr, fractionalstr = timestr.split('.', 1)
+
+    if len(timestr) == 2:
+        #hh
+        hourstr = timestr
+    elif len(timestr) == 4 or len(timestr) == 5:
+        #hh:mm
+        #hhmm
+        if timestr.count(':') == 1:
+            hourstr, minutestr = timestr.split(':')
         else:
-            raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
-                                 .format(isotimestr))
-
-        parsecomponent = False
-
-        if parsingtz is False:
-            if len(componentstr) == 2 and charidx < len(isotimestr) - 1 and timestr[charidx + 1].isdigit():
-                #Lookahead, if we have two characters, and the next is a number, parse
-                parsecomponent = True
-            elif componentstr != '' and (timechar == ':' or timechar in TIMEZONE_DELIMITERS):
-                #If we've consumed characaters, and we hit a colon or TZ, parse
-                parsecomponent = True
-            elif charidx == len(timestr) - 1:
-                #We're at the end of the string, parse
-                parsecomponent = True
-
-        if parsecomponent is True and hasfractionalcomponent is True and '.' not in componentstr:
-            #Only parse a single fractional component
-            raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
-                                 .format(isotimestr))
-
-        if hourstr is None:
-            if parsecomponent is True:
-                hourstr = componentstr
-                componentstr = ''
-        elif hourstr is not None and minutestr is None and parsingtz is False:
-            if parsecomponent is True:
-                minutestr = componentstr
-                componentstr = ''
-        elif hourstr is not None and minutestr is not None and secondstr is None and parsingtz is False:
-            if parsecomponent is True:
-                secondstr = componentstr
-                componentstr = ''
-        elif hourstr is not None and tzstr is None and timechar in TIMEZONE_DELIMITERS:
-            #Avoid an error parsing 'Z' before parsingtz is set
-            pass
-        elif hourstr is not None and tzstr is None and parsingtz is True:
-            if charidx == len(timestr) - 1:
-                tzstr = componentstr
-                componentstr = ''
-                parsingtz = False
+            hourstr = timestr[0:2]
+            minutestr = timestr[2:]
+    elif len(timestr) == 6 or len(timestr) == 8:
+        #hh:mm:ss
+        #hhmmss
+        if timestr.count(':') == 2:
+            hourstr, minutestr, secondstr = timestr.split(':')
         else:
-            raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
-                                 .format(isotimestr))
-
-        if timechar in TIMEZONE_DELIMITERS and parsingtz is False:
-            if timechar == 'Z':
-                tzstr = 'Z'
-                componentstr = ''
-            else:
-                parsingtz = True
-                componentstr = timechar
-
-    if componentstr != '':
+            hourstr = timestr[0:2]
+            minutestr = timestr[2:4]
+            secondstr = timestr[4:]
+    else:
         raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
                              .format(isotimestr))
+
+    hascomponent = False
+
+    for componentstr in [hourstr, minutestr, secondstr]:
+        if componentstr is not None:
+            hascomponent = True
+
+            if componentstr.isdigit() is False:
+                raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
+                                     .format(isotimestr))
+
+    if hascomponent is False:
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
+                             .format(isotimestr))
+
+    if fractionalstr is not None:
+        if fractionalstr.isdigit() is False:
+            raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
+                                 .format(isotimestr))
+
+        if secondstr is not None:
+            secondstr = secondstr + '.' + fractionalstr
+        elif minutestr is not None:
+            minutestr = minutestr + '.' + fractionalstr
+        elif hourstr is not None:
+            hourstr = hourstr + '.' + fractionalstr
 
     if tzstr is None:
         tz = None

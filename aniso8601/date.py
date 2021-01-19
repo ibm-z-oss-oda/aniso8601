@@ -79,7 +79,6 @@ def parse_date(isodatestr, builder=PythonTimeBuilder):
     if len(isodatestr) == 0 or isodatestr.count('-') > 2:
         raise ISOFormatError('"{0}" is not a valid ISO 8601 date.'
                              .format(isodatestr))
-
     yearstr = None
     monthstr = None
     daystr = None
@@ -87,59 +86,68 @@ def parse_date(isodatestr, builder=PythonTimeBuilder):
     weekdaystr = None
     ordinaldaystr = None
 
-    #Consume the date components
-    componentstr = ''
-
-    for charidx, datechar in enumerate(isodatestr):
-        if datechar.isdigit() or (componentstr == '' and yearstr is not None and datechar == 'W'):
-            componentstr += datechar
-        elif datechar == '-':
-            pass
+    if len(isodatestr) <= 4:
+        #Y[YYY]
+        yearstr = isodatestr
+    elif 'W' in isodatestr:
+        if len(isodatestr) == 10:
+            #YYYY-Www-D
+            yearstr = isodatestr[0:4]
+            weekstr = isodatestr[6:8]
+            weekdaystr = isodatestr[9]
+        elif len(isodatestr) == 8:
+            if '-' in isodatestr:
+                #YYYY-Www
+                yearstr = isodatestr[0:4]
+                weekstr = isodatestr[6:]
+            else:
+                #YYYYWwwD
+                yearstr = isodatestr[0:4]
+                weekstr = isodatestr[5:7]
+                weekdaystr = isodatestr[7]
+        elif len(isodatestr) == 7:
+            #YYYYWww
+            yearstr = isodatestr[0:4]
+            weekstr = isodatestr[5:]
+    elif len(isodatestr) == 7:
+        if '-' in isodatestr:
+            #YYYY-MM
+            yearstr = isodatestr[0:4]
+            monthstr = isodatestr[5:]
         else:
-            raise ISOFormatError('"{0}" is not a valid ISO 8601 date.'
-                                 .format(isodatestr))
+            #YYYYDDD
+            yearstr = isodatestr[0:4]
+            ordinaldaystr = isodatestr[4:]
+    elif len(isodatestr) == 8:
+        if '-' in isodatestr:
+            #YYYY-DDD
+            yearstr = isodatestr[0:4]
+            ordinaldaystr = isodatestr[5:]
+        else:
+            #YYYYMMDD
+            yearstr = isodatestr[0:4]
+            monthstr = isodatestr[4:6]
+            daystr = isodatestr[6:]
+    elif len(isodatestr) == 10:
+        #YYYY-MM-DD
+        yearstr = isodatestr[0:4]
+        monthstr = isodatestr[5:7]
+        daystr = isodatestr[8:]
+    else:
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 date.'
+                             .format(isodatestr))
 
-        if yearstr is None:
-            #Y[YYY]
-            if len(componentstr) == 4 or charidx == len(isodatestr) - 1:
-                yearstr = componentstr
-                componentstr = ''
-            elif datechar == '-':
+    hascomponent = False
+
+    for componentstr in [yearstr, monthstr, daystr, weekstr, weekdaystr, ordinaldaystr]:
+        if componentstr is not None:
+            hascomponent = True
+
+            if componentstr.isdigit() is False:
                 raise ISOFormatError('"{0}" is not a valid ISO 8601 date.'
                                      .format(isodatestr))
-        elif yearstr is not None and componentstr != '' and componentstr[0] == 'W':
-            #YYYY-Www
-            #YYYY-Www-D
-            #YYYYWwwD
-            if len(componentstr) == 3 and componentstr[0] == 'W':
-                weekstr = componentstr[1:]
-                componentstr = ''
-        elif yearstr is not None and monthstr is None and weekstr is None:
-            if len(componentstr) == 2 and (len(isodatestr[charidx + 1:]) in [2, 3] or (isodatestr[charidx - 2] == '-' and charidx == len(isodatestr) - 1)):
-                #YYYY-MM-DD
-                #YYYY-MM
-                monthstr = componentstr
-                componentstr = ''
-            elif len(componentstr) == 3 and charidx == len(isodatestr) - 1:
-                #YYYY-DDD
-                ordinaldaystr = componentstr
-                componentstr = ''
-        elif yearstr is not None and monthstr is not None:
-            #YYYY-MM-DD
-            #YYYYMMDD
-            if len(componentstr) == 2:
-                daystr = componentstr
-                componentstr = ''
-        elif yearstr is not None and weekstr is not None and weekdaystr is None:
-            #YYYY-Www-D
-            if len(componentstr) == 1:
-                weekdaystr = componentstr
-                componentstr = ''
-        else:
-            raise ISOFormatError('"{0}" is not a valid ISO 8601 date.'
-                                 .format(isodatestr))
 
-    if componentstr != '':
+    if hascomponent is False:
         raise ISOFormatError('"{0}" is not a valid ISO 8601 date.'
                              .format(isodatestr))
 
