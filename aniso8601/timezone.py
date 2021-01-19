@@ -15,11 +15,7 @@ def parse_timezone(tzstr, builder=PythonTimeBuilder):
     if is_string(tzstr) is False:
         raise ValueError('Time zone must be string.')
 
-    if 'Z' in tzstr:
-        if len(tzstr) != 1:
-            raise ISOFormatError('"{0}" is not a valid ISO 8601 time offset.'
-                                 .format(tzstr))
-
+    if tzstr[0] == 'Z' and len(tzstr) == 1:
         return builder.build_timezone(negative=False, Z=True, name=tzstr)
     elif len(tzstr) == 6:
         #±hh:mm
