@@ -45,6 +45,12 @@ def parse_timezone(tzstr, builder=PythonTimeBuilder):
         raise ISOFormatError('"{0}" is not a valid ISO 8601 time offset.'
                              .format(tzstr))
 
+    for componentstr in [hourstr, minutestr]:
+        if componentstr is not None:
+            if componentstr.isdigit() is False:
+                raise ISOFormatError('"{0}" is not a valid ISO 8601 time offset.'
+                                     .format(tzstr))
+
     if tzstr[0] == '+':
         return builder.build_timezone(negative=False, hh=hourstr,
                                       mm=minutestr, name=tzstr)
