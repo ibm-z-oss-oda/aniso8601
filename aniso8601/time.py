@@ -114,6 +114,11 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
     if stopidx != -1:
         timestr, fractionalstr = timestr.split('.', 1)
 
+        if fractionalstr.isdigit() is False:
+            raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
+                                 .format(isotimestr))
+
+
     if len(timestr) == 2:
         #hh
         hourstr = timestr
@@ -153,10 +158,6 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
                              .format(isotimestr))
 
     if fractionalstr is not None:
-        if fractionalstr.isdigit() is False:
-            raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
-                                 .format(isotimestr))
-
         if secondstr is not None:
             secondstr = secondstr + '.' + fractionalstr
         elif minutestr is not None:
