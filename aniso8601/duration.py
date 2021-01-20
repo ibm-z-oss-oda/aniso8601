@@ -35,15 +35,17 @@ def parse_duration(isodurationstr, builder=PythonTimeBuilder):
     #assume it is a specified duration
     if _has_any_component(isodurationstr,
                           ['Y', 'M', 'D', 'H', 'S', 'W']) is True:
-        return _parse_duration_prescribed(isodurationstr, builder)
+        parseresult = _parse_duration_prescribed(isodurationstr)
+        return builder.build_duration(**parseresult)
 
     if isodurationstr.find('T') != -1:
-        return _parse_duration_combined(isodurationstr, builder)
+        parseresult = _parse_duration_combined(isodurationstr)
+        return builder.build_duration(**parseresult)
 
     raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
                           .format(isodurationstr))
 
-def _parse_duration_prescribed(durationstr, builder):
+def _parse_duration_prescribed(durationstr):
     #durationstr can be of the form PnYnMnDTnHnMnS or PnW
 
     #Don't allow negative elements
@@ -87,126 +89,156 @@ def _parse_duration_prescribed(durationstr, builder):
 
     #Parse the elements of the duration
     if durationstr.find('T') == -1:
-        return _parse_duration_prescribed_notime(durationstr, builder)
+        return _parse_duration_prescribed_notime(durationstr)
 
-    return _parse_duration_prescribed_time(durationstr, builder)
+    return _parse_duration_prescribed_time(durationstr)
 
-def _parse_duration_prescribed_notime(durationstr, builder):
+def _parse_duration_prescribed_notime(isodurationstr):
     #durationstr can be of the form PnYnMnD or PnW
 
     #Don't allow negative elements
     #https://bitbucket.org/nielsenb/aniso8601/issues/20/negative-duration
-    if durationstr.find('-') != -1:
+    if isodurationstr.find('-') != -1:
         raise NegativeDurationError('ISO 8601 durations must be positive.')
+
+    durationstr = normalize(isodurationstr)
 
     yearstr = None
     monthstr = None
-    weekstr = None
     daystr = None
+    weekstr = None
 
-    #Consume the date components
-    componentstr = ''
+    weekidx = durationstr.find('W')
+    yearidx = durationstr.find('Y')
+    monthidx = durationstr.find('M')
+    dayidx = durationstr.find('D')
 
-    for datachar in normalize(durationstr[1:]):
-        if datachar.isdigit() or datachar == '.':
-            componentstr += datachar
-        elif datachar == 'Y' and yearstr is None and monthstr is None and weekstr is None and daystr is None:
-            yearstr = componentstr
-            componentstr = ''
-        elif datachar == 'M' and monthstr is None and weekstr is None and daystr is None:
-            monthstr = componentstr
-            componentstr = ''
-        elif datachar == 'W' and weekstr is None and daystr is None:
-            weekstr = componentstr
-            componentstr = ''
-        elif datachar == 'D' and daystr is None:
-            daystr = componentstr
-            componentstr = ''
-        else:
-            raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
-                                  .format(durationstr))
-
-    #Make sure everything was consumed
-    if componentstr != '':
+    if weekidx != -1:
+        weekstr = durationstr[1:-1]
+    elif yearidx != -1 and monthidx != -1 and dayidx != -1:
+        yearstr = durationstr[1:yearidx]
+        monthstr = durationstr[yearidx + 1:monthidx]
+        daystr = durationstr[monthidx + 1:-1]
+    elif yearidx != -1 and monthidx != -1:
+        yearstr = durationstr[1:yearidx]
+        monthstr = durationstr[yearidx + 1:monthidx]
+    elif monthidx != -1 and dayidx != -1:
+        monthstr = durationstr[1:monthidx]
+        daystr = durationstr[monthidx + 1:-1]
+    elif yearidx != -1:
+        yearstr = durationstr[1:-1]
+    elif monthidx != -1:
+        monthstr = durationstr[1:-1]
+    elif dayidx != -1:
+        daystr = durationstr[1:-1]
+    else:
         raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
-                              .format(durationstr))
+                              .format(isodurationstr))
 
-    return builder.build_duration(PnY=yearstr, PnM=monthstr,
-                                  PnW=weekstr, PnD=daystr)
+    hascomponent = False
 
-def _parse_duration_prescribed_time(durationstr, builder):
+    for componentstr in [yearstr, monthstr, daystr, weekstr]:
+        if componentstr is not None:
+            hascomponent = True
+
+            if '.' in componentstr:
+                intstr, fractionalstr = componentstr.split('.', 1)
+
+                if intstr.isdigit() is False:
+                    raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
+                                          .format(isodurationstr))
+
+                if fractionalstr.isdigit() is False:
+                    raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
+                                          .format(isodurationstr))
+            else:
+                if componentstr.isdigit() is False:
+                    raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
+                                          .format(isodurationstr))
+
+    if hascomponent is False:
+        raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
+                              .format(isodurationstr))
+
+    return {'PnY': yearstr, 'PnM': monthstr, 'PnW': weekstr, 'PnD': daystr}
+
+def _parse_duration_prescribed_time(isodurationstr):
     #durationstr can be of the form PnYnMnDTnHnMnS
 
     #Don't allow negative elements
     #https://bitbucket.org/nielsenb/aniso8601/issues/20/negative-duration
-    if durationstr.find('-') != -1:
+    if isodurationstr.find('-') != -1:
         raise NegativeDurationError('ISO 8601 durations must be positive.')
 
-    timeidx = durationstr.find('T')
+    timeidx = isodurationstr.find('T')
 
-    firsthalf = durationstr[1:timeidx]
-    secondhalf = normalize(durationstr[timeidx + 1:])
+    datestr = isodurationstr[:timeidx]
+    timestr = normalize(isodurationstr[timeidx + 1:])
 
-    yearstr = None
-    monthstr = None
-    daystr = None
     hourstr = None
     minutestr = None
     secondstr = None
 
-    #Consume the date components
-    componentstr = ''
+    houridx = timestr.find('H')
+    minuteidx = timestr.find('M')
+    secondidx = timestr.find('S')
 
-    for datachar in firsthalf:
-        if datachar.isdigit():
-            componentstr += datachar
-        elif datachar == 'Y' and yearstr is None and monthstr is None and daystr is None:
-            yearstr = componentstr
-            componentstr = ''
-        elif datachar == 'M' and monthstr is None and daystr is None:
-            monthstr = componentstr
-            componentstr = ''
-        elif datachar == 'D' and daystr is None:
-            daystr = componentstr
-            componentstr = ''
-        else:
-            raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
-                                  .format(durationstr))
-
-    #Make sure everything was consumed
-    if componentstr != '':
+    if houridx != -1 and minuteidx != -1 and secondidx != -1:
+        hourstr = timestr[0:houridx]
+        minutestr = timestr[houridx + 1:minuteidx]
+        secondstr = timestr[minuteidx + 1:-1]
+    elif houridx != -1 and minuteidx != -1:
+        hourstr = timestr[0:houridx]
+        minutestr = timestr[houridx + 1:minuteidx]
+    elif minuteidx != -1 and secondidx != -1:
+        minutestr = timestr[0:minuteidx]
+        secondstr = timestr[minuteidx + 1:-1]
+    elif houridx != -1:
+        hourstr = timestr[0:-1]
+    elif minuteidx != -1:
+        minutestr = timestr[0:-1]
+    elif secondidx != -1:
+        secondstr = timestr[0:-1]
+    else:
         raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
-                              .format(durationstr))
+                              .format(isodurationstr))
 
+    hascomponent = False
 
-    #Consume the time components
-    componentstr = ''
+    for componentstr in [hourstr, minutestr, secondstr]:
+        if componentstr is not None:
+            hascomponent = True
 
-    for datachar in secondhalf:
-        if datachar.isdigit() or datachar == '.':
-            componentstr += datachar
-        elif datachar == 'H' and hourstr is None and minutestr is None and secondstr is None:
-            hourstr = componentstr
-            componentstr = ''
-        elif datachar == 'M' and minutestr is None and secondstr is None:
-            minutestr = componentstr
-            componentstr = ''
-        elif datachar == 'S' and secondstr is None:
-            secondstr = componentstr
-            componentstr = ''
-        else:
-            raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
-                                  .format(durationstr))
+            if '.' in componentstr:
+                intstr, fractionalstr = componentstr.split('.', 1)
 
-    #Make sure everything was consumed
-    if componentstr != '':
+                if intstr.isdigit() is False:
+                    raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
+                                          .format(isodurationstr))
+
+                if fractionalstr.isdigit() is False:
+                    raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
+                                          .format(isodurationstr))
+            else:
+                if componentstr.isdigit() is False:
+                    raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
+                                          .format(isodurationstr))
+
+    if hascomponent is False:
         raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
-                              .format(durationstr))
+                              .format(isodurationstr))
 
-    return builder.build_duration(PnY=yearstr, PnM=monthstr, PnD=daystr,
-                                  TnH=hourstr, TnM=minutestr, TnS=secondstr)
+    #Parse any date components
+    durationdict = {'PnY': None, 'PnM': None, 'PnW': None, 'PnD': None}
 
-def _parse_duration_combined(durationstr, builder):
+    if len(datestr) > 1:
+        durationdict = _parse_duration_prescribed_notime(datestr)
+
+    durationdict.update({'TnH': hourstr, 'TnM': minutestr, 'TnS': secondstr})
+
+    return durationdict
+
+def _parse_duration_combined(durationstr):
     #Period of the form P<date>T<time>
 
     #Split the string in to its component parts
@@ -215,9 +247,8 @@ def _parse_duration_combined(durationstr, builder):
     datevalue = parse_date(datepart, builder=TupleBuilder)
     timevalue = parse_time(timepart, builder=TupleBuilder)
 
-    return builder.build_duration(PnY=datevalue[0], PnM=datevalue[1],
-                                  PnD=datevalue[2], TnH=timevalue[0],
-                                  TnM=timevalue[1], TnS=timevalue[2])
+    return {'PnY': datevalue.YYYY, 'PnM': datevalue.MM, 'PnD': datevalue.DD,
+            'TnH': timevalue.hh, 'TnM': timevalue.mm, 'TnS': timevalue.ss}
 
 def _has_any_component(durationstr, components):
     #Given a duration string, and a list of components, returns True
