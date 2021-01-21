@@ -65,7 +65,7 @@ def _parse_duration_prescribed(durationstr):
         remaining = durationstr[separator_index + 1:]
         if find_separator(remaining) != -1:
             raise ISOFormatError('ISO 8601 allows only lowest order element to '
-                             'have a decimal fraction.')
+                                 'have a decimal fraction.')
 
         #There should only ever be 1 letter after a decimal if there is more
         #then one, the string is invalid
