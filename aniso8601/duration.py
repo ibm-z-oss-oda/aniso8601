@@ -45,39 +45,37 @@ def parse_duration(isodurationstr, builder=PythonTimeBuilder):
     raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
                           .format(isodurationstr))
 
-def _parse_duration_prescribed(durationstr):
+def _parse_duration_prescribed(isodurationstr):
     #durationstr can be of the form PnYnMnDTnHnMnS or PnW
 
     #Don't allow negative elements
     #https://bitbucket.org/nielsenb/aniso8601/issues/20/negative-duration
-    if durationstr.find('-') != -1:
+    if isodurationstr.find('-') != -1:
         raise NegativeDurationError('ISO 8601 durations must be positive.')
 
     #Make sure the end character is valid
     #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed
-    if durationstr[-1] not in ['Y', 'M', 'D', 'H', 'S', 'W']:
+    if isodurationstr[-1] not in ['Y', 'M', 'D', 'H', 'S', 'W']:
         raise ISOFormatError('ISO 8601 duration must end with a valid '
                              'character.')
 
     #Make sure only the lowest order element has decimal precision
-    separator_index = find_separator(durationstr)
-    if separator_index != -1:
-        remaining = durationstr[separator_index + 1:]
-        if find_separator(remaining) != -1:
-            raise ISOFormatError('ISO 8601 allows only lowest order element to '
-                                 'have a decimal fraction.')
+    durationstr = normalize(isodurationstr)
+
+    if durationstr.count('.') > 1:
+        raise ISOFormatError('ISO 8601 allows only lowest order element to '
+                             'have a decimal fraction.')
+
+    seperatoridx = durationstr.find('.')
+
+    if seperatoridx != -1:
+        remaining = durationstr[seperatoridx + 1:-1]
 
         #There should only ever be 1 letter after a decimal if there is more
         #then one, the string is invalid
-        lettercount = 0
-
-        for character in remaining:
-            if character.isalpha() is True:
-                lettercount += 1
-
-                if lettercount > 1:
-                    raise ISOFormatError('ISO 8601 duration must end with '
-                                         'a single valid character.')
+        if remaining.isdigit() is False:
+                raise ISOFormatError('ISO 8601 duration must end with '
+                                     'a single valid character.')
 
     #Do not allow W in combination with other designators
     #https://bitbucket.org/nielsenb/aniso8601/issues/2/week-designators-should-not-be-combinable
