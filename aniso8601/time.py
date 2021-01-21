@@ -110,9 +110,7 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
             timestr = timestr[0:delimiteridx]
 
     #Split out the fractional component
-    stopidx = timestr.find('.')
-
-    if stopidx != -1:
+    if timestr.find('.') != -1:
         timestr, fractionalstr = timestr.split('.', 1)
 
         if fractionalstr.isdigit() is False:
