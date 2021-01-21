@@ -96,11 +96,6 @@ def _parse_duration_prescribed(durationstr):
 def _parse_duration_prescribed_notime(isodurationstr):
     #durationstr can be of the form PnYnMnD or PnW
 
-    #Don't allow negative elements
-    #https://bitbucket.org/nielsenb/aniso8601/issues/20/negative-duration
-    if isodurationstr.find('-') != -1:
-        raise NegativeDurationError('ISO 8601 durations must be positive.')
-
     durationstr = normalize(isodurationstr)
 
     yearstr = None
@@ -164,11 +159,6 @@ def _parse_duration_prescribed_notime(isodurationstr):
 
 def _parse_duration_prescribed_time(isodurationstr):
     #durationstr can be of the form PnYnMnDTnHnMnS
-
-    #Don't allow negative elements
-    #https://bitbucket.org/nielsenb/aniso8601/issues/20/negative-duration
-    if isodurationstr.find('-') != -1:
-        raise NegativeDurationError('ISO 8601 durations must be positive.')
 
     timeidx = isodurationstr.find('T')
 

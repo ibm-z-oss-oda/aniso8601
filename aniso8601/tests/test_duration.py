@@ -257,6 +257,21 @@ class TestDurationParserFunctions(unittest.TestCase):
 
     def test_parse_duration_prescribed_negative(self):
         with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed('P-1Y')
+
+        with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed('P-2M')
+
+        with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed('P-3D')
+
+        with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed('P-4W')
+
+        with self.assertRaises(NegativeDurationError):
+            _parse_duration_prescribed('P-1Y2M3D')
+
+        with self.assertRaises(NegativeDurationError):
             _parse_duration_prescribed('P-T1H')
 
         with self.assertRaises(NegativeDurationError):
@@ -264,9 +279,6 @@ class TestDurationParserFunctions(unittest.TestCase):
 
         with self.assertRaises(NegativeDurationError):
             _parse_duration_prescribed('P-T3S')
-
-        with self.assertRaises(NegativeDurationError):
-            _parse_duration_prescribed('P-4W')
 
         with self.assertRaises(NegativeDurationError):
             _parse_duration_prescribed('P-1Y2M3DT4H54M6S')
@@ -341,22 +353,6 @@ class TestDurationParserFunctions(unittest.TestCase):
         with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed_notime('P1Y2M3D4H5S')
 
-    def test_parse_duration_prescribed_notime_negative(self):
-        with self.assertRaises(NegativeDurationError):
-            _parse_duration_prescribed_notime('P-1Y')
-
-        with self.assertRaises(NegativeDurationError):
-            _parse_duration_prescribed_notime('P-2M')
-
-        with self.assertRaises(NegativeDurationError):
-            _parse_duration_prescribed_notime('P-3D')
-
-        with self.assertRaises(NegativeDurationError):
-            _parse_duration_prescribed_notime('P-7W')
-
-        with self.assertRaises(NegativeDurationError):
-            _parse_duration_prescribed_notime('P-1Y2M3D')
-
     def test_parse_duration_prescribed_notime_outoforder(self):
         #Ensure durations are required to be in the correct order
         #https://bitbucket.org/nielsenb/aniso8601/issues/8/durations-with-components-in-wrong-order
@@ -415,10 +411,6 @@ class TestDurationParserFunctions(unittest.TestCase):
 
         with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed_time('P1Y2MT3D4H54M6S')
-
-    def test_parse_duration_prescribed_time_negative(self):
-        with self.assertRaises(NegativeDurationError):
-            _parse_duration_prescribed_time('P-1Y2M3DT4H54M6S')
 
     def test_parse_duration_prescribed_time_outoforder(self):
         #Ensure durations are required to be in the correct order
