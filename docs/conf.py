@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "aniso8601"
-copyright = "2020, Brandon Nielsen"
+copyright = "2021, Brandon Nielsen"
 author = "Brandon Nielsen"
 
 # The version info for the project you're documenting, acts as replacement for
