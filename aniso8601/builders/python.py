@@ -8,8 +8,9 @@
 
 import datetime
 
-from aniso8601.builders import (BaseTimeBuilder, DateTuple, Limit,
-                                TupleBuilder, cast, range_check)
+from aniso8601.builders import (BaseTimeBuilder, DateTuple, DatetimeTuple,
+                                Limit, TimeTuple, TupleBuilder, cast,
+                                range_check)
 from aniso8601.exceptions import (DayOutOfBoundsError,
                                   HoursOutOfBoundsError, ISOFormatError,
                                   LeapSecondError, MidnightBoundsError,
@@ -339,6 +340,10 @@ class PythonTimeBuilder(BaseTimeBuilder):
     def build_interval(cls, start=None, end=None, duration=None):
         if start is not None and end is not None:
             #<start>/<end>
+            #Handle concise format
+            if cls._is_interval_end_concise(end) is True:
+                end = cls._combine_concise_interval_tuples(start, end)
+
             startobject = cls._build_object(start)
             endobject = cls._build_object(end)
 

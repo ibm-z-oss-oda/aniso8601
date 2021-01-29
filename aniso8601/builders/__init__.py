@@ -367,6 +367,59 @@ class BaseTimeBuilder(object):
                                   hh=parsetuple.hh, mm=parsetuple.mm,
                                   name=parsetuple.name)
 
+    @classmethod
+    def _is_interval_end_concise(cls, endtuple):
+        if type(endtuple) is TimeTuple:
+            return True
+
+        if type(endtuple) is DatetimeTuple:
+            enddatetuple = endtuple.date
+        else:
+            enddatetuple = endtuple
+
+        if enddatetuple.YYYY is None:
+            return True
+
+        return False
+
+    @classmethod
+    def _combine_concise_interval_tuples(cls, starttuple, conciseendtuple):
+        endtimetuple = None
+        enddatetuple = None
+
+        if type(starttuple) is DateTuple:
+            startdatetuple = starttuple
+        else:
+            #Start is a datetime
+            startdatetuple = starttuple.date
+
+        if type(conciseendtuple) is DateTuple:
+            enddatetuple = conciseendtuple
+        elif type(conciseendtuple) is DatetimeTuple:
+            enddatetuple = conciseendtuple.date
+            endtimetuple = conciseendtuple.time
+        else:
+            #Time
+            endtimetuple = conciseendtuple
+
+        if enddatetuple is not None:
+            if enddatetuple.YYYY is None and enddatetuple.MM is None:
+                newenddatetuple = DateTuple(YYYY=startdatetuple.YYYY, MM=startdatetuple.MM,
+                                            DD=enddatetuple.DD, Www=enddatetuple.Www,
+                                            D=enddatetuple.D, DDD=enddatetuple.DDD)
+            else:
+                newenddatetuple = DateTuple(YYYY=startdatetuple.YYYY, MM=enddatetuple.MM,
+                                            DD=enddatetuple.DD, Www=enddatetuple.Www,
+                                            D=enddatetuple.D, DDD=enddatetuple.DDD)
+
+        if enddatetuple is not None and endtimetuple is None:
+            return newenddatetuple
+
+        if enddatetuple is not None and endtimetuple is not None:
+            return TupleBuilder.build_datetime(newenddatetuple, endtimetuple)
+
+        return TupleBuilder.build_datetime(startdatetuple, endtimetuple)
+
 class TupleBuilder(BaseTimeBuilder):
     #Builder used to return the arguments as a tuple, cleans up some parse methods
     @classmethod

@@ -317,6 +317,75 @@ class TestBaseTimeBuilder(unittest.TestCase):
             self.assertEqual(result, timezonetest[0])
             mock_build.assert_called_once_with(**timezonetest[1])
 
+    def test_is_interval_end_concise(self):
+        self.assertTrue(BaseTimeBuilder._is_interval_end_concise(TimeTuple('1', '2', '3',
+                                                                           None)))
+        self.assertTrue(BaseTimeBuilder._is_interval_end_concise(DateTuple(None, '2', '3',
+                                                                           '4', '5', '6')))
+        self.assertTrue(BaseTimeBuilder._is_interval_end_concise(DatetimeTuple(DateTuple(None, '2', '3',
+                                                                                         '4', '5', '6'),
+                                                                               TimeTuple('7', '8', '9',
+                                                                                         None))))
+
+        self.assertFalse(BaseTimeBuilder._is_interval_end_concise(DateTuple('1', '2', '3',
+                                                                            '4', '5', '6')))
+        self.assertFalse(BaseTimeBuilder._is_interval_end_concise(DatetimeTuple(DateTuple('1', '2', '3',
+                                                                                          '4', '5', '6'),
+                                                                                TimeTuple('7', '8', '9',
+                                                                                          None))))
+
+    def test_combine_concise_interval_tuples(self):
+        testtuples= ((DateTuple('2020', '01', '01',
+                                None, None, None),
+                      DateTuple(None, None, '02',
+                                None, None, None),
+                      DateTuple('2020', '01', '02',
+                                None, None, None)),
+                     (DateTuple('2008', '02', '15',
+                                None, None, None),
+                      DateTuple(None, '03', '14',
+                                None, None, None),
+                      DateTuple('2008', '03', '14',
+                                None, None, None)),
+                     (DatetimeTuple(DateTuple('2007', '12', '14',
+                                              None, None, None),
+                                     TimeTuple('13', '30', None,
+                                               None)),
+                      TimeTuple('15', '30', None,
+                                None),
+                      DatetimeTuple(DateTuple('2007', '12', '14',
+                                              None, None, None),
+                                    TimeTuple('15', '30', None,
+                                              None))),
+                     (DatetimeTuple(DateTuple('2007', '11', '13',
+                                              None, None, None),
+                                    TimeTuple('09', '00', None,
+                                              None)),
+                      DatetimeTuple(DateTuple(None, None, '15',
+                                              None, None, None),
+                                    TimeTuple('17', '00', None,
+                                              None)),
+                      DatetimeTuple(DateTuple('2007', '11', '15',
+                                              None, None, None),
+                                    TimeTuple('17', '00', None,
+                                              None))),
+                     (DatetimeTuple(DateTuple('2007', '11', '13',
+                                              None, None, None),
+                                    TimeTuple('00', '00', None,
+                                              None)),
+                      DatetimeTuple(DateTuple(None, None, '16',
+                                              None, None, None),
+                                    TimeTuple('00', '00', None,
+                                              None)),
+                      DatetimeTuple(DateTuple('2007', '11', '16',
+                                              None, None, None),
+                                    TimeTuple('00', '00', None,
+                                              None))))
+
+        for testtuple in testtuples:
+            result = BaseTimeBuilder._combine_concise_interval_tuples(testtuple[0], testtuple[1])
+            self.assertEqual(result, testtuple[2])
+
 class TestTupleBuilder(unittest.TestCase):
     def test_build_date(self):
         datetuple = TupleBuilder.build_date()

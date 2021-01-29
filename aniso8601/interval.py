@@ -6,13 +6,13 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-from aniso8601.builders import TupleBuilder
+from aniso8601.builders import TupleBuilder, DateTuple
 from aniso8601.builders.python import PythonTimeBuilder
 from aniso8601.compat import is_string
 from aniso8601.date import parse_date
 from aniso8601.duration import parse_duration
 from aniso8601.exceptions import ISOFormatError
-from aniso8601.time import parse_datetime
+from aniso8601.time import parse_datetime, parse_time
 
 def parse_interval(isointervalstr, intervaldelimiter='/',
                    datetimedelimiter='T', builder=PythonTimeBuilder):
@@ -65,7 +65,7 @@ def parse_repeating_interval(isointervalstr, intervaldelimiter='/',
     #Rnn/<interval>
     #R/<interval>
 
-    if is_string(isointervalstr) is False:
+    if not isinstance(isointervalstr, str):
         raise ValueError('Interval must be string.')
 
     if len(isointervalstr) == 0:
@@ -112,81 +112,118 @@ def _parse_interval(isointervalstr, builder, intervaldelimiter='/',
         #is to maintain consistency with parsing <start>/<end> durations, as
         #well as making repeating interval code cleaner. Users who desire
         #durations to be in order can use the 'sorted' operator.
+        duration = parse_duration(firstpart, builder=TupleBuilder)
 
         #We need to figure out if <end> is a date, or a datetime
         if secondpart.find(datetimedelimiter) != -1:
             #<end> is a datetime
-            duration = parse_duration(firstpart, builder=TupleBuilder)
-            enddatetime = parse_datetime(secondpart,
-                                         delimiter=datetimedelimiter,
-                                         builder=TupleBuilder)
+            endtuple = parse_datetime(secondpart,
+                                      delimiter=datetimedelimiter,
+                                      builder=TupleBuilder)
+        else:
+            endtuple = parse_date(secondpart, builder=TupleBuilder)
 
-            return builder.build_interval(end=enddatetime,
-                                          duration=duration)
-
-        #<end> must just be a date
-        duration = parse_duration(firstpart, builder=TupleBuilder)
-        enddate = parse_date(secondpart, builder=TupleBuilder)
-
-        return builder.build_interval(end=enddate, duration=duration)
+        return builder.build_interval(end=endtuple, duration=duration)
     elif secondpart[0] == 'P':
         #<start>/<duration>
         #We need to figure out if <start> is a date, or a datetime
+        duration = parse_duration(secondpart, builder=TupleBuilder)
+
         if firstpart.find(datetimedelimiter) != -1:
             #<start> is a datetime
-            duration = parse_duration(secondpart, builder=TupleBuilder)
-            startdatetime = parse_datetime(firstpart,
-                                           delimiter=datetimedelimiter,
-                                           builder=TupleBuilder)
+            starttuple = parse_datetime(firstpart,
+                                        delimiter=datetimedelimiter,
+                                        builder=TupleBuilder)
+        else:
+            #<start> must just be a date
+            starttuple = parse_date(firstpart, builder=TupleBuilder)
 
-            return builder.build_interval(start=startdatetime,
-                                          duration=duration)
-
-        #<start> must just be a date
-        duration = parse_duration(secondpart, builder=TupleBuilder)
-        startdate = parse_date(firstpart, builder=TupleBuilder)
-
-        return builder.build_interval(start=startdate,
+        return builder.build_interval(start=starttuple,
                                       duration=duration)
 
     #<start>/<end>
-    if (firstpart.find(datetimedelimiter) != -1
-            and secondpart.find(datetimedelimiter) != -1):
+    if firstpart.find(datetimedelimiter) != -1:
         #Both parts are datetimes
-        start_datetime = parse_datetime(firstpart,
-                                        delimiter=datetimedelimiter,
-                                        builder=TupleBuilder)
+        starttuple = parse_datetime(firstpart,
+                                    delimiter=datetimedelimiter,
+                                    builder=TupleBuilder)
+    else:
+        starttuple = parse_date(firstpart, builder=TupleBuilder)
 
-        end_datetime = parse_datetime(secondpart,
-                                      delimiter=datetimedelimiter,
-                                      builder=TupleBuilder)
+    endtuple = _parse_interval_end(secondpart,
+                                   starttuple,
+                                   datetimedelimiter)
 
-        return builder.build_interval(start=start_datetime,
-                                      end=end_datetime)
-    elif (firstpart.find(datetimedelimiter) != -1
-          and secondpart.find(datetimedelimiter) == -1):
-        #First part is a datetime, second part is a date
-        start_datetime = parse_datetime(firstpart,
-                                        delimiter=datetimedelimiter,
-                                        builder=TupleBuilder)
+    return builder.build_interval(start=starttuple, end=endtuple)
 
-        end_date = parse_date(secondpart, builder=TupleBuilder)
+def _parse_interval_end(endstr, starttuple, datetimedelimiter):
+    datestr = None
+    timestr = None
 
-        return builder.build_interval(start=start_datetime,
-                                      end=end_date)
-    elif (firstpart.find(datetimedelimiter) == -1
-          and secondpart.find(datetimedelimiter) != -1):
-        #First part is a date, second part is a datetime
-        start_date = parse_date(firstpart, builder=TupleBuilder)
-        end_datetime = parse_datetime(secondpart,
-                                      delimiter=datetimedelimiter,
-                                      builder=TupleBuilder)
+    monthstr = None
+    daystr = None
 
-        return builder.build_interval(start=start_date,
-                                      end=end_datetime)
+    concise = False
 
-    #Both parts are dates
-    start_date = parse_date(firstpart, builder=TupleBuilder)
-    end_date = parse_date(secondpart, builder=TupleBuilder)
+    if type(starttuple) is DateTuple:
+        startdatetuple = starttuple
+    else:
+        #Start is a datetime
+        startdatetuple = starttuple.date
 
-    return builder.build_interval(start=start_date, end=end_date)
+    if datetimedelimiter in endstr:
+        datestr, timestr = endstr.split(datetimedelimiter, 1)
+    elif ':' in endstr:
+        timestr = endstr
+    else:
+        datestr = endstr
+
+    #End is just a time
+    if datestr is None:
+        return parse_time(timestr, builder=TupleBuilder)
+
+    #Handle backwards concise representation
+    if datestr.count('-') == 1:
+        monthstr, daystr = datestr.split('-')
+        concise = True
+    elif len(datestr) <= 2:
+        daystr = datestr
+        concise = True
+    elif len(datestr) <= 4:
+        monthstr = datestr[0:2]
+        daystr = datestr[2:]
+        concise = True
+
+    if concise is True:
+        concisedatestr = startdatetuple.YYYY
+
+        #Seperators required because concise elements may be missing digits
+        if monthstr is not None:
+            concisedatestr += '-' + monthstr
+        elif startdatetuple.MM is not None:
+            concisedatestr += '-' + startdatetuple.MM
+
+        if daystr is not None:
+            concisedatestr += '-' + daystr
+        elif startdatetuple.DD is not None:
+            concisedatestr += '-' + startdatetuple.DD
+
+        enddatetuple = parse_date(concisedatestr, builder=TupleBuilder)
+
+        #Clear unsupplied components
+        if monthstr is None:
+            enddatetuple = DateTuple(YYYY=None, MM=None, DD=enddatetuple.DD,
+                                     Www=None, D=None, DDD=None)
+        else:
+            #Year not provided
+            enddatetuple = DateTuple(YYYY=None, MM=enddatetuple.MM, DD=enddatetuple.DD,
+                                     Www=None, D=None, DDD=None)
+    else:
+        enddatetuple = parse_date(datestr, builder=TupleBuilder)
+
+    if timestr is None:
+        return enddatetuple
+
+    endtimetuple = parse_time(timestr, builder=TupleBuilder)
+
+    return TupleBuilder.build_datetime(enddatetuple, endtimetuple)
