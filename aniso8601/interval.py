@@ -212,12 +212,11 @@ def _parse_interval_end(endstr, starttuple, datetimedelimiter):
 
         #Clear unsupplied components
         if monthstr is None:
-            enddatetuple = DateTuple(YYYY=None, MM=None, DD=enddatetuple.DD,
-                                     Www=None, D=None, DDD=None)
+            enddatetuple = TupleBuilder.build_date(DD=enddatetuple.DD)
         else:
             #Year not provided
-            enddatetuple = DateTuple(YYYY=None, MM=enddatetuple.MM, DD=enddatetuple.DD,
-                                     Www=None, D=None, DDD=None)
+            enddatetuple = TupleBuilder.build_date(MM=enddatetuple.MM,
+                                                   DD=enddatetuple.DD)
     else:
         enddatetuple = parse_date(datestr, builder=TupleBuilder)
 
