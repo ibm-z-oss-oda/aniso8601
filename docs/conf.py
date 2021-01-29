@@ -28,7 +28,7 @@ author = "Brandon Nielsen"
 # The short X.Y version.
 version = "8.1.1"
 # The full version, including alpha/beta/rc tags.
-release = "8.1.1-dev.0"
+release = "8.1.1"
 
 # -- General configuration ---------------------------------------------------
 

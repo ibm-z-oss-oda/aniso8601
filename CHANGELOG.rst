@@ -1,10 +1,10 @@
 Changelog
 =========
 
-aniso8601 8.1.1-dev.0
-=====================
+aniso8601 8.1.1
+===============
 
-*Release date: YYYY-MM-DD*
+*Release date: 2021-01-29*
 
 Changes
 -------
