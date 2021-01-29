@@ -8,6 +8,7 @@ aniso8601 9.0.0-dev.0
 
 Changes
 -------
+
 * Add explicit bounds of [000, 366] to day of year component :code:`_parse_ordinal_date`, this adds the same limits to dates of the format YYYYDDD or YYYY-DDD when using :code:`parse_date`
 * Add :code:`range_check_date`, :code:`range_check_time`, :code:`range_check_duration`, :code:`range_check_repeating_interval`, and :code:`range_check_timezone` range checking class methods to :code:`BaseTimeBuilder` there are no datetime or non-repeating interval check function as they are made of already checked parts
 * :code:`PythonTimeBuilder` now calls the appropriate range check functions using the :code:`range_check_date`, :code:`range_check_time`, :code:`range_check_duration`, :code:`range_check_repeating_interval`, and :code:`range_check_timezone` methods defined in :code:`aniso8601.builders`
@@ -29,6 +30,7 @@ Changes
 
 Deprecation
 -----------
+
 * **Update on Python 2 support**: Python 2 support was slated to be removed in 7.0.0 but was not, it will remain until a test fails on Python 2 but not Python 3
 * Using Setuptools to run tests (:code:`python setup.py tests`) will be removed in the next major or minor version (either 9.1.0, 10.0.0)
 
@@ -40,12 +42,16 @@ aniso8601 8.1.1
 Changes
 -------
 
-* Deprecate running tests with :code:`python setup.py tests` as the test suite support in Setuptools is `deprecated <https://github.com/pypa/setuptools/issues/1684>`_
 * Add version to :code:`__init__.py`
 * Cleaner reading of `README.rst` into the :code:`long_description` field of `setup.py`
 * Define :code:`long_description_content_type` as :code:`text/x-rst`
 * Simplify Sphinx configuration
 * Add :code:`compat.is_string` method, returns :code:`True` for :code:`str`, :code:`unicode` types, :code:`False` otherwise, used to fix `28 <https://bitbucket.org/nielsenb/aniso8601/issues/28/810-breaks-parsing-unicode-strings-with>`_
+
+Deprecation
+-----------
+
+* Deprecate running tests with :code:`python setup.py tests` as the test suite support in Setuptools is `deprecated <https://github.com/pypa/setuptools/issues/1684>`_
 
 aniso8601 8.1.0
 ===============
