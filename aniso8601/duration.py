@@ -21,7 +21,7 @@ def parse_duration(isodurationstr, builder=PythonTimeBuilder):
     #PnYnMnDTnHnMnS (or any reduced precision equivalent)
     #P<date>T<time>
 
-    if not isinstance(isodurationstr, str):
+    if compat.is_string(isodurationstr) is False:
         raise ValueError('Duration must be string.')
 
     if len(isodurationstr) == 0:

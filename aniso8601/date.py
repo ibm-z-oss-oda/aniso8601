@@ -6,8 +6,9 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-from aniso8601.exceptions import ISOFormatError
 from aniso8601.builders.python import PythonTimeBuilder
+from aniso8601.compat import is_string
+from aniso8601.exceptions import ISOFormatError
 from aniso8601.resolution import DateResolution
 
 def get_date_resolution(isodatestr):
@@ -23,7 +24,7 @@ def get_date_resolution(isodatestr):
     #YYYYWwwD
     #YYYY-DDD
     #YYYYDDD
-    if not isinstance(isodatestr, str):
+    if is_string(isodatestr) is False:
         raise ValueError('Date must be string.')
 
     if isodatestr.startswith('+') or isodatestr.startswith('-'):

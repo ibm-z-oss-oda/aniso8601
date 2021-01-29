@@ -8,6 +8,7 @@
 
 from aniso8601.builders import TupleBuilder
 from aniso8601.builders.python import PythonTimeBuilder
+from aniso8601.compat import is_string
 from aniso8601.date import parse_date
 from aniso8601.decimalfraction import find_separator, normalize
 from aniso8601.exceptions import ISOFormatError
@@ -42,7 +43,7 @@ def get_time_resolution(isotimestr):
     #hh:mm±hh
     #hhmm±hh
     #hh±hh
-    if not isinstance(isotimestr, str):
+    if is_string(isotimestr) is False:
         raise ValueError('Time must be string.')
 
     timestr = _split_tz(isotimestr)[0].replace(':', '')
@@ -118,7 +119,7 @@ def parse_datetime(isodatetimestr, delimiter='T', builder=PythonTimeBuilder):
     #By default, the ISO 8601 specified T delimiter is used to split the
     #date and time (<date>T<time>). Fixed offset tzdata will be included
     #if UTC offset is given in the input string.
-    if not isinstance(isodatetimestr, str):
+    if is_string(isodatetimestr) is False:
         raise ValueError('Date time must be string.')
 
     if delimiter not in isodatetimestr:

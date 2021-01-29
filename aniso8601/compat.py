@@ -14,3 +14,9 @@ if PY2:
     range = xrange
 else:
     range = range
+
+def is_string(tocheck):
+    if PY2:
+        return isinstance(tocheck, str) or isinstance(tocheck, unicode)
+
+    return isinstance(tocheck, str)

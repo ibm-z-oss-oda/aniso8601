@@ -7,11 +7,12 @@
 # of the BSD license.  See the LICENSE file for details.
 
 from aniso8601.builders.python import PythonTimeBuilder
+from aniso8601.compat import is_string
 from aniso8601.exceptions import ISOFormatError
 
 def parse_timezone(tzstr, builder=PythonTimeBuilder):
     #tzstr can be Z, ±hh:mm, ±hhmm, ±hh
-    if not isinstance(tzstr, str):
+    if is_string(tzstr) is False:
         raise ValueError('Time zone must be string.')
 
     if 'Z' in tzstr:

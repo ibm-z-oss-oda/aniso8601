@@ -8,6 +8,7 @@
 
 from aniso8601.builders import TupleBuilder
 from aniso8601.builders.python import PythonTimeBuilder
+from aniso8601.compat import is_string
 from aniso8601.date import parse_date
 from aniso8601.duration import parse_duration
 from aniso8601.exceptions import ISOFormatError
@@ -32,7 +33,7 @@ def parse_interval(isointervalstr, intervaldelimiter='/',
     #Is expressly not supported as there is no way to provide the additional
     #required context.
 
-    if not isinstance(isointervalstr, str):
+    if is_string(isointervalstr) is False:
         raise ValueError('Interval must be string.')
 
     if len(isointervalstr) == 0:
@@ -58,7 +59,7 @@ def parse_repeating_interval(isointervalstr, intervaldelimiter='/',
     #Rnn/<interval>
     #R/<interval>
 
-    if not isinstance(isointervalstr, str):
+    if is_string(isointervalstr) is False:
         raise ValueError('Interval must be string.')
 
     if len(isointervalstr) == 0:

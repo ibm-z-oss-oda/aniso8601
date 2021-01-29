@@ -14,6 +14,7 @@ Changes
 * Cleaner reading of `README.rst` into the :code:`long_description` field of `setup.py`
 * Define :code:`long_description_content_type` as :code:`text/x-rst`
 * Simplify Sphinx configuration
+* Add :code:`compat.is_string` method, returns :code:`True` for :code:`str`, :code:`unicode` types, :code:`False` otherwise, used to fix `28 <https://bitbucket.org/nielsenb/aniso8601/issues/28/810-breaks-parsing-unicode-strings-with>`_
 
 aniso8601 8.1.0
 ===============
