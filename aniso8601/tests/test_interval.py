@@ -221,6 +221,13 @@ class TestIntervalParserFunctions(unittest.TestCase):
                                                        None, None, None),
                                              TimeTuple('17', '00', None,
                                                        None))}),
+                      ('2007-11-13T00:00/12:34.567',
+                       {'start': DatetimeTuple(DateTuple('2007', '11', '13',
+                                                         None, None, None),
+                                               TimeTuple('00', '00', None,
+                                                         None)),
+                        'end': TimeTuple('12', '34.567', None,
+                                         None)}),
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
                       ('1980-03-05T01:01:00.0000001/'
@@ -552,6 +559,13 @@ class TestIntervalParserFunctions(unittest.TestCase):
                                                        None, None, None),
                                              TimeTuple('17', '00', None,
                                                        None))}),
+                      ('2007-11-13T00:00/12:34.567',
+                       {'start': DatetimeTuple(DateTuple('2007', '11', '13',
+                                                         None, None, None),
+                                               TimeTuple('00', '00', None,
+                                                         None)),
+                        'end': TimeTuple('12', '34.567', None,
+                                         None)}),
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
                       ('1980-03-05T01:01:00.0000001/'
