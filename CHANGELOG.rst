@@ -9,6 +9,7 @@ aniso8601 9.0.0-dev.0
 Changes
 -------
 
+* Add support for concise interval format (see `27 <https://bitbucket.org/nielsenb/aniso8601/issues/27/support-for-short-syntax-for-intervals>`_)
 * Add explicit bounds of [000, 366] to day of year component :code:`_parse_ordinal_date`, this adds the same limits to dates of the format YYYYDDD or YYYY-DDD when using :code:`parse_date`
 * Add :code:`range_check_date`, :code:`range_check_time`, :code:`range_check_duration`, :code:`range_check_repeating_interval`, and :code:`range_check_timezone` range checking class methods to :code:`BaseTimeBuilder` there are no datetime or non-repeating interval check function as they are made of already checked parts
 * :code:`PythonTimeBuilder` now calls the appropriate range check functions using the :code:`range_check_date`, :code:`range_check_time`, :code:`range_check_duration`, :code:`range_check_repeating_interval`, and :code:`range_check_timezone` methods defined in :code:`aniso8601.builders`
