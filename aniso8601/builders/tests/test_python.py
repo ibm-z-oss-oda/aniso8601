@@ -696,6 +696,13 @@ class TestPythonTimeBuilder(unittest.TestCase):
                        datetime.datetime(year=2007, month=11, day=13,
                                          hour=12, minute=34, second=34,
                                          microsecond=20000)),
+                      ({'start': DateTuple('2007', '11', '13',
+                                           None, None, None),
+                        'end': TimeTuple('12', '34', None,
+                                         None)},
+                        datetime.date(year=2007, month=11, day=13),
+                        datetime.datetime(year=2007, month=11, day=13,
+                                          hour=12, minute=34)),
                       #Make sure we truncate, not round
                       #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
                       ({'start': DatetimeTuple(DateTuple('1980', '03', '05',
