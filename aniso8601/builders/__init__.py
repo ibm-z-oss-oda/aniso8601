@@ -384,6 +384,9 @@ class BaseTimeBuilder(object):
 
     @classmethod
     def _combine_concise_interval_tuples(cls, starttuple, conciseendtuple):
+        starttimetuple = None
+        startdatetuple = None
+
         endtimetuple = None
         enddatetuple = None
 
@@ -391,6 +394,7 @@ class BaseTimeBuilder(object):
             startdatetuple = starttuple
         else:
             #Start is a datetime
+            starttimetuple = starttuple.time
             startdatetuple = starttuple.date
 
         if type(conciseendtuple) is DateTuple:
@@ -411,6 +415,12 @@ class BaseTimeBuilder(object):
                 newenddatetuple = DateTuple(YYYY=startdatetuple.YYYY, MM=enddatetuple.MM,
                                             DD=enddatetuple.DD, Www=enddatetuple.Www,
                                             D=enddatetuple.D, DDD=enddatetuple.DDD)
+
+        if ((starttimetuple is not None and starttimetuple.tz is not None) and
+            (endtimetuple is not None and endtimetuple.tz != starttimetuple.tz)):
+            #Copy the timezone across
+            endtimetuple = TimeTuple(hh=endtimetuple.hh, mm=endtimetuple.mm,
+                                     ss=endtimetuple.ss, tz=starttimetuple.tz)
 
         if enddatetuple is not None and endtimetuple is None:
             return newenddatetuple

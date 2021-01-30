@@ -380,7 +380,27 @@ class TestBaseTimeBuilder(unittest.TestCase):
                       DatetimeTuple(DateTuple('2007', '11', '16',
                                               None, None, None),
                                     TimeTuple('00', '00', None,
-                                              None))))
+                                              None))),
+                     (DatetimeTuple(DateTuple('2007', '11', '13',
+                                              None, None, None),
+                                    TimeTuple('09', '00', None,
+                                              TimezoneTuple(False,
+                                                            True,
+                                                            None,
+                                                            None,
+                                                            'Z'))),
+                      DatetimeTuple(DateTuple(None, None, '15',
+                                              None, None, None),
+                                    TimeTuple('17', '00', None,
+                                              None)),
+                     DatetimeTuple(DateTuple('2007', '11', '15',
+                                              None, None, None),
+                                    TimeTuple('17', '00', None,
+                                              TimezoneTuple(False,
+                                                            True,
+                                                            None,
+                                                            None,
+                                                            'Z')))))
 
         for testtuple in testtuples:
             result = BaseTimeBuilder._combine_concise_interval_tuples(testtuple[0], testtuple[1])
