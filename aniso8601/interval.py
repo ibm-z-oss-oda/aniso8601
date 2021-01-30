@@ -178,9 +178,12 @@ def _parse_interval_end(endstr, starttuple, datetimedelimiter):
     else:
         datestr = endstr
 
+    if timestr is not None:
+        endtimetuple = parse_time(timestr, builder=TupleBuilder)
+
     #End is just a time
     if datestr is None:
-        return parse_time(timestr, builder=TupleBuilder)
+        return endtimetuple
 
     #Handle backwards concise representation
     if datestr.count('-') == 1:
@@ -197,7 +200,7 @@ def _parse_interval_end(endstr, starttuple, datetimedelimiter):
     if concise is True:
         concisedatestr = startdatetuple.YYYY
 
-        #Seperators required because concise elements may be missing digits
+        #Separators required because concise elements may be missing digits
         if monthstr is not None:
             concisedatestr += '-' + monthstr
         elif startdatetuple.MM is not None:
@@ -222,7 +225,5 @@ def _parse_interval_end(endstr, starttuple, datetimedelimiter):
 
     if timestr is None:
         return enddatetuple
-
-    endtimetuple = parse_time(timestr, builder=TupleBuilder)
 
     return TupleBuilder.build_datetime(enddatetuple, endtimetuple)
