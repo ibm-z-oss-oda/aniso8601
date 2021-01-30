@@ -230,7 +230,7 @@ def _parse_duration_combined(durationstr):
     #Period of the form P<date>T<time>
 
     #Split the string in to its component parts
-    datepart, timepart = durationstr[1:].split('T', maxsplit=1) #We skip the 'P'
+    datepart, timepart = durationstr[1:].split('T', 1) #We skip the 'P'
 
     datevalue = parse_date(datepart, builder=TupleBuilder)
     timevalue = parse_time(timepart, builder=TupleBuilder)
