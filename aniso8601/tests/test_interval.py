@@ -678,6 +678,14 @@ class TestIntervalParserFunctions(unittest.TestCase):
                                                            TimeTuple('17', '00', None,
                                                                      None)))
 
+        self.assertEqual(_parse_interval_end('12:34.567', DatetimeTuple(DateTuple('2007', '11', '13',
+                                                                                 None, None, None),
+                                                                       TimeTuple('00', '00', None,
+                                                                                 None)),
+                                             'T'),
+                                             TimeTuple('12', '34.567', None,
+                                                       None))
+
 class TestRepeatingIntervalParserFunctions(unittest.TestCase):
     def test_parse_repeating_interval(self):
         with mock.patch.object(aniso8601.interval.PythonTimeBuilder,
