@@ -70,7 +70,10 @@ class TestTimezoneParserFunctions(unittest.TestCase):
                 parse_timezone(testtuple, builder=None)
 
     def test_parse_timezone_badstr(self):
-        testtuples = ('+1', '-00', '-0000', '-00:00', '01', '0123', 'bad', '')
+        testtuples = ('+1', '-00', '-0000', '-00:00',
+                      '01', '0123', '@12:34',
+                      'Y', ' Z', 'Z ', ' Z ',
+                      'bad', '')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
@@ -111,19 +114,6 @@ class TestTimezoneParserFunctions(unittest.TestCase):
 
         self.assertEqual(result, expectedargs)
         mockBuilder.build_timezone.assert_called_once_with(**expectedargs)
-
-    def test_parse_timezone_badstr(self):
-        with self.assertRaises(ISOFormatError):
-            parse_timezone('Y', builder=None)
-
-        with self.assertRaises(ISOFormatError):
-            parse_timezone(' Z', builder=None)
-
-        with self.assertRaises(ISOFormatError):
-            parse_timezone('Z ', builder=None)
-
-        with self.assertRaises(ISOFormatError):
-            parse_timezone(' Z ', builder=None)
 
     def test_parse_timezone_negativezero(self):
         #A 0 offset cannot be negative

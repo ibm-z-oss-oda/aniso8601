@@ -15,7 +15,7 @@ def parse_timezone(tzstr, builder=PythonTimeBuilder):
     if is_string(tzstr) is False:
         raise ValueError('Time zone must be string.')
 
-    if tzstr[0] == 'Z' and len(tzstr) == 1:
+    if len(tzstr) == 1 and tzstr[0] == 'Z':
         return builder.build_timezone(negative=False, Z=True, name=tzstr)
     elif len(tzstr) == 6:
         #±hh:mm
@@ -54,7 +54,8 @@ def parse_timezone(tzstr, builder=PythonTimeBuilder):
     if tzstr[0] == '+':
         return builder.build_timezone(negative=False, hh=hourstr,
                                       mm=minutestr, name=tzstr)
-    elif tzstr[0] == '-':
+
+    if tzstr[0] == '-':
         return builder.build_timezone(negative=True, hh=hourstr,
                                       mm=minutestr, name=tzstr)
 
