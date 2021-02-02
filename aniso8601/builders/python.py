@@ -162,7 +162,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
     def build_date(cls, YYYY=None, MM=None, DD=None, Www=None, D=None,
                    DDD=None):
-        YYYY, MM, DD, Www, D, DDD = cls.range_check_date(YYYY, MM, DD, Www, D, DDD, rangedict=cls.DATE_RANGE_DICT)
+        YYYY, MM, DD, Www, D, DDD = cls.range_check_date(YYYY, MM, DD, Www, D, DDD)
 
         if MM is None:
             MM = 1
@@ -188,7 +188,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         seconds = 0
         microseconds = 0
 
-        hh, mm, ss, tz = cls.range_check_time(hh, mm, ss, tz, rangedict=cls.TIME_RANGE_DICT)
+        hh, mm, ss, tz = cls.range_check_time(hh, mm, ss, tz)
 
         if type(hh) is FractionalComponent:
             hours = hh.principal
@@ -248,7 +248,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         seconds = 0
         microseconds = 0
 
-        PnY, PnM, PnW, PnD, TnH, TnM, TnS = cls.range_check_duration(PnY, PnM, PnW, PnD, TnH, TnM, TnS, rangedict=cls.DURATION_RANGE_DICT)
+        PnY, PnM, PnW, PnD, TnH, TnM, TnS = cls.range_check_duration(PnY, PnM, PnW, PnD, TnH, TnM, TnS)
 
         if PnY is not None:
             if type(PnY) is FractionalComponent:
@@ -420,7 +420,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
         startobject = None
         endobject = None
 
-        R, Rnn, interval = cls.range_check_repeating_interval(R, Rnn, interval, rangedict=cls.REPEATING_INTERVAL_RANGE_DICT)
+        R, Rnn, interval = cls.range_check_repeating_interval(R, Rnn, interval)
 
         if interval.start is not None:
             startobject = cls._build_object(interval.start)
@@ -450,7 +450,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
     @classmethod
     def build_timezone(cls, negative=None, Z=None, hh=None, mm=None, name=''):
-        negative, Z, hh, mm, name = cls.range_check_timezone(negative, Z, hh, mm, name, rangedict=cls.TIMEZONE_RANGE_DICT)
+        negative, Z, hh, mm, name = cls.range_check_timezone(negative, Z, hh, mm, name)
 
         if Z is True:
             #Z -> UTC
