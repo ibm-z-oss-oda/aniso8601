@@ -422,14 +422,14 @@ class PythonTimeBuilder(BaseTimeBuilder):
 
         R, Rnn, interval = cls.range_check_repeating_interval(R, Rnn, interval, rangedict=cls.REPEATING_INTERVAL_RANGE_DICT)
 
-        if interval[0] is not None:
-            startobject = cls._build_object(interval[0])
+        if interval.start is not None:
+            startobject = cls._build_object(interval.start)
 
-        if interval[1] is not None:
-            endobject = cls._build_object(interval[1])
+        if interval.end is not None:
+            endobject = cls._build_object(interval.end)
 
-        if interval[2] is not None:
-            durationobject = cls._build_object(interval[2])
+        if interval.duration is not None:
+            durationobject = cls._build_object(interval.duration)
         else:
             durationobject = endobject - startobject
 
