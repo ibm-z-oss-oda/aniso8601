@@ -843,6 +843,21 @@ class TestPythonTimeBuilder(unittest.TestCase):
                              - dateindex * datetime.timedelta(hours=1,
                                                               minutes=2))
 
+        args = {'R': True, 'interval': IntervalTuple(DateTuple('1981', '04', '05',
+                                                                None, None, None),
+                                                      None,
+                                                      DurationTuple(None, None, None,
+                                                                    '1', None, None,
+                                                                    None))}
+        resultgenerator = PythonTimeBuilder.build_repeating_interval(**args)
+
+        #Test the first 11 generated
+        for dateindex in compat.range(0, 11):
+            self.assertEqual(next(resultgenerator),
+                             (datetime.datetime(year=1981, month=4, day=5,
+                                               hour=0, minute=0)
+                             + dateindex * datetime.timedelta(days=1)).date())
+
     def test_build_timezone(self):
         testtuples = (({'Z': True, 'name': 'Z'},
                        datetime.timedelta(hours=0), 'UTC'),
