@@ -640,6 +640,12 @@ class TestIntervalParserFunctions(unittest.TestCase):
                                              DateTuple(None, '03', '14',
                                                        None, None, None))
 
+        self.assertEqual(_parse_interval_end('0314', DateTuple('2008', '02', '15',
+                                                                None, None, None),
+                                             'T'),
+                                             DateTuple(None, '03', '14',
+                                                       None, None, None))
+
         self.assertEqual(_parse_interval_end('15:30', DatetimeTuple(DateTuple('2007', '12', '14',
                                                                               None, None, None),
                                                                     TimeTuple('13', '30', None,

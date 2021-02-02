@@ -206,10 +206,7 @@ def _parse_interval_end(endstr, starttuple, datetimedelimiter):
         elif startdatetuple.MM is not None:
             concisedatestr += '-' + startdatetuple.MM
 
-        if daystr is not None:
-            concisedatestr += '-' + daystr
-        elif startdatetuple.DD is not None:
-            concisedatestr += '-' + startdatetuple.DD
+        concisedatestr += '-' + daystr
 
         enddatetuple = parse_date(concisedatestr, builder=TupleBuilder)
 
