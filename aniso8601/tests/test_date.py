@@ -28,6 +28,10 @@ class TestDateResolutionFunctions(unittest.TestCase):
         self.assertEqual(get_date_resolution('2009-W01'), DateResolution.Week)
         self.assertEqual(get_date_resolution('2004W53'), DateResolution.Week)
 
+    def test_get_date_resolution_day(self):
+        self.assertEqual(get_date_resolution('2004-04-11'), DateResolution.Day)
+        self.assertEqual(get_date_resolution('20090121'), DateResolution.Day)
+
     def test_get_date_resolution_year_weekday(self):
         self.assertEqual(get_date_resolution('2004-W53-6'),
                          DateResolution.Weekday)
