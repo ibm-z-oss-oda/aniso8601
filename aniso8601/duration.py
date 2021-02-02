@@ -140,10 +140,6 @@ def _parse_duration_prescribed_notime(isodurationstr):
                 if intstr.isdigit() is False:
                     raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
                                           .format(isodurationstr))
-
-                if fractionalstr.isdigit() is False:
-                    raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
-                                          .format(isodurationstr))
             else:
                 if componentstr.isdigit() is False:
                     raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
@@ -201,10 +197,6 @@ def _parse_duration_prescribed_time(isodurationstr):
                 intstr, fractionalstr = componentstr.split('.', 1)
 
                 if intstr.isdigit() is False:
-                    raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
-                                          .format(isodurationstr))
-
-                if fractionalstr.isdigit() is False:
                     raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
                                           .format(isodurationstr))
             else:
