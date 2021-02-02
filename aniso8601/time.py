@@ -142,26 +142,17 @@ def parse_time(isotimestr, builder=PythonTimeBuilder):
         raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
                              .format(isotimestr))
 
-    hascomponent = False
-
     for componentstr in [hourstr, minutestr, secondstr]:
-        if componentstr is not None:
-            hascomponent = True
-
-            if componentstr.isdigit() is False:
-                raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
-                                     .format(isotimestr))
-
-    if hascomponent is False:
-        raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
-                             .format(isotimestr))
+        if componentstr is not None and componentstr.isdigit() is False:
+            raise ISOFormatError('"{0}" is not a valid ISO 8601 time.'
+                                 .format(isotimestr))
 
     if fractionalstr is not None:
         if secondstr is not None:
             secondstr = secondstr + '.' + fractionalstr
         elif minutestr is not None:
             minutestr = minutestr + '.' + fractionalstr
-        elif hourstr is not None:
+        else:
             hourstr = hourstr + '.' + fractionalstr
 
     if tzstr is None:
