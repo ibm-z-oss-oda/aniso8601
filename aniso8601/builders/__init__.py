@@ -323,11 +323,6 @@ class BaseTimeBuilder(object):
         if 'mm' in rangedict:
             mm = rangedict['mm'].rangefunc(mm, rangedict['mm'])
 
-        if hh is not None:
-            if negative is True and hh == 0 and (mm is None or mm == 0):
-                raise ISOFormatError('Negative ISO 8601 time offset must not '
-                                     'be 0.')
-
         return (negative, Z, hh, mm, name)
 
     @classmethod
