@@ -306,9 +306,6 @@ class BaseTimeBuilder(object):
         if rangedict is None:
             rangedict = cls.REPEATING_INTERVAL_RANGE_DICT
 
-        if 'R' in rangedict:
-            R = rangedict['R'].rangefunc(R, rangedict['R'])
-
         if 'Rnn' in rangedict:
             Rnn = rangedict['Rnn'].rangefunc(Rnn, rangedict['Rnn'])
 
