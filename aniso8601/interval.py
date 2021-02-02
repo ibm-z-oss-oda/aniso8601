@@ -39,6 +39,10 @@ def parse_interval(isointervalstr, intervaldelimiter='/',
     if len(isointervalstr) == 0:
         raise ISOFormatError('Interval string is empty.')
 
+    if isointervalstr[0] == 'R':
+        raise ISOFormatError('ISO 8601 repeating intervals must be parsed '
+                             'with parse_repeating_interval.')
+
     intervaldelimitercount = isointervalstr.count(intervaldelimiter)
 
     if intervaldelimitercount == 0:
@@ -49,10 +53,6 @@ def parse_interval(isointervalstr, intervaldelimiter='/',
     if intervaldelimitercount > 1:
         raise ISOFormatError('{0} is not a valid ISO 8601 interval'
                              .format(isointervalstr))
-
-    if isointervalstr[0] == 'R':
-        raise ISOFormatError('ISO 8601 repeating intervals must be parsed '
-                             'with parse_repeating_interval.')
 
     return _parse_interval(isointervalstr, builder,
                            intervaldelimiter, datetimedelimiter)
@@ -71,14 +71,14 @@ def parse_repeating_interval(isointervalstr, intervaldelimiter='/',
     if len(isointervalstr) == 0:
         raise ISOFormatError('Repeating interval string is empty.')
 
+    if isointervalstr[0] != 'R':
+        raise ISOFormatError('ISO 8601 repeating interval must start '
+                             'with an R.')
+
     if intervaldelimiter not in isointervalstr:
         raise ISOFormatError('Interval delimiter "{0}" is not in interval '
                               'string "{1}".'
                              .format(intervaldelimiter, isointervalstr))
-
-    if isointervalstr[0] != 'R':
-        raise ISOFormatError('ISO 8601 repeating interval must start '
-                             'with an R.')
 
     #Parse the number of iterations
     iterationpart, intervalpart = isointervalstr.split(intervaldelimiter, 1)
