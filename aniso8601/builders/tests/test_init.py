@@ -114,6 +114,10 @@ class TestBaseTimeBuilder(unittest.TestCase):
         with self.assertRaises(DayOutOfBoundsError):
             BaseTimeBuilder.range_check_date(YYYY='1234', DDD='367')
 
+        #Make sure Nones pass through unmodified
+        self.assertEqual(BaseTimeBuilder.range_check_date(rangedict={}), (None, None, None,
+                                                                          None, None, None))
+
     def test_range_check_time(self):
         #Leap seconds not supported
         #https://bitbucket.org/nielsenb/aniso8601/issues/10/sub-microsecond-precision-in-durations-is
@@ -157,6 +161,21 @@ class TestBaseTimeBuilder(unittest.TestCase):
         #https://bitbucket.org/nielsenb/aniso8601/issues/13/parsing-of-leap-second-gives-wildly
         with self.assertRaises(LeapSecondError):
             BaseTimeBuilder.range_check_time(hh='23', mm='59', ss='60')
+
+        #Make sure Nones pass through unmodified
+        self.assertEqual(BaseTimeBuilder.range_check_time(rangedict={}), (None, None, None, None))
+
+    def test_range_check_duration(self):
+        self.assertEqual(BaseTimeBuilder.range_check_duration(rangedict={}), (None, None, None,
+                                                                              None, None, None,
+                                                                              None))
+
+    def test_range_check_repeating_interval(self):
+        self.assertEqual(BaseTimeBuilder.range_check_repeating_interval(rangedict={}), (None, None, None))
+
+    def test_rnage_check_timezone(self):
+        self.assertEqual(BaseTimeBuilder.range_check_timezone(rangedict={}), (None, None, None,
+                                                                              None, ''))
 
     def test_build_object(self):
         datetest = (DateTuple('1', '2', '3', '4', '5', '6'),
