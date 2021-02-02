@@ -257,7 +257,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
             else:
                 years = PnY
 
-            if years * DAYS_PER_YEAR + microseconds // MICROSECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
+            if years * DAYS_PER_YEAR > TIMEDELTA_MAX_DAYS:
                 raise YearOutOfBoundsError('Duration exceeds maximum timedelta size.')
 
         if PnM is not None:
@@ -267,7 +267,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
             else:
                 months = PnM
 
-            if months * DAYS_PER_MONTH + microseconds // MICROSECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
+            if months * DAYS_PER_MONTH > TIMEDELTA_MAX_DAYS:
                 raise MonthOutOfBoundsError('Duration exceeds maximum timedelta size.')
 
         if PnW is not None:
@@ -277,7 +277,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
             else:
                 weeks = PnW
 
-            if weeks * DAYS_PER_WEEK + microseconds // MICROSECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
+            if weeks * DAYS_PER_WEEK > TIMEDELTA_MAX_DAYS:
                 raise WeekOutOfBoundsError('Duration exceeds maximum timedelta size.')
 
         if PnD is not None:
