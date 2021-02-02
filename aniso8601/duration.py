@@ -128,12 +128,8 @@ def _parse_duration_prescribed_notime(isodurationstr):
         raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
                               .format(isodurationstr))
 
-    hascomponent = False
-
     for componentstr in [yearstr, monthstr, daystr, weekstr]:
         if componentstr is not None:
-            hascomponent = True
-
             if '.' in componentstr:
                 intstr, fractionalstr = componentstr.split('.', 1)
 
@@ -144,10 +140,6 @@ def _parse_duration_prescribed_notime(isodurationstr):
                 if componentstr.isdigit() is False:
                     raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
                                           .format(isodurationstr))
-
-    if hascomponent is False:
-        raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
-                              .format(isodurationstr))
 
     return {'PnY': yearstr, 'PnM': monthstr, 'PnW': weekstr, 'PnD': daystr}
 
@@ -187,12 +179,8 @@ def _parse_duration_prescribed_time(isodurationstr):
         raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
                               .format(isodurationstr))
 
-    hascomponent = False
-
     for componentstr in [hourstr, minutestr, secondstr]:
         if componentstr is not None:
-            hascomponent = True
-
             if '.' in componentstr:
                 intstr, fractionalstr = componentstr.split('.', 1)
 
@@ -203,10 +191,6 @@ def _parse_duration_prescribed_time(isodurationstr):
                 if componentstr.isdigit() is False:
                     raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
                                           .format(isodurationstr))
-
-    if hascomponent is False:
-        raise ISOFormatError('"{0}" is not a valid ISO 8601 duration.'
-                              .format(isodurationstr))
 
     #Parse any date components
     durationdict = {'PnY': None, 'PnM': None, 'PnW': None, 'PnD': None}
