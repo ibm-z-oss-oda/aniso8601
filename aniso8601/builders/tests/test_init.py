@@ -21,6 +21,9 @@ from aniso8601.exceptions import (DayOutOfBoundsError, HoursOutOfBoundsError,
                                   WeekOutOfBoundsError)
 from aniso8601.tests.compat import mock
 
+class LeapSecondSupportingTestBuilder(BaseTimeBuilder):
+    LEAP_SECONDS_SUPPORTED = True
+
 class TestBuilderFunctions(unittest.TestCase):
     def test_cast(self):
         self.assertEqual(cast('1', int), 1)
@@ -164,6 +167,12 @@ class TestBaseTimeBuilder(unittest.TestCase):
 
         #Make sure Nones pass through unmodified
         self.assertEqual(BaseTimeBuilder.range_check_time(rangedict={}), (None, None, None, None))
+
+    def test_range_check_time_leap_seconds_supported(self):
+        self.assertEqual(LeapSecondSupportingTestBuilder.range_check_time(hh='23', mm='59', ss='60'), (23, 59, 60, None))
+
+        with self.assertRaises(SecondsOutOfBoundsError):
+            LeapSecondSupportingTestBuilder.range_check_time(hh='01', mm='02', ss='60')
 
     def test_range_check_duration(self):
         self.assertEqual(BaseTimeBuilder.range_check_duration(rangedict={}), (None, None, None,
