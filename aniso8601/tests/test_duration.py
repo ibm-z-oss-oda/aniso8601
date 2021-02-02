@@ -194,7 +194,8 @@ class TestDurationParserFunctions(unittest.TestCase):
         testtuples = ('PPPPPPPPPPPPPPPPPPPPPPPPPPPP', 'PTT',
                       'PX7DDDTX8888UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU'
                       'UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU8888888888888888H$H',
-                      'P1Y2M3B.4D', 'P1Y2M3.4BD', 'bad', '')
+                      'P1Y2M3X.4D', 'P1Y2M3.4XD', 'P1Y2M3DT4H5M6XS', 'PT4H5M6X.2S',
+                      'bad', '')
 
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
