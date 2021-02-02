@@ -434,6 +434,13 @@ class TestDurationParserFunctions(unittest.TestCase):
         with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed_time('PT1S1H')
 
+    def test_parse_duration_prescribed_time_badstr(self):
+        with self.assertRaises(ISOFormatError):
+            _parse_duration_prescribed_time('P1Y')
+
+        with self.assertRaises(ISOFormatError):
+            _parse_duration_prescribed_time('P1Y1M')
+
     def test_parse_duration_combined(self):
         testtuples = (('P0003-06-04T12:30:05', {'PnY': '0003', 'PnM': '06',
                                                 'PnD': '04', 'TnH': '12',
