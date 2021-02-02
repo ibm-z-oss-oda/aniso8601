@@ -945,20 +945,40 @@ class TestPythonTimeBuilder(unittest.TestCase):
 
     def test_range_check_interval(self):
         with self.assertRaises(YearOutOfBoundsError):
-            PythonTimeBuilder.build_interval(start=DateTuple('7', None, None,
+            PythonTimeBuilder.build_interval(start=DateTuple('0007', None, None,
                                                              None, None, None),
                                              duration=DurationTuple(None, None,
-                                                                    None, '3000010',
+                                                                    None, str(datetime.timedelta.max.days),
                                                                     None, None,
                                                                     None))
 
         with self.assertRaises(YearOutOfBoundsError):
-            PythonTimeBuilder.build_interval(end=DateTuple('1', None, None,
+            PythonTimeBuilder.build_interval(start=DatetimeTuple(DateTuple('0007', None, None,
+                                                                           None, None, None),
+                                                                 TimeTuple('1', None, None,
+                                                                           None)),
+                                             duration=DurationTuple(str(datetime.timedelta.max.days // 365), None,
+                                                                    None, None,
+                                                                    None, None,
+                                                                    None))
+
+        with self.assertRaises(YearOutOfBoundsError):
+            PythonTimeBuilder.build_interval(end=DateTuple('0001', None, None,
                                                            None, None, None),
-                                             duration=DurationTuple(None, None,
+                                             duration=DurationTuple('3', None,
                                                                     None, None,
                                                                     None, None,
-                                                                    '31525376629'))
+                                                                    None))
+
+        with self.assertRaises(YearOutOfBoundsError):
+            PythonTimeBuilder.build_interval(end=DatetimeTuple(DateTuple('0001', None, None,
+                                                                           None, None, None),
+                                                                 TimeTuple('1', None, None,
+                                                                           None)),
+                                             duration=DurationTuple('2', None,
+                                                                    None, None,
+                                                                    None, None,
+                                                                    None))
 
     def test_build_week_date(self):
         weekdate = PythonTimeBuilder._build_week_date(2009, 1)
