@@ -456,10 +456,7 @@ class PythonTimeBuilder(BaseTimeBuilder):
             #Z -> UTC
             return UTCOffset(name='UTC', minutes=0)
 
-        if hh is not None:
-            tzhour = int(hh)
-        else:
-            tzhour = 0
+        tzhour = int(hh)
 
         if mm is not None:
             tzminute = int(mm)
