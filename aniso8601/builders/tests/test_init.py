@@ -182,7 +182,7 @@ class TestBaseTimeBuilder(unittest.TestCase):
     def test_range_check_repeating_interval(self):
         self.assertEqual(BaseTimeBuilder.range_check_repeating_interval(rangedict={}), (None, None, None))
 
-    def test_rnage_check_timezone(self):
+    def test_range_check_timezone(self):
         self.assertEqual(BaseTimeBuilder.range_check_timezone(rangedict={}), (None, None, None,
                                                                               None, ''))
 
