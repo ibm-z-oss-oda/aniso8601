@@ -8,7 +8,6 @@ aniso8601 9.0.0-dev.0
 
 Changes
 -------
-
 * Add support for concise interval format (see `27 <https://bitbucket.org/nielsenb/aniso8601/issues/27/support-for-short-syntax-for-intervals>`_)
 * Add explicit bounds of [000, 366] to day of year component :code:`_parse_ordinal_date`, this adds the same limits to dates of the format YYYYDDD or YYYY-DDD when using :code:`parse_date`
 * Add :code:`range_check_date`, :code:`range_check_time`, :code:`range_check_duration`, :code:`range_check_repeating_interval`, and :code:`range_check_timezone` range checking class methods to :code:`BaseTimeBuilder` there are no datetime or non-repeating interval check function as they are made of already checked parts
@@ -31,7 +30,6 @@ Changes
 
 Deprecation
 -----------
-
 * **Update on Python 2 support**: Python 2 support was slated to be removed in 7.0.0 but was not, it will remain until a test fails on Python 2 but not Python 3
 * Using Setuptools to run tests (:code:`python setup.py tests`) will be removed in the next major or minor version (either 9.1.0, 10.0.0)
 
@@ -42,7 +40,6 @@ aniso8601 8.1.1
 
 Changes
 -------
-
 * Add version to :code:`__init__.py`
 * Cleaner reading of `README.rst` into the :code:`long_description` field of `setup.py`
 * Define :code:`long_description_content_type` as :code:`text/x-rst`
@@ -51,7 +48,6 @@ Changes
 
 Deprecation
 -----------
-
 * Deprecate running tests with :code:`python setup.py tests` as the test suite support in Setuptools is `deprecated <https://github.com/pypa/setuptools/issues/1684>`_
 
 aniso8601 8.1.0
@@ -61,7 +57,6 @@ aniso8601 8.1.0
 
 Changes
 -------
-
 * Empty string arguments to :code:`get_date_resolution` and :code:`parse_date` now raise :code:`ISOFormatError`, fixes `26 <https://bitbucket.org/nielsenb/aniso8601/issues/26/parse_date-parse_time-parse_datetime-fails>`_
 * None and non-string arguments to :code:`get_date_resolution` and :code:`parse_date` now raise :code:`ValueError`
 * Empty string arguments to :code:`parse_duration` now raise :code:`ISOFormatError`
