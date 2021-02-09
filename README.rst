@@ -7,18 +7,17 @@ Another ISO 8601 parser for Python
 Features
 ========
 * Pure Python implementation
-* Python 3 support
 * Logical behavior
 
-  - Parse a time, get a `datetime.time <http://docs.python.org/2/library/datetime.html#datetime.time>`_
-  - Parse a date, get a `datetime.date <http://docs.python.org/2/library/datetime.html#datetime.date>`_
-  - Parse a datetime, get a `datetime.datetime <http://docs.python.org/2/library/datetime.html#datetime.datetime>`_
-  - Parse a duration, get a `datetime.timedelta <http://docs.python.org/2/library/datetime.html#datetime.timedelta>`_
+  - Parse a time, get a `datetime.time <http://docs.python.org/3/library/datetime.html#datetime.time>`_
+  - Parse a date, get a `datetime.date <http://docs.python.org/3/library/datetime.html#datetime.date>`_
+  - Parse a datetime, get a `datetime.datetime <http://docs.python.org/3/library/datetime.html#datetime.datetime>`_
+  - Parse a duration, get a `datetime.timedelta <http://docs.python.org/3/library/datetime.html#datetime.timedelta>`_
   - Parse an interval, get a tuple of dates or datetimes
   - Parse a repeating interval, get a date or datetime `generator <http://www.python.org/dev/peps/pep-0255/>`_
 
 * UTC offset represented as fixed-offset tzinfo
-* Parser separate from representation, allowing parsing to different datetime formats
+* Parser separate from representation, allowing parsing to different datetime representations
 * No regular expressions
 
 Installation
@@ -37,6 +36,8 @@ Use
 
 Parsing datetimes
 -----------------
+
+*Consider `datetime.datetime.fromisoformat <https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat>`_ for basic ISO 8601 datetime parsing*
 
 To parse a typical ISO 8601 datetime string::
 
@@ -77,6 +78,8 @@ Leap seconds are currently not supported and attempting to parse one raises a :c
 Parsing dates
 -------------
 
+*Consider `datetime.date.fromisoformat <https://docs.python.org/3/library/datetime.html#datetime.date.fromisoformat>`_ for basic ISO 8601 date parsing*
+
 To parse a date represented in an ISO 8601 string::
 
   >>> import aniso8601
@@ -100,6 +103,8 @@ To parse an ISO 8601 ordinal date::
 
 Parsing times
 -------------
+
+*Consider `datetime.time.fromisoformat <https://docs.python.org/3/library/datetime.html#datetime.time.fromisoformat>`_ for basic ISO 8601 time parsing*
 
 To parse a time formatted as an ISO 8601 string::
 
