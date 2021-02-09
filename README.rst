@@ -218,6 +218,17 @@ The end of an interval is returned as a datetime when required to maintain the r
   >>> aniso8601.parse_interval('2007-03-01/P1.5D')
   (datetime.date(2007, 3, 1), datetime.datetime(2007, 3, 2, 12, 0))
 
+Concise representations are supported::
+
+  >>> aniso8601.parse_interval('2020-01-01/02')
+  (datetime.date(2020, 1, 1), datetime.date(2020, 1, 2))
+  >>> aniso8601.parse_interval('2007-12-14T13:30/15:30')
+  (datetime.datetime(2007, 12, 14, 13, 30), datetime.datetime(2007, 12, 14, 15, 30))
+  >>> aniso8601.parse_interval('2008-02-15/03-14')
+  (datetime.date(2008, 2, 15), datetime.date(2008, 3, 14))
+  >>> aniso8601.parse_interval('2007-11-13T09:00/15T17:00')
+  (datetime.datetime(2007, 11, 13, 9, 0), datetime.datetime(2007, 11, 15, 17, 0))
+
 Repeating intervals are supported as well, and return a generator::
 
   >>> aniso8601.parse_repeating_interval('R3/1981-04-05/P1D')
