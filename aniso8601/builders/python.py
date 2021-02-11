@@ -352,9 +352,9 @@ class PythonTimeBuilder(BaseTimeBuilder):
         durationobject = cls._build_object(duration)
 
         #Determine if datetime promotion is required
-        datetimerequired = (duration[4] is not None
-                            or duration[5] is not None
-                            or duration[6] is not None
+        datetimerequired = (duration.TnH is not None
+                            or duration.TnM is not None
+                            or duration.TnS is not None
                             or durationobject.seconds != 0
                             or durationobject.microseconds != 0)
 
