@@ -47,10 +47,10 @@ def get_time_resolution(isotimestr):
     #hh±hh
     isotimetuple = parse_time(isotimestr, builder=TupleBuilder)
 
-    if isotimetuple[2] is not None:
+    if isotimetuple.ss is not None:
         return TimeResolution.Seconds
 
-    if isotimetuple[1] is not None:
+    if isotimetuple.mm is not None:
         return TimeResolution.Minutes
 
     return TimeResolution.Hours
