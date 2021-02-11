@@ -17,6 +17,8 @@ class TestInitFunctions(unittest.TestCase):
         self.assertEqual(aniso8601.parse_time, aniso8601.time.parse_time)
         self.assertEqual(aniso8601.get_time_resolution,
                          aniso8601.time.get_time_resolution)
+        self.assertEqual(aniso8601.get_datetime_resolution,
+                         aniso8601.time.get_datetime_resolution)
 
         self.assertEqual(aniso8601.parse_date, aniso8601.date.parse_date)
         self.assertEqual(aniso8601.get_date_resolution,

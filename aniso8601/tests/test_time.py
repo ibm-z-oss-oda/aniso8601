@@ -13,7 +13,8 @@ from aniso8601.builders import (DateTuple, DatetimeTuple, TimeTuple,
                                 TimezoneTuple)
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.resolution import TimeResolution
-from aniso8601.time import get_time_resolution, parse_datetime, parse_time
+from aniso8601.time import (_get_time_resolution, get_datetime_resolution,
+                            get_time_resolution, parse_datetime, parse_time)
 from aniso8601.tests.compat import mock
 
 class TestTimeResolutionFunctions(unittest.TestCase):
@@ -67,6 +68,16 @@ class TestTimeResolutionFunctions(unittest.TestCase):
         self.assertEqual(get_time_resolution('06:14:00.000123Z'),
                          TimeResolution.Seconds)
 
+    def test_get_datetime_resolution(self):
+        self.assertEqual(get_datetime_resolution('2019-06-05T01:03:11.858714'),
+                         TimeResolution.Seconds)
+        self.assertEqual(get_datetime_resolution('2019-06-05T01:03:11'),
+                         TimeResolution.Seconds)
+        self.assertEqual(get_datetime_resolution('2019-06-05T01:03'),
+                         TimeResolution.Minutes)
+        self.assertEqual(get_datetime_resolution('2019-06-05T01'),
+                         TimeResolution.Hours)
+
     def test_get_time_resolution_badtype(self):
         testtuples = (None, 1, False, 1.234)
 
@@ -80,6 +91,17 @@ class TestTimeResolutionFunctions(unittest.TestCase):
         for testtuple in testtuples:
             with self.assertRaises(ISOFormatError):
                 get_time_resolution(testtuple)
+
+    def test_get_time_resolution_internal(self):
+        self.assertEqual(_get_time_resolution(TimeTuple(hh='01', mm='02',
+                                                        ss='03', tz=None)),
+                         TimeResolution.Seconds)
+        self.assertEqual(_get_time_resolution(TimeTuple(hh='01', mm='02',
+                                                        ss=None, tz=None)),
+                         TimeResolution.Minutes)
+        self.assertEqual(_get_time_resolution(TimeTuple(hh='01', mm=None,
+                                                        ss=None, tz=None)),
+                         TimeResolution.Hours)
 
 class TestTimeParserFunctions(unittest.TestCase):
     def test_parse_time(self):

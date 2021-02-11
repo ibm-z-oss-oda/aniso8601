@@ -12,8 +12,9 @@ Changes
 * Add explicit bounds of [000, 366] to day of year component :code:`_parse_ordinal_date`, this adds the same limits to dates of the format YYYYDDD or YYYY-DDD when using :code:`parse_date`
 * Add :code:`range_check_date`, :code:`range_check_time`, :code:`range_check_duration`, :code:`range_check_repeating_interval`, and :code:`range_check_timezone` range checking class methods to :code:`BaseTimeBuilder` there are no datetime or non-repeating interval check function as they are made of already checked parts
 * :code:`PythonTimeBuilder` now calls the appropriate range check functions using the :code:`range_check_date`, :code:`range_check_time`, :code:`range_check_duration`, :code:`range_check_repeating_interval`, and :code:`range_check_timezone` methods defined in :code:`aniso8601.builders`
-* Add :code:`get_duration_resolution` which behaves like other resolution helpers
-* Add :code:`get_interval_resolution` which behaves like other resolution helpers
+  Add :code:`get_datetime_resolution` which behaves like :code:`get_time_resolution` but accepts a ISO 8601 date time as an argument, return value is a :code:`TimeResolution`
+* Add :code:`get_duration_resolution` which behaves like other resolution helpers, return value is a :code:`DurationResolution`
+* Add :code:`get_interval_resolution` which behaves like other resolution helpers, return value is a :code:`IntervalResolution`
 * Raise :code:`DayOutOfBoundsError` if calendar day exceeds number of days in calendar month
 * Raise :code:`DayOutOfBoundsError` if ordinal day exceeds number of days in calendar year (366 now raises :code:`DayOutOfBoundsError` in non-leap year)
 * Raise :code:`ISOFormatError` when date or time string contains extra whitespace
