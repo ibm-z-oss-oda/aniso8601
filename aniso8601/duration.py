@@ -23,22 +23,22 @@ def get_duration_resolution(isodurationstr):
     #P<date>T<time>
     isodurationtuple = parse_duration(isodurationstr, builder=TupleBuilder)
 
-    if isodurationtuple[6] is not None:
+    if isodurationtuple.TnS is not None:
         return DurationResolution.Seconds
 
-    if isodurationtuple[5] is not None:
+    if isodurationtuple.TnM is not None:
         return DurationResolution.Minutes
 
-    if isodurationtuple[4] is not None:
+    if isodurationtuple.TnH is not None:
         return DurationResolution.Hours
 
-    if isodurationtuple[3] is not None:
+    if isodurationtuple.PnD is not None:
         return DurationResolution.Days
 
-    if isodurationtuple[2] is not None:
+    if isodurationtuple.PnW is not None:
         return DurationResolution.Weeks
 
-    if isodurationtuple[1] is not None:
+    if isodurationtuple.PnM is not None:
         return DurationResolution.Months
 
     return DurationResolution.Years
