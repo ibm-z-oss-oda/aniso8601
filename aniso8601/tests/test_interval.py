@@ -14,6 +14,7 @@ from aniso8601.builders import (DateTuple, DatetimeTuple,
                                 TimezoneTuple)
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.interval import (_get_interval_component_resolution,
+                                _get_interval_resolution,
                                 _parse_interval, _parse_interval_end,
                                 get_interval_resolution,
                                 get_repeating_interval_resolution,
@@ -22,6 +23,54 @@ from aniso8601.resolution import IntervalResolution
 from aniso8601.tests.compat import mock
 
 class TestIntervalParser_UtilityFunctions(unittest.TestCase):
+    def test_get_interval_resolution(self):
+        self.assertEqual(_get_interval_resolution(IntervalTuple(start=DateTuple(YYYY='2001', MM='02', DD='03',
+                                                                                Www=None, D=None, DDD=None),
+                                                                end=DatetimeTuple(DateTuple(YYYY='2001', MM='02', DD='03',
+                                                                                            Www=None, D=None, DDD=None),
+                                                                                  TimeTuple(hh='04', mm='05', ss='06',
+                                                                                            tz=None)),
+                                                                duration=None)),
+                                                  IntervalResolution.Seconds)
+        self.assertEqual(_get_interval_resolution(IntervalTuple(start=DatetimeTuple(DateTuple(YYYY='2001', MM='02', DD='03',
+                                                                                              Www=None, D=None, DDD=None),
+                                                                                    TimeTuple(hh='04', mm='05', ss='06',
+                                                                                              tz=None)),
+                                                                end=DateTuple(YYYY='2001', MM='02', DD='03',
+                                                                              Www=None, D=None, DDD=None),
+                                                                duration=None)),
+                                                  IntervalResolution.Seconds)
+
+        self.assertEqual(_get_interval_resolution(IntervalTuple(start=DateTuple(YYYY='2001', MM='02', DD='03',
+                                                                                Www=None, D=None, DDD=None),
+                                                                end=None,
+                                                                duration=DurationTuple(PnY='1', PnM='2', PnW=None, PnD='3',
+                                                                                       TnH='4', TnM='5', TnS='6'))),
+                                                  IntervalResolution.Seconds)
+        self.assertEqual(_get_interval_resolution(IntervalTuple(start=DatetimeTuple(DateTuple(YYYY='2001', MM='02', DD='03',
+                                                                                              Www=None, D=None, DDD=None),
+                                                                                    TimeTuple(hh='04', mm='05', ss='06',
+                                                                                              tz=None)),
+                                                                end=None,
+                                                                duration=DurationTuple(PnY='1', PnM='2', PnW=None, PnD='3',
+                                                                                       TnH=None, TnM=None, TnS=None))),
+                                                  IntervalResolution.Seconds)
+
+        self.assertEqual(_get_interval_resolution(IntervalTuple(start=None,
+                                                                end=DateTuple(YYYY='2001', MM='02', DD='03',
+                                                                              Www=None, D=None, DDD=None),
+                                                                duration=DurationTuple(PnY='1', PnM='2', PnW=None, PnD='3',
+                                                                                       TnH='4', TnM='5', TnS='6'))),
+                                                  IntervalResolution.Seconds)
+        self.assertEqual(_get_interval_resolution(IntervalTuple(start=None,
+                                                                end=DatetimeTuple(DateTuple(YYYY='2001', MM='02', DD='03',
+                                                                                            Www=None, D=None, DDD=None),
+                                                                                  TimeTuple(hh='04', mm='05', ss='06',
+                                                                                            tz=None)),
+                                                                duration=DurationTuple(PnY='1', PnM='2', PnW=None, PnD='3',
+                                                                                       TnH=None, TnM=None, TnS=None))),
+                                                  IntervalResolution.Seconds)
+
     def test_get_interval_component_resolution(self):
         self.assertEqual(_get_interval_component_resolution(DateTuple(YYYY='2001', MM=None, DD=None,
                                                                       Www=None, D=None, DDD='123')),
