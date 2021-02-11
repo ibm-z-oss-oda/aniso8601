@@ -10,14 +10,60 @@ import unittest
 import aniso8601
 
 from aniso8601.exceptions import ISOFormatError, NegativeDurationError
-from aniso8601.duration import (parse_duration, _parse_duration_prescribed,
+from aniso8601.duration import (get_duration_resolution, parse_duration,
+                                _parse_duration_prescribed,
                                 _parse_duration_combined,
                                 _parse_duration_prescribed_notime,
                                 _parse_duration_prescribed_time,
                                 _has_any_component)
+from aniso8601.resolution import DurationResolution
 from aniso8601.tests.compat import mock
 
 class TestDurationParserFunctions(unittest.TestCase):
+    def test_get_duration_resolution_years(self):
+        self.assertEqual(get_duration_resolution('P1Y'), DurationResolution.Years)
+        self.assertEqual(get_duration_resolution('P1,5Y'), DurationResolution.Years)
+        self.assertEqual(get_duration_resolution('P1.5Y'), DurationResolution.Years)
+
+    def test_get_duration_resolution_months(self):
+        self.assertEqual(get_duration_resolution('P1Y2M'), DurationResolution.Months)
+        self.assertEqual(get_duration_resolution('P1M'), DurationResolution.Months)
+        self.assertEqual(get_duration_resolution('P1,5M'), DurationResolution.Months)
+        self.assertEqual(get_duration_resolution('P1.5M'), DurationResolution.Months)
+
+    def test_get_duration_resolution_weeks(self):
+        self.assertEqual(get_duration_resolution('P1W'), DurationResolution.Weeks)
+        self.assertEqual(get_duration_resolution('P1,5W'), DurationResolution.Weeks)
+        self.assertEqual(get_duration_resolution('P1.5W'), DurationResolution.Weeks)
+
+    def test_get_duration_resolution_days(self):
+        self.assertEqual(get_duration_resolution('P1Y2M3D'), DurationResolution.Days)
+        self.assertEqual(get_duration_resolution('P1Y2M3,5D'), DurationResolution.Days)
+        self.assertEqual(get_duration_resolution('P1Y2M3.5D'), DurationResolution.Days)
+        self.assertEqual(get_duration_resolution('P1D'), DurationResolution.Days)
+        self.assertEqual(get_duration_resolution('P1,5D'), DurationResolution.Days)
+        self.assertEqual(get_duration_resolution('P1.5D'), DurationResolution.Days)
+
+    def test_get_duration_resolution_hours(self):
+        self.assertEqual(get_duration_resolution('P1Y2M3DT4H'), DurationResolution.Hours)
+        self.assertEqual(get_duration_resolution('PT4H'), DurationResolution.Hours)
+
+    def test_get_duration_resolution_minutes(self):
+        self.assertEqual(get_duration_resolution('P1Y2M3DT4H5M'), DurationResolution.Minutes)
+        self.assertEqual(get_duration_resolution('PT4H5M'), DurationResolution.Minutes)
+
+    def test_get_duration_resolution_seconds(self):
+        self.assertEqual(get_duration_resolution('P1Y2M3DT4H54M6S'), DurationResolution.Seconds)
+        self.assertEqual(get_duration_resolution('P1Y2M3DT4H54M6,5S'), DurationResolution.Seconds)
+        self.assertEqual(get_duration_resolution('P1Y2M3DT4H54M6.5S'), DurationResolution.Seconds)
+        self.assertEqual(get_duration_resolution('PT4H54M6,5S'), DurationResolution.Seconds)
+        self.assertEqual(get_duration_resolution('PT4H54M6.5S'), DurationResolution.Seconds)
+        self.assertEqual(get_duration_resolution('PT0.0000001S'), DurationResolution.Seconds)
+        self.assertEqual(get_duration_resolution('PT2.0000048S'), DurationResolution.Seconds)
+        self.assertEqual(get_duration_resolution('P0003-06-04T12:30:05'), DurationResolution.Seconds)
+        self.assertEqual(get_duration_resolution('P0003-06-04T12:30:05.5'), DurationResolution.Seconds)
+        self.assertEqual(get_duration_resolution('P0001-02-03T14:43:59.9999997'), DurationResolution.Seconds)
+
     def test_parse_duration(self):
         testtuples = (('P1Y2M3DT4H54M6S', {'PnY': '1', 'PnM': '2',
                                            'PnW': None, 'PnD': '3',

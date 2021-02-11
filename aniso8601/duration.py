@@ -10,15 +10,45 @@ from aniso8601 import compat
 from aniso8601.builders import TupleBuilder
 from aniso8601.builders.python import PythonTimeBuilder
 from aniso8601.date import parse_date
-from aniso8601.decimalfraction import find_separator, normalize
+from aniso8601.decimalfraction import normalize
 from aniso8601.exceptions import ISOFormatError, NegativeDurationError
+from aniso8601.resolution import DurationResolution
 from aniso8601.time import parse_time
+
+def get_duration_resolution(isodurationstr):
+    #Valid string formats are:
+    #
+    #PnYnMnDTnHnMnS (or any reduced precision equivalent)
+    #PnW
+    #P<date>T<time>
+    isodurationtuple = parse_duration(isodurationstr, builder=TupleBuilder)
+
+    if isodurationtuple[6] is not None:
+        return DurationResolution.Seconds
+
+    if isodurationtuple[5] is not None:
+        return DurationResolution.Minutes
+
+    if isodurationtuple[4] is not None:
+        return DurationResolution.Hours
+
+    if isodurationtuple[3] is not None:
+        return DurationResolution.Days
+
+    if isodurationtuple[2] is not None:
+        return DurationResolution.Weeks
+
+    if isodurationtuple[1] is not None:
+        return DurationResolution.Months
+
+    return DurationResolution.Years
 
 def parse_duration(isodurationstr, builder=PythonTimeBuilder):
     #Given a string representing an ISO 8601 duration, return a
     #a duration built by the given builder. Valid formats are:
     #
     #PnYnMnDTnHnMnS (or any reduced precision equivalent)
+    #PnW
     #P<date>T<time>
 
     if compat.is_string(isodurationstr) is False:

@@ -24,8 +24,14 @@ class TestInitFunctions(unittest.TestCase):
 
         self.assertEqual(aniso8601.parse_duration,
                          aniso8601.duration.parse_duration)
+        self.assertEqual(aniso8601.get_duration_resolution,
+                         aniso8601.duration.get_duration_resolution)
 
         self.assertEqual(aniso8601.parse_interval,
                          aniso8601.interval.parse_interval)
         self.assertEqual(aniso8601.parse_repeating_interval,
                          aniso8601.interval.parse_repeating_interval)
+        self.assertEqual(aniso8601.get_interval_resolution,
+                         aniso8601.interval.get_interval_resolution)
+        self.assertEqual(aniso8601.get_repeating_interval_resolution,
+                         aniso8601.interval.get_repeating_interval_resolution)

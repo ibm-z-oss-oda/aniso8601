@@ -14,10 +14,86 @@ from aniso8601.builders import (DateTuple, DatetimeTuple,
                                 TimezoneTuple)
 from aniso8601.exceptions import ISOFormatError
 from aniso8601.interval import (_parse_interval, _parse_interval_end,
+                                get_interval_resolution,
+                                get_repeating_interval_resolution,
                                 parse_interval, parse_repeating_interval)
+from aniso8601.resolution import IntervalResolution
 from aniso8601.tests.compat import mock
 
 class TestIntervalParserFunctions(unittest.TestCase):
+    def test_get_interval_resolution_date(self):
+        self.assertEqual(get_interval_resolution('P1.5Y/2018'),
+                         IntervalResolution.Year)
+        self.assertEqual(get_interval_resolution('P1.5Y/2018-03'),
+                         IntervalResolution.Month)
+        self.assertEqual(get_interval_resolution('P1.5Y/2018-03-06'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_interval_resolution('P1.5Y/2018W01'),
+                         IntervalResolution.Week)
+        self.assertEqual(get_interval_resolution('P1.5Y/2018-306'),
+                         IntervalResolution.Ordinal)
+        self.assertEqual(get_interval_resolution('P1.5Y/2018W012'),
+                         IntervalResolution.Weekday)
+
+        self.assertEqual(get_interval_resolution('2018/P1.5Y'),
+                         IntervalResolution.Year)
+        self.assertEqual(get_interval_resolution('2018-03/P1.5Y'),
+                         IntervalResolution.Month)
+        self.assertEqual(get_interval_resolution('2018-03-06/P1.5Y'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_interval_resolution('2018W01/P1.5Y'),
+                         IntervalResolution.Week)
+        self.assertEqual(get_interval_resolution('2018-306/P1.5Y'),
+                         IntervalResolution.Ordinal)
+        self.assertEqual(get_interval_resolution('2018W012/P1.5Y'),
+                         IntervalResolution.Weekday)
+
+    def test_get_interval_resolution_time(self):
+        self.assertEqual(get_interval_resolution('P1M/1981-04-05T01'),
+                         IntervalResolution.Hours)
+        self.assertEqual(get_interval_resolution('P1M/1981-04-05T01:01'),
+                         IntervalResolution.Minutes)
+        self.assertEqual(get_interval_resolution('P1M/1981-04-05T01:01:00'),
+                         IntervalResolution.Seconds)
+
+        self.assertEqual(get_interval_resolution('1981-04-05T01/P1M'),
+                         IntervalResolution.Hours)
+        self.assertEqual(get_interval_resolution('1981-04-05T01:01/P1M'),
+                         IntervalResolution.Minutes)
+        self.assertEqual(get_interval_resolution('1981-04-05T01:01:00/P1M'),
+                         IntervalResolution.Seconds)
+
+    def test_get_interval_resolution_duration(self):
+        self.assertEqual(get_interval_resolution('2014-11-12/P1Y2M3D'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_interval_resolution('2014-11-12/P1Y2M'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_interval_resolution('2014-11-12/P1Y'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_interval_resolution('2014-11-12/P1W'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_interval_resolution('2014-11-12/P1Y2M3DT4H'),
+                         IntervalResolution.Hours)
+        self.assertEqual(get_interval_resolution('2014-11-12/P1Y2M3DT4H54M'),
+                         IntervalResolution.Minutes)
+        self.assertEqual(get_interval_resolution('2014-11-12/P1Y2M3DT4H54M6S'),
+                         IntervalResolution.Seconds)
+
+        self.assertEqual(get_interval_resolution('P1Y2M3D/2014-11-12'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_interval_resolution('P1Y2M/2014-11-12'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_interval_resolution('P1Y/2014-11-12'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_interval_resolution('P1W/2014-11-12'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_interval_resolution('P1Y2M3DT4H/2014-11-12'),
+                         IntervalResolution.Hours)
+        self.assertEqual(get_interval_resolution('P1Y2M3DT4H54M/2014-11-12'),
+                         IntervalResolution.Minutes)
+        self.assertEqual(get_interval_resolution('P1Y2M3DT4H54M6S/2014-11-12'),
+                         IntervalResolution.Seconds)
+
     def test_parse_interval(self):
         testtuples = (('P1M/1981-04-05T01:01:00',
                        {'end': DatetimeTuple(DateTuple('1981', '04', '05',
@@ -693,6 +769,79 @@ class TestIntervalParserFunctions(unittest.TestCase):
                                                        None))
 
 class TestRepeatingIntervalParserFunctions(unittest.TestCase):
+    def test_get_interval_resolution_date(self):
+        self.assertEqual(get_repeating_interval_resolution('R/P1.5Y/2018'),
+                         IntervalResolution.Year)
+        self.assertEqual(get_repeating_interval_resolution('R1/P1.5Y/2018-03'),
+                         IntervalResolution.Month)
+        self.assertEqual(get_repeating_interval_resolution('R2/P1.5Y/2018-03-06'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_repeating_interval_resolution('R3/P1.5Y/2018W01'),
+                         IntervalResolution.Week)
+        self.assertEqual(get_repeating_interval_resolution('R4/P1.5Y/2018-306'),
+                         IntervalResolution.Ordinal)
+        self.assertEqual(get_repeating_interval_resolution('R5/P1.5Y/2018W012'),
+                         IntervalResolution.Weekday)
+
+        self.assertEqual(get_repeating_interval_resolution('R/2018/P1.5Y'),
+                         IntervalResolution.Year)
+        self.assertEqual(get_repeating_interval_resolution('R1/2018-03/P1.5Y'),
+                         IntervalResolution.Month)
+        self.assertEqual(get_repeating_interval_resolution('R2/2018-03-06/P1.5Y'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_repeating_interval_resolution('R3/2018W01/P1.5Y'),
+                         IntervalResolution.Week)
+        self.assertEqual(get_repeating_interval_resolution('R4/2018-306/P1.5Y'),
+                         IntervalResolution.Ordinal)
+        self.assertEqual(get_repeating_interval_resolution('R5/2018W012/P1.5Y'),
+                         IntervalResolution.Weekday)
+
+    def test_get_interval_resolution_time(self):
+        self.assertEqual(get_repeating_interval_resolution('R/P1M/1981-04-05T01'),
+                         IntervalResolution.Hours)
+        self.assertEqual(get_repeating_interval_resolution('R1/P1M/1981-04-05T01:01'),
+                         IntervalResolution.Minutes)
+        self.assertEqual(get_repeating_interval_resolution('R2/P1M/1981-04-05T01:01:00'),
+                         IntervalResolution.Seconds)
+
+        self.assertEqual(get_repeating_interval_resolution('R/1981-04-05T01/P1M'),
+                         IntervalResolution.Hours)
+        self.assertEqual(get_repeating_interval_resolution('R1/1981-04-05T01:01/P1M'),
+                         IntervalResolution.Minutes)
+        self.assertEqual(get_repeating_interval_resolution('R2/1981-04-05T01:01:00/P1M'),
+                         IntervalResolution.Seconds)
+
+    def test_get_interval_resolution_duration(self):
+        self.assertEqual(get_repeating_interval_resolution('R/2014-11-12/P1Y2M3D'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_repeating_interval_resolution('R1/2014-11-12/P1Y2M'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_repeating_interval_resolution('R2/2014-11-12/P1Y'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_repeating_interval_resolution('R3/2014-11-12/P1W'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_repeating_interval_resolution('R4/2014-11-12/P1Y2M3DT4H'),
+                         IntervalResolution.Hours)
+        self.assertEqual(get_repeating_interval_resolution('R5/2014-11-12/P1Y2M3DT4H54M'),
+                         IntervalResolution.Minutes)
+        self.assertEqual(get_repeating_interval_resolution('R6/2014-11-12/P1Y2M3DT4H54M6S'),
+                         IntervalResolution.Seconds)
+
+        self.assertEqual(get_repeating_interval_resolution('R/P1Y2M3D/2014-11-12'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_repeating_interval_resolution('R1/P1Y2M/2014-11-12'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_repeating_interval_resolution('R2/P1Y/2014-11-12'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_repeating_interval_resolution('R3/P1W/2014-11-12'),
+                         IntervalResolution.Day)
+        self.assertEqual(get_repeating_interval_resolution('R4/P1Y2M3DT4H/2014-11-12'),
+                         IntervalResolution.Hours)
+        self.assertEqual(get_repeating_interval_resolution('R5/P1Y2M3DT4H54M/2014-11-12'),
+                         IntervalResolution.Minutes)
+        self.assertEqual(get_repeating_interval_resolution('R6/P1Y2M3DT4H54M6S/2014-11-12'),
+                         IntervalResolution.Seconds)
+
     def test_parse_repeating_interval(self):
         with mock.patch.object(aniso8601.interval.PythonTimeBuilder,
                                'build_repeating_interval') as mockBuilder:

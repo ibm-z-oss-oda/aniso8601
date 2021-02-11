@@ -6,13 +6,96 @@
 # This software may be modified and distributed under the terms
 # of the BSD license.  See the LICENSE file for details.
 
-from aniso8601.builders import TupleBuilder, DateTuple
+from aniso8601.builders import TupleBuilder, DateTuple, DatetimeTuple
 from aniso8601.builders.python import PythonTimeBuilder
 from aniso8601.compat import is_string
 from aniso8601.date import parse_date
 from aniso8601.duration import parse_duration
 from aniso8601.exceptions import ISOFormatError
+from aniso8601.resolution import IntervalResolution
 from aniso8601.time import parse_datetime, parse_time
+
+def get_interval_resolution(isointervalstr, intervaldelimiter='/',
+                            datetimedelimiter='T'):
+    isointervaltuple = parse_interval(isointervalstr, intervaldelimiter=intervaldelimiter,
+                                      datetimedelimiter=datetimedelimiter, builder=TupleBuilder)
+
+    return _get_interval_resolution(isointervaltuple)
+
+def get_repeating_interval_resolution(isointervalstr, intervaldelimiter='/',
+                                      datetimedelimiter='T'):
+    repeatingintervaltuple = parse_repeating_interval(isointervalstr, intervaldelimiter=intervaldelimiter,
+                                                     datetimedelimiter=datetimedelimiter, builder=TupleBuilder)
+
+    return _get_interval_resolution(repeatingintervaltuple.interval)
+
+def _get_interval_resolution(intervaltuple):
+    if intervaltuple.start is not None and intervaltuple.end is not None:
+        return max(_get_interval_component_resolution(intervaltuple.start), _get_interval_component_resolution(intervaltuple.end))
+
+    if intervaltuple.start is not None and intervaltuple.duration is not None:
+        return max(_get_interval_component_resolution(intervaltuple.start), _get_interval_component_resolution(intervaltuple.duration))
+
+    return max(_get_interval_component_resolution(intervaltuple.end), _get_interval_component_resolution(intervaltuple.duration))
+
+def _get_interval_component_resolution(componenttuple):
+    if type(componenttuple) is DateTuple:
+        if componenttuple.DDD is not None:
+            #YYYY-DDD
+            #YYYYDDD
+            return IntervalResolution.Ordinal
+
+        if componenttuple.D is not None:
+            #YYYY-Www-D
+            #YYYYWwwD
+            return IntervalResolution.Weekday
+
+        if componenttuple.Www is not None:
+            #YYYY-Www
+            #YYYYWww
+            return IntervalResolution.Week
+
+        if componenttuple.DD is not None:
+            #YYYY-MM-DD
+            #YYYYMMDD
+            return IntervalResolution.Day
+
+        if componenttuple.MM is not None:
+            #YYYY-MM
+            return IntervalResolution.Month
+
+        #Y[YYY]
+        return IntervalResolution.Year
+    elif type(componenttuple) is DatetimeTuple:
+        #Datetime
+        if componenttuple.time.ss is not None:
+            return IntervalResolution.Seconds
+
+        if componenttuple.time.mm is not None:
+            return IntervalResolution.Minutes
+
+        return IntervalResolution.Hours
+
+    #Duration
+    if componenttuple.TnS is not None:
+        return IntervalResolution.Seconds
+
+    if componenttuple.TnM is not None:
+        return IntervalResolution.Minutes
+
+    if componenttuple.TnH is not None:
+        return IntervalResolution.Hours
+
+    if componenttuple.PnD is not None:
+        return IntervalResolution.Day
+
+    if componenttuple.PnW is not None:
+        return IntervalResolution.Week
+
+    if componenttuple.PnM is not None:
+        return IntervalResolution.Month
+
+    return IntervalResolution.Year
 
 def parse_interval(isointervalstr, intervaldelimiter='/',
                    datetimedelimiter='T', builder=PythonTimeBuilder):
