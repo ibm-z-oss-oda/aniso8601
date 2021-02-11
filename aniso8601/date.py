@@ -28,27 +28,27 @@ def get_date_resolution(isodatestr):
     #YYYYDDD
     isodatetuple = parse_date(isodatestr, builder=TupleBuilder)
 
-    if isodatetuple[5] is not None:
+    if isodatetuple.DDD is not None:
         #YYYY-DDD
         #YYYYDDD
         return DateResolution.Ordinal
 
-    if isodatetuple[4] is not None:
+    if isodatetuple.D is not None:
         #YYYY-Www-D
         #YYYYWwwD
         return DateResolution.Weekday
 
-    if isodatetuple[3] is not None:
+    if isodatetuple.Www is not None:
         #YYYY-Www
         #YYYYWww
         return DateResolution.Week
 
-    if isodatetuple[2] is not None:
+    if isodatetuple.DD is not None:
         #YYYY-MM-DD
         #YYYYMMDD
         return DateResolution.Day
 
-    if isodatetuple[1] is not None:
+    if isodatetuple.MM is not None:
         #YYYY-MM
         return DateResolution.Month
 
