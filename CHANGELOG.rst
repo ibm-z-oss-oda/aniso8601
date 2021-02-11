@@ -29,6 +29,7 @@ Changes
 * Change :code:`get_time_resolution` to call :code:`parse_time` and return the resolution based on the smallest parsed component
 * :code:`TupleBuilder` now builds :code:`DateTuple`, :code:`TimeTuple`, :code:`DatetimeTuple`, :code:`DurationTuple`, :code:`IntervalTuple`, :code:`RepeatingIntervalTuple` and :code:`TimezoneTuple` namedtuples
 * Simplify :code:`parse_duration`, :code:`build_duration` will now be called with explicit :code:`None` arguments when components of a prescribed duration are not present in the ISO 8601 duration string instead of being excluded from the call
+* Remove unused :code:`decimalfraction.find_separator`
 
 Deprecation
 -----------

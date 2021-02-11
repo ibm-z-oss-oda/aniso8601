@@ -8,15 +8,9 @@
 
 import unittest
 
-from aniso8601.decimalfraction import find_separator, normalize
+from aniso8601.decimalfraction import normalize
 
 class TestDecimalFractionFunctions(unittest.TestCase):
-    def test_find_separator(self):
-        self.assertEqual(find_separator(''), -1)
-        self.assertEqual(find_separator('1234'), -1)
-        self.assertEqual(find_separator('12.345'), 2)
-        self.assertEqual(find_separator('123,45'), 3)
-
     def test_normalize(self):
         self.assertEqual(normalize(''), '')
         self.assertEqual(normalize('12.34'), '12.34')
