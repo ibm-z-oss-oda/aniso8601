@@ -3,6 +3,13 @@ aniso8601 - Builder Development
 
 Most builders will descend from either :code:`aniso8601.builders.BaseTimeBuilder` or :code:`aniso8601.builders.python.PythonTimeBuilder`.
 
+Builder class variables
+=======================
+
+:code:`LEAP_SECONDS_SUPPORTED` (:code:`boolean`, default :code:`False`) - Set to :code:`True` if :code:`range_check_time` should accept `leap seconds <https://en.wikipedia.org/wiki/Leap_second>`_. Otherwise :code:`range_check_time` will raise a :code:`LeapSecondError` when range checking a time representing a leap second.
+
+The limit variables will be discussed in the TODO.
+
 Build methods
 =============
 
@@ -69,3 +76,12 @@ build_timezone
 :code:`hh` (:code:`str`, default: :code:`None`) - Hour component of UTC offset
 :code:`mm` (:code:`str`, default: :code:`None`) - Minute component of UTC offset
 :code:`name` (:code:`str`, default: :code:`''`) - Timezone name
+
+Range check methods
+===================
+
+Every build method has a corresponding range check method, e.g. :code:`range_check_date` for :code:`build_date`. Range methods take the same arguments as their corresponding build method. Range methods are expected to cast the arguments to the correct type, range check them, and return the arguments as a `tuple <https://docs.python.org/3/library/stdtypes.html#typesseq-tuple>`_ in the same order the method was called with. These methods are not called by default in the :code:`BaseTimeBuilder` or :code:`TupleBuilder` build methods.
+
+The final argument to every range check method is a :code:`rangedict`. :code:`rangedict` is expected to be a `dictionary <https://docs.python.org/3/library/stdtypes.html#dict>`_ with keys matching the build method arguments, and values being corresponding :code:`aniso8601.builders.Limit` named tuples. The range check methods will by default use a matching range dict if no argument to :code:`rangedict` is provided, e.g. :code:`BaseTimeBuilder.DATE_RANGE_DICT` is used by default by :code:`BaseTimeBuilder.range_check_date`.
+
+Note that there is no :code:`range_check_interval` method. Since the :code:`start`, :code:`end`, and :code:`duration` arguments are all different, already range checked types, it is assumed the build method will be calling range checked build methods internally (likely via :code:`_build_object`). An additional :code:`range_check_interval` method would be redundant.
