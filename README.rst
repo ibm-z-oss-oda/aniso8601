@@ -348,80 +348,80 @@ The following builders are available as separate projects:
 TupleBuilder
 ------------
 
-The :code:`TupleBuilder` returns parse results as tuples of strings. It is located in the :code:`aniso8601.builders` module.
+The :code:`TupleBuilder` returns parse results as `named tuples <https://docs.python.org/3/library/collections.html#collections.namedtuple>`_. It is located in the :code:`aniso8601.builders` module.
 
 Datetimes
 ^^^^^^^^^
 
-Parsing a datetime returns a tuple containing a date tuple as a collection of strings, a time tuple as a collection of strings, and the 'datetime' string. The date tuple contains the following parse components: :code:`(YYYY, MM, DD, Www, D, DDD, 'date')`. The time tuple contains the following parse components :code:`(hh, mm, ss, tz, 'time')`, where :code:`tz` is a tuple with the following components :code:`(negative, Z, hh, mm, name, 'timezone')` with :code:`negative` and :code:`Z` being booleans::
+Parsing a datetime returns a tuple containing date and time tuples . The date tuple contains the following parse components: :code:`YYYY`, :code:`MM`, :code:`DD`, :code:`Www`, :code:`D`, :code:`DDD`. The time tuple contains the following parse components :code:`hh`, :code:`mm`, :code:`ss`, :code:`tz`, where :code:`tz` itself is a tuple with the following components :code:`negative`, :code:`Z`, :code:`hh`, :code:`mm`, :code:`name` with :code:`negative` and :code:`Z` being booleans::
 
   >>> import aniso8601
   >>> from aniso8601.builders import TupleBuilder
   >>> aniso8601.parse_datetime('1977-06-10T12:00:00', builder=TupleBuilder)
-  (('1977', '06', '10', None, None, None, 'date'), ('12', '00', '00', None, 'time'), 'datetime')
+  Datetime(date=Date(YYYY='1977', MM='06', DD='10', Www=None, D=None, DDD=None), time=Time(hh='12', mm='00', ss='00', tz=None))
   >>> aniso8601.parse_datetime('1979-06-05T08:00:00-08:00', builder=TupleBuilder)
-  (('1979', '06', '05', None, None, None, 'date'), ('08', '00', '00', (True, None, '08', '00', '-08:00', 'timezone'), 'time'), 'datetime')
+  Datetime(date=Date(YYYY='1979', MM='06', DD='05', Www=None, D=None, DDD=None), time=Time(hh='08', mm='00', ss='00', tz=Timezone(negative=True, Z=None, hh='08', mm='00', name='-08:00')))
 
 Dates
 ^^^^^
 
-Parsing a date returns a tuple containing the following parse components: :code:`(YYYY, MM, DD, Www, D, DDD, 'date')`::
+Parsing a date returns a tuple containing the following parse components: :code:`YYYY`, :code:`MM`, :code:`DD`, :code:`Www`, :code:`D`, :code:`DDD`::
 
   >>> import aniso8601
   >>> from aniso8601.builders import TupleBuilder
   >>> aniso8601.parse_date('1984-04-23', builder=TupleBuilder)
-  ('1984', '04', '23', None, None, None, 'date')
+  Date(YYYY='1984', MM='04', DD='23', Www=None, D=None, DDD=None)
   >>> aniso8601.parse_date('1986-W38-1', builder=TupleBuilder)
-  ('1986', None, None, '38', '1', None, 'date')
+  Date(YYYY='1986', MM=None, DD=None, Www='38', D='1', DDD=None)
   >>> aniso8601.parse_date('1988-132', builder=TupleBuilder)
-  ('1988', None, None, None, None, '132', 'date')
+  Date(YYYY='1988', MM=None, DD=None, Www=None, D=None, DDD='132')
 
 Times
 ^^^^^
 
-Parsing a time returns a tuple containing following parse components: :code:`(hh, mm, ss, tz, 'time')`, where :code:`tz` is a tuple with the following components :code:`(negative, Z, hh, mm, name, 'timezone')` with :code:`negative` and :code:`Z` being booleans::
+Parsing a time returns a tuple containing following parse components: :code:`hh`, :code:`mm`, :code:`ss`, :code:`tz`, where :code:`tz` is a tuple with the following components :code:`negative`, :code:`Z`, :code:`hh`, :code:`mm`, :code:`name`, with :code:`negative` and :code:`Z` being booleans::
 
   >>> import aniso8601
   >>> from aniso8601.builders import TupleBuilder
   >>> aniso8601.parse_time('11:31:14', builder=TupleBuilder)
-  ('11', '31', '14', None, 'time')
+  Time(hh='11', mm='31', ss='14', tz=None)
   >>> aniso8601.parse_time('171819Z', builder=TupleBuilder)
-  ('17', '18', '19', (False, True, None, None, 'Z', 'timezone'), 'time')
+  Time(hh='17', mm='18', ss='19', tz=Timezone(negative=False, Z=True, hh=None, mm=None, name='Z'))
   >>> aniso8601.parse_time('17:18:19-02:30', builder=TupleBuilder)
-  ('17', '18', '19', (True, None, '02', '30', '-02:30', 'timezone'), 'time')
+  Time(hh='17', mm='18', ss='19', tz=Timezone(negative=True, Z=None, hh='02', mm='30', name='-02:30'))
 
 Durations
 ^^^^^^^^^
 
-Parsing a duration returns a tuple containing the following parse components: :code:`(PnY, PnM, PnW, PnD, TnH, TnM, TnS, 'duration')`::
+Parsing a duration returns a tuple containing the following parse components: :code:`PnY`, :code:`PnM`, :code:`PnW`, :code:`PnD`, :code:`TnH`, :code:`TnM`, :code:`TnS`::
 
   >>> import aniso8601
   >>> from aniso8601.builders import TupleBuilder
   >>> aniso8601.parse_duration('P1Y2M3DT4H54M6S', builder=TupleBuilder)
-  ('1', '2', None, '3', '4', '54', '6', 'duration')
+  Duration(PnY='1', PnM='2', PnW=None, PnD='3', TnH='4', TnM='54', TnS='6')
   >>> aniso8601.parse_duration('P7W', builder=TupleBuilder)
-  (None, None, '7', None, None, None, None, 'duration')
+  Duration(PnY=None, PnM=None, PnW='7', PnD=None, TnH=None, TnM=None, TnS=None)
 
 Intervals
 ^^^^^^^^^
 
-Parsing an interval returns a tuple containing the following parse components: :code:`(start, end, duration, 'interval')`, :code:`start` and :code:`end` may both be datetime or date tuples, :code:`duration` is a duration tuple::
+Parsing an interval returns a tuple containing the following parse components: :code:`start`, :code:`end`, :code:`duration`, :code:`start` and :code:`end` may both be datetime or date tuples, :code:`duration` is a duration tuple::
 
   >>> import aniso8601
   >>> from aniso8601.builders import TupleBuilder
   >>> aniso8601.parse_interval('2007-03-01T13:00:00/2008-05-11T15:30:00', builder=TupleBuilder)
-  ((('2007', '03', '01', None, None, None, 'date'), ('13', '00', '00', None, 'time'), 'datetime'), (('2008', '05', '11', None, None, None, 'date'), ('15', '30', '00', None, 'time'), 'datetime'), None, 'interval')
+  Interval(start=Datetime(date=Date(YYYY='2007', MM='03', DD='01', Www=None, D=None, DDD=None), time=Time(hh='13', mm='00', ss='00', tz=None)), end=Datetime(date=Date(YYYY='2008', MM='05', DD='11', Www=None, D=None, DDD=None), time=Time(hh='15', mm='30', ss='00', tz=None)), duration=None)
   >>> aniso8601.parse_interval('2007-03-01T13:00:00Z/P1Y2M10DT2H30M', builder=TupleBuilder)
-  ((('2007', '03', '01', None, None, None, 'date'), ('13', '00', '00', (False, True, None, None, 'Z', 'timezone'), 'time'), 'datetime'), None, ('1', '2', None, '10', '2', '30', None, 'duration'), 'interval')
+  Interval(start=Datetime(date=Date(YYYY='2007', MM='03', DD='01', Www=None, D=None, DDD=None), time=Time(hh='13', mm='00', ss='00', tz=Timezone(negative=False, Z=True, hh=None, mm=None, name='Z'))), end=None, duration=Duration(PnY='1', PnM='2', PnW=None, PnD='10', TnH='2', TnM='30', TnS=None))
   >>> aniso8601.parse_interval('P1M/1981-04-05', builder=TupleBuilder)
-  (None, ('1981', '04', '05', None, None, None, 'date'), (None, '1', None, None, None, None, None, 'duration'), 'interval')
+  Interval(start=None, end=Date(YYYY='1981', MM='04', DD='05', Www=None, D=None, DDD=None), duration=Duration(PnY=None, PnM='1', PnW=None, PnD=None, TnH=None, TnM=None, TnS=None))
 
-A repeating interval returns a tuple containing the following parse components: :code:`(R, Rnn, interval, 'repeatinginterval')` where :code:`R` is a boolean, :code:`True` for an unbounded interval, :code:`False` otherwise.::
+A repeating interval returns a tuple containing the following parse components: :code:`R`, :code:`Rnn`, :code:`interval`, where :code:`R` is a boolean, :code:`True` for an unbounded interval, :code:`False` otherwise.::
 
   >>> aniso8601.parse_repeating_interval('R3/1981-04-05/P1D', builder=TupleBuilder)
-  (False, '3', (('1981', '04', '05', None, None, None, 'date'), None, (None, None, None, '1', None, None, None, 'duration'), 'interval'), 'repeatinginterval')
+  RepeatingInterval(R=False, Rnn='3', interval=Interval(start=Date(YYYY='1981', MM='04', DD='05', Www=None, D=None, DDD=None), end=None, duration=Duration(PnY=None, PnM=None, PnW=None, PnD='1', TnH=None, TnM=None, TnS=None)))
   >>> aniso8601.parse_repeating_interval('R/PT1H2M/1980-03-05T01:01:00', builder=TupleBuilder)
-  (True, None, (None, (('1980', '03', '05', None, None, None, 'date'), ('01', '01', '00', None, 'time'), 'datetime'), (None, None, None, None, '1', '2', None, 'duration'), 'interval'), 'repeatinginterval')
+  RepeatingInterval(R=True, Rnn=None, interval=Interval(start=None, end=Datetime(date=Date(YYYY='1980', MM='03', DD='05', Www=None, D=None, DDD=None), time=Time(hh='01', mm='01', ss='00', tz=None)), duration=Duration(PnY=None, PnM=None, PnW=None, PnD=None, TnH='1', TnM='2', TnS=None)))
 
 Development
 ===========
