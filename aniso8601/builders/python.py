@@ -239,97 +239,33 @@ class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
     def build_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None, TnH=None,
                        TnM=None, TnS=None):
-        years = 0
-        months = 0
-        days = 0
         weeks = 0
+        days = 0
         hours = 0
         minutes = 0
         seconds = 0
         microseconds = 0
 
+        #PnY and PnM will be distributed to PnD, microsecond remainder to TnS
         PnY, PnM, PnW, PnD, TnH, TnM, TnS = cls.range_check_duration(PnY, PnM, PnW, PnD, TnH, TnM, TnS)
 
-        if PnY is not None:
-            if type(PnY) is FractionalComponent:
-                years = PnY.principal
-                microseconds = PnY.microsecondremainder
-            else:
-                years = PnY
-
-            if years * DAYS_PER_YEAR > TIMEDELTA_MAX_DAYS:
-                raise YearOutOfBoundsError('Duration exceeds maximum timedelta size.')
-
-        if PnM is not None:
-            if type(PnM) is FractionalComponent:
-                months = PnM.principal
-                microseconds = PnM.microsecondremainder
-            else:
-                months = PnM
-
-            if months * DAYS_PER_MONTH > TIMEDELTA_MAX_DAYS:
-                raise MonthOutOfBoundsError('Duration exceeds maximum timedelta size.')
-
         if PnW is not None:
-            if type(PnW) is FractionalComponent:
-                weeks = PnW.principal
-                microseconds = PnW.microsecondremainder
-            else:
-                weeks = PnW
-
-            if weeks * DAYS_PER_WEEK > TIMEDELTA_MAX_DAYS:
-                raise WeekOutOfBoundsError('Duration exceeds maximum timedelta size.')
+            weeks = PnW
 
         if PnD is not None:
-            if type(PnD) is FractionalComponent:
-                days = PnD.principal
-                microseconds = PnD.microsecondremainder
-            else:
-                days = PnD
-
-            if days > TIMEDELTA_MAX_DAYS:
-                raise DayOutOfBoundsError('Duration exceeds maximum timedelta size.')
+            days = PnD
 
         if TnH is not None:
-            if type(TnH) is FractionalComponent:
-                hours = TnH.principal
-                microseconds = TnH.microsecondremainder
-            else:
-                hours = TnH
-
-            if hours // HOURS_PER_DAY > TIMEDELTA_MAX_DAYS:
-                raise HoursOutOfBoundsError('Duration exceeds maximum timedelta size.')
+            hours = TnH
 
         if TnM is not None:
-            if type(TnM) is FractionalComponent:
-                minutes = TnM.principal
-                microseconds = TnM.microsecondremainder
-            else:
-                minutes = TnM
-
-            if minutes // MINUTES_PER_DAY > TIMEDELTA_MAX_DAYS:
-                raise MinutesOutOfBoundsError('Duration exceeds maximum timedelta size.')
+            minutes = TnM
 
         if TnS is not None:
-            if type(TnS) is FractionalComponent:
-                seconds = TnS.principal
-                microseconds = TnS.microsecondremainder
-            else:
-                seconds = TnS
+            seconds = TnS.principal
+            microseconds = TnS.microsecondremainder
 
-            if seconds // SECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
-                raise SecondsOutOfBoundsError('Duration exceeds maximum timedelta size.')
-
-        years, months, weeks, days, hours, minutes, seconds, microseconds = PythonTimeBuilder._distribute_microseconds(microseconds, (years, months, weeks, days, hours, minutes, seconds), (MICROSECONDS_PER_YEAR, MICROSECONDS_PER_MONTH, MICROSECONDS_PER_WEEK, MICROSECONDS_PER_DAY, MICROSECONDS_PER_HOUR, MICROSECONDS_PER_MINUTE, MICROSECONDS_PER_SECOND))
-
-        #Note that weeks can be handled without conversion to days
-        totaldays = years * DAYS_PER_YEAR + months * DAYS_PER_MONTH + days
-
-        #Check against timedelta limits
-        if totaldays + weeks * DAYS_PER_WEEK + hours // HOURS_PER_DAY + minutes // MINUTES_PER_DAY + seconds // SECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
-            raise DayOutOfBoundsError('Duration exceeds maximum timedelta size.')
-
-        return datetime.timedelta(days=totaldays,
+        return datetime.timedelta(days=days,
                                   seconds=seconds,
                                   microseconds=microseconds,
                                   minutes=minutes,
@@ -467,6 +403,101 @@ class PythonTimeBuilder(BaseTimeBuilder):
             return UTCOffset(name=name, minutes=-(tzhour * 60 + tzminute))
 
         return UTCOffset(name=name, minutes=tzhour * 60 + tzminute)
+
+    @classmethod
+    def range_check_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None,
+                             TnH=None, TnM=None, TnS=None, rangedict=None):
+        years = 0
+        months = 0
+        days = 0
+        weeks = 0
+        hours = 0
+        minutes = 0
+        seconds = 0
+        microseconds = 0
+
+        PnY, PnM, PnW, PnD, TnH, TnM, TnS = BaseTimeBuilder.range_check_duration(PnY, PnM, PnW, PnD, TnH, TnM, TnS, rangedict=cls.DURATION_RANGE_DICT)
+
+        if PnY is not None:
+            if type(PnY) is FractionalComponent:
+                years = PnY.principal
+                microseconds = PnY.microsecondremainder
+            else:
+                years = PnY
+
+            if years * DAYS_PER_YEAR > TIMEDELTA_MAX_DAYS:
+                raise YearOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
+        if PnM is not None:
+            if type(PnM) is FractionalComponent:
+                months = PnM.principal
+                microseconds = PnM.microsecondremainder
+            else:
+                months = PnM
+
+            if months * DAYS_PER_MONTH > TIMEDELTA_MAX_DAYS:
+                raise MonthOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
+        if PnW is not None:
+            if type(PnW) is FractionalComponent:
+                weeks = PnW.principal
+                microseconds = PnW.microsecondremainder
+            else:
+                weeks = PnW
+
+            if weeks * DAYS_PER_WEEK > TIMEDELTA_MAX_DAYS:
+                raise WeekOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
+        if PnD is not None:
+            if type(PnD) is FractionalComponent:
+                days = PnD.principal
+                microseconds = PnD.microsecondremainder
+            else:
+                days = PnD
+
+            if days > TIMEDELTA_MAX_DAYS:
+                raise DayOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
+        if TnH is not None:
+            if type(TnH) is FractionalComponent:
+                hours = TnH.principal
+                microseconds = TnH.microsecondremainder
+            else:
+                hours = TnH
+
+            if hours // HOURS_PER_DAY > TIMEDELTA_MAX_DAYS:
+                raise HoursOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
+        if TnM is not None:
+            if type(TnM) is FractionalComponent:
+                minutes = TnM.principal
+                microseconds = TnM.microsecondremainder
+            else:
+                minutes = TnM
+
+            if minutes // MINUTES_PER_DAY > TIMEDELTA_MAX_DAYS:
+                raise MinutesOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
+        if TnS is not None:
+            if type(TnS) is FractionalComponent:
+                seconds = TnS.principal
+                microseconds = TnS.microsecondremainder
+            else:
+                seconds = TnS
+
+            if seconds // SECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
+                raise SecondsOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
+        years, months, weeks, days, hours, minutes, seconds, microseconds = PythonTimeBuilder._distribute_microseconds(microseconds, (years, months, weeks, days, hours, minutes, seconds), (MICROSECONDS_PER_YEAR, MICROSECONDS_PER_MONTH, MICROSECONDS_PER_WEEK, MICROSECONDS_PER_DAY, MICROSECONDS_PER_HOUR, MICROSECONDS_PER_MINUTE, MICROSECONDS_PER_SECOND))
+
+        #Note that weeks can be handled without conversion to days
+        totaldays = years * DAYS_PER_YEAR + months * DAYS_PER_MONTH + days
+
+        #Check against timedelta limits
+        if totaldays + weeks * DAYS_PER_WEEK + hours // HOURS_PER_DAY + minutes // MINUTES_PER_DAY + seconds // SECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
+            raise DayOutOfBoundsError('Duration exceeds maximum timedelta size.')
+
+        return (0, 0, weeks, totaldays, hours, minutes, FractionalComponent(seconds, microseconds))
 
     @staticmethod
     def _build_week_date(isoyear, isoweek, isoday=None):
