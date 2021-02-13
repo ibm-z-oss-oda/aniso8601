@@ -75,6 +75,17 @@ Leap seconds are currently not supported and attempting to parse one raises a :c
       raise LeapSecondError('Leap seconds are not supported.')
   aniso8601.exceptions.LeapSecondError: Leap seconds are not supported.
 
+To get the resolution of an ISO 8601 datetime string::
+
+  >>> aniso8601.get_datetime_resolution('1977-06-10T12:00:00Z') == aniso8601.resolution.TimeResolution.Seconds
+  True
+  >>> aniso8601.get_datetime_resolution('1977-06-10T12:00') == aniso8601.resolution.TimeResolution.Minutes
+  True
+  >>> aniso8601.get_datetime_resolution('1977-06-10T12') == aniso8601.resolution.TimeResolution.Hours
+  True
+
+Note that datetime resolutions map to :code:`TimeResolution` as a valid datetime cannot have no time members so the resolution mapping is the same.
+
 Parsing dates
 -------------
 
@@ -100,6 +111,15 @@ To parse an ISO 8601 ordinal date::
 
   >>> aniso8601.parse_date('1988-132')
   datetime.date(1988, 5, 11)
+
+To get the resolution of an ISO 8601 date string::
+
+  >>> aniso8601.get_date_resolution('1981-04-05') == aniso8601.resolution.DateResolution.Day
+  True
+  >>> aniso8601.get_date_resolution('1981-04') == aniso8601.resolution.DateResolution.Month
+  True
+  >>> aniso8601.get_date_resolution('1981') == aniso8601.resolution.DateResolution.Year
+  True
 
 Parsing times
 -------------
@@ -158,6 +178,15 @@ Leap seconds are currently not supported and attempting to parse one raises a :c
       raise LeapSecondError('Leap seconds are not supported.')
   aniso8601.exceptions.LeapSecondError: Leap seconds are not supported.
 
+To get the resolution of an ISO 8601 time string::
+
+  >>> aniso8601.get_time_resolution('11:31:14') == aniso8601.resolution.TimeResolution.Seconds
+  True
+  >>> aniso8601.get_time_resolution('11:31') == aniso8601.resolution.TimeResolution.Minutes
+  True
+  >>> aniso8601.get_time_resolution('11') == aniso8601.resolution.TimeResolution.Hours
+  True
+
 Parsing durations
 -----------------
 
@@ -186,6 +215,21 @@ Parsing a duration from a combined date and time is supported as well::
 
   >>> aniso8601.parse_duration('P0001-01-02T01:30:5')
   datetime.timedelta(397, 5405)
+
+To get the resolution of an ISO 8601 duration string::
+
+  >>> aniso8601.get_duration_resolution('P1Y2M3DT4H54M6S') == aniso8601.resolution.DurationResolution.Seconds
+  True
+  >>> aniso8601.get_duration_resolution('P1Y2M3DT4H54M') == aniso8601.resolution.DurationResolution.Minutes
+  True
+  >>> aniso8601.get_duration_resolution('P1Y2M3DT4H') == aniso8601.resolution.DurationResolution.Hours
+  True
+  >>> aniso8601.get_duration_resolution('P1Y2M3D') == aniso8601.resolution.DurationResolution.Days
+  True
+  >>> aniso8601.get_duration_resolution('P1Y2M') == aniso8601.resolution.DurationResolution.Months
+  True
+  >>> aniso8601.get_duration_resolution('P1Y') == aniso8601.resolution.DurationResolution.Years
+  True
 
 Parsing intervals
 -----------------
@@ -266,27 +310,26 @@ Note that you should never try to convert a generator produced by an unbounded i
       currentdate += timedelta
   OverflowError: date value out of range
 
-Date and time resolution
-------------------------
+To get the resolution of an ISO 8601 interval string::
 
-In some situations, it may be useful to figure out the resolution provided by an ISO 8601 date or time string. Two functions are provided for this purpose.
+  >>> aniso8601.get_interval_resolution('2007-03-01T13:00:00/2008-05-11T15:30:00') == aniso8601.resolution.IntervalResolution.Seconds
+  True
+  >>> aniso8601.get_interval_resolution('2007-03-01T13:00/2008-05-11T15:30') == aniso8601.resolution.IntervalResolution.Minutes
+  True
+  >>> aniso8601.get_interval_resolution('2007-03-01T13/2008-05-11T15') == aniso8601.resolution.IntervalResolution.Hours
+  True
+  >>> aniso8601.get_interval_resolution('2007-03-01/2008-05-11') == aniso8601.resolution.IntervalResolution.Day
+  True
+  >>> aniso8601.get_interval_resolution('2007-03/P1Y') == aniso8601.resolution.IntervalResolution.Month
+  True
+  >>> aniso8601.get_interval_resolution('2007/P1Y') == aniso8601.resolution.IntervalResolution.Year
+  True
 
-To get the resolution of a ISO 8601 time string::
+And for repeating ISO 8601 interval strings::
 
-  >>> aniso8601.get_time_resolution('11:31:14') == aniso8601.resolution.TimeResolution.Seconds
+  >>> aniso8601.get_repeating_interval_resolution('R3/1981-04-05/P1D') == aniso8601.resolution.IntervalResolution.Day
   True
-  >>> aniso8601.get_time_resolution('11:31') == aniso8601.resolution.TimeResolution.Minutes
-  True
-  >>> aniso8601.get_time_resolution('11') == aniso8601.resolution.TimeResolution.Hours
-  True
-
-Similarly, for an ISO 8601 date string::
-
-  >>> aniso8601.get_date_resolution('1981-04-05') == aniso8601.resolution.DateResolution.Day
-  True
-  >>> aniso8601.get_date_resolution('1981-04') == aniso8601.resolution.DateResolution.Month
-  True
-  >>> aniso8601.get_date_resolution('1981') == aniso8601.resolution.DateResolution.Year
+  >>> aniso8601.get_repeating_interval_resolution('R/PT1H2M/1980-03-05T01:01:00') == aniso8601.resolution.IntervalResolution.Seconds
   True
 
 Builders
