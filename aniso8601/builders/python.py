@@ -239,47 +239,25 @@ class PythonTimeBuilder(BaseTimeBuilder):
     @classmethod
     def build_duration(cls, PnY=None, PnM=None, PnW=None, PnD=None, TnH=None,
                        TnM=None, TnS=None):
-        weeks = 0
-        days = 0
-        hours = 0
-        minutes = 0
-        seconds = 0
-        microseconds = 0
-
         #PnY and PnM will be distributed to PnD, microsecond remainder to TnS
         PnY, PnM, PnW, PnD, TnH, TnM, TnS = cls.range_check_duration(PnY, PnM, PnW, PnD, TnH, TnM, TnS)
 
-        if PnW is not None:
-            weeks = PnW
+        seconds = TnS.principal
+        microseconds = TnS.microsecondremainder
 
-        if PnD is not None:
-            days = PnD
-
-        if TnH is not None:
-            hours = TnH
-
-        if TnM is not None:
-            minutes = TnM
-
-        if TnS is not None:
-            seconds = TnS.principal
-            microseconds = TnS.microsecondremainder
-
-        return datetime.timedelta(days=days,
+        return datetime.timedelta(days=PnD,
                                   seconds=seconds,
                                   microseconds=microseconds,
-                                  minutes=minutes,
-                                  hours=hours,
-                                  weeks=weeks)
+                                  minutes=TnM,
+                                  hours=TnH,
+                                  weeks=PnW)
 
     @classmethod
     def build_interval(cls, start=None, end=None, duration=None):
+        start, end, duration = cls.range_check_interval(start, end, duration)
+
         if start is not None and end is not None:
             #<start>/<end>
-            #Handle concise format
-            if cls._is_interval_end_concise(end) is True:
-                end = cls._combine_concise_interval_tuples(start, end)
-
             startobject = cls._build_object(start)
             endobject = cls._build_object(end)
 
@@ -299,25 +277,11 @@ class PythonTimeBuilder(BaseTimeBuilder):
             endobject = cls._build_object(end)
 
             #Range check
-            if type(end) is DateTuple:
-                enddatetime = cls.build_datetime(end, TupleBuilder.build_time())
-
-                if enddatetime - datetime.datetime.min < durationobject:
-                    raise YearOutOfBoundsError('Interval end less than minimium date.')
-
-                if datetimerequired is True:
-                    #<end> is a date, and <duration> requires datetime resolution
-                    return (endobject,
-                            cls.build_datetime(end, TupleBuilder.build_time())
-                            - durationobject)
-            else:
-                mindatetime = datetime.datetime.min
-
-                if end.time.tz is not None:
-                    mindatetime = mindatetime.replace(tzinfo=endobject.tzinfo)
-
-                if endobject - mindatetime < durationobject:
-                    raise YearOutOfBoundsError('Interval end less than minimium date.')
+            if type(end) is DateTuple and datetimerequired is True:
+                #<end> is a date, and <duration> requires datetime resolution
+                return (endobject,
+                        cls.build_datetime(end, TupleBuilder.build_time())
+                        - durationobject)
 
             return (endobject,
                     endobject
@@ -327,25 +291,11 @@ class PythonTimeBuilder(BaseTimeBuilder):
         startobject = cls._build_object(start)
 
         #Range check
-        if type(start) is DateTuple:
-            startdatetime = cls.build_datetime(start, TupleBuilder.build_time())
-
-            if datetime.datetime.max - startdatetime < durationobject:
-                raise YearOutOfBoundsError('Interval end greater than maximum date.')
-
-            if datetimerequired is True:
-                #<start> is a date, and <duration> requires datetime resolution
-                return (startobject,
-                        cls.build_datetime(start, TupleBuilder.build_time())
-                        + durationobject)
-        else:
-            maxdatetime = datetime.datetime.max
-
-            if start.time.tz is not None:
-                maxdatetime = maxdatetime.replace(tzinfo=startobject.tzinfo)
-
-            if maxdatetime - startobject < durationobject:
-                raise YearOutOfBoundsError('Interval end greater than maximum date.')
+        if type(start) is DateTuple and datetimerequired is True:
+            #<start> is a date, and <duration> requires datetime resolution
+            return (startobject,
+                    cls.build_datetime(start, TupleBuilder.build_time())
+                    + durationobject)
 
         return (startobject,
                 startobject
@@ -497,7 +447,59 @@ class PythonTimeBuilder(BaseTimeBuilder):
         if totaldays + weeks * DAYS_PER_WEEK + hours // HOURS_PER_DAY + minutes // MINUTES_PER_DAY + seconds // SECONDS_PER_DAY > TIMEDELTA_MAX_DAYS:
             raise DayOutOfBoundsError('Duration exceeds maximum timedelta size.')
 
-        return (0, 0, weeks, totaldays, hours, minutes, FractionalComponent(seconds, microseconds))
+        return (None, None, weeks, totaldays, hours, minutes, FractionalComponent(seconds, microseconds))
+
+    @classmethod
+    def range_check_interval(cls, start=None, end=None, duration=None):
+        #Handles concise format, range checks any potential durations
+        if start is not None and end is not None:
+            #<start>/<end>
+            #Handle concise format
+            if cls._is_interval_end_concise(end) is True:
+                end = cls._combine_concise_interval_tuples(start, end)
+
+            return (start, end, duration)
+
+        durationobject = cls._build_object(duration)
+
+        if end is not None:
+            #<duration>/<end>
+            endobject = cls._build_object(end)
+
+            #Range check
+            if type(end) is DateTuple:
+                enddatetime = cls.build_datetime(end, TupleBuilder.build_time())
+
+                if enddatetime - datetime.datetime.min < durationobject:
+                    raise YearOutOfBoundsError('Interval end less than minimium date.')
+            else:
+                mindatetime = datetime.datetime.min
+
+                if end.time.tz is not None:
+                    mindatetime = mindatetime.replace(tzinfo=endobject.tzinfo)
+
+                if endobject - mindatetime < durationobject:
+                    raise YearOutOfBoundsError('Interval end less than minimium date.')
+        else:
+            #<start>/<duration>
+            startobject = cls._build_object(start)
+
+            #Range check
+            if type(start) is DateTuple:
+                startdatetime = cls.build_datetime(start, TupleBuilder.build_time())
+
+                if datetime.datetime.max - startdatetime < durationobject:
+                    raise YearOutOfBoundsError('Interval end greater than maximum date.')
+            else:
+                maxdatetime = datetime.datetime.max
+
+                if start.time.tz is not None:
+                    maxdatetime = maxdatetime.replace(tzinfo=startobject.tzinfo)
+
+                if maxdatetime - startobject < durationobject:
+                    raise YearOutOfBoundsError('Interval end greater than maximum date.')
+
+        return (start, end, duration)
 
     @staticmethod
     def _build_week_date(isoyear, isoweek, isoday=None):

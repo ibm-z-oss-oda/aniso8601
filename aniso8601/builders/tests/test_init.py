@@ -175,14 +175,23 @@ class TestBaseTimeBuilder(unittest.TestCase):
             LeapSecondSupportingTestBuilder.range_check_time(hh='01', mm='02', ss='60')
 
     def test_range_check_duration(self):
+        self.assertEqual(BaseTimeBuilder.range_check_duration(), (None, None, None,
+                                                                  None, None, None,
+                                                                  None))
+
         self.assertEqual(BaseTimeBuilder.range_check_duration(rangedict={}), (None, None, None,
                                                                               None, None, None,
                                                                               None))
 
     def test_range_check_repeating_interval(self):
+        self.assertEqual(BaseTimeBuilder.range_check_repeating_interval(), (None, None, None))
+
         self.assertEqual(BaseTimeBuilder.range_check_repeating_interval(rangedict={}), (None, None, None))
 
     def test_range_check_timezone(self):
+        self.assertEqual(BaseTimeBuilder.range_check_timezone(), (None, None, None,
+                                                                  None, ''))
+
         self.assertEqual(BaseTimeBuilder.range_check_timezone(rangedict={}), (None, None, None,
                                                                               None, ''))
 
