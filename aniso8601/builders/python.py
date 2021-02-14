@@ -565,28 +565,6 @@ class PythonTimeBuilder(BaseTimeBuilder):
             #Update the value
             currentdate += timedelta
 
-    @classmethod
-    def _split_to_microseconds(cls, floatstr, conversion, thrownmessage):
-        #Splits a string with a decimal point into an int, and
-        #int representing the floating point remainder as a number
-        #of microseconds, determined by multiplying by conversion
-        intpart, floatpart = floatstr.split('.')
-
-        try:
-            intvalue = int(intpart)
-        except:
-            raise ISOFormatError(thrownmessage)
-
-        try:
-            preconvertedvalue = int(floatpart)
-        except:
-            raise ISOFormatError(thrownmessage)
-
-        convertedvalue = ((preconvertedvalue * conversion) //
-                          (10 ** len(floatpart)))
-
-        return (intvalue, convertedvalue)
-
     @staticmethod
     def _distribute_microseconds(todistribute, recipients, reductions):
         #Given a number of microseconds as int, a tuple of ints length n

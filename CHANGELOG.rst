@@ -33,6 +33,7 @@ Changes
 * :code:`TupleBuilder` now builds :code:`DateTuple`, :code:`TimeTuple`, :code:`DatetimeTuple`, :code:`DurationTuple`, :code:`IntervalTuple`, :code:`RepeatingIntervalTuple` and :code:`TimezoneTuple` namedtuples
 * Simplify :code:`parse_duration`, :code:`build_duration` will now be called with explicit :code:`None` arguments when components of a prescribed duration are not present in the ISO 8601 duration string instead of being excluded from the call
 * Remove unused :code:`decimalfraction.find_separator`
+* Remove unused :code:`PythonTimeBuilder._split_to_microseconds`
 
 Deprecation
 -----------

@@ -1050,36 +1050,6 @@ class TestPythonTimeBuilder(unittest.TestCase):
                              datetime.date(year=2018, month=8, day=29)
                              + dateindex * datetime.timedelta(days=5))
 
-    def test_split_to_microseconds(self):
-        result = PythonTimeBuilder._split_to_microseconds('1.1', int(1e6), 'dummy')
-
-        self.assertEqual(result, (1, 100000))
-        self.assertIsInstance(result[0], int)
-        self.assertIsInstance(result[1], int)
-
-        result = PythonTimeBuilder._split_to_microseconds('1.000001', int(1e6), 'dummy')
-
-        self.assertEqual(result, (1, 1))
-        self.assertIsInstance(result[0], int)
-        self.assertIsInstance(result[1], int)
-
-        result = PythonTimeBuilder._split_to_microseconds('1.0000001', int(1e6), 'dummy')
-
-        self.assertEqual(result, (1, 0))
-        self.assertIsInstance(result[0], int)
-        self.assertIsInstance(result[1], int)
-
-    def test_split_to_microseconds_exception(self):
-        with self.assertRaises(ISOFormatError) as e:
-            PythonTimeBuilder._split_to_microseconds('b.1', int(1e6), 'exception text')
-
-        self.assertEqual(str(e.exception), 'exception text')
-
-        with self.assertRaises(ISOFormatError) as e:
-            PythonTimeBuilder._split_to_microseconds('1.ad', int(1e6), 'exception text')
-
-        self.assertEqual(str(e.exception), 'exception text')
-
     def test_distribute_microseconds(self):
         self.assertEqual(PythonTimeBuilder._distribute_microseconds(1, (), ()), (1,))
         self.assertEqual(PythonTimeBuilder._distribute_microseconds(11, (0,), (10,)), (1, 1))
