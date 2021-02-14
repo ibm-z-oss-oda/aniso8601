@@ -9,7 +9,7 @@
 import unittest
 import aniso8601
 
-from aniso8601.exceptions import ISOFormatError, NegativeDurationError
+from aniso8601.exceptions import ISOFormatError
 from aniso8601.duration import (get_duration_resolution, parse_duration,
                                 _parse_duration_prescribed,
                                 _parse_duration_combined,
@@ -181,28 +181,28 @@ class TestDurationParserFunctions(unittest.TestCase):
             parse_duration('P1Y2W', builder=None)
 
     def test_parse_duration_negative(self):
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             parse_duration('P-1Y', builder=None)
 
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             parse_duration('P-2M', builder=None)
 
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             parse_duration('P-3D', builder=None)
 
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             parse_duration('P-T4H', builder=None)
 
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             parse_duration('P-T54M', builder=None)
 
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             parse_duration('P-T6S', builder=None)
 
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             parse_duration('P-7W', builder=None)
 
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             parse_duration('P-1Y2M3DT4H54M6S', builder=None)
 
     def test_parse_duration_outoforder(self):
@@ -307,31 +307,31 @@ class TestDurationParserFunctions(unittest.TestCase):
             self.assertEqual(result, testtuple[1])
 
     def test_parse_duration_prescribed_negative(self):
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed('P-1Y')
 
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed('P-2M')
 
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed('P-3D')
 
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed('P-4W')
 
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed('P-1Y2M3D')
 
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed('P-T1H')
 
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed('P-T2M')
 
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed('P-T3S')
 
-        with self.assertRaises(NegativeDurationError):
+        with self.assertRaises(ISOFormatError):
             _parse_duration_prescribed('P-1Y2M3DT4H54M6S')
 
     def test_parse_duration_prescribed_multiplefractions(self):

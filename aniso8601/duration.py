@@ -11,7 +11,7 @@ from aniso8601.builders import TupleBuilder
 from aniso8601.builders.python import PythonTimeBuilder
 from aniso8601.date import parse_date
 from aniso8601.decimalfraction import normalize
-from aniso8601.exceptions import ISOFormatError, NegativeDurationError
+from aniso8601.exceptions import ISOFormatError
 from aniso8601.resolution import DurationResolution
 from aniso8601.time import parse_time
 
@@ -77,11 +77,6 @@ def parse_duration(isodurationstr, builder=PythonTimeBuilder):
 
 def _parse_duration_prescribed(isodurationstr):
     #durationstr can be of the form PnYnMnDTnHnMnS or PnW
-
-    #Don't allow negative elements
-    #https://bitbucket.org/nielsenb/aniso8601/issues/20/negative-duration
-    if isodurationstr.find('-') != -1:
-        raise NegativeDurationError('ISO 8601 durations must be positive.')
 
     #Make sure the end character is valid
     #https://bitbucket.org/nielsenb/aniso8601/issues/9/durations-with-trailing-garbage-are-parsed

@@ -17,6 +17,7 @@ Changes
 * Add :code:`get_datetime_resolution` which behaves like :code:`get_time_resolution` but accepts a ISO 8601 date time as an argument, return value is a :code:`TimeResolution`
 * Add :code:`get_duration_resolution` which behaves like other resolution helpers, return value is a :code:`DurationResolution`
 * Add :code:`get_interval_resolution` which behaves like other resolution helpers, return value is a :code:`IntervalResolution`
+* Negative durations now fail at the parse step and simply raise :code:`ISOFormatError`, calling a :code:`PythonTimeBuilder.build_duration` directly with a negative duration component will yield an :code:`ISOFormatError` in the range check
 * Raise :code:`DayOutOfBoundsError` if calendar day exceeds number of days in calendar month
 * Raise :code:`DayOutOfBoundsError` if ordinal day exceeds number of days in calendar year (366 now raises :code:`DayOutOfBoundsError` in non-leap year)
 * Raise :code:`ISOFormatError` when date or time string contains extra whitespace
@@ -34,6 +35,7 @@ Changes
 * Simplify :code:`parse_duration`, :code:`build_duration` will now be called with explicit :code:`None` arguments when components of a prescribed duration are not present in the ISO 8601 duration string instead of being excluded from the call
 * Remove unused :code:`decimalfraction.find_separator`
 * Remove unused :code:`PythonTimeBuilder._split_to_microseconds`
+* Removed :code:`NegativeDurationError`
 
 Deprecation
 -----------

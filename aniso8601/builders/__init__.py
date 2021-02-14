@@ -10,10 +10,9 @@ import calendar
 
 from aniso8601.exceptions import (DayOutOfBoundsError, MidnightBoundsError,
                                   MinutesOutOfBoundsError, MonthOutOfBoundsError,
-                                  NegativeDurationError, HoursOutOfBoundsError,
-                                  ISOFormatError, LeapSecondError,
-                                  SecondsOutOfBoundsError, WeekOutOfBoundsError,
-                                  YearOutOfBoundsError)
+                                  HoursOutOfBoundsError, ISOFormatError,
+                                  LeapSecondError, SecondsOutOfBoundsError,
+                                  WeekOutOfBoundsError, YearOutOfBoundsError)
 from collections import namedtuple
 
 DateTuple = namedtuple('Date', ['YYYY', 'MM', 'DD', 'Www', 'D', 'DDD'])
@@ -109,35 +108,35 @@ class BaseTimeBuilder(object):
                         'Minute must be between 0..59.',
                         range_check)
     DURATION_PNY_LIMIT = Limit('Invalid year duration string.',
-                               None, None, YearOutOfBoundsError,
-                               None,
+                               0, None, ISOFormatError,
+                               'Duration years component must be positive.',
                                range_check)
     DURATION_PNM_LIMIT = Limit('Invalid month duration string.',
-                               None, None, MonthOutOfBoundsError,
-                               None,
+                               0, None, ISOFormatError,
+                               'Duration months component must be positive.',
                                range_check)
     DURATION_PNW_LIMIT = Limit('Invalid week duration string.',
-                               None, None, WeekOutOfBoundsError,
-                               None,
+                               0, None, ISOFormatError,
+                               'Duration weeks component must be positive.',
                                range_check)
     DURATION_PND_LIMIT = Limit('Invalid day duration string.',
-                               None, None, DayOutOfBoundsError,
-                               None,
+                               0, None, ISOFormatError,
+                               'Duration days component must be positive.',
                                range_check)
     DURATION_TNH_LIMIT = Limit('Invalid hour duration string.',
-                               None, None, HoursOutOfBoundsError,
-                               None,
+                               0, None, ISOFormatError,
+                               'Duration hours component must be positive.',
                                range_check)
     DURATION_TNM_LIMIT = Limit('Invalid minute duration string.',
-                               None, None, MinutesOutOfBoundsError,
-                               None,
+                               0, None, ISOFormatError,
+                               'Duration minutes component must be positive.',
                                range_check)
     DURATION_TNS_LIMIT = Limit('Invalid second duration string.',
-                               None, None, SecondsOutOfBoundsError,
-                               None,
+                               0, None, ISOFormatError,
+                               'Duration seconds component must be positive.',
                                range_check)
     INTERVAL_RNN_LIMIT = Limit('Invalid duration repetition string.',
-                               0, None, NegativeDurationError,
+                               0, None, ISOFormatError,
                                'Duration repetition count must be positive.',
                                range_check)
 
