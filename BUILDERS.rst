@@ -66,7 +66,7 @@ build_repeating_interval
 
 :code:`R` (:code:`boolean`, default: :code:`None`) - :code:`True` if interval repeats without bound, :code:`False` otherwise, default :code:`None` value should never be passed
 :code:`Rnn` (:code:`str`, default: :code:`None`) - Repetition count component
-:code:`interval` (:code:`IntervalTuple`, default: :code:`None`) - Interval component as a nemd tuple
+:code:`interval` (:code:`IntervalTuple`, default: :code:`None`) - Interval component as a named tuple
 
 build_timezone
 --------------
@@ -80,7 +80,7 @@ build_timezone
 Range check methods
 ===================
 
-Every build method has a corresponding range check method, e.g. :code:`range_check_date` for :code:`build_date`. Range methods take the same arguments as their corresponding build method. Range methods are expected to cast the arguments to the correct type, range check them, and return the arguments as a `tuple <https://docs.python.org/3/library/stdtypes.html#typesseq-tuple>`_ in the same order the method was called with. These methods are not called by default in the :code:`BaseTimeBuilder` or :code:`TupleBuilder` build methods.
+Every build method has a corresponding range check method, e.g. :code:`range_check_date` for :code:`build_date`. Range methods take the same arguments as their corresponding build method. Range methods are expected to cast the arguments to the correct type, range check them, and return the (now casted) arguments as a `tuple <https://docs.python.org/3/library/stdtypes.html#typesseq-tuple>`_ in the same order the method was called with. These methods are not called by default in the :code:`BaseTimeBuilder` or :code:`TupleBuilder` build methods.
 
 The final argument to every range check method is a :code:`rangedict`. :code:`rangedict` is expected to be a `dictionary <https://docs.python.org/3/library/stdtypes.html#dict>`_ with keys matching the build method arguments, and values being corresponding :code:`aniso8601.builders.Limit` named tuples. The range check methods will by default use a matching range dict if no argument to :code:`rangedict` is provided, e.g. :code:`BaseTimeBuilder.DATE_RANGE_DICT` is used by default by :code:`BaseTimeBuilder.range_check_date`.
 
