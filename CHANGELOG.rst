@@ -15,6 +15,7 @@ Changes
 * Add :code:`range_check_duration` to :code:`PythonTimeBuilder` which calls :code:`BaseTimeBuilder.range_check_duration` and performs additional checks against maximum timedelta size
 * Add :code:`range_check_interval` to :code:`PythonTimeBuilder` which handles building concise dates and performs additional checks against maximum timedelta size
 * Add :code:`get_datetime_resolution` which behaves like :code:`get_time_resolution` but accepts a ISO 8601 date time as an argument, return value is a :code:`TimeResolution`
+* Add :code:`exceptions.RangeCheckError` as a parent type of all failures in the range check methods, it descends from :code:`ValueError`
 * Add :code:`get_duration_resolution` which behaves like other resolution helpers, return value is a :code:`DurationResolution`
 * Add :code:`get_interval_resolution` which behaves like other resolution helpers, return value is a :code:`IntervalResolution`
 * Negative durations now fail at the parse step and simply raise :code:`ISOFormatError`, calling a :code:`PythonTimeBuilder.build_duration` directly with a negative duration component will yield an :code:`ISOFormatError` in the range check
