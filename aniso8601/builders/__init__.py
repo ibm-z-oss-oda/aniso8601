@@ -223,7 +223,7 @@ class BaseTimeBuilder(object):
                 raise DayOutOfBoundsError('{0} is out of range for {1}-{2}'.format(DD, YYYY, MM))
 
         if DDD is not None:
-            if calendar.isleap(YYYY) is False and DDD >= 366:
+            if calendar.isleap(YYYY) is False and DDD == 366:
                 raise DayOutOfBoundsError('{0} is only valid for leap year.'.format(DDD))
 
         return (YYYY, MM, DD, Www, D, DDD)

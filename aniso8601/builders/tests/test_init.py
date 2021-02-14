@@ -117,6 +117,10 @@ class TestBaseTimeBuilder(unittest.TestCase):
         with self.assertRaises(DayOutOfBoundsError):
             BaseTimeBuilder.range_check_date(YYYY='1234', DDD='367')
 
+        #https://bitbucket.org/nielsenb/aniso8601/issues/14/parsing-ordinal-dates-should-only-allow
+        with self.assertRaises(DayOutOfBoundsError):
+            BaseTimeBuilder.range_check_date(YYYY='1981', DDD='366')
+
         #Make sure Nones pass through unmodified
         self.assertEqual(BaseTimeBuilder.range_check_date(rangedict={}), (None, None, None,
                                                                           None, None, None))

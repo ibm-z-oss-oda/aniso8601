@@ -1006,11 +1006,6 @@ class TestPythonTimeBuilder(unittest.TestCase):
         ordinaldate = PythonTimeBuilder._build_ordinal_date(1981, 95)
         self.assertEqual(ordinaldate, datetime.date(year=1981, month=4, day=5))
 
-    def test_build_ordinal_date_leapyear(self):
-        #https://bitbucket.org/nielsenb/aniso8601/issues/14/parsing-ordinal-dates-should-only-allow
-        with self.assertRaises(DayOutOfBoundsError):
-            PythonTimeBuilder._build_ordinal_date(1981, 366)
-
     def test_iso_year_start(self):
         yearstart = PythonTimeBuilder._iso_year_start(2004)
         self.assertEqual(yearstart, datetime.date(year=2003, month=12, day=29))

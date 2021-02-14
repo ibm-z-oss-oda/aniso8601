@@ -517,12 +517,6 @@ class PythonTimeBuilder(BaseTimeBuilder):
         builtdate = (datetime.date(isoyear, 1, 1)
                      + datetime.timedelta(days=isoday - 1))
 
-        #Enforce ordinal day limitation
-        #https://bitbucket.org/nielsenb/aniso8601/issues/14/parsing-ordinal-dates-should-only-allow
-        if isoday == 0 or builtdate.year != isoyear:
-            raise DayOutOfBoundsError('Day of year must be from 1..365, '
-                                      '1..366 for leap year.')
-
         return builtdate
 
     @staticmethod
