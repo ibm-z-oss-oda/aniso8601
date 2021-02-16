@@ -22,7 +22,7 @@ Features
   - Parse a repeating interval, get a date or datetime `generator <http://www.python.org/dev/peps/pep-0255/>`_
 
 * UTC offset represented as fixed-offset tzinfo
-* Parser separate from representation, allowing parsing to different datetime representations
+* Parser separate from representation, allowing parsing to different datetime representations (see `Builders`_)
 * No regular expressions
 
 Installation
@@ -238,6 +238,8 @@ To get the resolution of an ISO 8601 duration string::
   >>> aniso8601.get_duration_resolution('P1Y') == aniso8601.resolution.DurationResolution.Years
   True
 
+The default :code:`PythonTimeBuilder` assumes years are 365 days, and months are 30 days. Where calendar level accuracy is required, a `RelativeTimeBuilder <https://bitbucket.org/nielsenb/relativetimebuilder>`_ can be used, see also `Builders`_.
+
 Parsing intervals
 -----------------
 
@@ -344,7 +346,7 @@ Builders
 
 Builders can be used to change the output format of a parse operation. All parse functions have a :code:`builder` keyword argument which accepts a builder class.
 
-Two builders are included. The :code:`PythonTimeBuilder` (the default) in the :code:`aniso8601.builders.python` module, and the :code:`TupleBuilder` which returns the parse result as a tuple of strings and is located in the :code:`aniso8601.builders` module.
+Two builders are included. The :code:`PythonTimeBuilder` (the default) in the :code:`aniso8601.builders.python` module, and the :code:`TupleBuilder` which returns the parse result as a corresponding named tuple and is located in the :code:`aniso8601.builders` module.
 
 Information on writing a builder can be found in :ref:`builder_development`.
 
