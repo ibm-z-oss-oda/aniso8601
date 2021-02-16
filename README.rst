@@ -70,13 +70,15 @@ Leap seconds are currently not supported and attempting to parse one raises a :c
   >>> aniso8601.parse_datetime('2018-03-06T23:59:60')
   Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
-    File "aniso8601/time.py", line 135, in parse_datetime
+    File "/home/nielsenb/Jetfuse/aniso8601/aniso8601/aniso8601/time.py", line 196, in parse_datetime
       return builder.build_datetime(datepart, timepart)
-    File "aniso8601/builders/python.py", line 176, in build_datetime
+    File "/home/nielsenb/Jetfuse/aniso8601/aniso8601/aniso8601/builders/python.py", line 237, in build_datetime
       cls._build_object(time))
-    File "aniso8601/builders/__init__.py", line 63, in _build_object
-      return cls.build_time(hh=parsetuple[0], mm=parsetuple[1],
-    File "aniso8601/builders/python.py", line 134, in build_time
+    File "/home/nielsenb/Jetfuse/aniso8601/aniso8601/aniso8601/builders/__init__.py", line 336, in _build_object
+      return cls.build_time(hh=parsetuple.hh, mm=parsetuple.mm,
+    File "/home/nielsenb/Jetfuse/aniso8601/aniso8601/aniso8601/builders/python.py", line 191, in build_time
+      hh, mm, ss, tz = cls.range_check_time(hh, mm, ss, tz)
+    File "/home/nielsenb/Jetfuse/aniso8601/aniso8601/aniso8601/builders/__init__.py", line 266, in range_check_time
       raise LeapSecondError('Leap seconds are not supported.')
   aniso8601.exceptions.LeapSecondError: Leap seconds are not supported.
 
@@ -89,7 +91,7 @@ To get the resolution of an ISO 8601 datetime string::
   >>> aniso8601.get_datetime_resolution('1977-06-10T12') == aniso8601.resolution.TimeResolution.Hours
   True
 
-Note that datetime resolutions map to :code:`TimeResolution` as a valid datetime cannot have no time members so the resolution mapping is the same.
+Note that datetime resolutions map to :code:`TimeResolution` as a valid datetime must have at least one time member so the resolution mapping is equivalent.
 
 Parsing dates
 -------------
@@ -175,11 +177,11 @@ Leap seconds are currently not supported and attempting to parse one raises a :c
   >>> aniso8601.parse_time('23:59:60')
   Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
-    File "aniso8601/time.py", line 113, in parse_time
-      return _RESOLUTION_MAP[timeresolution](timestr, tz, builder)
-    File "aniso8601/time.py", line 169, in _parse_second_time
-      return builder.build_time(hh=normalize(hourstr), mm=normalize(minutestr),
-    File "aniso8601/builders/python.py", line 134, in build_time
+    File "/home/nielsenb/Jetfuse/aniso8601/aniso8601/aniso8601/time.py", line 174, in parse_time
+      return builder.build_time(hh=hourstr, mm=minutestr, ss=secondstr, tz=tz)
+    File "/home/nielsenb/Jetfuse/aniso8601/aniso8601/aniso8601/builders/python.py", line 191, in build_time
+      hh, mm, ss, tz = cls.range_check_time(hh, mm, ss, tz)
+    File "/home/nielsenb/Jetfuse/aniso8601/aniso8601/aniso8601/builders/__init__.py", line 266, in range_check_time
       raise LeapSecondError('Leap seconds are not supported.')
   aniso8601.exceptions.LeapSecondError: Leap seconds are not supported.
 
@@ -218,7 +220,7 @@ The decimal fraction can be specified with a comma instead of a full-stop::
 
 Parsing a duration from a combined date and time is supported as well::
 
-  >>> aniso8601.parse_duration('P0001-01-02T01:30:5')
+  >>> aniso8601.parse_duration('P0001-01-02T01:30:05')
   datetime.timedelta(397, 5405)
 
 To get the resolution of an ISO 8601 duration string::
@@ -278,7 +280,7 @@ Concise representations are supported::
   >>> aniso8601.parse_interval('2007-11-13T09:00/15T17:00')
   (datetime.datetime(2007, 11, 13, 9, 0), datetime.datetime(2007, 11, 15, 17, 0))
 
-Repeating intervals are supported as well, and return a generator::
+Repeating intervals are supported as well, and return a `generator <https://wiki.python.org/moin/Generators>`_::
 
   >>> aniso8601.parse_repeating_interval('R3/1981-04-05/P1D')
   <generator object _date_generator at 0x7fd800d3b320>
@@ -311,7 +313,7 @@ Note that you should never try to convert a generator produced by an unbounded i
   >>> list(aniso8601.parse_repeating_interval('R/PT1H2M/1980-03-05T01:01:00'))
   Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
-    File "aniso8601/builders/python.py", line 419, in _date_generator_unbounded
+    File "/home/nielsenb/Jetfuse/aniso8601/aniso8601/aniso8601/builders/python.py", line 560, in _date_generator_unbounded
       currentdate += timedelta
   OverflowError: date value out of range
 
@@ -360,7 +362,7 @@ The :code:`TupleBuilder` returns parse results as `named tuples <https://docs.py
 Datetimes
 ^^^^^^^^^
 
-Parsing a datetime returns a tuple containing date and time tuples . The date tuple contains the following parse components: :code:`YYYY`, :code:`MM`, :code:`DD`, :code:`Www`, :code:`D`, :code:`DDD`. The time tuple contains the following parse components :code:`hh`, :code:`mm`, :code:`ss`, :code:`tz`, where :code:`tz` itself is a tuple with the following components :code:`negative`, :code:`Z`, :code:`hh`, :code:`mm`, :code:`name` with :code:`negative` and :code:`Z` being booleans::
+Parsing a datetime returns a :code:`DatetimeTuple` containing :code:`Date` and :code:`Time` tuples . The date tuple contains the following parse components: :code:`YYYY`, :code:`MM`, :code:`DD`, :code:`Www`, :code:`D`, :code:`DDD`. The time tuple contains the following parse components :code:`hh`, :code:`mm`, :code:`ss`, :code:`tz`, where :code:`tz` itself is a tuple with the following components :code:`negative`, :code:`Z`, :code:`hh`, :code:`mm`, :code:`name` with :code:`negative` and :code:`Z` being booleans::
 
   >>> import aniso8601
   >>> from aniso8601.builders import TupleBuilder
@@ -372,7 +374,7 @@ Parsing a datetime returns a tuple containing date and time tuples . The date tu
 Dates
 ^^^^^
 
-Parsing a date returns a tuple containing the following parse components: :code:`YYYY`, :code:`MM`, :code:`DD`, :code:`Www`, :code:`D`, :code:`DDD`::
+Parsing a date returns a :code:`DateTuple` containing the following parse components: :code:`YYYY`, :code:`MM`, :code:`DD`, :code:`Www`, :code:`D`, :code:`DDD`::
 
   >>> import aniso8601
   >>> from aniso8601.builders import TupleBuilder
@@ -386,7 +388,7 @@ Parsing a date returns a tuple containing the following parse components: :code:
 Times
 ^^^^^
 
-Parsing a time returns a tuple containing following parse components: :code:`hh`, :code:`mm`, :code:`ss`, :code:`tz`, where :code:`tz` is a tuple with the following components :code:`negative`, :code:`Z`, :code:`hh`, :code:`mm`, :code:`name`, with :code:`negative` and :code:`Z` being booleans::
+Parsing a time returns a :code:`TimeTuple` containing following parse components: :code:`hh`, :code:`mm`, :code:`ss`, :code:`tz`, where :code:`tz` is a :code:`TimezoneTuple` with the following components :code:`negative`, :code:`Z`, :code:`hh`, :code:`mm`, :code:`name`, with :code:`negative` and :code:`Z` being booleans::
 
   >>> import aniso8601
   >>> from aniso8601.builders import TupleBuilder
@@ -400,7 +402,7 @@ Parsing a time returns a tuple containing following parse components: :code:`hh`
 Durations
 ^^^^^^^^^
 
-Parsing a duration returns a tuple containing the following parse components: :code:`PnY`, :code:`PnM`, :code:`PnW`, :code:`PnD`, :code:`TnH`, :code:`TnM`, :code:`TnS`::
+Parsing a duration returns a :code:`DurationTuple` containing the following parse components: :code:`PnY`, :code:`PnM`, :code:`PnW`, :code:`PnD`, :code:`TnH`, :code:`TnM`, :code:`TnS`::
 
   >>> import aniso8601
   >>> from aniso8601.builders import TupleBuilder
@@ -412,7 +414,7 @@ Parsing a duration returns a tuple containing the following parse components: :c
 Intervals
 ^^^^^^^^^
 
-Parsing an interval returns a tuple containing the following parse components: :code:`start`, :code:`end`, :code:`duration`, :code:`start` and :code:`end` may both be datetime or date tuples, :code:`duration` is a duration tuple::
+Parsing an interval returns an :code:`IntervalTuple` containing the following parse components: :code:`start`, :code:`end`, :code:`duration`, :code:`start` and :code:`end` may both be datetime or date tuples, :code:`duration` is a duration tuple::
 
   >>> import aniso8601
   >>> from aniso8601.builders import TupleBuilder
@@ -423,7 +425,7 @@ Parsing an interval returns a tuple containing the following parse components: :
   >>> aniso8601.parse_interval('P1M/1981-04-05', builder=TupleBuilder)
   Interval(start=None, end=Date(YYYY='1981', MM='04', DD='05', Www=None, D=None, DDD=None), duration=Duration(PnY=None, PnM='1', PnW=None, PnD=None, TnH=None, TnM=None, TnS=None))
 
-A repeating interval returns a tuple containing the following parse components: :code:`R`, :code:`Rnn`, :code:`interval`, where :code:`R` is a boolean, :code:`True` for an unbounded interval, :code:`False` otherwise.::
+A repeating interval returns a :code:`RepeatingIntervalTuple` containing the following parse components: :code:`R`, :code:`Rnn`, :code:`interval`, where :code:`R` is a boolean, :code:`True` for an unbounded interval, :code:`False` otherwise.::
 
   >>> aniso8601.parse_repeating_interval('R3/1981-04-05/P1D', builder=TupleBuilder)
   RepeatingInterval(R=False, Rnn='3', interval=Interval(start=Date(YYYY='1981', MM='04', DD='05', Www=None, D=None, DDD=None), end=None, duration=Duration(PnY=None, PnM=None, PnW=None, PnD='1', TnH=None, TnM=None, TnS=None)))
