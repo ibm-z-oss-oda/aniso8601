@@ -344,7 +344,7 @@ Builders
 
 Builders can be used to change the output format of a parse operation. All parse functions have a :code:`builder` keyword argument which accepts a builder class.
 
-Two builders are included. The :code:`PythonTimeBuilder` (the default) in the  :code:`aniso8601.builders.python` module, and the :code:`TupleBuilder` which returns the parse result as a tuple of strings and is located in the :code:`aniso8601.builders` module.
+Two builders are included. The :code:`PythonTimeBuilder` (the default) in the :code:`aniso8601.builders.python` module, and the :code:`TupleBuilder` which returns the parse result as a tuple of strings and is located in the :code:`aniso8601.builders` module.
 
 Information on writing a builder can be found in :ref:`builder_development`.
 
