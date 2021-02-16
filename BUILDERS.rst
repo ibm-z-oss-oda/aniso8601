@@ -85,3 +85,63 @@ Every build method has a corresponding range check method, e.g. :code:`range_che
 The final argument to every range check method is a :code:`rangedict`. :code:`rangedict` is expected to be a `dictionary <https://docs.python.org/3/library/stdtypes.html#dict>`_ with keys matching the build method arguments, and values being corresponding :code:`aniso8601.builders.Limit` named tuples. The range check methods will by default use a matching range dict if no argument to :code:`rangedict` is provided, e.g. :code:`BaseTimeBuilder.DATE_RANGE_DICT` is used by default by :code:`BaseTimeBuilder.range_check_date`.
 
 Note that there is no :code:`range_check_interval` method. Since the :code:`start`, :code:`end`, and :code:`duration` arguments are all different, already range checked types, it is assumed the build method will be calling range checked build methods internally (likely via :code:`_build_object`). An additional :code:`range_check_interval` method would be redundant. However a builder is welcome to implement one if necessary, :code:`PythonTimeBuilder` has additional range checking logic in :code:`range_check_duration` as well as a :code:`range_check_interval` method, both of which check against maximum Python timedelta size.
+
+range_check_date
+----------------
+
+:code:`YYYY` (:code:`str`, default: :code:`None`) - Year component
+:code:`MM` (:code:`str`, default: :code:`None`) - Month component
+:code:`DD` (:code:`str`, default: :code:`None`) - Day component
+:code:`Www` (:code:`str`, default: :code:`None`) - `Week number <https://en.wikipedia.org/wiki/ISO_week_date>`_ component
+:code:`D` (:code:`str`, default: :code:`None`) - Weekday number component
+:code:`DDD` (:code:`str`, default: :code:`None`) - `Ordinal <https://en.wikipedia.org/wiki/Ordinal_date>`_ day of year component
+:code:`rangedict` (:code:`dict`, default: :code:`None`) - Dict with key of argument name, value of Limit named tuple to apply to the value
+
+Returns - Tuple of values in same order as kwargs that have been cast and range checked
+
+range_check_time
+----------------
+
+:code:`hh` (:code:`str`, default: :code:`None`) - Hour component
+:code:`mm` (:code:`str`, default: :code:`None`) - Minute component
+:code:`ss` (:code:`str`, default: :code:`None`) - Second component
+:code:`tz` (:code:`TimezoneTuple`, default: :code:`None`) - Timezone component as named tuple
+:code:`rangedict` (:code:`dict`, default: :code:`None`) - Dict with key of argument name, value of Limit named tuple to apply to the value
+
+Returns - Tuple of values in same order as kwargs that have been cast and range checked
+
+range_check_duration
+--------------------
+
+:code:`PnY` (:code:`str`, default: :code:`None`) - Year component
+:code:`PnM` (:code:`str`, default: :code:`None`) - Month component
+:code:`PnW` (:code:`str`, default: :code:`None`) - Week component
+:code:`PnD` (:code:`str`, default: :code:`None`) - Day component
+:code:`TnH` (:code:`str`, default: :code:`None`) - Hour component
+:code:`TnM` (:code:`str`, default: :code:`None`) - Minute component
+:code:`TnS` (:code:`str`, default: :code:`None`) - Second component
+:code:`rangedict` (:code:`dict`, default: :code:`None`) - Dict with key of argument name, value of Limit named tuple to apply to the value
+
+Returns - Tuple of values in same order as kwargs that have been cast and range checked
+
+range_check_repeating_interval
+------------------------------
+
+:code:`R` (:code:`boolean`, default: :code:`None`) - :code:`True` if interval repeats without bound, :code:`False` otherwise, default :code:`None` value should never be passed
+:code:`Rnn` (:code:`str`, default: :code:`None`) - Repetition count component
+:code:`interval` (:code:`IntervalTuple`, default: :code:`None`) - Interval component as a named tuple
+:code:`rangedict` (:code:`dict`, default: :code:`None`) - Dict with key of argument name, value of Limit named tuple to apply to the value
+
+Returns - Tuple of values in same order as kwargs that have been cast and range checked
+
+range_check_repeating_timezone
+------------------------------
+
+:code:`negative` (:code:`boolean`, default: :code:`None`) - :code:`True` if UTC offset is negative, :code:`False` otherwise, default :code:`None` value should never be passed
+:code:`Z` (:code:`boolean`, default: :code:`None`) - :code:`True` if the parsed timezone string is "Z" and the UTC offset should be 0, :code:`False` otherwise, default :code:`None` value should never be passed
+:code:`hh` (:code:`str`, default: :code:`None`) - Hour component of UTC offset
+:code:`mm` (:code:`str`, default: :code:`None`) - Minute component of UTC offset
+:code:`name` (:code:`str`, default: :code:`''`) - Timezone name
+:code:`rangedict` (:code:`dict`, default: :code:`None`) - Dict with key of argument name, value of Limit named tuple to apply to the value
+
+Returns - Tuple of values in same order as kwargs that have been cast and range checked
