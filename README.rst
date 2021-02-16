@@ -1,3 +1,8 @@
+.. toctree::
+  :hidden:
+
+  BUILDERS.rst
+
 aniso8601
 =========
 
