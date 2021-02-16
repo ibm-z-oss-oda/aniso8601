@@ -205,7 +205,7 @@ The range check methods defined in the :code:`BaseTimeBuilder` take correspondin
 Build methods
 =============
 
-Build methods are called at the end of a "successful" parse. They are called with the parse components as strings. The only guarantee is that the strings correspond to the location of the component in the ISO 8601 string, no range checking is performed. Helpers are provided for range checking and casting, see TODO for more details. Some parse components e.g. timezones, will be passed as named tuples as built by :code:`builders.TupleBuilder`, :code:`BaseTimeBuilder._build_object` is given as a helper method to go from a named tuple to an object by way of the class' defined build methods.
+Build methods are called at the end of a "successful" parse. They are called with the parse components as strings. The only guarantee is that the strings correspond to the location of the component in the ISO 8601 string, no range checking is performed. Helpers are provided for range checking and casting, see `Range check methods`_ for more details. Some parse components e.g. timezones, will be passed as named tuples as built by :code:`builders.TupleBuilder`, :code:`BaseTimeBuilder._build_object` is given as a helper method to go from a named tuple to an object by way of the class' defined build methods.
 
 Build methods are expected to be class methods as no builder instantiation is done in the parse methods.
 
