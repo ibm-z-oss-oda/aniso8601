@@ -1,19 +1,211 @@
 aniso8601 - Builder Development
 ===============================
 
-Most builders will descend from either :code:`aniso8601.builders.BaseTimeBuilder` or :code:`aniso8601.builders.python.PythonTimeBuilder`.
+Most builders will descend from either :code:`builders.BaseTimeBuilder` or :code:`builders.python.PythonTimeBuilder`.
 
 Builder class variables
 =======================
 
 :code:`LEAP_SECONDS_SUPPORTED` (:code:`boolean`, default :code:`False`) - Set to :code:`True` if :code:`range_check_time` should accept `leap seconds <https://en.wikipedia.org/wiki/Leap_second>`_. Otherwise :code:`range_check_time` will raise a :code:`LeapSecondError` when range checking a time representing a leap second.
 
-The limit variables will be discussed in the TODO.
+Limit tuples
+------------
+
+The :code:`builders.range_check` method used by the default range check methods operates on limits defined by Limit named tuples
+
+Limit
+^^^^^
+
+:code:`casterrorstring` (:code:`str`) - Error message for when cast operation fails
+:code:`min` (:code:`int`, :code:`float`, :code:`None`) - Minimum value, value < min raises :code:`rangeexception` with the give :code:`rangerrorstring`, :code:`None` means bound is not enforced
+:code:`max` (:code:`int`, :code:`float`, :code:`None`) - Minimum value, value > min raises :code:`rangeexception` with the give :code:`rangerrorstring`, :code:`None` means bound is not enforced
+:code:`rangeexception` (:code:`Exception`) - Exception to raise when value is out of given range
+:code:`rangeerrorstring` (:code:`str`) - String passed to :code:`rangeexception` constructor when value is out of given range
+:code:`rangefunc` (:code:`method`) - Method to call for range checking, must take value as the first argument, and the applicable limit tuple as the second
+
+Limits
+------
+
+The limit tuples defined in :code:`BaseTimeBuilder` are defined as follows:
+
+:code:`DATE_YYYY_LIMIT`::
+
+  Limit('Invalid year string.',
+        0000, 9999, YearOutOfBoundsError,
+        'Year must be between 1..9999.',
+        range_check)
+
+:code:`DATE_MM_LIMIT`::
+
+  Limit('Invalid month string.',
+        1, 12, MonthOutOfBoundsError,
+        'Month must be between 1..12.',
+        range_check)
+
+:code:`DATE_DD_LIMIT`::
+
+  Limit('Invalid day string.',
+        1, 31, DayOutOfBoundsError,
+        'Day must be between 1..31.',
+        range_check)
+
+:code:`DATE_WWW_LIMIT`::
+
+  Limit('Invalid week string.',
+        1, 53, WeekOutOfBoundsError,
+        'Week number must be between 1..53.',
+        range_check)
+
+:code:`DATE_D_LIMIT`::
+
+  Limit('Invalid weekday string.',
+        1, 7, DayOutOfBoundsError,
+        'Weekday number must be between 1..7.',
+        range_check)
+
+:code:`DATE_DDD_LIMIT`::
+
+  Limit('Invalid ordinal day string.',
+        1, 366, DayOutOfBoundsError,
+        'Ordinal day must be between 1..366.',
+        range_check)
+
+:code:`TIME_HH_LIMIT`::
+
+  Limit('Invalid hour string.',
+        0, 24, HoursOutOfBoundsError,
+        'Hour must be between 0..24 with '
+        '24 representing midnight.',
+        range_check)
+
+:code:`TIME_MM_LIMIT`::
+
+  Limit('Invalid minute string.',
+        0, 59, MinutesOutOfBoundsError,
+        'Minute must be between 0..59.',
+        range_check)
+
+:code:`TIME_SS_LIMIT`::
+
+  Limit('Invalid second string.',
+        0, 60, SecondsOutOfBoundsError,
+        'Second must be between 0..60 with 60 representing a leap second.',
+        range_check)
+
+:code:`TZ_HH_LIMIT`::
+
+  Limit('Invalid timezone hour string.',
+        0, 23, HoursOutOfBoundsError,
+        'Hour must be between 0..23.',
+        range_check)
+
+:code:`TZ_MM_LIMIT`::
+
+  Limit('Invalid timezone minute string.',
+        0, 59, MinutesOutOfBoundsError,
+        'Minute must be between 0..59.',
+        range_check)
+
+:code:`DURATION_PNY_LIMIT`::
+
+  Limit('Invalid year duration string.',
+        0, None, ISOFormatError,
+        'Duration years component must be positive.',
+        range_check)
+
+:code:`DURATION_PNM_LIMIT`::
+
+  Limit('Invalid month duration string.',
+        0, None, ISOFormatError,
+        'Duration months component must be positive.',
+        range_check)
+
+:code:`DURATION_PNW_LIMIT`::
+
+  Limit('Invalid week duration string.',
+        0, None, ISOFormatError,
+        'Duration weeks component must be positive.',
+        range_check)
+
+:code:`DURATION_PND_LIMIT`::
+
+  Limit('Invalid day duration string.',
+        0, None, ISOFormatError,
+        'Duration days component must be positive.',
+        range_check)
+
+:code:`DURATION_TNH_LIMIT`::
+
+  Limit('Invalid hour duration string.',
+        0, None, ISOFormatError,
+        'Duration hours component must be positive.',
+        range_check)
+
+:code:`DURATION_TNM_LIMIT`::
+
+  Limit('Invalid minute duration string.',
+        0, None, ISOFormatError,
+        'Duration minutes component must be positive.',
+        range_check)
+
+:code:`DURATION_TNS_LIMIT`::
+
+  Limit('Invalid second duration string.',
+        0, None, ISOFormatError,
+        'Duration seconds component must be positive.',
+        range_check)
+
+
+:code:`INTERVAL_RNN_LIMIT`::
+
+  Limit('Invalid duration repetition string.',
+        0, None, ISOFormatError,
+        'Duration repetition count must be positive.',
+        range_check)
+
+Limit dicts
+-----------
+
+The range check methods defined in the :code:`BaseTimeBuilder` take corresponding :code:`rangedict` arguments defined in :code:`BaseTimeBuilder`. Arguments without a matching :code:`rangedict` entry are not range checked (or cast). They are defined as follows:
+
+:code:`DATE_RANGE_DICT`::
+
+  {'YYYY': DATE_YYYY_LIMIT,
+   'MM': DATE_MM_LIMIT,
+   'DD': DATE_DD_LIMIT,
+   'Www': DATE_WWW_LIMIT,
+   'D': DATE_D_LIMIT,
+   'DDD': DATE_DDD_LIMIT}
+
+:code:`TIME_RANGE_DICT`::
+
+  {'hh': TIME_HH_LIMIT,
+   'mm': TIME_MM_LIMIT,
+   'ss': TIME_SS_LIMIT}
+
+:code:`DURATION_RANGE_DICT`::
+
+  {'PnY': DURATION_PNY_LIMIT,
+   'PnM': DURATION_PNM_LIMIT,
+   'PnW': DURATION_PNW_LIMIT,
+   'PnD': DURATION_PND_LIMIT,
+   'TnH': DURATION_TNH_LIMIT,
+   'TnM': DURATION_TNM_LIMIT,
+   'TnS': DURATION_TNS_LIMIT}
+
+:code:`REPEATING_INTERVAL_RANGE_DICT`::
+
+  {'Rnn': INTERVAL_RNN_LIMIT}
+
+:code:`TIMEZONE_RANGE_DICT`::
+
+  {'hh': TZ_HH_LIMIT,
+   'mm': TZ_MM_LIMIT}
 
 Build methods
 =============
 
-Build methods are called at the end of a "successful" parse. They are called with the parse components as strings. The only guarantee is that the strings correspond to the location of the component in the ISO 8601 string, no range checking is performed. Helpers are provided for range checking and casting, see TODO for more details. Some parse components e.g. timezones, will be passed as named tuples as built by :code:`aniso8601.builders.TupleBuilder`, :code:`BaseTimeBuilder._build_object` is given as a helper method to go from a named tuple to an object by way of the class' defined build methods.
+Build methods are called at the end of a "successful" parse. They are called with the parse components as strings. The only guarantee is that the strings correspond to the location of the component in the ISO 8601 string, no range checking is performed. Helpers are provided for range checking and casting, see TODO for more details. Some parse components e.g. timezones, will be passed as named tuples as built by :code:`builders.TupleBuilder`, :code:`BaseTimeBuilder._build_object` is given as a helper method to go from a named tuple to an object by way of the class' defined build methods.
 
 Build methods are expected to be class methods as no builder instantiation is done in the parse methods.
 
