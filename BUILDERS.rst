@@ -163,7 +163,7 @@ The limit tuples defined in :code:`BaseTimeBuilder` are defined as follows:
         'Duration repetition count must be positive.',
         range_check)
 
-Limit dicts
+Range dicts
 -----------
 
 The range check methods defined in the :code:`BaseTimeBuilder` take corresponding :code:`rangedict` arguments defined in :code:`BaseTimeBuilder`. Arguments without a matching :code:`rangedict` entry are not range checked (or cast). They are defined as follows:
@@ -337,3 +337,51 @@ range_check_repeating_timezone
 :code:`rangedict` (:code:`dict`, default: :code:`None`) - Dict with key of argument name, value of Limit named tuple to apply to the value
 
 Returns - Tuple of values in same order as kwargs that have been cast and range checked
+
+Helper class methods
+====================
+
+:code:`BaseTimeBuilder` has some convenience methods to help deal with intervals.
+
+_is_interval_end_precise
+------------------------
+
+:code:`endtuple` (:code:`TimeTuple`, :code:`DateTuple`, :code:`DatetimeTuple`) - The :code:`end` member of an :code:`IntervalTuple` to check
+
+Returns - :code:`True` if `endtuple` will take missing components from the :code:`start` of an :code:`IntervalTuple`, :code:`False` otherwise
+
+_combine_concise_interval_tuples
+--------------------------------
+
+:code:`starttuple` (:code:`TimeTuple`, :code:`DateTuple`, :code:`DatetimeTuple`) - The :code:`start` member of an :code:`IntervalTuple`
+:code:`conciseendtuple` (:code:`TimeTuple`, :code:`DateTuple`, :code:`DatetimeTuple`) - The :code:`end` member of an :code:`IntervalTuple` which will have missing components added from :code:`starttuple`
+
+Returns - A :code:`DatetimeTuple` if :code:`start` is a :code:`DatetimeTuple` or :code:`conciseendtuple` is a :code:`DatetimeTuple` or :code:`TimeTuple`, a :code:`DateTuple` otherwise. Any components present in :code:`start` but missing in :code:`conciseendtuple` will be taken from :code:`start`.
+
+Other methods
+=============
+
+There are a couple other common methods in :code:`builders`.
+
+cast
+----
+
+:code:`builders.cast` used as a wrapper around cast methods to handle throwing the correct exception.
+
+:code:`value` - The value to be cast
+:code:`castfunction` (:code:`method`) - Method to call to cast :code:`value` to the desired return type
+:code:`caughtexceptions` (:code:`iterable`, default: :code:`(ValueError,)`) - Iterable of the types of exceptions that should be caught when calling :code:`castfunction`
+:code:`thrownexception` (:code:`Exception`, default: :code:`ISOFormatError`) - The exception to throw when one of :code:`caughtexceptions` is caught
+:code:`thrownmessage` (:code:`str`, default: :code:`None`) - String passed to :code:`thrownexception` constructor
+
+Returns - The output of :code:`castfunc` when called with :code:`value`
+
+range_check
+-----------
+
+:code:`builders.range_check` is the range check method used by all :code:`BaseTimeBuilder` limits. If "." is present in :code:`valuestr`, it will be cast to :code:`float` (via :code:`builders.cast`), :code:`int` otherwise.
+
+:code:`valuestr` (:code:`str`) - The value to cast and range check
+:code:`limit` (:code:`Limit`) - The `Limit`_ tuple to use to range check
+
+Returns - :code:`valuestr` if cast is successful and range checks pass
