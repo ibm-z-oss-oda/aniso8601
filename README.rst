@@ -339,6 +339,8 @@ Builders can be used to change the output format of a parse operation. All parse
 
 Two builders are included. The :code:`PythonTimeBuilder` (the default) in the  :code:`aniso8601.builders.python` module, and the :code:`TupleBuilder` which returns the parse result as a tuple of strings and is located in the :code:`aniso8601.builders` module.
 
+Information on writing a builder can be found in :ref:`builder_development`.
+
 The following builders are available as separate projects:
 
 * `RelativeTimeBuilder <https://bitbucket.org/nielsenb/relativetimebuilder>`_ supports parsing to `datetutil relativedelta types <https://dateutil.readthedocs.io/en/stable/relativedelta.html>`_ for calendar level accuracy
