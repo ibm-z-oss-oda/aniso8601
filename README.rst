@@ -17,7 +17,7 @@ Features
   - Parse a repeating interval, get a date or datetime `generator <http://www.python.org/dev/peps/pep-0255/>`_
 
 * UTC offset represented as fixed-offset tzinfo
-* Parser separate from representation, allowing parsing to different datetime representations (see `Builders </Builders.rst>`_)
+* Parser separate from representation, allowing parsing to different datetime representations (see `Builders`_)
 * No regular expressions
 
 Installation
@@ -343,7 +343,7 @@ Builders can be used to change the output format of a parse operation. All parse
 
 Two builders are included. The :code:`PythonTimeBuilder` (the default) in the :code:`aniso8601.builders.python` module, and the :code:`TupleBuilder` which returns the parse result as a corresponding named tuple and is located in the :code:`aniso8601.builders` module.
 
-Information on writing a builder can be found in :ref:`builder_development`.
+Information on writing a builder can be found in `BUILDERS </BUILDERS.rst>`_.
 
 The following builders are available as separate projects:
 
