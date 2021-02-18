@@ -385,7 +385,7 @@ cast
 range_check
 -----------
 
-:code:`builders.range_check` is the range check method used by all :code:`BaseTimeBuilder` limits. If "." is present in :code:`valuestr`, it will be cast to :code:`float` (via :code:`builders.cast`), :code:`int` otherwise.
+:code:`builders.range_check` is the range check method used by all :code:`BaseTimeBuilder` limits. If a decimal point is present in :code:`valuestr`, it will be cast to :code:`float` (via :code:`builders.cast`), :code:`int` otherwise.
 
 :code:`valuestr` (:code:`str`) - The value to cast and range check
 :code:`limit` (:code:`Limit`) - The `Limit`_ tuple to use to range check
