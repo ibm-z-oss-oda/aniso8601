@@ -14,7 +14,7 @@ Features
   - Parse a datetime, get a `datetime.datetime <http://docs.python.org/3/library/datetime.html#datetime.datetime>`_
   - Parse a duration, get a `datetime.timedelta <http://docs.python.org/3/library/datetime.html#datetime.timedelta>`_
   - Parse an interval, get a tuple of dates or datetimes
-  - Parse a repeating interval, get a date or datetime `generator <http://www.python.org/dev/peps/pep-0255/>`_
+  - Parse a repeating interval, get a date or datetime `generator <https://wiki.python.org/moin/Generators>`_
 
 * UTC offset represented as fixed-offset tzinfo
 * Parser separate from representation, allowing parsing to different datetime representations (see `Builders`_)
