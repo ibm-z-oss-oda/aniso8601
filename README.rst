@@ -1,8 +1,3 @@
-.. toctree::
-  :hidden:
-
-  BUILDERS.rst
-
 aniso8601
 =========
 
@@ -22,7 +17,7 @@ Features
   - Parse a repeating interval, get a date or datetime `generator <http://www.python.org/dev/peps/pep-0255/>`_
 
 * UTC offset represented as fixed-offset tzinfo
-* Parser separate from representation, allowing parsing to different datetime representations (see `Builders`_)
+* Parser separate from representation, allowing parsing to different datetime representations (see `Builders </Builders.rst>`_)
 * No regular expressions
 
 Installation
@@ -42,7 +37,7 @@ Use
 Parsing datetimes
 -----------------
 
-*Consider `datetime.datetime.fromisoformat <https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat>`_ for basic ISO 8601 datetime parsing*
+*Consider* `datetime.datetime.fromisoformat <https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat>`_ *for basic ISO 8601 datetime parsing*
 
 To parse a typical ISO 8601 datetime string::
 
@@ -96,7 +91,7 @@ Note that datetime resolutions map to :code:`TimeResolution` as a valid datetime
 Parsing dates
 -------------
 
-*Consider `datetime.date.fromisoformat <https://docs.python.org/3/library/datetime.html#datetime.date.fromisoformat>`_ for basic ISO 8601 date parsing*
+*Consider* `datetime.date.fromisoformat <https://docs.python.org/3/library/datetime.html#datetime.date.fromisoformat>`_ *for basic ISO 8601 date parsing*
 
 To parse a date represented in an ISO 8601 string::
 
@@ -131,7 +126,7 @@ To get the resolution of an ISO 8601 date string::
 Parsing times
 -------------
 
-*Consider `datetime.time.fromisoformat <https://docs.python.org/3/library/datetime.html#datetime.time.fromisoformat>`_ for basic ISO 8601 time parsing*
+*Consider* `datetime.time.fromisoformat <https://docs.python.org/3/library/datetime.html#datetime.time.fromisoformat>`_ *for basic ISO 8601 time parsing*
 
 To parse a time formatted as an ISO 8601 string::
 
