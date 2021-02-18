@@ -14,4 +14,4 @@ from aniso8601.duration import parse_duration, get_duration_resolution
 from aniso8601.interval import (parse_interval, parse_repeating_interval,
                                 get_interval_resolution, get_repeating_interval_resolution)
 
-__version__ = "9.0.0"
+__version__ = "9.0.1-dev.0"
