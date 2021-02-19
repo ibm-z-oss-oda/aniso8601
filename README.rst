@@ -437,12 +437,24 @@ Setup
 
 It is recommended to develop using a `virtualenv <https://virtualenv.pypa.io/en/stable/>`_.
 
+Inside a virtualenv, development dependencies can be installed automatically::
+
+  $ pip install -e .[dev]
+
+`pre-commit <https://pre-commit.com/>`_ is used for managing pre-commit hooks::
+
+  $ pre-commit install
+
+To run the pre-commit hooks manually::
+
+  $ pre-commit run --all-files
+
 Tests
 -----
 
 Tests can be run using the `unittest testing framework <https://docs.python.org/3/library/unittest.html>`_::
 
-   $ python -m unittest discover aniso8601
+  $ python -m unittest discover aniso8601
 
 Contributing
 ============

@@ -6,6 +6,10 @@ dist/
 *.egg-info
 .eggs/
 
+#   Development   #
+###################
+.coverage
+
 #  Documentation  #
 ###################
 docs/_build

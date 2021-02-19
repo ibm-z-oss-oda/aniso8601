@@ -6,6 +6,17 @@ aniso8601 9.0.1-dev.0
 
 *Release date: YYYY-MM-DD*
 
+Added
+-----
+* Development requirements handled by :code:`extras_require` (install with :code:`pip install -e .[dev]`)
+* Pre-commit hooks, managed with `pre-commit <https://pre-commit.com/>`_ (install with :code:`pre-commit install`)
+
+Changed
+-------
+* Code formatted with `Black <https://black.readthedocs.io/en/stable/index.html>`_
+* Imports sorted with `isort <https://pycqa.github.io/isort/>`_
+* Following `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_ for this and future CHANGELOG entries
+
 aniso8601 9.0.0
 ===============
 

@@ -1,0 +1,37 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: local
+    hooks:
+      - id: isort
+        name: isort
+        entry: isort
+        language: system
+  - repo: https://github.com/psf/black
+    rev: stable
+    hooks:
+      - id: black
+        language_version: python3.9
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint -j 0 --errors-only aniso8601
+        language: system
+        pass_filenames: false
+  - repo: local
+    hooks:
+      - id: tests-coverage-run
+        name: tests-coverage-run
+        entry: coverage run --branch -m unittest
+        language: system
+        pass_filenames: false
+      - id: tests-coverage-report
+        name: tests-coverage-report
+        entry: coverage report --fail-under=100
+        language: system
+        pass_filenames: false

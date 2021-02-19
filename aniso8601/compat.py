@@ -10,13 +10,15 @@ import sys
 
 PY2 = sys.version_info[0] == 2
 
-if PY2:
-    range = xrange
+if PY2:  # pragma: no cover
+    range = xrange  # pylint: disable=undefined-variable
 else:
     range = range
 
+
 def is_string(tocheck):
-    if PY2:
+    # pylint: disable=undefined-variable
+    if PY2:  # pragma: no cover
         return isinstance(tocheck, str) or isinstance(tocheck, unicode)
 
     return isinstance(tocheck, str)

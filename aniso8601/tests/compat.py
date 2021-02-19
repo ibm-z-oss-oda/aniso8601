@@ -11,6 +11,6 @@ import sys
 PY2 = sys.version_info[0] == 2
 
 if PY2:
-    import mock
+    import mock  # pylint: disable=import-error
 else:
     from unittest import mock
