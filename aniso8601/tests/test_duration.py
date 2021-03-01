@@ -602,6 +602,78 @@ class TestDurationParserFunctions(unittest.TestCase):
                     "TnS": "6.5",
                 },
             ),
+            (
+                "PT4H",
+                {
+                    "PnY": None,
+                    "PnM": None,
+                    "PnW": None,
+                    "PnD": None,
+                    "TnH": "4",
+                    "TnM": None,
+                    "TnS": None,
+                },
+            ),
+            (
+                "PT5M",
+                {
+                    "PnY": None,
+                    "PnM": None,
+                    "PnW": None,
+                    "PnD": None,
+                    "TnH": None,
+                    "TnM": "5",
+                    "TnS": None,
+                },
+            ),
+            (
+                "PT6S",
+                {
+                    "PnY": None,
+                    "PnM": None,
+                    "PnW": None,
+                    "PnD": None,
+                    "TnH": None,
+                    "TnM": None,
+                    "TnS": "6",
+                },
+            ),
+            (
+                "PT1H2M",
+                {
+                    "PnY": None,
+                    "PnM": None,
+                    "PnW": None,
+                    "PnD": None,
+                    "TnH": "1",
+                    "TnM": "2",
+                    "TnS": None,
+                },
+            ),
+            (
+                "PT3H4S",
+                {
+                    "PnY": None,
+                    "PnM": None,
+                    "PnW": None,
+                    "PnD": None,
+                    "TnH": "3",
+                    "TnM": None,
+                    "TnS": "4",
+                },
+            ),
+            (
+                "PT5M6S",
+                {
+                    "PnY": None,
+                    "PnM": None,
+                    "PnW": None,
+                    "PnD": None,
+                    "TnH": None,
+                    "TnM": "5",
+                    "TnS": "6",
+                },
+            ),
         )
 
         for testtuple in testtuples:
