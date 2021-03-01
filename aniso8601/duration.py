@@ -206,7 +206,7 @@ def _parse_duration_prescribed_time(isodurationstr):
         minutestr = timestr[houridx + 1 : minuteidx]
     elif houridx != -1 and secondidx != -1:
         hourstr = timestr[0:houridx]
-        secondstr = timestr[houridx + 1:-1]
+        secondstr = timestr[houridx + 1 : -1]
     elif minuteidx != -1 and secondidx != -1:
         minutestr = timestr[0:minuteidx]
         secondstr = timestr[minuteidx + 1 : -1]
