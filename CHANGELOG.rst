@@ -17,6 +17,10 @@ Changed
 * Imports sorted with `isort <https://pycqa.github.io/isort/>`_
 * Following `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_ for this and future CHANGELOG entries
 
+Fixed
+-----
+* Parsing durations with only a time component (see `PR 14 <https://bitbucket.org/nielsenb/aniso8601/pull-requests/14>`_)
+
 aniso8601 9.0.0
 ===============
 
