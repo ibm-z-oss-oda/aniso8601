@@ -149,6 +149,9 @@ def _parse_duration_prescribed_notime(isodurationstr):
     elif yearidx != -1 and monthidx != -1:
         yearstr = durationstr[1:yearidx]
         monthstr = durationstr[yearidx + 1 : monthidx]
+    elif yearidx != -1 and dayidx != -1:
+        yearstr = durationstr[1:yearidx]
+        daystr = durationstr[yearidx + 1 : dayidx]
     elif monthidx != -1 and dayidx != -1:
         monthstr = durationstr[1:monthidx]
         daystr = durationstr[monthidx + 1 : -1]

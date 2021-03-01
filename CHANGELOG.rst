@@ -19,7 +19,8 @@ Changed
 
 Fixed
 -----
-* Parsing durations with only hour and second time components (see `PR 14 <https://bitbucket.org/nielsenb/aniso8601/pull-requests/14>`_)
+* Parsing prescribed durations with only hour and second time components (see `PR 14 <https://bitbucket.org/nielsenb/aniso8601/pull-requests/14>`_)
+* Parsing prescribed durations with only year and day components
 
 aniso8601 9.0.0
 ===============
