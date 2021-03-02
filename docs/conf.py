@@ -26,9 +26,9 @@ author = "Brandon Nielsen"
 # built documents.
 #
 # The short X.Y version.
-version = "9.0.1"
+version = "9.0.2"
 # The full version, including alpha/beta/rc tags.
-release = "9.0.1"
+release = "9.0.2-dev.0"
 
 # -- General configuration ---------------------------------------------------
 

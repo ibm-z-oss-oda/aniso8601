@@ -23,4 +23,4 @@ from aniso8601.time import (
     parse_time,
 )
 
-__version__ = "9.0.1"
+__version__ = "9.0.2-dev.0"
