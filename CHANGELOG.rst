@@ -1,10 +1,10 @@
 Changelog
-=========
+#########
 
-aniso8601 9.0.1-dev.0
-=====================
+aniso8601 9.0.1
+===============
 
-*Release date: YYYY-MM-DD*
+*Release date: 2021-03-01*
 
 Added
 -----
@@ -18,6 +18,7 @@ Changed
 * Imports sorted with `isort <https://pycqa.github.io/isort/>`_
 * Following `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_ for this and future CHANGELOG entries
 * Removed python-dateutil from :code:`BuildRequires` in specfile as they are no longer required since calendar level duration building was split to a separate project (6.0.0)
+* Heading level of top of CHANGELOG
 
 Fixed
 -----
