@@ -872,6 +872,27 @@ class TestDurationParserFunctions(unittest.TestCase):
         with self.assertRaises(ISOFormatError):
             parse_duration("P1Y1M2W3D", builder=None)
 
+        with self.assertRaises(ISOFormatError):
+            parse_duration("P7WT4H", builder=None)
+
+        with self.assertRaises(ISOFormatError):
+            parse_duration("P7WT54M", builder=None)
+
+        with self.assertRaises(ISOFormatError):
+            parse_duration("P7WT6S", builder=None)
+
+        with self.assertRaises(ISOFormatError):
+            parse_duration("P7WT4H54M", builder=None)
+
+        with self.assertRaises(ISOFormatError):
+            parse_duration("P7WT4H6S", builder=None)
+
+        with self.assertRaises(ISOFormatError):
+            parse_duration("P7WT54M6S", builder=None)
+
+        with self.assertRaises(ISOFormatError):
+            parse_duration("P7WT4H54M6S", builder=None)
+
     def test_parse_duration_negative(self):
         with self.assertRaises(ISOFormatError):
             parse_duration("P-1Y", builder=None)
