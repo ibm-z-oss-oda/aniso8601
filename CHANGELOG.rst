@@ -10,6 +10,7 @@ Added
 -----
 * Development requirements handled by :code:`extras_require` (install with :code:`pip install -e .[dev]`)
 * Pre-commit hooks, managed with `pre-commit <https://pre-commit.com/>`_ (install with :code:`pre-commit install`)
+* Add :code:`readthedocs.yaml` to make configuration explicit
 
 Changed
 -------
