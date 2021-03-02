@@ -17,6 +17,7 @@ Changed
 * Code formatted with `Black <https://black.readthedocs.io/en/stable/index.html>`_
 * Imports sorted with `isort <https://pycqa.github.io/isort/>`_
 * Following `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_ for this and future CHANGELOG entries
+* Removed python-dateutil from :code:`BuildRequires` in specfile as they are no longer required since calendar level duration building was split to a separate project (6.0.0)
 
 Fixed
 -----
