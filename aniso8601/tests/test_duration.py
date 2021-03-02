@@ -851,10 +851,26 @@ class TestDurationParserFunctions(unittest.TestCase):
             parse_duration("1Y2M3DT4H54M6S", builder=None)
 
     def test_parse_duration_weekcombination(self):
+        # Week designator cannot be combined with other time designators
+        # https://bitbucket.org/nielsenb/aniso8601/issues/2/week-designators-should-not-be-combinable
+
         with self.assertRaises(ISOFormatError):
-            # Week designator cannot be combined with other time designators
-            # https://bitbucket.org/nielsenb/aniso8601/issues/2/week-designators-should-not-be-combinable
             parse_duration("P1Y2W", builder=None)
+
+        with self.assertRaises(ISOFormatError):
+            parse_duration("P1M2W", builder=None)
+
+        with self.assertRaises(ISOFormatError):
+            parse_duration("P2W3D", builder=None)
+
+        with self.assertRaises(ISOFormatError):
+            parse_duration("P1Y2W3D", builder=None)
+
+        with self.assertRaises(ISOFormatError):
+            parse_duration("P1M2W3D", builder=None)
+
+        with self.assertRaises(ISOFormatError):
+            parse_duration("P1Y1M2W3D", builder=None)
 
     def test_parse_duration_negative(self):
         with self.assertRaises(ISOFormatError):
