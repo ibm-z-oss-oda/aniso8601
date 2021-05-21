@@ -80,6 +80,7 @@ def parse_date(isodatestr, builder=PythonTimeBuilder):
 
     if len(isodatestr) == 0 or isodatestr.count("-") > 2:
         raise ISOFormatError('"{0}" is not a valid ISO 8601 date.'.format(isodatestr))
+
     yearstr = None
     monthstr = None
     daystr = None
